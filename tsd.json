@@ -1,0 +1,45 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "angularjs/angular.d.ts": {
+      "commit": "ca32947b75a2b1203779dac7154ffbc232746e4d"
+    },
+    "angular-ui/angular-ui-router.d.ts": {
+      "commit": "ca32947b75a2b1203779dac7154ffbc232746e4d"
+    },
+    "restangular/restangular.d.ts": {
+      "commit": "ca32947b75a2b1203779dac7154ffbc232746e4d"
+    },
+    "gulp/gulp.d.ts": {
+      "commit": "ca32947b75a2b1203779dac7154ffbc232746e4d"
+    },
+    "node/node.d.ts": {
+      "commit": "ca32947b75a2b1203779dac7154ffbc232746e4d"
+    },
+    "lodash/lodash.d.ts": {
+      "commit": "6959dc430e4aeb24a1e392c6f824ef723d9ca85c"
+    },
+    "chai/chai.d.ts": {
+      "commit": "30cfe7dedb3ae990a369cda93995d69b169465bd"
+    },
+    "mocha/mocha.d.ts": {
+      "commit": "30cfe7dedb3ae990a369cda93995d69b169465bd"
+    },
+    "q/Q.d.ts": {
+      "commit": "30cfe7dedb3ae990a369cda93995d69b169465bd"
+    },
+    "angularjs/angular-route.d.ts": {
+      "commit": "26df7a5696a909bf30cd97564f9efaab7862469d"
+    },
+    "cryptojs/cryptojs.d.ts": {
+      "commit": "26df7a5696a909bf30cd97564f9efaab7862469d"
+    },
+    "requirejs/require.d.ts": {
+      "commit": "26df7a5696a909bf30cd97564f9efaab7862469d"
+    }
+  }
+}

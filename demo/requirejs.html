@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RequireJS &mdash; RingCentral&trade; Platform</title>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="common.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>
+        <a href="../.." id="logo"></a>
+    </h1>
+
+    <hr>
+
+    <h4>Build</h4>
+    <p id="report-build"></p>
+    <h4>Raw</h4>
+    <p id="report-raw"></p>
+
+    <hr>
+
+    <p class="text-center text-muted">
+        &copy; 1999 &ndash; <span id="date"></span> RingCentral&trade;, Inc. All rights reserved.
+        <script> document.getElementById('date').innerHTML = (new Date()).getFullYear().toString(); </script>
+    </p>
+
+</div>
+
+<script src="http://requirejs.org/docs/release/2.1.15/comments/require.js" type="text/javascript"></script>
+<script src="../lib/requirejs-config.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    require(['../build/rc-sdk', '../lib/browser'], function(Build, Raw) {
+
+        document.getElementById('report-build').innerHTML = [
+            'RCSDK version: ' + Raw.version,
+            'Root scope is not poisoned: ' + (window.RCSDK == undefined)
+        ].join('<br>');
+
+        document.getElementById('report-raw').innerHTML = [
+            'RCSDK version: ' + Build.version,
+            'Root scope is not poisoned: ' + (window.RCSDK == undefined),
+            '',
+            'Different classes: ' + (Build !== Raw)
+        ].join('<br>');
+
+    });
+
+</script>
+
+</body>
+</html>

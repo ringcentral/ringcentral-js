@@ -1,0 +1,119 @@
+<form class="panel" ng-controller="RingoutCtrl"  name="ringOutForm" role="form" ng-submit="onCall()"
+      ng-class="{'panel-default':Ringout.isInProgress(ringout) || Ringout.isNew(ringout), 'panel-success':Ringout.isSuccess(ringout), 'panel-danger':Ringout.isError(ringout), 'loading': options.loading}">
+
+    <div class="panel-heading"><h2 class="panel-title">Ringout</h2></div>
+
+    <div class="panel-body form-horizontal" ng-show="Ringout.isNew(ringout)">
+
+        <div class="form-group">
+            <label class="col-xs-2 control-label">Mode</label>
+
+            <div class="col-xs-8">
+                <label class="radio-inline">
+                    <input type="radio" ng-model="options.isCustom" ng-value="false"> My Numbers
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" ng-model="options.isCustom" ng-value="true"> Custom
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group" ng-hide="options.isCustom">
+            <label for="ringout-from" class="col-xs-2 control-label">From</label>
+
+            <div class="col-xs-8">
+                <select ng-model="options.fromCustom" class="form-control" id="ringout-from"
+                        ng-options="number as (number.label + ' (' + number.phoneNumber + ')') for number in forwardingNumbers track by number.id">
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group" ng-show="options.isCustom">
+            <label for="ringout-fromCustom" class="col-xs-2 control-label">From</label>
+
+            <div class="col-xs-8">
+                <div class="input-group">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-earphone"></span></span>
+                    <input type="text" class="form-control" ng-model="ringout.from.phoneNumber" id="ringout-fromCustom" placeholder="Phone Number">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ringout-to" class="col-xs-2 control-label">To</label>
+
+            <div class="col-xs-8">
+                <div class="input-group">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-earphone"></span></span>
+                    <input type="text" class="form-control" ng-model="ringout.to.phoneNumber" id="ringout-to" placeholder="Phone Number (type for options)">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ringout-to" class="col-xs-2 control-label">Prompt</label>
+
+            <div class="col-xs-8">
+                <label class="checkbox-inline">
+                    <input ng-model="ringout.playPrompt" ng-value="true" type="checkbox">
+                    Prompt me to dial 1 before connecting
+                </label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="panel-body form-horizontal" ng-hide="Ringout.isNew(ringout)">
+
+        <div class="form-group">
+            <label class="col-xs-2 control-label">From</label>
+
+            <p class="col-xs-6 form-control-static" ng-bind="ringout.from.phoneNumber"></p>
+        </div>
+
+        <div class="form-group">
+            <label class="col-xs-2 control-label">To</label>
+
+            <p class="col-xs-6 form-control-static" ng-bind="ringout.to.phoneNumber"></p>
+        </div>
+
+        <div class="form-group">
+            <label class="col-xs-2 control-label">Play Prompt</label>
+
+            <p class="col-xs-6 form-control-static" ng-bind="ringout.to.playPrompt ? 'Yes' : 'No'"></p>
+        </div>
+
+        <div class="form-group">
+            <label class="col-xs-2 control-label">Call Status</label>
+
+            <p class="col-xs-6 form-control-static" ng-bind="ringout.status.callStatus"></p>
+        </div>
+
+        <div class="form-group">
+            <label class="col-xs-2 control-label">Caller Status</label>
+
+            <p class="col-xs-6 form-control-static" ng-bind="ringout.status.callerStatus"></p>
+        </div>
+
+        <div class="form-group">
+            <label class="col-xs-2 control-label">Callee Status</label>
+
+            <p class="col-xs-6 form-control-static" ng-bind="ringout.status.calleeStatus"></p>
+        </div>
+
+    </div>
+
+    <div class="panel-footer text-center">
+        <button ng-show="Ringout.isNew(ringout)" type="submit" class="btn btn-primary">
+            <span class="glyphicon glyphicon-earphone"></span> Call
+        </button>
+        <button ng-hide="Ringout.isNew(ringout)" type="button" class="btn" ng-class="!Ringout.isInProgress(ringout) ? 'btn-primary' : 'btn-danger'" ng-click="onHangUp()">
+            <span class="glyphicon" ng-class="Ringout.isInProgress(ringout) ? 'glyphicon-phone-alt' : 'glyphicon-ok'"></span>
+            {{ Ringout.isInProgress(ringout) ? 'Hang Up' : 'Done' }}
+        </button>
+    </div>
+
+</form>
+
+
+

@@ -1,0 +1,10 @@
+bower_components
+**/*-spec.js
+test
+.bowerrc
+.jshintrc
+.editorconfig
+bower.json
+Gruntfile.js
+karma.conf.js
+makefile

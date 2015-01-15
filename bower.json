@@ -1,0 +1,38 @@
+{
+  "name": "rcsdk",
+  "version": "0.15.5",
+  "main": "./build/rc-sdk.min.js",
+  "ignore": [
+    "**/*",
+    "!README.md",
+    "!build/rc-sdk.js",
+    "!build/rc-sdk.js.map",
+    "!build/rc-sdk.min.js",
+    "!build/rc-sdk.min.js.map",
+    "!demo/**/*",
+    "!docs/*",
+    "!lib/**/!(*spec).*"
+  ],
+  "dependencies": {
+    "pubnub": "*",
+    "cryptojslib": "*",
+    "es6-promise-polyfill": "*"
+  },
+  "devDependencies": {
+  },
+  "private": true,
+  "license": "http://www.ringcentral.com/legal/apilitos.html",
+  "authors": [
+    {
+      "name": "RingCentral, Inc.",
+      "email": "devsupport@ringcentral.com"
+    },
+    {
+      "name": "Kirill Konshin"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://gitgub.com/ringcentral/js-sdk.git"
+  }
+}
