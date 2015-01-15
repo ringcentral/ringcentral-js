@@ -4604,7 +4604,7 @@
         /** @private */
         this._context = core_Context.$get(injections);  //TODO Link Platform events with Subscriptions and the rest
       }
-      RCSDK.version = '0.15.5';
+      RCSDK.version = '1.0.0';
       // Internals
       /**
        * @returns {Context}
@@ -4614,7 +4614,6 @@
       };
       // Core
       /**
-       * @returns {Ajax}
        */
       RCSDK.prototype.getAjax = function () {
         return core_Ajax.$get(this.getContext());

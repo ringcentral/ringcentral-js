@@ -1,6 +1,6 @@
 {
   "name": "rcsdk",
-  "version": "0.15.5",
+  "version": "1.0.0",
   "main": "./build/rc-sdk.min.js",
   "ignore": [
     "**/*",

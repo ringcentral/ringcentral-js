@@ -1,6 +1,6 @@
 {
   "name": "rcsdk",
-  "version": "0.15.5",
+  "version": "1.0.0",
   "scripts": {
     "start": "node server.js",
     "build": "./node_modules/.bin/gulp",
