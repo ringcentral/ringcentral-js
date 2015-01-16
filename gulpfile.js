@@ -99,7 +99,7 @@
     gulp.task('test', function(cb) {
 
         require('child_process')
-            .exec('npm test', function(err, stdout, stderr) { // -- --reporter list
+            .exec('npm run mocha', function(err, stdout, stderr) { // -- --reporter list
                 stdout.split(/[\n\r]/).forEach(function(line) { gutil.log(line); });
                 stderr && gutil.log(gutil.colors.red(stderr));
                 cb(err);
