@@ -3,14 +3,12 @@
     var gulp = require('gulp'),
         gutil = require('gulp-util'),
         sourcemaps = require('gulp-sourcemaps'),
-        skipTests = ('skipTests' in gutil.env),
         buildDir = ('buildDir' in gutil.env) ? gutil.env.buildDir : '.',
         build = buildDir + '/build',
         sourcemapsDebug = false;
 
     gutil.log('Working directory:', gutil.colors.magenta(process.cwd()));
     gutil.log('Build directory:', gutil.colors.magenta(buildDir));
-    gutil.log('Skip tests:', gutil.colors.cyan(JSON.stringify(skipTests)));
 
     gulp.task('version', function() {
 
@@ -34,7 +32,7 @@
 
     });
 
-    gulp.task('rjs', (skipTests ? [] : ['test']).concat(['clean', 'version']), function() {
+    gulp.task('rjs', ['clean', 'version'], function() {
 
         var addSrc = require('gulp-add-src'),
             amdClean = require('gulp-amdclean'),
@@ -93,17 +91,6 @@
 
             .pipe(sourcemaps.write('.', {debug: sourcemapsDebug}))
             .pipe(gulp.dest(buildDir + '/build'));
-
-    });
-
-    gulp.task('test', function(cb) {
-
-        require('child_process')
-            .exec('npm run mocha', function(err, stdout, stderr) { // -- --reporter list
-                stdout.split(/[\n\r]/).forEach(function(line) { gutil.log(line); });
-                stderr && gutil.log(gutil.colors.red(stderr));
-                cb(err);
-            });
 
     });
 
