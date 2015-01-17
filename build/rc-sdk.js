@@ -888,7 +888,7 @@
       json = json.trim();
       if (jsonRegex.test(json))
         return res;
-      var data = json.split('\n\n', 2);
+      var data = json.replace(/\r/g, '').split('\n\n', 2);
       res.content = data[1];
       res.headers = data[0].split('\n').reduce(function (res, val) {
         var parts = val.split(': ');
