@@ -2918,7 +2918,7 @@
   }({});
   helpers_Presence = function (exports) {
     'use strict';
-    var Helper = core_Helper.Class;
+    var Helper = core_Helper.Class, Utils = core_Utils;
     /**
      * @extends Helper
      * @constructor
@@ -2942,7 +2942,7 @@
      * @returns {string}
      */
     PresenceHelper.prototype.getId = function (presence) {
-      return presence && this.extension.getId(presence.extension);
+      return presence && (this.extension.getId(presence.extension) || presence.extensionId);
     };
     /**
      * @param {IPresence} presence
@@ -2976,14 +2976,21 @@
     /**
      * @param {IExtension[]} extensions
      * @param {IPresence[]} presences
+     * @param {bool} [merge]
      * @returns {*}
      */
-    PresenceHelper.prototype.attachToExtensions = function (extensions, presences) {
+    PresenceHelper.prototype.attachToExtensions = function (extensions, presences, merge) {
       var index = this.index(presences);
-      extensions.forEach(function (extension) {
+      extensions.forEach(/** @param {IExtension} extension */
+      function (extension) {
         var presence = index[this.extension.getId(extension)];
-        if (presence)
-          extension.presence = presence;
+        if (presence) {
+          if ('presence' in extension && merge) {
+            Utils.extend(extension.presence, presence);
+          } else {
+            extension.presence = presence;
+          }
+        }
       }, this);
     };
     /**
