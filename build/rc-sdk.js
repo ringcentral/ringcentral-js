@@ -725,7 +725,7 @@
   }({});
   core_Ajax = function (exports) {
     'use strict';
-    var Observable = core_Observable.Class, Utils = core_Utils, Log = core_Log, jsonRegex = /^['"\{\[]/;
+    var Observable = core_Observable.Class, Utils = core_Utils, Log = core_Log, boundarySeparator = '--', headerSeparator = ':', bodySeparator = '\n\n';
     /**
      * @typedef {Object} IAjaxOptions
      * @property {string} url
@@ -779,6 +779,9 @@
         this.options = options;
       return this;
     };
+    /**
+     * @returns {string}
+     */
     Ajax.prototype.getContentType = function () {
       return this.headers['Content-Type'] || '';
     };
@@ -875,62 +878,57 @@
     Ajax.prototype.checkStatus = function (status) {
       return status.toString().substr(0, 1) == '2';
     };
-    /**
-     * TODO Add tests
-     * @param {string} json
-     * @returns {{content: string, headers: object}}
-     */
-    Ajax.prototype.splitHeadersAndContent = function (json) {
-      var res = {
-        content: json,
-        headers: {}
-      };
-      json = json.trim();
-      if (jsonRegex.test(json))
-        return res;
-      var data = json.replace(/\r/g, '').split('\n\n', 2);
-      res.content = data[1];
-      res.headers = data[0].split('\n').reduce(function (res, val) {
-        var parts = val.split(': ');
-        res[parts[0]] = parts[1];
-        return res;
-      }, res.headers);
-      return res;
-    };
     Ajax.prototype.parseResponse = function () {
       if (!this.isMultipart()) {
-        var data = null, isString = this.response && typeof this.response == 'string';
         try {
-          data = isString ? JSON.parse(this.response) : this.response;
-          // Data can be blank
+          if (typeof this.response == 'string' && this.getContentType().indexOf('application/json') != -1) {
+            this.data = JSON.parse(this.response);
+          } else {
+            this.data = this.response;  //TODO Add more parsers
+          }
           if (!this.checkStatus(this.status))
-            this.error = new Error(data.message || data.error_description || data.description);
+            this.error = new Error(this.data.message || this.data.error_description || this.data.description || 'Unknown error');
         } catch (e) {
-          // Capture JSON.parse errors
+          // Capture parse errors
           Log.error('Ajax.parseResponse(): Unable to parse data');
           Log.error(e.stack || e);
           Log.error(this.response);
           this.error = e;
         }
-        this.data = data;
       } else {
         try {
-          var boundary = this.getContentType().split('boundary=')[1], parts = this.response.split(/--Boundary_[\d]+_[\d]+_[\d]+/), res = this.splitHeadersAndContent(parts[1]), partsInfo = JSON.parse(res.content);
-          this.data = [];
-          partsInfo.response.forEach(function (partInfo, i) {
-            var result = new Ajax(this.context), res = this.splitHeadersAndContent(parts[parseInt(i) + 2]);
-            result.status = partInfo.status;
-            result.response = res.content;
-            result.headers = res.headers;
-            try {
-              result.parseResponse();
-            } catch (e) {
-            }
-            this.data.push(result);
+          var boundary = this.getContentType().match(/boundary=([^;]+)/i)[1], parts = this.response.split(boundarySeparator + boundary);
+          if (parts[0].trim() == '')
+            parts.shift();
+          if (parts[parts.length - 1].trim() == boundarySeparator)
+            parts.pop();
+          // Step 1. Parse all parts into Ajax objects
+          parts = parts.map(function (part) {
+            var subParts = part.trim().replace(/\r/g, '').split(bodySeparator), ajaxPart = new Ajax(this.context);
+            ajaxPart.headers = (subParts.length > 1 ? subParts.shift() : '').split('\n').reduce(function (res, header) {
+              if (header.length == 0)
+                return res;
+              var headerParts = header.split(headerSeparator), name = headerParts.shift().trim();
+              res[name] = headerParts.join(headerSeparator).trim();
+              return res;
+            }, {});
+            ajaxPart.response = subParts.join(bodySeparator);
+            return ajaxPart;
+          }, this);
+          // Step 2. Claim first part as statuses, assign status from this and parse the response
+          var statusInfo = parts.shift();
+          statusInfo.status = this.status;
+          statusInfo.parseResponse();
+          // Steo 3. For the rest of parts assign status and parse the response
+          this.data = parts.map(function (part, i) {
+            part.status = statusInfo.data.response[i].status;
+            part.parseResponse();
+            return part;
           }, this);
         } catch (e) {
           Log.error('Ajax.parseResponse(): Unable to parse batch response');
           Log.error(e.stack || e);
+          Log.error(this.response);
           this.error = e;
         }
       }
