@@ -403,10 +403,10 @@
       this.status = 0;
     }
     XhrMock.prototype.getResponseHeader = function (header) {
-      return this.responseHeaders[header];
+      return this.responseHeaders[header.toLowerCase()];
     };
     XhrMock.prototype.setRequestHeader = function (header, value) {
-      this.requestHeaders[header] = value;
+      this.requestHeaders[header.toLowerCase()] = value;
     };
     XhrMock.prototype.open = function (method, url, async) {
       this.method = method;
@@ -445,10 +445,10 @@
       Log.debug('XhrMock.destroy(): Aborted');
     };
     XhrMock.prototype.getRequestHeader = function (header) {
-      return this.requestHeaders[header];
+      return this.requestHeaders[header.toLowerCase()];
     };
     XhrMock.prototype.setResponseHeader = function (header, value) {
-      this.responseHeaders[header] = value;
+      this.responseHeaders[header.toLowerCase()] = value;
     };
     XhrMock.prototype.setStatus = function (status) {
       this.status = status;
@@ -504,12 +504,6 @@
      */
     Context.prototype.getCryptoJS = function () {
       return this.injections.CryptoJS;
-    };
-    /**
-     * @returns {XMLHttpRequest}
-     */
-    Context.prototype.getXHR = function () {
-      return this.injections.XHR;
     };
     /**
      * @returns {PUBNUB}
@@ -725,7 +719,7 @@
   }({});
   core_Ajax = function (exports) {
     'use strict';
-    var Observable = core_Observable.Class, Utils = core_Utils, Log = core_Log, boundarySeparator = '--', headerSeparator = ':', bodySeparator = '\n\n';
+    var Observable = core_Observable.Class, Utils = core_Utils, Log = core_Log, jsonContentType = 'application/json', multipartContentType = 'multipart/mixed', boundarySeparator = '--', headerSeparator = ':', bodySeparator = '\n\n';
     /**
      * @typedef {Object} IAjaxOptions
      * @property {string} url
@@ -755,6 +749,7 @@
        */
       this.options = {};
       this.context = context;
+      /** @type {AjaxObserver} */
       this.observer = core_AjaxObserver.$get(context);
       /** @type {XMLHttpRequest} */
       this.xhr = null;
@@ -780,17 +775,86 @@
       return this;
     };
     /**
+     * @param {string} name
+     * @param {string} value
+     * @returns {Ajax}
+     */
+    Ajax.prototype.setRequestHeader = function (name, value) {
+      this.options.headers[name.toLowerCase()] = value;
+      return this;
+    };
+    /**
+     * @param {string} name
+     * @param {string} value
+     * @returns {Ajax}
+     */
+    Ajax.prototype.setResponseHeader = function (name, value) {
+      this.headers[name.toLowerCase()] = value;
+      return this;
+    };
+    /**
+     * @param {string} name
+     * @returns {string}
+     */
+    Ajax.prototype.getRequestHeader = function (name) {
+      return this.options.headers[name.toLowerCase()];
+    };
+    /**
+     * @param {string} name
+     * @returns {string}
+     */
+    Ajax.prototype.getResponseHeader = function (name) {
+      return this.headers[name.toLowerCase()];
+    };
+    /**
+     * @param {string} type
+     * @returns {boolean}
+     */
+    Ajax.prototype.isResponseContentType = function (type) {
+      return this.getResponseContentType().indexOf(type) > -1;
+    };
+    /**
+     * @returns {string}
+     */
+    Ajax.prototype.getResponseContentType = function () {
+      return this.getResponseHeader('Content-Type') || '';
+    };
+    /**
+     * @returns {boolean}
+     */
+    Ajax.prototype.isResponseMultipart = function () {
+      return this.isResponseContentType(multipartContentType);
+    };
+    /**
+     * @returns {boolean}
+     */
+    Ajax.prototype.isResponseUnauthorized = function () {
+      return this.status == 401;
+    };
+    /**
+     * @deprecated
      * @returns {string}
      */
     Ajax.prototype.getContentType = function () {
-      return this.headers['Content-Type'] || '';
+      return this.getResponseContentType();
     };
+    /**
+     * @deprecated
+     * @returns {boolean}
+     */
     Ajax.prototype.isMultipart = function () {
-      return this.getContentType().indexOf('multipart/mixed') > -1;
+      return this.isResponseMultipart();
     };
+    /**
+     * @deprecated
+     * @returns {boolean}
+     */
     Ajax.prototype.isUnauthorized = function () {
-      return this.status == 401;
+      return this.isResponseUnauthorized();
     };
+    /**
+     * @returns {boolean}
+     */
     Ajax.prototype.isLoaded = function () {
       return !!this.status;
     };
@@ -803,14 +867,20 @@
       if (!this.options.url)
         throw new Error('Url is not defined');
       var defaultHeaders = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
+          'Accept': jsonContentType,
+          'Content-Type': jsonContentType
+        }, headers = this.options.headers || {};
+      this.options.headers = {};
+      Object.keys(defaultHeaders).forEach(function (key) {
+        this.setRequestHeader(key, defaultHeaders[key]);
+      }, this);
+      Object.keys(headers).forEach(function (key) {
+        this.setRequestHeader(key, headers[key]);
+      }, this);
       this.options.method = this.options.method ? this.options.method.toUpperCase() : 'GET';
       this.options.async = this.options.async !== undefined ? this.options.async : true;
       this.options.get = this.options.get || null;
-      this.options.headers = Utils.extend(defaultHeaders, this.options.headers);
-      this.options.post = this.options.post ? typeof this.options.post !== 'string' && this.options.headers['Content-Type'] === 'application/json' ? JSON.stringify(this.options.post) : this.options.post : '';
+      this.options.post = this.options.post ? typeof this.options.post !== 'string' && this.getRequestHeader('Content-Type') === jsonContentType ? JSON.stringify(this.options.post) : this.options.post : '';
       this.options.url = this.options.url + (this.options.get ? (this.options.url.indexOf('?') > -1 ? '&' : '?') + Utils.queryStringify(this.options.get) : '');
       if ([
           'GET',
@@ -843,6 +913,9 @@
         throw e;
       }.bind(this));
     };
+    /**
+     * @returns {XMLHttpRequest}
+     */
     Ajax.prototype.getXHR = function () {
       return this.context.getXHR();
     };
@@ -856,13 +929,9 @@
         //@see http://stackoverflow.com/questions/19666809/cors-withcredentials-support-limited
         xhr.withCredentials = true;
         xhr.onload = function () {
-          this.response = xhr.responseText;
-          this.headers = {
-            //'RoutingKey': xhr.getResponseHeader('RoutingKey'),
-            //'Date': xhr.getResponseHeader('Date'),
-            'Content-Type': xhr.getResponseHeader('Content-Type')
-          };
           this.status = xhr.status;
+          this.response = xhr.responseText;
+          this.setResponseHeader('Content-Type', xhr.getResponseHeader('Content-Type'));
           resolve(this);
         }.bind(this);
         xhr.onerror = function (event) {
@@ -879,9 +948,9 @@
       return status.toString().substr(0, 1) == '2';
     };
     Ajax.prototype.parseResponse = function () {
-      if (!this.isMultipart()) {
+      if (!this.isResponseMultipart()) {
         try {
-          if (typeof this.response == 'string' && this.getContentType().indexOf('application/json') != -1) {
+          if (typeof this.response == 'string' && this.isResponseContentType(jsonContentType)) {
             this.data = JSON.parse(this.response);
           } else {
             this.data = this.response;  //TODO Add more parsers
@@ -897,7 +966,7 @@
         }
       } else {
         try {
-          var boundary = this.getContentType().match(/boundary=([^;]+)/i)[1], parts = this.response.split(boundarySeparator + boundary);
+          var boundary = this.getResponseContentType().match(/boundary=([^;]+)/i)[1], parts = this.response.split(boundarySeparator + boundary);
           if (parts[0].trim() == '')
             parts.shift();
           if (parts[parts.length - 1].trim() == boundarySeparator)
@@ -905,13 +974,12 @@
           // Step 1. Parse all parts into Ajax objects
           parts = parts.map(function (part) {
             var subParts = part.trim().replace(/\r/g, '').split(bodySeparator), ajaxPart = new Ajax(this.context);
-            ajaxPart.headers = (subParts.length > 1 ? subParts.shift() : '').split('\n').reduce(function (res, header) {
+            (subParts.length > 1 ? subParts.shift() : '').split('\n').forEach(function (header) {
               if (header.length == 0)
                 return res;
               var headerParts = header.split(headerSeparator), name = headerParts.shift().trim();
-              res[name] = headerParts.join(headerSeparator).trim();
-              return res;
-            }, {});
+              ajaxPart.setResponseHeader(name, headerParts.join(headerSeparator).trim());
+            }, this);
             ajaxPart.response = subParts.join(bodySeparator);
             return ajaxPart;
           }, this);
@@ -1308,7 +1376,7 @@
         options.headers.Authorization = this.getTokenType() + (token ? ' ' + token : '');
         return this.getAjax().setOptions(options).send();
       }.bind(this)).catch(function (e) {
-        if (!e.ajax || !e.ajax.isUnauthorized())
+        if (!e.ajax || !e.ajax.isResponseUnauthorized())
           throw e;
         this.cancelAccessToken();
         return this.refresh().then(function () {
@@ -1779,8 +1847,7 @@
      * @return {IHelperObject[]}
      */
     Helper.prototype.parseMultipartResponse = function (ajax) {
-      if (ajax.isMultipart()) {
-        // Response is multipart (multiple IDs)
+      if (ajax.isResponseMultipart()) {
         // ajax.data has full array, leave only successful
         return ajax.data.filter(function (result) {
           return !result.error;
@@ -4609,7 +4676,7 @@
         /** @private */
         this._context = core_Context.$get(injections);  //TODO Link Platform events with Subscriptions and the rest
       }
-      RCSDK.version = '1.0.0';
+      RCSDK.version = '1.1.0';
       // Internals
       /**
        * @returns {Context}
