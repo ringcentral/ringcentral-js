@@ -1127,6 +1127,7 @@
       // 1 week
       this.refreshHandicapMs = 60 * 1000;
       // 1 minute
+      this.refreshDelayMs = 100;
       this.clearCacheOnRefreshError = true;
       /** @type {Promise} */
       this.refreshPromise = null;
@@ -1231,28 +1232,29 @@
      */
     Platform.prototype.refresh = function () {
       var refresh = new (this.context.getPromise())(function (resolve, reject) {
-        // This means queue was paused before this particular refresh
-        var wasPaused = this.isPaused();
-        // Queue must be paused anyway
-        this.pause();
-        // Then refreshPolling if it was paused before
-        if (wasPaused)
+        if (this.isPaused()) {
           return resolve(this.refreshPolling(null));
+        } else {
+          this.pause();
+        }
         var authData = this.getAuthData();
         Log.debug('Platform.refresh(): Performing token refresh (access token', authData.access_token, ', refresh token', authData.refresh_token, ')');
         if (!authData || !authData.refresh_token)
           throw new Error('Refresh token is missing');
         if (Date.now() > authData.refreshExpireTime)
           throw new Error('Refresh token has expired');
-        resolve(this.authCall({
-          url: '/restapi/oauth/token',
-          post: {
-            'grant_type': 'refresh_token',
-            'refresh_token': authData.refresh_token,
-            'access_token_ttl': this.accessTokenTtl,
-            'refresh_token_ttl': this.remember() ? this.refreshTokenTtlRemember : this.refreshTokenTtl
-          }
-        }));
+        // Make sure all existing AJAX calls had a chance to reach the server
+        setTimeout(function () {
+          resolve(this.authCall({
+            url: '/restapi/oauth/token',
+            post: {
+              'grant_type': 'refresh_token',
+              'refresh_token': authData.refresh_token,
+              'access_token_ttl': this.accessTokenTtl,
+              'refresh_token_ttl': this.remember() ? this.refreshTokenTtlRemember : this.refreshTokenTtl
+            }
+          }));
+        }.bind(this), this.refreshDelayMs);
       }.bind(this));
       return refresh.then(function (ajax) {
         // This means refresh has happened elsewhere and we are here because of timeout

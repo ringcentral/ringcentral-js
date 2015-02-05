@@ -15,6 +15,7 @@ define(function(require, exports, module) {
             cache = rcsdk.getCache();
 
         platform.pollInterval = 1;
+        platform.refreshDelayMs = 1;
 
         /**
          * @name Mock
