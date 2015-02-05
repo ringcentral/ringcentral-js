@@ -401,6 +401,7 @@
       this.readyState = 0;
       this.responseHeaders = {};
       this.status = 0;
+      this.context = context;
     }
     XhrMock.prototype.getResponseHeader = function (header) {
       return this.responseHeaders[header.toLowerCase()];
@@ -433,13 +434,19 @@
       }
       this.setStatus(200);
       this.setResponseHeader('Content-Type', 'application/json');
-      var res = currentResponse.response(this);
-      if (this.getResponseHeader('Content-Type') == 'application/json')
-        res = JSON.stringify(res);
-      this.responseText = res;
-      setTimeout(function () {
-        this.onload && this.onload();
-      }.bind(this), 1);
+      var res = currentResponse.response(this), Promise = this.context.getPromise();
+      function onLoad(res) {
+        if (this.getResponseHeader('Content-Type') == 'application/json')
+          res = JSON.stringify(res);
+        this.responseText = res;
+        setTimeout(function () {
+          this.onload && this.onload();
+        }.bind(this), 1);
+      }
+      if (res instanceof Promise) {
+        res.then(onLoad.bind(this)).catch(this.onerror.bind(this));
+      } else
+        onLoad.call(this, res);
     };
     XhrMock.prototype.abort = function () {
       Log.debug('XhrMock.destroy(): Aborted');
@@ -726,6 +733,7 @@
      * @property {string} method?
      * @property {boolean} async?
      * @property {Object} post?
+     * @property {Object} get?
      * @property {Object} headers?
      */
     /**
@@ -780,6 +788,7 @@
      * @returns {Ajax}
      */
     Ajax.prototype.setRequestHeader = function (name, value) {
+      this.options.headers = this.options.headers || {};
       this.options.headers[name.toLowerCase()] = value;
       return this;
     };
@@ -797,6 +806,7 @@
      * @returns {string}
      */
     Ajax.prototype.getRequestHeader = function (name) {
+      this.options.headers = this.options.headers || {};
       return this.options.headers[name.toLowerCase()];
     };
     /**
@@ -899,7 +909,7 @@
      */
     Ajax.prototype.send = function () {
       this.observer.emit(this.observer.events.beforeRequest, this);
-      return this.context.getPromise().resolve(this).then(this.checkOptions.bind(this)).then(this.request.bind(this)).then(function (ajax) {
+      return this.request().then(function (ajax) {
         ajax.parseResponse();
         if (ajax.error)
           throw ajax.error;
@@ -924,6 +934,7 @@
      */
     Ajax.prototype.request = function () {
       return new (this.context.getPromise())(function (resolve, reject) {
+        this.checkOptions();
         var options = this.options, xhr = this.getXHR();
         xhr.open(options.method, options.url, options.async);
         //@see http://stackoverflow.com/questions/19666809/cors-withcredentials-support-limited
@@ -1219,17 +1230,21 @@
      * @returns {Promise}
      */
     Platform.prototype.refresh = function () {
-      return this.context.getPromise().resolve(null).then(function (result) {
-        if (this.isPaused())
-          return this.refreshPolling(result);
+      var refresh = new (this.context.getPromise())(function (resolve, reject) {
+        // This means queue was paused before this particular refresh
+        var wasPaused = this.isPaused();
+        // Queue must be paused anyway
         this.pause();
+        // Then refreshPolling if it was paused before
+        if (wasPaused)
+          return resolve(this.refreshPolling(null));
         var authData = this.getAuthData();
         Log.debug('Platform.refresh(): Performing token refresh (access token', authData.access_token, ', refresh token', authData.refresh_token, ')');
         if (!authData || !authData.refresh_token)
           throw new Error('Refresh token is missing');
         if (Date.now() > authData.refreshExpireTime)
           throw new Error('Refresh token has expired');
-        return this.authCall({
+        resolve(this.authCall({
           url: '/restapi/oauth/token',
           post: {
             'grant_type': 'refresh_token',
@@ -1237,16 +1252,20 @@
             'access_token_ttl': this.accessTokenTtl,
             'refresh_token_ttl': this.remember() ? this.refreshTokenTtlRemember : this.refreshTokenTtl
           }
-        }).then(function (ajax) {
-          Log.info('Platform.refresh(): Token was refreshed');
-          if (!ajax.data || !ajax.data.refresh_token || !ajax.data.access_token) {
-            var e = new Error('Malformed OAuth response');
-            e.ajax = ajax;
-            throw e;
-          }
-          this.setCache(ajax.data).resume();
+        }));
+      }.bind(this));
+      return refresh.then(function (ajax) {
+        // This means refresh has happened elsewhere and we are here because of timeout
+        if (!ajax || !ajax.data)
           return ajax;
-        }.bind(this));
+        Log.info('Platform.refresh(): Token was refreshed');
+        if (!ajax.data.refresh_token || !ajax.data.access_token) {
+          var e = new Error('Malformed OAuth response');
+          e.ajax = ajax;
+          throw e;
+        }
+        this.setCache(ajax.data).resume();
+        return ajax;
       }.bind(this)).then(function (result) {
         this.emit(this.events.refreshSuccess, result);
         return result;
@@ -1316,7 +1335,7 @@
      */
     Platform.prototype.isTokenValid = function () {
       var authData = this.getAuthData();
-      return authData.token_type == forcedTokenType || new Date(authData.expireTime).getTime() - this.refreshHandicapMs > Date.now();
+      return authData.token_type == forcedTokenType || new Date(authData.expireTime).getTime() - this.refreshHandicapMs > Date.now() && !this.isPaused();
     };
     /**
      * Checks if user is authorized
@@ -1372,9 +1391,7 @@
       return this.isAuthorized()  // Refresh will occur inside
 .then(function () {
         var token = this.getToken();
-        options.headers = options.headers || {};
-        options.headers.Authorization = this.getTokenType() + (token ? ' ' + token : '');
-        return this.getAjax().setOptions(options).send();
+        return this.getAjax().setOptions(options).setRequestHeader('Authorization', this.getTokenType() + (token ? ' ' + token : '')).send();
       }.bind(this)).catch(function (e) {
         if (!e.ajax || !e.ajax.isResponseUnauthorized())
           throw e;
@@ -1391,15 +1408,10 @@
      */
     Platform.prototype.authCall = function (options) {
       options = options || {};
-      options.headers = Utils.extend({
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json',
-        'Authorization': 'Basic ' + this.apiKey
-      }, options.headers || {});
       options.method = options.method || 'POST';
       options.post = Utils.queryStringify(options.post);
       options.url = this.apiUrl(options.url, { addServer: true });
-      return this.getAjax().setOptions(options).send();
+      return this.getAjax().setOptions(options).setRequestHeader('Content-Type', 'application/x-www-form-urlencoded').setRequestHeader('Accept', 'application/json').setRequestHeader('Authorization', 'Basic' + this.apiKey).send();
     };
     /**
      *
