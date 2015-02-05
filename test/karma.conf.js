@@ -1,10 +1,8 @@
 module.exports = function(config) {
 
-    var pkg = require('./package.json'); //TODO Re-use GruntJS paths
-
     config.set({
 
-        basePath: '.',
+        basePath: '../',
 
         frameworks: [
             'mocha',
@@ -24,8 +22,8 @@ module.exports = function(config) {
             {pattern: './bower_components/cryptojslib/**/*.js', included: false},
             {pattern: './bower_components/pubnub/web/*.*', included: false},
             {pattern: './bower_components/es6-promise-polyfill/*.*', included: false},
-            // include files
             {pattern: './node_modules/chai-spies/chai-spies.js', included: false},
+            // include files
             {pattern: './test/phantomjs-bind.js', included: true},
             {pattern: './lib/requirejs-config.js', included: true},
             {pattern: './test/karma.js', included: true}
