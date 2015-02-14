@@ -46,7 +46,7 @@
     "karma-mocha-reporter": "*",
     "karma-phantomjs-launcher": "*",
     "karma-requirejs": "*",
-    "karma-sinon-chai": "*",
+    "karma-sinon-chai": "0.2.*",
     "mocha": "*",
     "soap": "*"
   },

@@ -942,7 +942,8 @@
         xhr.onload = function () {
           this.status = xhr.status;
           this.response = xhr.responseText;
-          this.setResponseHeader('Content-Type', xhr.getResponseHeader('Content-Type'));
+          this.setResponseHeader('Content-Type', xhr.getResponseHeader('Content-Type') || jsonContentType);
+          // if no header, set default
           resolve(this);
         }.bind(this);
         xhr.onerror = function (event) {
@@ -1237,14 +1238,16 @@
         } else {
           this.pause();
         }
-        var authData = this.getAuthData();
-        Log.debug('Platform.refresh(): Performing token refresh (access token', authData.access_token, ', refresh token', authData.refresh_token, ')');
-        if (!authData || !authData.refresh_token)
-          throw new Error('Refresh token is missing');
-        if (Date.now() > authData.refreshExpireTime)
-          throw new Error('Refresh token has expired');
         // Make sure all existing AJAX calls had a chance to reach the server
         setTimeout(function () {
+          var authData = this.getAuthData();
+          Log.debug('Platform.refresh(): Performing token refresh (access token', authData.access_token, ', refresh token', authData.refresh_token, ')');
+          if (!authData || !authData.refresh_token)
+            return reject(new Error('Refresh token is missing'));
+          if (Date.now() > authData.refreshExpireTime)
+            return reject(new Error('Refresh token has expired'));
+          if (!this.isPaused())
+            return reject(new Error('Queue was resumed before refresh call'));
           resolve(this.authCall({
             url: '/restapi/oauth/token',
             post: {
