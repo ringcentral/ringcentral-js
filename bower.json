@@ -21,7 +21,7 @@
   "devDependencies": {
   },
   "private": true,
-  "license": "http://www.ringcentral.com/legal/apilitos.html",
+  "license": "MIT",
   "authors": [
     {
       "name": "RingCentral, Inc.",
