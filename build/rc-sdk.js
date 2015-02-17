@@ -4955,10 +4955,6 @@
      */
     return exports;
   }({});
-  /**
-   * @description RingPlatform JS SDK
-   * @copyright © 2014-2015 RingCentral, Inc. All rights reserved.
-   */
   (function () {
     if (typeof exports !== 'undefined') {
       // NodeJS
