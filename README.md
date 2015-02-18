@@ -29,19 +29,12 @@
 
 Pick the option that works best for you:
 
-- [ZIP file](https://github.com/ringcentral/js-sdk/archive/master.zip) and dependencies:
+- Bower &mdash; `$ bower install rcsdk --save`, all dependencies will be downloaded to `bower_components` directory
+- NPM &mdash; `$ npm install rcsdk --save`
+- [ZIP file](https://github.com/ringcentral/js-sdk/archive/master.zip) and dependencies *(not recommended)*:
     - [ES6 Promise Polyfill](https://github.com/lahmatiy/es6-promise-polyfill)
     - [PUBNUB](http://www.pubnub.com/docs/javascript/javascript-sdk.html)
     - [Crypto JS](https://code.google.com/p/crypto-js)
-- Bower &mdash; `$ bower install git+ssh://git@github.com/ringcentral/js-sdk.git --save` (you must have access
-to the GitHub repository), all dependencies will be downloaded to your `bower_components` directory
-- NPM &mdash; `$ npm install git+ssh://git@github.com/ringcentral/js-sdk.git --save` (you must have access to
-the GitHub repository)
-
-Alternative non-SSH URLs for Bower and NPM:
-
-- `git+https://git@github.com/ringcentral/js-sdk.git`
-- `https://github.com/ringcentral/js-sdk`
 
 ## 2a. Set things up (if you don't use RequireJS in your project)
 
