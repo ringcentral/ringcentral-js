@@ -4693,7 +4693,7 @@
         /** @private */
         this._context = core_Context.$get(injections);  //TODO Link Platform events with Subscriptions and the rest
       }
-      RCSDK.version = '1.1.1';
+      RCSDK.version = '1.1.2';
       // Internals
       /**
        * @returns {Context}
