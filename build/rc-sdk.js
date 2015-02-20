@@ -960,8 +960,8 @@
       return status.toString().substr(0, 1) == '2';
     };
     Ajax.prototype.parseResponse = function () {
-      if (!this.isResponseMultipart()) {
-        try {
+      try {
+        if (!this.isResponseMultipart()) {
           if (typeof this.response == 'string' && this.isResponseContentType(jsonContentType)) {
             this.data = JSON.parse(this.response);
           } else {
@@ -969,15 +969,7 @@
           }
           if (!this.checkStatus(this.status))
             this.error = new Error(this.data.message || this.data.error_description || this.data.description || 'Unknown error');
-        } catch (e) {
-          // Capture parse errors
-          Log.error('Ajax.parseResponse(): Unable to parse data');
-          Log.error(e.stack || e);
-          Log.error(this.response);
-          this.error = e;
-        }
-      } else {
-        try {
+        } else {
           var boundary = this.getResponseContentType().match(/boundary=([^;]+)/i)[1], parts = this.response.split(boundarySeparator + boundary);
           if (parts[0].trim() == '')
             parts.shift();
@@ -1005,12 +997,13 @@
             part.parseResponse();
             return part;
           }, this);
-        } catch (e) {
-          Log.error('Ajax.parseResponse(): Unable to parse batch response');
-          Log.error(e.stack || e);
-          Log.error(this.response);
-          this.error = e;
         }
+      } catch (e) {
+        // Capture parse errors
+        Log.error('Ajax.parseResponse(): Unable to parse data');
+        Log.error(e.stack || e);
+        Log.error(this.response);
+        this.error = e;
       }
       return this;
     };
@@ -1416,7 +1409,7 @@
       options.method = options.method || 'POST';
       options.post = Utils.queryStringify(options.post);
       options.url = this.apiUrl(options.url, { addServer: true });
-      return this.getAjax().setOptions(options).setRequestHeader('Content-Type', 'application/x-www-form-urlencoded').setRequestHeader('Accept', 'application/json').setRequestHeader('Authorization', 'Basic' + this.apiKey).send();
+      return this.getAjax().setOptions(options).setRequestHeader('Content-Type', 'application/x-www-form-urlencoded').setRequestHeader('Accept', 'application/json').setRequestHeader('Authorization', 'Basic ' + this.apiKey).send();
     };
     /**
      *
@@ -4693,7 +4686,7 @@
         /** @private */
         this._context = core_Context.$get(injections);  //TODO Link Platform events with Subscriptions and the rest
       }
-      RCSDK.version = '1.1.2';
+      RCSDK.version = '1.1.3';
       // Internals
       /**
        * @returns {Context}
