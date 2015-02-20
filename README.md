@@ -265,14 +265,13 @@ Subscriptions are created by calling the `getSubscription` method of the RCSDK i
 ```js
 var subscription = rcsdk.getSubscription();
 
-subscription.on(this.subscription.events.notification, function(msg) {
+subscription.on(subscription.events.notification, function(msg) {
     console.log(msg, msg.body);
 });
 
 subscription.register({
     events: ['/account/~/extension/~/presence'], // a list of server-side events
-    success: function(){ ... } // things to do on success
-});
+}).then(...);
 ```
 
 Once a subscription has been created, the SDK takes care of renewing it automatically. To cancel a subscription, you can
