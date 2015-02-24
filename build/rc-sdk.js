@@ -2,36 +2,18 @@
   var core_pubnub_PubnubMock, core_Utils, core_Log, core_xhr_XhrResponse, core_xhr_XhrMock, core_Context, core_Observable, core_AjaxObserver, core_Ajax, core_Cache, core_Platform, core_Subscription, core_PageVisibility, core_Helper, core_Validator, core_List, helpers_Country, helpers_DeviceModel, helpers_Language, helpers_State, helpers_Location, helpers_ShippingMethod, helpers_Timezone, helpers_Account, helpers_BlockedNumber, helpers_Extension, helpers_Presence, helpers_Contact, helpers_Call, helpers_Conferencing, helpers_ContactGroup, helpers_Device, helpers_ForwardingNumber, helpers_Message, helpers_PhoneNumber, helpers_Ringout, helpers_Service, RCSDK;
   core_pubnub_PubnubMock = function (exports) {
     'use strict';
-    function WS(url) {
-      this.url = url;
-      this.pubnub = {
-        ready: function () {
-        }
-      };
-      this.onmessage = function () {
-      };
-      this.onclose = function () {
-      };
-      this.onerror = function () {
-      };
-      this.onopen = function () {
-      };
-      this.close = function (code, reason) {
-        this.onclose({
-          code: code,
-          reason: reason,
-          wasClean: true
-        });
-      };
-      /**
-       * This stub allows to simulate message arrival
-       * @param data
-       */
-      this.receiveMessage = function (data) {
-        this.onmessage({ data: data });
-      };
-      this.onopen();
+    function PubnubMock(options) {
     }
+    PubnubMock.prototype.ready = function () {
+    };
+    PubnubMock.prototype.unsubscribe = function (options) {
+    };
+    PubnubMock.prototype.subscribe = function (options) {
+      this.onMessage = options.message;
+    };
+    PubnubMock.prototype.receiveMessage = function (msg) {
+      this.onMessage(msg, 'env', 'channel');
+    };
     /**
      * @alias RCSDK.core.pubnub.Mock
      * @type {PUBNUB}
@@ -42,7 +24,11 @@
        * @returns {PUBNUB}
        */
       $get: function (context) {
-        return { ws: WS };
+        return {
+          init: function (options) {
+            return new PubnubMock(options);
+          }
+        };
       }
     };
     return exports;
@@ -788,8 +774,13 @@
      * @returns {Ajax}
      */
     Ajax.prototype.setRequestHeader = function (name, value) {
+      name = name.toLowerCase();
       this.options.headers = this.options.headers || {};
-      this.options.headers[name.toLowerCase()] = value;
+      if (value) {
+        this.options.headers[name] = value;
+      } else {
+        delete this.options.headers[name];
+      }
       return this;
     };
     /**
@@ -887,6 +878,11 @@
       Object.keys(headers).forEach(function (key) {
         this.setRequestHeader(key, headers[key]);
       }, this);
+      // Delete all headers that don't have value
+      Object.keys(this.options.headers).forEach(function (key) {
+        if (!this.options.headers[key])
+          delete this.options.headers[key];
+      }, this);
       this.options.method = this.options.method ? this.options.method.toUpperCase() : 'GET';
       this.options.async = this.options.async !== undefined ? this.options.async : true;
       this.options.get = this.options.get || null;
@@ -962,7 +958,8 @@
     Ajax.prototype.parseResponse = function () {
       try {
         if (!this.isResponseMultipart()) {
-          if (typeof this.response == 'string' && this.isResponseContentType(jsonContentType)) {
+          if (typeof this.response == 'string' && !!this.response && this.isResponseContentType(jsonContentType)) {
+            // Handle 204 No Content -- response may be empty
             this.data = JSON.parse(this.response);
           } else {
             this.data = this.response;  //TODO Add more parsers
@@ -1482,8 +1479,8 @@
         // Active
         uri: ''
       };
-      /** @type {PUBNUB.ws} */
-      this.socket = null;
+      /** @type {PUBNUB} */
+      this.pubnub = null;
       this.context = context;
     }
     Subscription.prototype = Object.create(Observable.prototype);
@@ -1501,12 +1498,8 @@
       subscribeError: 'subscribeError'
     };
     /**
-     * @param {string} url
-     * @returns {PUBNUB.ws}
+     * @returns {PUBNUB}
      */
-    Subscription.prototype.createPubnub = function (url) {
-      return new (this.getPubnub()).ws(url);
-    };
     Subscription.prototype.getPubnub = function () {
       return this.context.getPubnub();
     };
@@ -1554,16 +1547,14 @@
       return new (this.context.getPromise())(function (resolve, reject) {
         if (!this.eventFilters || !this.eventFilters.length)
           throw new Error('Events are undefined');
-        resolve();
-      }.bind(this)).then(function () {
-        return this.getPlatform().apiCall({
+        resolve(this.getPlatform().apiCall({
           method: 'POST',
           url: '/restapi/v1.0/subscription',
           post: {
             eventFilters: this.getFullEventFilters(),
             deliveryMode: { transportType: 'PubNub' }
           }
-        });
+        }));
       }.bind(this)).then(function (ajax) {
         this.updateSubscription(ajax.data).subscribeAtPubnub().emit(this.events.subscribeSuccess, ajax.data);
         return ajax;
@@ -1611,24 +1602,23 @@
       return new (this.context.getPromise())(function (resolve, reject) {
         if (!this.subscription || !this.subscription.id)
           throw new Error('Subscription ID is required');
-        resolve();
-      }.bind(this)).then(function () {
-        return this.getPlatform().apiCall({
+        resolve(this.getPlatform().apiCall({
           async: !!options.async,
           // Warning! This is necessary because this method is used in beforeunload hook and has to be synchronous
           method: 'DELETE',
           url: '/restapi/v1.0/subscription/' + this.subscription.id
-        });
+        }));
       }.bind(this)).then(function (ajax) {
         this.unsubscribe().emit(this.events.removeSuccess, ajax);
         return ajax;
       }.bind(this)).catch(function (e) {
-        this.unsubscribe().emit(this.events.removeError, e);
+        this.emit(this.events.removeError, e);
         throw e;
       }.bind(this));
     };
     Subscription.prototype.destroy = function () {
       this.unsubscribe();
+      Log.info('RC.core.Subscription: Destroyed');
       return Observable.prototype.destroy.call(this);
     };
     Subscription.prototype.isSubscribed = function () {
@@ -1662,14 +1652,14 @@
       return this;
     };
     /**
-     * Remove subscription and disconnect from socket
+     * Remove subscription and disconnect from PUBNUB
      * @protected
      * @returns {Subscription}
      */
     Subscription.prototype.unsubscribe = function () {
       this.clearTimeout();
-      // @see https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Status_codes
-      this.socket && this.socket.close(this.socket.CLOSE_NORMAL, 'Connection terminated by client');
+      if (this.pubnub && this.isSubscribed())
+        this.pubnub.unsubscribe({ channel: this.subscription.deliveryMode.address });
       this.subscription = null;
       return this;
     };
@@ -1698,25 +1688,19 @@
     Subscription.prototype.subscribeAtPubnub = function () {
       if (!this.isSubscribed())
         return this;
-      // ws(s)://ORIGIN/PUBLISH_KEY/SUBSCRIBE_KEY/CHANNEL
-      var url = 'wss://pubsub.pubnub.com//' + this.subscription.deliveryMode.subscriberKey + '/' + this.subscription.deliveryMode.address;
-      this.socket = this.createPubnub(url);
-      this.socket.pubnub && this.socket.pubnub.ready();
-      //TODO This may be unnecessary
-      this.socket.onmessage = function (e) {
-        Log.info('Subscription: Socket received message', e);
-        this.notify(e.data);
-      }.bind(this);
-      this.socket.onclose = function () {
-        Log.info('Subscription: Socket closed');
-      };
-      this.socket.onerror = function (e) {
-        Log.error('Subscription: Socket error');
-        Log.error(e.stack || e);
-      };
-      this.socket.onopen = function () {
-        Log.info('Subscription: Socket open');
-      };
+      var PUBNUB = this.getPubnub();
+      this.pubnub = PUBNUB.init({ subscribe_key: this.subscription.deliveryMode.subscriberKey });
+      this.pubnub.ready();
+      this.pubnub.subscribe({
+        channel: this.subscription.deliveryMode.address,
+        message: function (message, env, channel) {
+          Log.info('RC.core.Subscription: Incoming message', message);
+          this.notify(message);
+        }.bind(this),
+        connect: function () {
+          Log.info('RC.core.Subscription: PUBNUB connected');
+        }.bind(this)
+      });
       return this;
     };
     exports = {
@@ -4686,7 +4670,7 @@
         /** @private */
         this._context = core_Context.$get(injections);  //TODO Link Platform events with Subscriptions and the rest
       }
-      RCSDK.version = '1.1.3';
+      RCSDK.version = '1.1.4';
       // Internals
       /**
        * @returns {Context}

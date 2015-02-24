@@ -23,6 +23,9 @@
             var rcsdk = new RCSDK(),
                     platform = rcsdk.getPlatform();
 
+            platform.apiKey = localStorage.getItem('rscdk-demo-apiKey');
+            platform.server = localStorage.getItem('rscdk-demo-server');
+
             function showExtension() {
 
                 document.getElementById('login').style.display = 'none';
@@ -158,10 +161,6 @@
                 e.preventDefault();
                 platform.logout();
             });
-
-            platform = rcsdk.getPlatform();
-            platform.apiKey = localStorage.getItem('rscdk-demo-apiKey');
-            platform.server = localStorage.getItem('rscdk-demo-server');
 
             platform.on(platform.events.logoutSuccess, function() {
                 showLogin();
