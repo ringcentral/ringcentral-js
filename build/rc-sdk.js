@@ -774,8 +774,13 @@
      * @returns {Ajax}
      */
     Ajax.prototype.setRequestHeader = function (name, value) {
+      name = name.toLowerCase();
       this.options.headers = this.options.headers || {};
-      this.options.headers[name.toLowerCase()] = value;
+      if (value) {
+        this.options.headers[name] = value;
+      } else {
+        delete this.options.headers[name];
+      }
       return this;
     };
     /**
@@ -872,6 +877,11 @@
       }, this);
       Object.keys(headers).forEach(function (key) {
         this.setRequestHeader(key, headers[key]);
+      }, this);
+      // Delete all headers that don't have value
+      Object.keys(this.options.headers).forEach(function (key) {
+        if (!this.options.headers[key])
+          delete this.options.headers[key];
       }, this);
       this.options.method = this.options.method ? this.options.method.toUpperCase() : 'GET';
       this.options.async = this.options.async !== undefined ? this.options.async : true;
