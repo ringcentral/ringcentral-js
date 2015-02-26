@@ -30,7 +30,7 @@
     });
 
     require([
-        '../build/rc-sdk', // or simply browser
+        '../build/rc-sdk.min', // or simply browser
         '../test/lib/Mock',
         '../node_modules/chai-spies/chai-spies' //TODO Get rid of it
     ], function(RCSDK, Mock, spies) {

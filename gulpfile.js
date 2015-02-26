@@ -3,16 +3,15 @@
     var gulp = require('gulp'),
         gutil = require('gulp-util'),
         sourcemaps = require('gulp-sourcemaps'),
-        buildDir = ('buildDir' in gutil.env) ? gutil.env.buildDir : '.',
-        build = buildDir + '/build',
+        replace = require('gulp-replace'),
+
+        build = (('buildDir' in gutil.env) ? gutil.env.buildDir : '.') + '/build',
         sourcemapsDebug = false;
 
     gutil.log('Working directory:', gutil.colors.magenta(process.cwd()));
-    gutil.log('Build directory:', gutil.colors.magenta(buildDir));
+    gutil.log('Build directory:', gutil.colors.magenta(build));
 
     gulp.task('version', function() {
-
-        var replace = require('gulp-replace');
 
         return gulp.src(['./bower.json', './package.json'])
             .pipe(replace(/"version": "[^"]+?"/ig, '"version": "' + require('./lib/index').version + '"'))
@@ -20,82 +19,82 @@
 
     });
 
+    gulp.task('sourcemap', ['rjs'], function() {
+
+        return gulp.src([build + '/rc-sdk.js.map'])
+            .pipe(replace(/webpack:\/\/\//g, ''))
+            .pipe(replace(/(.\/lib\/)/g, '.$1'))
+            .pipe(gulp.dest(build));
+
+    });
+
     gulp.task('clean', function() {
 
         var fs = require('fs'),
-            files = ['.js', '.js.map', '.min.js', '.min.js.map'];
+            extensions = ['.js', '.js.map', '.min.js', '.min.js.map'];
 
-        files.forEach(function(file) {
-            var path = process.cwd() + '/' + buildDir + '/build/rc-sdk' + file;
+        extensions.forEach(function(ext) {
+            var path = process.cwd() + '/' + build + '/rc-sdk' + ext;
             fs.existsSync(path) && fs.unlinkSync(path);
         });
 
     });
 
-    gulp.task('rjs', ['clean', 'version'], function() {
+    gulp.task('rjs', ['clean'], function() {
 
-        var addSrc = require('gulp-add-src'),
-            amdClean = require('gulp-amdclean'),
-            amdOptimize = require('amd-optimize'),
-            concat = require('gulp-concat'),
-            wrapJs = require('gulp-wrap-js'),
-            ignore = ['crypto-js', 'dom-storage', 'es6-promise', 'pubnub', 'xhr2'];
+        var webpack = require('gulp-webpack-build'),
+            path = require('path'),
+            rename = require('gulp-rename');
 
-        return gulp.src(['./lib/*/**/*.js', './lib/RCSDK.js'])
+        return gulp.src(path.join('.', webpack.config.CONFIG_FILENAME), {base: path.resolve('./lib')})
 
-            .pipe(amdOptimize('RCSDK', {
-                baseUrl: './lib',
-                exclude: ignore,
-                paths: ignore.reduce(function(paths, file) { //TODO Replace with simple "exclude"
-                    paths[file] = 'empty:';
-                    return paths;
-                }, {}),
-                preserveComments: true
+            .pipe(webpack.configure({
+                useMemoryFs: true,
+                progress: false
             }))
 
-            .pipe(addSrc.append('./lib/umd.js'))
-
-            .pipe(sourcemaps.init({debug: sourcemapsDebug}))
-
-            .pipe(concat('rc-sdk.js'))
-
-            .pipe(amdClean.gulp({
-                transformAMDChecks: false,
-                wrap: false,
-                ignoreModules: ignore.map(function(name) { return name.replace('-', '_'); })
+            .pipe(webpack.overrides({
+                debug: true,
+                devtool: '#source-map',
+                watchDelay: 200
             }))
 
-            .pipe(wrapJs('(function(root){%= body %})(this);', {
-                indent: {
-                    style: '  ',
-                    adjustMultilineComment: true
-                }
+            .pipe(webpack.compile())
+
+            .pipe(webpack.format({
+                version: true,
+                timings: true
             }))
 
-            .pipe(sourcemaps.write('.', {debug: sourcemapsDebug}))
-            .pipe(gulp.dest(buildDir + '/build'));
+            .pipe(webpack.failAfter({
+                errors: true,
+                warnings: true
+            }))
+
+            .pipe(gulp.dest(build));
 
     });
 
-    gulp.task('default', ['rjs'], function() {
+    gulp.task('default', ['version', 'sourcemap'], function() {
 
         var uglify = require('gulp-uglify'),
             rename = require('gulp-rename');
 
-        return gulp.src([buildDir + '/build/rc-sdk.js'])
+        return gulp.src([build + '/rc-sdk.js'])
             .pipe(sourcemaps.init({loadMaps: true, debug: sourcemapsDebug}))
-
-            .pipe(rename({suffix: '.min'}))
 
             .pipe(uglify())
 
+            .pipe(rename({suffix: '.min'}))
+
             .pipe(sourcemaps.write('.', {debug: sourcemapsDebug}))
-            .pipe(gulp.dest(buildDir + '/build'));
+            .pipe(gulp.dest(build));
 
     });
 
     gulp.task('watch', ['default'], function() {
         gulp.watch('lib/**/*.js', ['default']).on('change', function(event) {
+            //TODO Gulp-Webpack-Build watcher @see https://github.com/mdreizin/gulp-webpack-build/blob/master/docs/API.md
             gutil.log(gutil.template('File <%= file %> was <%= type %>, running tasks', {file: gutil.colors.magenta(event.path), type: event.type}));
         });
     });
