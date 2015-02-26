@@ -40,7 +40,17 @@
 
     });
 
-    gulp.task('rjs', ['clean'], function() {
+    gulp.task('jshint', function() {
+
+        var jshint = require('gulp-jshint');
+        return gulp.src(['./lib/**/*.js'])
+            .pipe(jshint())
+            .pipe(jshint.reporter('default'))
+            .pipe(jshint.reporter('fail'))
+
+    });
+
+    gulp.task('rjs', ['clean', 'jshint'], function() {
 
         var webpack = require('gulp-webpack-build'),
             path = require('path'),

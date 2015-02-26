@@ -1,11 +1,8 @@
 {
-    "maxerr": 50,
-    "curly": false,
-    "indent": 4,
-    "plusplus": false,
-    "nonew": false,
-    "eqeqeq": false,
-
-    "browser": true,
-    "node": true
+  "curly": false,
+  "eqeqeq": false,
+  "indent": 4,
+  "latedef": true,
+  "laxbreak": true,
+  "plusplus": false
 }

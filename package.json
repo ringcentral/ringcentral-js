@@ -17,6 +17,7 @@
     "crypto-js": "*",
     "dom-storage": "*",
     "es6-promise": "*",
+    "gulp-jshint": "^1.9.2",
     "gulp-uglifyjs": "^0.6.0",
     "gulp-webpack-build": "^0.5.1",
     "pubnub": "*",

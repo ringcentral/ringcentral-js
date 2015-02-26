@@ -152,12 +152,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         // Core
 
         /** @returns {Ajax} */
-        RCSDK.prototype.getAjax = function() { return __webpack_require__(7).$get(this.getContext()) };
+        RCSDK.prototype.getAjax = function() { return __webpack_require__(7).$get(this.getContext()); };
 
         /**
          * @returns {AjaxObserver}
          */
-        RCSDK.prototype.getAjaxObserver = function() { return __webpack_require__(8).$get(this.getContext()) };
+        RCSDK.prototype.getAjaxObserver = function() { return __webpack_require__(8).$get(this.getContext()); };
 
         /**
          * @returns {XhrResponse}
@@ -415,7 +415,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     Context.prototype.getLocalStorage = function() {
         return this.createSingleton('localStorage', function() {
             return (typeof this.injections.localStorage == 'function')
-                ? new this.injections.localStorage // this is NPM dom-storage constructor
+                ? new this.injections.localStorage() // this is NPM dom-storage constructor
                 : this.injections.localStorage; // this is window.localStorage
         }.bind(this));
     };
@@ -431,7 +431,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @returns {XMLHttpRequest}
      */
     Context.prototype.getXHR = function() {
-        return this.stubAjax ? __webpack_require__(42).$get(this) : new this.injections.XHR;
+        return this.stubAjax ? __webpack_require__(42).$get(this) : new this.injections.XHR();
     };
 
     module.exports = {
@@ -782,7 +782,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
                 var boundary = this.getResponseContentType().match(/boundary=([^;]+)/i)[1],
                     parts = this.response.split(boundarySeparator + boundary);
 
-                if (parts[0].trim() == '') parts.shift();
+                if (parts[0].trim() === '') parts.shift();
                 if (parts[parts.length - 1].trim() == boundarySeparator) parts.pop();
 
                 // Step 1. Parse all parts into Ajax objects
@@ -795,7 +795,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
                         .split('\n')
                         .forEach(function(header) {
 
-                            if (header.length == 0) return res;
+                            if (header.length === 0) return res;
 
                             var headerParts = header.split(headerSeparator),
                                 name = headerParts.shift().trim();
@@ -842,7 +842,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     };
 
     Ajax.prototype.destroy = function() {
-        this.xhr && this.xhr.abort();
+        if (this.xhr) this.xhr.abort();
         return Observable.prototype.destroy.call(this);
     };
 
@@ -1089,7 +1089,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         var key = this.cacheId + '-remember';
 
-        if (remember != undefined) {
+        if (remember !== undefined) {
 
             this.getStorage().setItem(key, remember);
             return this;
@@ -2004,13 +2004,28 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
         Observable.call(this);
 
         var hidden = "hidden",
-            self = this;
+            onchange = function(evt) {
+
+                evt = evt || window.event;
+
+                var v = 'visible',
+                    h = 'hidden',
+                    evtMap = {
+                        focus: v, focusin: v, pageshow: v, blur: h, focusout: h, pagehide: h
+                    };
+
+                this.visible = (evt.type in evtMap) ? evtMap[evt.type] == v : !document[hidden];
+
+                this.emit(this.events.change, this.visible);
+
+            }.bind(this);
 
         this.visible = true;
 
         if (typeof document == 'undefined' || typeof window == 'undefined') return;
 
         // Standards:
+
         if (hidden in document)
             document.addEventListener("visibilitychange", onchange);
         else if ((hidden = "mozHidden") in document)
@@ -2025,22 +2040,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
         // All others:
         else
             window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onchange;
-
-        function onchange(evt) {
-
-            evt = evt || window.event;
-
-            var v = 'visible',
-                h = 'hidden',
-                evtMap = {
-                    focus: v, focusin: v, pageshow: v, blur: h, focusout: h, pagehide: h
-                };
-
-            self.visible = (evt.type in evtMap) ? evtMap[evt.type] == v : !document[hidden];
-
-            self.emit(self.events.change, self.visible);
-
-        }
 
     }
 
@@ -2569,7 +2568,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
             return function() {
                 if (!value) return [];
                 return Utils.isEmail(value, multiple) ? [] : [new Error('Value has to be a valid email')];
-            }
+            };
         },
         /**
          * It is not recommended to have any kinds of complex validators at front end
@@ -2582,12 +2581,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
             return function() {
                 if (!value) return [];
                 return Utils.isPhoneNumber(value) ? [] : [new Error('Value has to be a valid US phone number')];
-            }
+            };
         },
         required: function(value) {
             return function() {
                 return !value ? [new Error('Field is required')] : [];
-            }
+            };
         },
         length: function(value, max, min) {
             return function() {
@@ -2603,7 +2602,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
                 return errors;
 
-            }
+            };
         },
         $get: function(context) {
             return Validator;
@@ -2733,7 +2732,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
             for (; i < length; i++) {
 
                 // Only deal with non-null/undefined values
-                if ((options = arguments[i]) != null) {
+                if ((options = arguments[i]) !== null) {
 
                     // Extend the base object
                     for (name in options) {
@@ -2901,11 +2900,11 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         },
 
         isNaN: function(obj) {
-            return obj == null || !rdigit.test(obj) || isNaN(obj);
+            return obj === null || !rdigit.test(obj) || isNaN(obj);
         },
 
         type: function(obj) {
-            return obj == null ?
+            return obj === null ?
                    String(obj) :
                    class2type[toString.call(obj)] || "object";
         },
@@ -2933,11 +2932,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         },
 
         getProperty: function(obj, property) {
-            try {
-                return eval('obj.' + property); //TODO Refactor
-            } catch (e) {
-                return undefined;
-            }
+
+            return property
+                .split(/[.[\]]/)
+                .reduce(function(res, part) {
+                    if (!res) return undefined;
+                    return part ? res[part] : res;
+                }, obj);
+
         },
 
         poll: function(fn, interval, timeout) {
@@ -2965,7 +2967,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         },
 
         stopPolling: function(timeout) {
-            timeout && clearTimeout(timeout);
+            if (timeout) clearTimeout(timeout);
         },
 
         parseString: function(s) {
@@ -3009,7 +3011,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         propertyExtractor: function(property) {
             return function(item, options) {
                 return property ? ((item && item[property]) || null) : item;
-            }
+            };
         },
 
         /**
@@ -5779,7 +5781,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
             extractFn: function(item) {
                 return item.usageType + '-' +
                        item.paymentType + '-' +
-                       item.type
+                       item.type;
             }
         }, options));
 
@@ -6167,6 +6169,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
     };
 
+    function isServiceFeatureEnabledMethod(feature) {
+        return function(serviceFeatures) {
+            return this.isEnabled(feature, serviceFeatures);
+        };
+    }
+
     ServiceHelper.prototype.isSmsEnabled = isServiceFeatureEnabledMethod('SMS');
     ServiceHelper.prototype.isSmsReceivingEnabled = isServiceFeatureEnabledMethod('SMSReceiving');
     ServiceHelper.prototype.isPresenceEnabled = isServiceFeatureEnabledMethod('Presence');
@@ -6188,12 +6196,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     ServiceHelper.prototype.isHipaaComplianceEnabled = isServiceFeatureEnabledMethod('HipaaCompliance');
     ServiceHelper.prototype.isCallParkEnabled = isServiceFeatureEnabledMethod('CallPark');
     ServiceHelper.prototype.isOnDemandCallRecordingEnabled = isServiceFeatureEnabledMethod('OnDemandCallRecording');
-
-    function isServiceFeatureEnabledMethod(feature) {
-        return function(serviceFeatures) {
-            return this.isEnabled(feature, serviceFeatures);
-        }
-    }
 
     module.exports = {
         Class: ServiceHelper,
@@ -6338,7 +6340,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 
         if (!currentResponse) {
             setTimeout(function() {
-                this.onerror && this.onerror(new Error('Unknown request: ' + this.url));
+                if (this.onerror) this.onerror(new Error('Unknown request: ' + this.url));
             }.bind(this), 1);
             return;
         }
@@ -6347,25 +6349,24 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
         this.setResponseHeader('Content-Type', 'application/json');
 
         var res = currentResponse.response(this),
-            Promise = this.context.getPromise();
+            Promise = this.context.getPromise(),
+            onLoad = function(res) {
 
-        function onLoad(res) {
+                if (this.getResponseHeader('Content-Type') == 'application/json') res = JSON.stringify(res);
 
-            if (this.getResponseHeader('Content-Type') == 'application/json') res = JSON.stringify(res);
+                this.responseText = res;
 
-            this.responseText = res;
+                setTimeout(function() {
+                    if (this.onload) this.onload();
+                }.bind(this), 1);
 
-            setTimeout(function() {
-                this.onload && this.onload();
-            }.bind(this), 1);
-
-        }
+            }.bind(this);
 
         if (res instanceof Promise) {
 
             res.then(onLoad.bind(this)).catch(this.onerror.bind(this));
 
-        } else onLoad.call(this, res);
+        } else onLoad(res);
 
     };
 
