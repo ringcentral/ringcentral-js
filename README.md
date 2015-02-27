@@ -133,7 +133,7 @@ relations team).
 
 ```js
 var platform = rcsdk.getPlatform();
-platform.server = 'https://platform.ringcentral.com';
+platform.server = 'https://platform.devtest.ringcentral.com'; // SANDBOX, for PRODUCTION use https://platform.ringcentral.com
 platform.apiKey = '[YOUR_API_KEY]';
 ```
 
