@@ -133,21 +133,17 @@ relations team).
 
 ```js
 var platform = rcsdk.getPlatform();
+
 platform.server = 'https://platform.devtest.ringcentral.com'; // SANDBOX, for PRODUCTION use https://platform.ringcentral.com
-platform.apiKey = '[YOUR_API_KEY]';
+
+// Use this in NodeJS
+platform.apiKey = new Buffer('YOUR_APP_KEY:YOUR_APP_SECRET').toString('base64');
+
+// Use this in Browser
+platform.apiKey = btoa('YOUR_APP_KEY:YOUR_APP_SECRET');
 ```
 
 The Platform singleton is now ready to be used for authorizing the user and then accessing the features of the API.
-
-The API Key is a Base64-encoded `APP Key` plus `:` plus `APP Secret`:
-
-```js
-// NodeJS
-var apiKey = new Buffer(appKey + ':' + appSecret).toString('base64');
-
-// Browser
-var apiKey = btoa(appKey + ':' + appSecret);
-```
 
 ## Login
 
@@ -715,7 +711,7 @@ platform.apiCall({
     }
 }).then(function(ajax) {
     alert('Success: ' + ajax.data.id);
-}).function(e) {
+}).catch(function(e) {
     alert('Error: ' + e.message);
 });
 ```
