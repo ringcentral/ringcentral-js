@@ -37,7 +37,11 @@
 
         chai.use(spies);
 
-        var rcsdk = new RCSDK();
+        var rcsdk = new RCSDK({
+            server: 'http://whatever',
+            appKey: 'whatever',
+            appSecret: 'whatever'
+        });
 
         /**
          * @type {RCSDK}

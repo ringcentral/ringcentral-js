@@ -9,10 +9,12 @@ define(function(require, exports, module) {
      */
     module.exports = function(rcsdk) {
 
-        rcsdk.useStubs();
-
         var platform = rcsdk.getPlatform(),
             cache = rcsdk.getCache();
+
+        rcsdk.getContext()
+            .useAjaxStub(true)
+            .usePubnubStub(true);
 
         platform.pollInterval = 1;
         platform.refreshDelayMs = 1;
