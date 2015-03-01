@@ -1032,7 +1032,7 @@
      */
     function Cache(context) {
       Observable.call(this);
-      this.prefix = 'rc-';
+      this.setPrefix();
       this.storage = context.getLocalStorage();  // storage must be defined from outside
     }
     Cache.prototype = Object.create(Observable.prototype);
@@ -1040,6 +1040,9 @@
       value: Cache,
       enumerable: false
     });
+    Cache.prototype.setPrefix = function (prefix) {
+      return this.prefix = prefix || 'rc-';
+    };
     Cache.prototype.prefixKey = function (key) {
       return this.prefix + key;
     };
@@ -1159,6 +1162,23 @@
      */
     Platform.prototype.clearStorage = function () {
       this.getStorage().clean();
+      return this;
+    };
+    /**
+     * @returns {Platform}
+     */
+    Platform.prototype.setCredentials = function (appKey, appSecret) {
+      var apiKey = (appKey || '') + ':' + (appSecret || '');
+      if (apiKey == ':')
+        return this;
+      this.apiKey = typeof btoa == 'function' ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
+      return this;
+    };
+    /**
+     * @returns {Platform}
+     */
+    Platform.prototype.setServer = function (server) {
+      this.server = server || '';
       return this;
     };
     /**
@@ -4658,19 +4678,23 @@
   RCSDK = function (exports) {
     'use strict';
     /**
-     * @param {IInjections} injections
+     * @param {RCSDK.IInjections} injections
      * @returns {RCSDK}
      */
     exports = function (injections) {
       /**
        * @name RCSDK
+       * @param {RCSDK.IOptions} [options]
        * @constructor
        */
       function RCSDK(options) {
+        options = options || {};
         /** @private */
-        this._context = core_Context.$get(injections);  //TODO Link Platform events with Subscriptions and the rest
+        this._context = core_Context.$get(injections);
+        this.getCache().setPrefix(options.cachePrefix || '');
+        this.getPlatform().setServer(options.server).setCredentials(options.appKey, options.appSecret);  //TODO Link Platform events with Subscriptions and the rest
       }
-      RCSDK.version = '1.1.4';
+      RCSDK.version = '1.1.5';
       // Internals
       /**
        * @returns {Context}
@@ -4922,14 +4946,6 @@
       injections.XHR = injections.XHR || getXHR();
       return RCSDK;
     };
-    /**
-     * @typedef {Object} IInjections
-     * @property {PUBNUB} PUBNUB
-     * @property {CryptoJS} CryptoJS
-     * @property {Storage} localStorage
-     * @property {XMLHttpRequest} XHR
-     * @property {Promise} Promise
-     */
     return exports;
   }({});
   (function () {
