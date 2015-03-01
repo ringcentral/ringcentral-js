@@ -119,7 +119,12 @@ var RCSDK = require('rcsdk');
 The SDK is represented by the global RCSDK constructor. Your application must create an instance of this object:
 
 ```js
-var rcsdk = new RCSDK();
+var rcsdk = new RCSDK({
+    server: 'https://platform.devtest.ringcentral.com', // SANDBOX
+    //server: 'https://platform.ringcentral.com', // PRODUCTION
+    appKey: 'yourAppKey',
+    appSecret: 'yourAppSecret'
+});
 ```
 
 This instance will be used later on to perform calls to API.
@@ -133,14 +138,6 @@ relations team).
 
 ```js
 var platform = rcsdk.getPlatform();
-
-platform.server = 'https://platform.devtest.ringcentral.com'; // SANDBOX, for PRODUCTION use https://platform.ringcentral.com
-
-// Use this in NodeJS
-platform.apiKey = new Buffer('YOUR_APP_KEY:YOUR_APP_SECRET').toString('base64');
-
-// Use this in Browser
-platform.apiKey = btoa('YOUR_APP_KEY:YOUR_APP_SECRET');
 ```
 
 The Platform singleton is now ready to be used for authorizing the user and then accessing the features of the API.

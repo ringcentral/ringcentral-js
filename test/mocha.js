@@ -4,7 +4,11 @@
         spies = require('chai-spies'),
         requirejs = require('requirejs'),
         RCSDK = require('../lib/index'),
-        rcsdk = new RCSDK();
+        rcsdk = new RCSDK({
+            server: 'http://whatever',
+            appKey: 'whatever',
+            appSecret: 'whatever'
+        });
 
     chai.use(spies);
 
