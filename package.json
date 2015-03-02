@@ -69,7 +69,7 @@
   },
   "homepage": "https://github.com/ringcentral/js-sdk",
   "engines": {
-    "node": "0.10.x"
+    "node": ">=0.10.36"
   },
   "license": "MIT"
 }
