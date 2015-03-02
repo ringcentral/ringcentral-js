@@ -137,7 +137,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         }
 
-        RCSDK.version = '1.1.6';
+        RCSDK.version = '1.1.7';
 
         // Internals
 
@@ -1025,7 +1025,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         this.urlPrefix = '/restapi';
         this.apiVersion = 'v1.0';
         this.accountPrefix = '/account/';
-        this.accessTokenTtl = 10 * 60; // 10 minutes
+        this.accessTokenTtl = null; // Platform server by default sets it to 60 * 60 = 1 hour
         this.refreshTokenTtl = 10 * 60 * 60; // 10 hours
         this.refreshTokenTtlRemember = 7 * 24 * 60 * 60; // 1 week
         this.refreshHandicapMs = 60 * 1000; // 1 minute
