@@ -116,33 +116,28 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         /**
          * @name RCSDK
+         * @param {IOptions} [options]
          * @constructor
          */
         function RCSDK(options) {
 
+            options = options || {};
+
             /** @private */
             this._context = __webpack_require__(6).$get(injections);
+
+            this.getCache()
+                .setPrefix(options.cachePrefix || '');
+
+            this.getPlatform()
+                .setServer(options.server)
+                .setCredentials(options.appKey, options.appSecret);
 
             //TODO Link Platform events with Subscriptions and the rest
 
         }
 
-        RCSDK.version = '1.1.5';
-
-        RCSDK.prototype.useStubs = function() {
-
-            var platform = this.getPlatform(),
-                context = this.getContext();
-
-            platform.server = '';
-            platform.apiKey = 'whatever';
-
-            context.useAjaxStub(true);
-            context.usePubnubStub(true);
-
-            return this;
-
-        };
+        RCSDK.version = '1.1.6';
 
         // Internals
 
@@ -346,6 +341,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @property {Storage} localStorage
      * @property {XMLHttpRequest} XHR
      * @property {Promise} Promise
+     */
+
+    /**
+     * @typedef {Object} IOptions
+     * @property {string} server
+     * @property {string} appKey
+     * @property {string} appSecret
+     * @property {string} [cachePrefix]
      */
 
 }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -1082,6 +1085,32 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     };
 
     /**
+     * @returns {Platform}
+     */
+    Platform.prototype.setCredentials = function(appKey, appSecret) {
+
+        var apiKey = (appKey || '') + ':' + (appSecret || '');
+
+        if (apiKey == ':') return this;
+
+        this.apiKey = (typeof btoa == 'function') ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
+
+        return this;
+
+    };
+
+    /**
+     * @returns {Platform}
+     */
+    Platform.prototype.setServer = function(server) {
+
+        this.server = server || '';
+
+        return this;
+
+    };
+
+    /**
      * @param {boolean} [remember]
      * @returns {Platform|boolean}
      */
@@ -1532,12 +1561,17 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     function Cache(context) {
         Observable.call(this);
-        this.prefix = 'rc-';
+        this.setPrefix();
         this.storage = context.getLocalStorage(); // storage must be defined from outside
     }
 
     Cache.prototype = Object.create(Observable.prototype);
     Object.defineProperty(Cache.prototype, 'constructor', {value: Cache, enumerable: false});
+
+    Cache.prototype.setPrefix = function(prefix) {
+        this.prefix = prefix || 'rc-';
+        return this;
+    };
 
     Cache.prototype.prefixKey = function(key) {
         return this.prefix + key;
