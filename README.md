@@ -36,7 +36,7 @@ Pick the option that works best for you:
     - [PUBNUB](http://www.pubnub.com/docs/javascript/javascript-sdk.html)
     - [Crypto JS](https://code.google.com/p/crypto-js)
 
-## 2a. Set things up (if you don't use RequireJS in your project)
+## 2a. Set things up in Browser (if you don't use RequireJS in your project)
 
 Add this to your HTML (order should be preserved):
 
@@ -49,7 +49,7 @@ Add this to your HTML (order should be preserved):
 <script type="text/javascript" src="path-to-scripts/rcsdk/build/rc-sdk.js"></script><!-- or rc-sdk.min.js -->
 ```
 
-## 2b. Set things up (if you use RequireJS in your project)
+## 2b. Set things up in Browser (if you use RequireJS in your project)
 
 ```js
 // Add this to your RequireJS configuration file
@@ -104,7 +104,7 @@ require(['rcsdk-raw'], function(RCSDK) {
 });
 ```
 
-## 2c. Set things up (on NodeJS)
+## 2c. Set things up on NodeJS
 
 ```js
 var RCSDK = require('rcsdk');
@@ -117,6 +117,11 @@ var RCSDK = require('rcsdk');
 ## Instantiate the RCSDK object
 
 The SDK is represented by the global RCSDK constructor. Your application must create an instance of this object:
+
+In order to bootstrap the RingCentral JavaScript SDK, you have to first get a reference to the Platform singleton and
+then configure it. Before you can do anything using the Platform singleton, you need to configure it with the server URL 
+(this tells the SDK which server to connect to) and your unique API key (this is provided by RingCentral's developer 
+relations team).
 
 ```js
 var rcsdk = new RCSDK({
@@ -131,21 +136,14 @@ This instance will be used later on to perform calls to API.
 
 ## Get the Platform Singleton
 
-In order to bootstrap the RingCentral JavaScript SDK, you have to first get a reference to the Platform singleton and
-then configure it. Before you can do anything using the Platform singleton, you need to configure it with the server URL 
-(this tells the SDK which server to connect to) and your unique API key (this is provided by RingCentral's developer 
-relations team).
-
 ```js
 var platform = rcsdk.getPlatform();
 ```
 
-The Platform singleton is now ready to be used for authorizing the user and then accessing the features of the API.
+Now that you have your platform singleton and SDK has been configured with the correct server URL and API key, your
+application can log in so that it can access the features of the API.
 
 ## Login
-
-Now that you have your platform singleton and it has been configured with the correct server URL and API key, your
-application can log in so that it can access the features of the API.
 
 Login is accomplished by calling the `platform.authorize()` method of the Platform singleton with username, extension
 (optional), and password as parameters. A Promise instance is returned, resolved with an Ajax object.
