@@ -146,175 +146,184 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         // Core
 
-        /** @returns {Ajax} */
-        RCSDK.prototype.getAjax = function() { return __webpack_require__(7).$get(this.getContext()); };
+        /**
+         * @returns {Request}
+         */
+        RCSDK.prototype.getRequest = function() { return __webpack_require__(7).$get(this.getContext()); };
+
+        /**
+         * @returns {Response}
+         */
+        RCSDK.prototype.getResponse = function(request, status, body, headers) {
+            return __webpack_require__(8).$get(this.getContext(), request, status, body, headers);
+        };
 
         /**
          * @returns {AjaxObserver}
          */
-        RCSDK.prototype.getAjaxObserver = function() { return __webpack_require__(8).$get(this.getContext()); };
+        RCSDK.prototype.getAjaxObserver = function() { return __webpack_require__(9).$get(this.getContext()); };
 
         /**
          * @returns {XhrResponse}
          */
-        RCSDK.prototype.getXhrResponse = function() { return __webpack_require__(9).$get(this.getContext()); };
+        RCSDK.prototype.getXhrResponse = function() { return __webpack_require__(10).$get(this.getContext()); };
 
         /**
          * @returns {Platform}
          */
-        RCSDK.prototype.getPlatform = function() { return __webpack_require__(10).$get(this.getContext()); };
+        RCSDK.prototype.getPlatform = function() { return __webpack_require__(11).$get(this.getContext()); };
 
         /**
          * @returns {Cache}
          */
-        RCSDK.prototype.getCache = function() { return __webpack_require__(11).$get(this.getContext()); };
+        RCSDK.prototype.getCache = function() { return __webpack_require__(12).$get(this.getContext()); };
 
         /**
          * @returns {Subscription}
          */
-        RCSDK.prototype.getSubscription = function() { return __webpack_require__(12).$get(this.getContext()); };
+        RCSDK.prototype.getSubscription = function() { return __webpack_require__(13).$get(this.getContext()); };
 
         /**
          * @returns {PageVisibility}
          */
-        RCSDK.prototype.getPageVisibility = function() { return __webpack_require__(13).$get(this.getContext()); };
+        RCSDK.prototype.getPageVisibility = function() { return __webpack_require__(14).$get(this.getContext()); };
 
         /**
          * @returns {Helper}
          */
-        RCSDK.prototype.getHelper = function() { return __webpack_require__(14).$get(this.getContext()); };
+        RCSDK.prototype.getHelper = function() { return __webpack_require__(15).$get(this.getContext()); };
 
         /**
          * @returns {Observable}
          */
-        RCSDK.prototype.getObservable = function() { return __webpack_require__(15).$get(this.getContext()); };
+        RCSDK.prototype.getObservable = function() { return __webpack_require__(16).$get(this.getContext()); };
 
         /**
          * @returns {Validator}
          */
-        RCSDK.prototype.getValidator = function() { return __webpack_require__(16).$get(this.getContext()); };
+        RCSDK.prototype.getValidator = function() { return __webpack_require__(17).$get(this.getContext()); };
 
         /**
          * @returns {Log}
          */
-        RCSDK.prototype.getLog = function() { return __webpack_require__(17).$get(this.getContext()); };
+        RCSDK.prototype.getLog = function() { return __webpack_require__(18).$get(this.getContext()); };
 
         /**
          * @returns {Utils}
          */
-        RCSDK.prototype.getUtils = function() { return __webpack_require__(18).$get(this.getContext()); };
+        RCSDK.prototype.getUtils = function() { return __webpack_require__(19).$get(this.getContext()); };
 
         /**
          * @returns {List}
          */
-        RCSDK.prototype.getList = function() { return __webpack_require__(19).$get(this.getContext()); };
+        RCSDK.prototype.getList = function() { return __webpack_require__(20).$get(this.getContext()); };
 
         // Helpers
 
         /**
          * @returns {CountryHelper}
          */
-        RCSDK.prototype.getCountryHelper = function() { return __webpack_require__(20).$get(this.getContext()); };
+        RCSDK.prototype.getCountryHelper = function() { return __webpack_require__(21).$get(this.getContext()); };
 
         /**
          * @returns {DeviceModelHelper}
          */
-        RCSDK.prototype.getDeviceModelHelper = function() { return __webpack_require__(21).$get(this.getContext()); };
+        RCSDK.prototype.getDeviceModelHelper = function() { return __webpack_require__(22).$get(this.getContext()); };
 
         /**
          * @returns {LanguageHelper}
          */
-        RCSDK.prototype.getLanguageHelper = function() { return __webpack_require__(22).$get(this.getContext()); };
+        RCSDK.prototype.getLanguageHelper = function() { return __webpack_require__(23).$get(this.getContext()); };
 
         /**
          * @returns {LocationHelper}
          */
-        RCSDK.prototype.getLocationHelper = function() { return __webpack_require__(23).$get(this.getContext()); };
+        RCSDK.prototype.getLocationHelper = function() { return __webpack_require__(24).$get(this.getContext()); };
 
         /**
          * @returns {ShippingMethodHelper}
          */
-        RCSDK.prototype.getShippingMethodHelper = function() { return __webpack_require__(24).$get(this.getContext()); };
+        RCSDK.prototype.getShippingMethodHelper = function() { return __webpack_require__(25).$get(this.getContext()); };
 
         /**
          * @returns {StateHelper}
          */
-        RCSDK.prototype.getStateHelper = function() { return __webpack_require__(25).$get(this.getContext()); };
+        RCSDK.prototype.getStateHelper = function() { return __webpack_require__(26).$get(this.getContext()); };
 
         /**
          * @returns {TimezoneHelper}
          */
-        RCSDK.prototype.getTimezoneHelper = function() { return __webpack_require__(26).$get(this.getContext()); };
+        RCSDK.prototype.getTimezoneHelper = function() { return __webpack_require__(27).$get(this.getContext()); };
 
         /**
          * @returns {AccountHelper}
          */
-        RCSDK.prototype.getAccountHelper = function() { return __webpack_require__(27).$get(this.getContext()); };
+        RCSDK.prototype.getAccountHelper = function() { return __webpack_require__(28).$get(this.getContext()); };
 
         /**
          * @returns {BlockedNumberHelper}
          */
-        RCSDK.prototype.getBlockedNumberHelper = function() { return __webpack_require__(28).$get(this.getContext()); };
+        RCSDK.prototype.getBlockedNumberHelper = function() { return __webpack_require__(29).$get(this.getContext()); };
 
         /**
          * @returns {CallHelper}
          */
-        RCSDK.prototype.getCallHelper = function() { return __webpack_require__(29).$get(this.getContext()); };
+        RCSDK.prototype.getCallHelper = function() { return __webpack_require__(30).$get(this.getContext()); };
 
         /**
          * @returns {ConferencingHelper}
          */
-        RCSDK.prototype.getConferencingHelper = function() { return __webpack_require__(30).$get(this.getContext()); };
+        RCSDK.prototype.getConferencingHelper = function() { return __webpack_require__(31).$get(this.getContext()); };
 
         /**
          * @returns {ContactHelper}
          */
-        RCSDK.prototype.getContactHelper = function() { return __webpack_require__(31).$get(this.getContext()); };
+        RCSDK.prototype.getContactHelper = function() { return __webpack_require__(32).$get(this.getContext()); };
 
         /**
          * @returns {ContactGroupHelper}
          */
-        RCSDK.prototype.getContactGroupHelper = function() { return __webpack_require__(32).$get(this.getContext()); };
+        RCSDK.prototype.getContactGroupHelper = function() { return __webpack_require__(33).$get(this.getContext()); };
 
         /**
          * @returns {DeviceHelper}
          */
-        RCSDK.prototype.getDeviceHelper = function() { return __webpack_require__(33).$get(this.getContext()); };
+        RCSDK.prototype.getDeviceHelper = function() { return __webpack_require__(34).$get(this.getContext()); };
 
         /**
          * @returns {ExtensionHelper}
          */
-        RCSDK.prototype.getExtensionHelper = function() { return __webpack_require__(34).$get(this.getContext()); };
+        RCSDK.prototype.getExtensionHelper = function() { return __webpack_require__(35).$get(this.getContext()); };
 
         /**
          * @returns {ForwardingNumberHelper}
          */
-        RCSDK.prototype.getForwardingNumberHelper = function() { return __webpack_require__(35).$get(this.getContext()); };
+        RCSDK.prototype.getForwardingNumberHelper = function() { return __webpack_require__(36).$get(this.getContext()); };
 
         /**
          * @returns {MessageHelper}
          */
-        RCSDK.prototype.getMessageHelper = function() { return __webpack_require__(36).$get(this.getContext()); };
+        RCSDK.prototype.getMessageHelper = function() { return __webpack_require__(37).$get(this.getContext()); };
 
         /**
          * @returns {PhoneNumberHelper}
          */
-        RCSDK.prototype.getPhoneNumberHelper = function() { return __webpack_require__(37).$get(this.getContext()); };
+        RCSDK.prototype.getPhoneNumberHelper = function() { return __webpack_require__(38).$get(this.getContext()); };
 
         /**
          * @returns {PresenceHelper}
          */
-        RCSDK.prototype.getPresenceHelper = function() { return __webpack_require__(38).$get(this.getContext()); };
+        RCSDK.prototype.getPresenceHelper = function() { return __webpack_require__(39).$get(this.getContext()); };
 
         /**
          * @returns {RingoutHelper}
          */
-        RCSDK.prototype.getRingoutHelper = function() { return __webpack_require__(39).$get(this.getContext()); };
+        RCSDK.prototype.getRingoutHelper = function() { return __webpack_require__(40).$get(this.getContext()); };
 
         /**
          * @returns {ServiceHelper}
          */
-        RCSDK.prototype.getServiceHelper = function() { return __webpack_require__(40).$get(this.getContext()); };
+        RCSDK.prototype.getServiceHelper = function() { return __webpack_require__(41).$get(this.getContext()); };
 
         if (!injections
             || !('CryptoJS' in injections)
@@ -408,7 +417,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @returns {PUBNUB}
      */
     Context.prototype.getPubnub = function() {
-        return this.stubPubnub ? __webpack_require__(41).$get(this) : this.injections.PUBNUB;
+        return this.stubPubnub ? __webpack_require__(42).$get(this) : this.injections.PUBNUB;
     };
 
     /**
@@ -434,7 +443,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @returns {XMLHttpRequest}
      */
     Context.prototype.getXHR = function() {
-        return this.stubAjax ? __webpack_require__(42).$get(this) : new this.injections.XHR();
+        return this.stubAjax ? __webpack_require__(43).$get(this) : new this.injections.XHR();
     };
 
     module.exports = {
@@ -458,14 +467,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
     'use strict';
 
-    var Observable = __webpack_require__(15).Class,
-        Utils = __webpack_require__(18),
-        Log = __webpack_require__(17),
-        jsonContentType = 'application/json',
-        multipartContentType = 'multipart/mixed',
-        boundarySeparator = '--',
-        headerSeparator = ':',
-        bodySeparator = '\n\n';
+    var Headers = __webpack_require__(44).Class,
+        Response = __webpack_require__(8),
+        Utils = __webpack_require__(19),
+        Log = __webpack_require__(18);
 
     /**
      * @typedef {Object} IAjaxOptions
@@ -480,225 +485,147 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     /**
      * @constructor
      * @extends Observable
-     * @alias RCSDK.core.Ajax
+     * @alias RCSDK.core.Request
      * @param {Context} [context]
      */
-    function Ajax(context) {
-        Observable.call(this);
-        /** @type {Ajax[]|object} */
-        this.data = null;
-        /** @type {Error|null} */
-        this.error = null;
-        this.response = '';
-        this.headers = {};
-        this.status = 0;
-        /**
-         * @type {IAjaxOptions}
-         * @protected
-         */
-        this.options = {};
+    function Request(context) {
+        Headers.call(this);
+        this.async = true;
+        this.method = '';
+        this.url = '';
+        this.query = null;
+        this.body = {};
         this.context = context;
-        /** @type {AjaxObserver} */
-        this.observer = __webpack_require__(8).$get(context);
         /** @type {XMLHttpRequest} */
         this.xhr = null;
+        /** @type {AjaxObserver} */
+        this.observer = __webpack_require__(9).$get(context);
     }
 
-    Ajax.prototype = Object.create(Observable.prototype);
-    Object.defineProperty(Ajax.prototype, 'constructor', {value: Ajax, enumerable: false});
+    Request.prototype = Object.create(Headers.prototype);
+    Object.defineProperty(Request.prototype, 'constructor', {value: Request, enumerable: false});
 
     /**
-     * @returns {IAjaxOptions}
+     * @returns {boolean}
      */
-    Ajax.prototype.getOptions = function() {
-        return this.options;
+    Request.prototype.isLoaded = function() {
+        return !!this.xhr;
     };
 
     /**
      * @param {IAjaxOptions} [options]
-     * @returns {Ajax}
+     * @returns {Request}
      */
-    Ajax.prototype.setOptions = function(options) {
-        if (options) this.options = options;
+    Request.prototype.setOptions = function(options) {
+
+        options = options || {};
+
+        // backwards compatibility
+        if (!('body' in options) && options.post) options.body = options.post;
+        if (!('query' in options) && options.get) options.query = options.get;
+
+        if ('method' in options) this.method = options.method;
+        if ('url' in options) this.url = options.url;
+        if ('query' in options) this.query = options.query;
+        if ('body' in options) this.body = options.body;
+        if ('headers' in options) this.setHeaders(options.headers);
+        if ('async' in options) this.async = !!options.async;
+
         return this;
-    };
 
-    /**
-     * @param {string} name
-     * @param {string} value
-     * @returns {Ajax}
-     */
-    Ajax.prototype.setRequestHeader = function(name, value) {
-        name = name.toLowerCase();
-        this.options.headers = this.options.headers || {};
-        if (value) {
-            this.options.headers[name] = value;
-        } else {
-            delete this.options.headers[name];
-        }
-        return this;
-    };
-
-    /**
-     * @param {string} name
-     * @param {string} value
-     * @returns {Ajax}
-     */
-    Ajax.prototype.setResponseHeader = function(name, value) {
-        this.headers[name.toLowerCase()] = value;
-        return this;
-    };
-
-    /**
-     * @param {string} name
-     * @returns {string}
-     */
-    Ajax.prototype.getRequestHeader = function(name) {
-        this.options.headers = this.options.headers || {};
-        return this.options.headers[name.toLowerCase()];
-    };
-
-    /**
-     * @param {string} name
-     * @returns {string}
-     */
-    Ajax.prototype.getResponseHeader = function(name) {
-        return this.headers[name.toLowerCase()];
-    };
-
-    /**
-     * @param {string} type
-     * @returns {boolean}
-     */
-    Ajax.prototype.isResponseContentType = function(type) {
-        return this.getResponseContentType().indexOf(type) > -1;
-    };
-
-    /**
-     * @returns {string}
-     */
-    Ajax.prototype.getResponseContentType = function() {
-        return this.getResponseHeader('Content-Type') || '';
-    };
-
-    /**
-     * @returns {boolean}
-     */
-    Ajax.prototype.isResponseMultipart = function() {
-        return this.isResponseContentType(multipartContentType);
-    };
-
-    /**
-     * @returns {boolean}
-     */
-    Ajax.prototype.isResponseUnauthorized = function() {
-        return (this.status == 401);
-    };
-
-    /**
-     * @deprecated
-     * @returns {string}
-     */
-    Ajax.prototype.getContentType = function() {
-        return this.getResponseContentType();
-    };
-
-    /**
-     * @deprecated
-     * @returns {boolean}
-     */
-    Ajax.prototype.isMultipart = function() {
-        return this.isResponseMultipart();
-    };
-
-    /**
-     * @deprecated
-     * @returns {boolean}
-     */
-    Ajax.prototype.isUnauthorized = function() {
-        return this.isResponseUnauthorized();
-    };
-
-    /**
-     * @returns {boolean}
-     */
-    Ajax.prototype.isLoaded = function() {
-        return !!this.status;
     };
 
     /**
      * Checks the send options, defaulting various of the options,
      * and consuming / transforming some of the options (like get).
-     * @returns {Ajax}
+     * @returns {Request}
      */
-    Ajax.prototype.checkOptions = function() {
+    Request.prototype.checkOptions = function() {
 
-        if (!this.options.url) throw new Error('Url is not defined');
+        if (!this.url) throw new Error('Url is not defined');
 
-        var defaultHeaders = {
-                'Accept': jsonContentType,
-                'Content-Type': jsonContentType
-            },
-            headers = this.options.headers || {};
+        if (!this.hasHeader('Accept')) this.setHeader('Accept', Headers.jsonContentType);
+        if (!this.hasHeader('Content-Type')) this.setHeader('Content-Type', Headers.jsonContentType);
 
-        this.options.headers = {};
+        this.method = this.method ? this.method.toUpperCase() : 'GET';
 
-        Object.keys(defaultHeaders).forEach(function(key) {
-            this.setRequestHeader(key, defaultHeaders[key]);
-        }, this);
-
-        Object.keys(headers).forEach(function(key) {
-            this.setRequestHeader(key, headers[key]);
-        }, this);
-
-        // Delete all headers that don't have value
-        Object.keys(this.options.headers).forEach(function(key) {
-            if (!this.options.headers[key]) delete this.options.headers[key];
-        }, this);
-
-        this.options.method = this.options.method ? this.options.method.toUpperCase() : 'GET';
-        this.options.async = (this.options.async !== undefined) ? this.options.async : true;
-        this.options.get = this.options.get || null;
-        this.options.post = this.options.post ? (
-            (typeof this.options.post !== 'string' && this.getRequestHeader('Content-Type') === jsonContentType)
-                ? JSON.stringify(this.options.post)
-                : this.options.post
-        ) : '';
-        this.options.url = this.options.url + (this.options.get ? ((this.options.url.indexOf('?') > -1 ? '&' : '?') + Utils.queryStringify(this.options.get)) : '');
-
-        if (['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'].indexOf(this.options.method) < 0) throw new Error('Method has wrong value');
-
-        delete this.options.get;
+        if (['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'].indexOf(this.method) < 0) throw new Error('Method has wrong value');
 
         return this;
+
+    };
+
+    Request.prototype.getEncodedBody = function() {
+
+        if (this.method === 'GET') return null;
+
+        if (typeof this.body === 'string') {
+            return this.body;
+        } else if (this.isJson()) {
+            return JSON.stringify(this.body);
+        } else {
+            return this.body;
+        }
 
     };
 
     /**
      * @returns {Promise}
      */
-    Ajax.prototype.send = function() {
+    Request.prototype.send = function() {
 
         this.observer.emit(this.observer.events.beforeRequest, this);
 
-        return this.request()
-            .then(function(ajax) {
+        return new (this.context.getPromise())(function(resolve, reject) {
 
-                ajax.parseResponse();
-                if (ajax.error) throw ajax.error;
-                return ajax;
+            this.checkOptions();
 
-            }.bind(this))
-            .then(function(ajax) {
+            var xhr = this.getXHR(),
+                url = this.url + (!!this.query ? ((this.url.indexOf('?') > -1 ? '&' : '?') + Utils.queryStringify(this.query)) : '');
 
-                this.observer.emit(this.observer.events.requestSuccess, ajax);
+            xhr.open(this.method, url, this.async);
 
-                return ajax;
+            //@see http://stackoverflow.com/questions/19666809/cors-withcredentials-support-limited
+            xhr.withCredentials = true;
+
+            xhr.onload = function() {
+
+                var response = Response.$get(this.context, this, xhr.status, xhr.responseText, {
+                    'Content-Type': xhr.getResponseHeader('Content-Type') || Headers.jsonContentType // if no header, set default
+                });
+
+                if (response.error) {
+                    var e = response.error;
+                    // backwards compatibility
+                    e.ajax = response; //FIXME Circular
+                    reject(e);
+                } else {
+                    resolve(response);
+                }
+
+            }.bind(this);
+
+            xhr.onerror = function(event) { // CORS or network issue
+                reject(new Error('The request cannot be sent'));
+            };
+
+            Utils.forEach(this.headers, function(value, header) {
+                if (!!value) xhr.setRequestHeader(header, value);
+            });
+
+            xhr.send(this.getEncodedBody());
+
+            this.xhr = xhr;
+
+        }.bind(this))
+            .then(function(response) {
+
+                this.observer.emit(this.observer.events.requestSuccess, response);
+
+                return response;
 
             }.bind(this))
             .catch(function(e) {
-
-                e.ajax = this;
 
                 this.observer.emit(this.observer.events.requestError, e);
 
@@ -711,153 +638,23 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     /**
      * @returns {XMLHttpRequest}
      */
-    Ajax.prototype.getXHR = function() {
+    Request.prototype.getXHR = function() {
         return this.context.getXHR();
     };
 
-    /**
-     * @returns {Promise}
-     */
-    Ajax.prototype.request = function() {
-
-        return new (this.context.getPromise())(function(resolve, reject) {
-
-            this.checkOptions();
-
-            var options = this.options,
-                xhr = this.getXHR();
-
-            xhr.open(options.method, options.url, options.async);
-
-            //@see http://stackoverflow.com/questions/19666809/cors-withcredentials-support-limited
-            xhr.withCredentials = true;
-
-            xhr.onload = function() {
-
-                this.status = xhr.status;
-                this.response = xhr.responseText;
-                this.setResponseHeader('Content-Type', xhr.getResponseHeader('Content-Type') || jsonContentType); // if no header, set default
-
-                resolve(this);
-
-            }.bind(this);
-
-            xhr.onerror = function(event) {
-                reject(new Error('The request cannot be sent')); // CORS or network issue
-            };
-
-            Utils.forEach(options.headers, function(value, header) {
-                xhr.setRequestHeader(header, value);
-            });
-
-            xhr.send(options.method === 'GET' ? null : options.post);
-
-            this.xhr = xhr;
-
-        }.bind(this));
-
-    };
-
-    Ajax.prototype.checkStatus = function(status) {
-        return status.toString().substr(0, 1) == '2';
-    };
-
-    Ajax.prototype.parseResponse = function() {
-
-        try {
-
-            if (!this.isResponseMultipart()) {
-
-                if (typeof(this.response) == 'string' && !!this.response && this.isResponseContentType(jsonContentType)) { // Handle 204 No Content -- response may be empty
-
-                    this.data = JSON.parse(this.response);
-
-                } else {
-
-                    this.data = this.response; //TODO Add more parsers
-
-                }
-
-                if (!this.checkStatus(this.status)) this.error = new Error(this.data.message || this.data.error_description || this.data.description || 'Unknown error');
-
-            } else {
-
-                var boundary = this.getResponseContentType().match(/boundary=([^;]+)/i)[1],
-                    parts = this.response.split(boundarySeparator + boundary);
-
-                if (parts[0].trim() === '') parts.shift();
-                if (parts[parts.length - 1].trim() == boundarySeparator) parts.pop();
-
-                // Step 1. Parse all parts into Ajax objects
-                parts = parts.map(function(part) {
-
-                    var subParts = part.trim().replace(/\r/g, '').split(bodySeparator),
-                        ajaxPart = new Ajax(this.context);
-
-                    (subParts.length > 1 ? subParts.shift() : '')
-                        .split('\n')
-                        .forEach(function(header) {
-
-                            if (header.length === 0) return res;
-
-                            var headerParts = header.split(headerSeparator),
-                                name = headerParts.shift().trim();
-
-                            ajaxPart.setResponseHeader(name, headerParts.join(headerSeparator).trim());
-
-                        }, this);
-
-                    ajaxPart.response = subParts.join(bodySeparator);
-
-                    return ajaxPart;
-
-                }, this);
-
-                // Step 2. Claim first part as statuses, assign status from this and parse the response
-                var statusInfo = parts.shift();
-                statusInfo.status = this.status;
-                statusInfo.parseResponse();
-
-                // Steo 3. For the rest of parts assign status and parse the response
-                this.data = parts.map(function(part, i) {
-
-                    part.status = statusInfo.data.response[i].status;
-                    part.parseResponse();
-
-                    return part;
-
-                }, this);
-
-            }
-
-        } catch (e) { // Capture parse errors
-
-            Log.error('Ajax.parseResponse(): Unable to parse data');
-            Log.error(e.stack || e);
-            Log.error(this.response);
-
-            this.error = e;
-
-        }
-
-        return this;
-
-    };
-
-    Ajax.prototype.destroy = function() {
+    Request.prototype.destroy = function() {
         if (this.xhr) this.xhr.abort();
-        return Observable.prototype.destroy.call(this);
     };
 
     module.exports = {
-        Class: Ajax,
+        Class: Request,
         /**
          * @static
          * @param {Context} context
-         * @returns {Ajax}
+         * @returns {Request}
          */
         $get: function(context) {
-            return new Ajax(context);
+            return new Request(context);
 
         }
     };
@@ -873,7 +670,185 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
     'use strict';
 
-    var Observable = __webpack_require__(15).Class;
+    var Headers = __webpack_require__(44).Class,
+        Utils = __webpack_require__(19),
+        Log = __webpack_require__(18),
+        boundarySeparator = '--',
+        headerSeparator = ':',
+        bodySeparator = '\n\n';
+
+    /**
+     * @typedef {Object} IResponseOptions
+     * @property {string} url
+     * @property {string} method?
+     * @property {boolean} async?
+     * @property {Object} post?
+     * @property {Object} get?
+     * @property {Object} headers?
+     */
+
+    /**
+     * @constructor
+     * @extends Observable
+     * @alias RCSDK.core.Response
+     * @param {Context} [context]
+     * @param {Request} [request]
+     * @param {number} [status]
+     * @param {string} [body]
+     * @param {object|string} [headers]
+     */
+    function Response(context, request, status, body, headers) {
+
+        Headers.call(this);
+
+        if (typeof(body) === 'string') {
+
+            body = body.replace(/\r/g, '');
+
+            if (!headers) {
+
+                var tmp = body.split(bodySeparator);
+
+                headers = (tmp.length > 1) ? tmp.shift() : {};
+                body = tmp.join(bodySeparator);
+
+            }
+
+        }
+
+        this.request = request;
+
+        /** @type {Response[]|object} */
+        this.data = null;
+
+        /** @type {Error|null} */
+        this.error = null;
+
+        this.status = status;
+        this.body = body;
+        this.headers = {};
+
+        this.context = context;
+
+        try {
+
+            // Step 1. Parse headers
+
+            if (typeof(headers) === 'string') {
+
+                (headers || '')
+                    .split('\n')
+                    .forEach(/** @param {string} header */ function(header) {
+
+                        if (!header) return;
+
+                        /** @type {string[]} */
+                        var parts = header.split(headerSeparator),
+                            name = parts.shift().trim();
+
+                        this.setHeader(name, parts.join(headerSeparator).trim());
+
+                    }, this);
+
+            } else {
+
+                this.setHeaders(headers);
+
+            }
+
+            // Step 2. Parse body
+
+            if (this.isJson() && !!this.body && typeof(this.body) === 'string') { // Handle 204 No Content -- response may be empty
+
+                this.data = JSON.parse(this.body);
+
+                if (!this.checkStatus()) this.error = new Error(this.data.message || this.data.error_description || this.data.description || 'Unknown error');
+
+            } else if (this.isMultipart()) {
+
+                // Step 2.1. Split multipart response
+
+                var boundary = this.getContentType().match(/boundary=([^;]+)/i)[1],
+                    parts = this.body.split(boundarySeparator + boundary);
+
+                if (parts[0].trim() === '') parts.shift();
+                if (parts[parts.length - 1].trim() == boundarySeparator) parts.pop();
+
+                // Step 2.2. Parse status info
+
+                var statusInfo = new Response(this.context, null, this.status, parts.shift());
+
+                // Step 2.3. Parse all other parts
+
+                this.data = parts.map(function(part, i) {
+
+                    var status = statusInfo.data.response[i].status;
+
+                    return new Response(this.context, null, status, part);
+
+                }, this);
+
+            } else { //TODO Add more parsers
+
+                this.data = this.body;
+
+            }
+
+        } catch (e) { // Capture parse errors
+
+            Log.error('Response.parseResponse(): Unable to parse data');
+            Log.error(e.stack || e);
+            Log.error(this.body);
+
+            this.error = e;
+
+        }
+
+    }
+
+    Response.prototype = Object.create(Headers.prototype);
+    Object.defineProperty(Response.prototype, 'constructor', {value: Response, enumerable: false});
+
+    /**
+     * @returns {boolean}
+     */
+    Response.prototype.isUnauthorized = function() {
+        return (this.status == 401);
+    };
+
+    Response.prototype.checkStatus = function() {
+        return this.status.toString().substr(0, 1) == '2';
+    };
+
+    module.exports = {
+        Class: Response,
+        /**
+         * @static
+         * @param {Context} [context]
+         * @param {Request} [request]
+         * @param {number} [status]
+         * @param {string} [body]
+         * @param {object|string} [headers]
+         * @returns {Response}
+         */
+        $get: function(context, request, status, body, headers) {
+            return new Response(context, request, status, body, headers);
+
+        }
+    };
+
+}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
+
+    'use strict';
+
+    var Observable = __webpack_require__(16).Class;
 
     /**
      * @constructor
@@ -912,7 +887,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
@@ -987,16 +962,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Utils = __webpack_require__(18),
-        Observable = __webpack_require__(15).Class,
-        Log = __webpack_require__(17),
+    var Utils = __webpack_require__(19),
+        Observable = __webpack_require__(16).Class,
+        Log = __webpack_require__(18),
         forcedTokenType = 'forced';
 
     /**
@@ -1060,14 +1035,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     Platform.prototype.getStorage = function() {
 
-        return __webpack_require__(11).$get(this.context);
+        return __webpack_require__(12).$get(this.context);
 
     };
 
     /**
-     * @returns {Ajax}
+     * @returns {Request}
      */
-    Platform.prototype.getAjax = function() {
+    Platform.prototype.getRequest = function() {
 
         return __webpack_require__(7).$get(this.context);
 
@@ -1154,13 +1129,13 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
                     "refresh_token_ttl": options.remember ? this.refreshTokenTtlRemember : this.refreshTokenTtl
                 }
             })
-            .then(function(ajax) {
+            .then(function(response) {
 
-                this.setCache(ajax.data)
+                this.setCache(response.data)
                     .remember(options.remember)
                     .emitAndCallback(this.events.authorizeSuccess, []);
 
-                return ajax;
+                return response;
 
             }.bind(this))
             .catch(function(e) {
@@ -1234,23 +1209,23 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         }.bind(this));
 
         return refresh
-            .then(function(ajax) {
+            .then(function(response) {
 
                 // This means refresh has happened elsewhere and we are here because of timeout
-                if (!ajax || !ajax.data) return ajax;
+                if (!response || !response.data) return response;
 
                 Log.info('Platform.refresh(): Token was refreshed');
 
-                if (!ajax.data.refresh_token || !ajax.data.access_token) {
+                if (!response.data.refresh_token || !response.data.access_token) {
                     var e = new Error('Malformed OAuth response');
-                    e.ajax = ajax;
+                    e.ajax = response;
                     throw e;
                 }
 
-                this.setCache(ajax.data)
+                this.setCache(response.data)
                     .resume();
 
-                return ajax;
+                return response;
 
             }.bind(this))
             .then(function(result) {
@@ -1286,13 +1261,13 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
                     token: this.getToken()
                 }
             })
-            .then(function(ajax) {
+            .then(function(response) {
 
                 this.resume()
                     .clearStorage()
-                    .emit(this.events.logoutSuccess, ajax);
+                    .emit(this.events.logoutSuccess, response);
 
-                return ajax;
+                return response;
 
             }.bind(this))
             .catch(function(e) {
@@ -1449,15 +1424,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
                 var token = this.getToken();
 
-                return this.getAjax()
+                return this.getRequest()
                     .setOptions(options)
-                    .setRequestHeader('Authorization', this.getTokenType() + (token ? ' ' + token : ''))
+                    .setHeader('Authorization', this.getTokenType() + (token ? ' ' + token : ''))
                     .send();
 
             }.bind(this))
             .catch(function(e) {
 
-                if (!e.ajax || !e.ajax.isResponseUnauthorized()) throw e;
+                if (!e.ajax || !e.ajax.isUnauthorized()) throw e;
 
                 this.cancelAccessToken();
 
@@ -1485,11 +1460,11 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         options.post = Utils.queryStringify(options.post);
         options.url = this.apiUrl(options.url, {addServer: true});
 
-        return this.getAjax()
+        return this.getRequest()
             .setOptions(options)
-            .setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-            .setRequestHeader('Accept', 'application/json')
-            .setRequestHeader('Authorization', 'Basic ' + this.apiKey)
+            .setHeader('Content-Type', 'application/x-www-form-urlencoded')
+            .setHeader('Accept', 'application/json')
+            .setHeader('Authorization', 'Basic ' + this.apiKey)
             .send();
 
     };
@@ -1543,15 +1518,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Observable = __webpack_require__(15).Class,
-        Utils = __webpack_require__(18);
+    var Observable = __webpack_require__(16).Class,
+        Utils = __webpack_require__(19);
 
     /**
      * @constructor
@@ -1626,16 +1601,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Observable = __webpack_require__(15).Class,
-        Log = __webpack_require__(17),
-        Utils = __webpack_require__(18),
+    var Observable = __webpack_require__(16).Class,
+        Log = __webpack_require__(18),
+        Utils = __webpack_require__(19),
         renewHandicapMs = 60 * 1000;
 
     /**
@@ -1699,7 +1674,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
     Subscription.prototype.getPlatform = function() {
 
-        return __webpack_require__(10).$get(this.context);
+        return __webpack_require__(11).$get(this.context);
 
     };
 
@@ -2017,7 +1992,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -2026,7 +2001,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 !(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
     'use strict';
 
-    var Observable = __webpack_require__(15).Class;
+    var Observable = __webpack_require__(16).Class;
 
     /**
      * @constructor
@@ -2103,14 +2078,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Utils = __webpack_require__(18);
+    var Utils = __webpack_require__(19);
 
     /**
      * @alias RCSDK.core.Helper
@@ -2177,12 +2152,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     };
 
     /**
-     * @param {Ajax} ajax
+     * @param {Response} ajax
      * @return {IHelperObject[]}
      */
     Helper.prototype.parseMultipartResponse = function(ajax) {
 
-        if (ajax.isResponseMultipart()) {
+        if (ajax.isMultipart()) {
 
             // ajax.data has full array, leave only successful
             return ajax.data.filter(function(result) {
@@ -2374,13 +2349,13 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
-    var Utils = __webpack_require__(18),
-        Log = __webpack_require__(17);
+    var Utils = __webpack_require__(19),
+        Log = __webpack_require__(18);
 
     /**
      * @constructor
@@ -2536,14 +2511,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Utils = __webpack_require__(18);
+    var Utils = __webpack_require__(19);
 
     /**
      * @typedef {object} IValidator
@@ -2647,14 +2622,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Utils = __webpack_require__(18);
+    var Utils = __webpack_require__(19);
 
     /**
      * @alias RCSDK.core.Log
@@ -2711,7 +2686,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
@@ -3023,14 +2998,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Utils = __webpack_require__(18);
+    var Utils = __webpack_require__(19);
 
     /**
      * @alias RCSDK.core.List
@@ -3215,14 +3190,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class;
+    var Helper = __webpack_require__(15).Class;
 
     /**
      * @extends Helper
@@ -3266,14 +3241,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class;
+    var Helper = __webpack_require__(15).Class;
 
     /**
      * @extends Helper
@@ -3522,14 +3497,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class;
+    var Helper = __webpack_require__(15).Class;
 
     /**
      * @extends Helper
@@ -3580,16 +3555,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        List = __webpack_require__(19),
-        Utils = __webpack_require__(18);
+    var Helper = __webpack_require__(15).Class,
+        List = __webpack_require__(20),
+        Utils = __webpack_require__(19);
 
     /**
      * @extends Helper
@@ -3597,7 +3572,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     function LocationHelper(context) {
         Helper.call(this, context);
-        this.state = __webpack_require__(25).$get(context);
+        this.state = __webpack_require__(26).$get(context);
     }
 
     LocationHelper.prototype = Object.create(Helper.prototype);
@@ -3705,14 +3680,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class;
+    var Helper = __webpack_require__(15).Class;
 
     /**
      * @extends Helper
@@ -3768,16 +3743,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        List = __webpack_require__(19),
-        Utils = __webpack_require__(18);
+    var Helper = __webpack_require__(15).Class,
+        List = __webpack_require__(20),
+        Utils = __webpack_require__(19);
 
     /**
      * @extends Helper
@@ -3785,7 +3760,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     function StateHelper(context) {
         Helper.call(this, context);
-        this.countryHelper = __webpack_require__(20).$get(context);
+        this.countryHelper = __webpack_require__(21).$get(context);
     }
 
     StateHelper.prototype = Object.create(Helper.prototype);
@@ -3848,14 +3823,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class;
+    var Helper = __webpack_require__(15).Class;
 
     /**
      * @extends Helper
@@ -3898,14 +3873,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class;
+    var Helper = __webpack_require__(15).Class;
 
     /**
      * @extends Helper
@@ -3940,15 +3915,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        Validator = __webpack_require__(16);
+    var Helper = __webpack_require__(15).Class,
+        Validator = __webpack_require__(17);
 
     /**
      * @extends Helper
@@ -4020,16 +3995,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        Utils = __webpack_require__(18),
-        List = __webpack_require__(19);
+    var Helper = __webpack_require__(15).Class,
+        Utils = __webpack_require__(19),
+        List = __webpack_require__(20);
 
     /**
      * @extends Helper
@@ -4037,8 +4012,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     function CallHelper(context) {
         Helper.call(this, context);
-        this.presence = __webpack_require__(38).$get(context);
-        this.contact = __webpack_require__(31).$get(context);
+        this.presence = __webpack_require__(39).$get(context);
+        this.contact = __webpack_require__(32).$get(context);
     }
 
     CallHelper.prototype = Object.create(Helper.prototype);
@@ -4487,14 +4462,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class;
+    var Helper = __webpack_require__(15).Class;
 
     /**
      * @extends Helper
@@ -4529,17 +4504,17 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Utils = __webpack_require__(18),
-        Validator = __webpack_require__(16),
-        Helper = __webpack_require__(14).Class,
-        List = __webpack_require__(19);
+    var Utils = __webpack_require__(19),
+        Validator = __webpack_require__(17),
+        Helper = __webpack_require__(15).Class,
+        List = __webpack_require__(20);
 
     /**
      * @extends Helper
@@ -4978,15 +4953,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        Validator = __webpack_require__(16);
+    var Helper = __webpack_require__(15).Class,
+        Validator = __webpack_require__(17);
 
     /**
      * @extends Helper
@@ -5040,15 +5015,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        Validator = __webpack_require__(16);
+    var Helper = __webpack_require__(15).Class,
+        Validator = __webpack_require__(17);
 
     /**
      * @extends Helper
@@ -5056,8 +5031,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     function DeviceHelper(context) {
         Helper.call(this, context);
-        this.extension = __webpack_require__(34).$get(context);
-        this.deviceModel = __webpack_require__(21).$get(context);
+        this.extension = __webpack_require__(35).$get(context);
+        this.deviceModel = __webpack_require__(22).$get(context);
     }
 
     DeviceHelper.prototype = Object.create(Helper.prototype);
@@ -5165,16 +5140,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        List = __webpack_require__(19),
-        Utils = __webpack_require__(18);
+    var Helper = __webpack_require__(15).Class,
+        List = __webpack_require__(20),
+        Utils = __webpack_require__(19);
 
     /**
      * @extends Helper
@@ -5339,16 +5314,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        Utils = __webpack_require__(18),
-        List = __webpack_require__(19);
+    var Helper = __webpack_require__(15).Class,
+        Utils = __webpack_require__(19),
+        List = __webpack_require__(20);
 
     /**
      * @extends Helper
@@ -5445,17 +5420,17 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        Validator = __webpack_require__(16),
-        Utils = __webpack_require__(18),
-        List = __webpack_require__(19);
+    var Helper = __webpack_require__(15).Class,
+        Validator = __webpack_require__(17),
+        Utils = __webpack_require__(19),
+        List = __webpack_require__(20);
 
     /**
      * @extends Helper
@@ -5463,8 +5438,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     function MessageHelper(context) {
         Helper.call(this, context);
-        this.platform = __webpack_require__(10).$get(context);
-        this.contact = __webpack_require__(31).$get(context);
+        this.platform = __webpack_require__(11).$get(context);
+        this.contact = __webpack_require__(32).$get(context);
     }
 
     MessageHelper.prototype = Object.create(Helper.prototype);
@@ -5542,7 +5517,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     MessageHelper.prototype.getSubscription = function(options) {
 
-        return (__webpack_require__(12).$get(this.context)).setEvents([this.createUrl(options)]);
+        return (__webpack_require__(13).$get(this.context)).setEvents([this.createUrl(options)]);
 
     };
 
@@ -5745,16 +5720,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var List = __webpack_require__(19),
-        Utils = __webpack_require__(18),
-        Helper = __webpack_require__(14).Class;
+    var List = __webpack_require__(20),
+        Utils = __webpack_require__(19),
+        Helper = __webpack_require__(15).Class;
 
     /**
      * @extends Helper
@@ -5762,7 +5737,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     function PhoneNumberHelper(context) {
         Helper.call(this, context);
-        this.extension = __webpack_require__(34).$get(context);
+        this.extension = __webpack_require__(35).$get(context);
     }
 
     PhoneNumberHelper.prototype = Object.create(Helper.prototype);
@@ -5912,15 +5887,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        Utils = __webpack_require__(18);
+    var Helper = __webpack_require__(15).Class,
+        Utils = __webpack_require__(19);
 
     /**
      * @extends Helper
@@ -5928,7 +5903,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     function PresenceHelper(context) {
         Helper.call(this, context);
-        this.extension = __webpack_require__(34).$get(context);
+        this.extension = __webpack_require__(35).$get(context);
     }
 
     PresenceHelper.prototype = Object.create(Helper.prototype);
@@ -5969,7 +5944,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     PresenceHelper.prototype.getSubscription = function(options, id) {
 
-        return __webpack_require__(12).$get(this.context).setEvents([this.createUrl(options, id)]);
+        return __webpack_require__(13).$get(this.context).setEvents([this.createUrl(options, id)]);
 
     };
 
@@ -6075,15 +6050,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class,
-        Validator = __webpack_require__(16);
+    var Helper = __webpack_require__(15).Class,
+        Validator = __webpack_require__(17);
 
     /**
      * @extends Helper
@@ -6091,7 +6066,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     function RingoutHelper(context) {
         Helper.call(this, context);
-        this.extension = __webpack_require__(34).$get(context);
+        this.extension = __webpack_require__(35).$get(context);
     }
 
     RingoutHelper.prototype = Object.create(Helper.prototype);
@@ -6164,14 +6139,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
 
     'use strict';
 
-    var Helper = __webpack_require__(14).Class;
+    var Helper = __webpack_require__(15).Class;
 
     /**
      * @extends Helper
@@ -6262,7 +6237,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
@@ -6307,7 +6282,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -6317,8 +6292,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 
     'use strict';
 
-    var Log = __webpack_require__(17),
-        Utils = __webpack_require__(18);
+    var Log = __webpack_require__(18),
+        Utils = __webpack_require__(19);
 
     /**
      * @constructor
@@ -6327,7 +6302,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
      */
     function XhrMock(context) {
         // Service
-        this.responses = __webpack_require__(9).$get(context);
+        this.responses = __webpack_require__(10).$get(context);
         // Request
         this.async = true;
         this.method = '';
@@ -6433,6 +6408,113 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
             return new XhrMock(context);
 
         }
+    };
+
+}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+
+/***/ },
+/* 44 */
+/***/ function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(require, exports, module) {
+
+    'use strict';
+
+    var Utils = __webpack_require__(19);
+
+    /**
+     * @constructor
+     * @extends Observable
+     * @alias RCSDK.core.Headers
+     */
+    function Headers() {
+        this.headers = {};
+    }
+
+    Object.defineProperty(Headers.prototype, 'constructor', {value: Headers, enumerable: false});
+
+    Headers.jsonContentType = 'application/json';
+    Headers.multipartContentType = 'multipart/mixed';
+
+    /**
+     * @param {string} name
+     * @param {string} value
+     * @returns {Headers}
+     */
+    Headers.prototype.setHeader = function(name, value) {
+
+        this.headers[name.toLowerCase()] = value;
+
+        return this;
+
+    };
+
+    /**
+     * @param {string} name
+     * @returns {string}
+     */
+    Headers.prototype.getHeader = function(name) {
+
+        return this.headers[name.toLowerCase()];
+
+    };
+
+    /**
+     * @param {string} name
+     * @returns {boolean}
+     */
+    Headers.prototype.hasHeader = function(name) {
+
+        return (name.toLowerCase() in this.headers);
+
+    };
+
+    /**
+     * @param {object} headers
+     * @returns {Headers}
+     */
+    Headers.prototype.setHeaders = function(headers) {
+
+        Utils.forEach(headers, function(value, name) {
+            this.setHeader(name, value);
+        }.bind(this));
+
+        return this;
+
+    };
+
+    /**
+     * @param {string} type
+     * @returns {boolean}
+     */
+    Headers.prototype.isContentType = function(type) {
+        return this.getContentType().indexOf(type) > -1;
+    };
+
+    /**
+     * @returns {string}
+     */
+    Headers.prototype.getContentType = function() {
+        return this.getHeader('Content-Type') || '';
+    };
+
+    /**
+     * @returns {boolean}
+     */
+    Headers.prototype.isMultipart = function() {
+        return this.isContentType(Headers.multipartContentType);
+    };
+
+    /**
+     * @returns {boolean}
+     */
+    Headers.prototype.isJson = function() {
+        return this.isContentType(Headers.jsonContentType);
+    };
+
+    module.exports = {
+        Class: Headers
     };
 
 }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
