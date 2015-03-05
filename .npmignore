@@ -1,9 +1,7 @@
 .editorconfig
 .jshintrc
 **/*-spec.js
-bower_components
 bower.json
-build
 gulpfile.js
 index.html
 server.js

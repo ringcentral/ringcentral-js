@@ -42,7 +42,7 @@
     "karma-mocha-reporter": "*",
     "karma-phantomjs-launcher": "*",
     "karma-requirejs": "*",
-    "karma-sinon-chai": "*",
+    "karma-chai": "*",
     "mocha": "*",
     "soap": "*",
     "webpack": "*"

@@ -68,13 +68,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 
     'use strict';
 
-    // ES6 Promise Polyfill only needs to be required since it modifies window object
-    __webpack_require__(2);
+    var promise = __webpack_require__(2);
 
     module.exports = __webpack_require__(5)({
         CryptoJS: __webpack_require__(3),
         localStorage: window.localStorage,
-        Promise: window.Promise,
+        Promise: (promise && 'Promise' in promise) ? promise.Promise : window.Promise,
         PUBNUB: __webpack_require__(4),
         XHR: window.XMLHttpRequest
     });
@@ -6441,5 +6440,5 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
 /***/ }
 /******/ ])
 });
-
+;
 //# sourceMappingURL=rc-sdk.js.map
