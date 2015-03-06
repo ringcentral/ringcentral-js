@@ -1281,7 +1281,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         return this
             .authCall({
                 url: '/restapi/oauth/revoke',
-                get: {
+                post: {
                     token: this.getToken()
                 }
             })
