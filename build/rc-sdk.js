@@ -563,6 +563,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
             return this.body;
         } else if (this.isJson()) {
             return JSON.stringify(this.body);
+        } else if (this.isUrlEncoded()) {
+            return Utils.queryStringify(this.body);
         } else {
             return this.body;
         }
@@ -576,7 +578,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         this.observer.emit(this.observer.events.beforeRequest, this);
 
-        return new (this.context.getPromise())(function(resolve, reject) {
+        var responsePromise = new (this.context.getPromise())(function(resolve, reject) {
 
             this.checkOptions();
 
@@ -617,7 +619,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
             this.xhr = xhr;
 
-        }.bind(this))
+        }.bind(this));
+
+        return responsePromise
             .then(function(response) {
 
                 this.observer.emit(this.observer.events.requestSuccess, response);
@@ -762,6 +766,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
                 this.data = JSON.parse(this.body);
 
+                //TODO this.json = this.data; // + documentation
+
                 if (!this.checkStatus()) this.error = new Error(this.data.message || this.data.error_description || this.data.description || 'Unknown error');
 
             } else if (this.isMultipart()) {
@@ -787,6 +793,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
                     return new Response(this.context, null, status, part);
 
                 }, this);
+
+                //TODO this.responses = this.data; // + documentation
 
             } else { //TODO Add more parsers
 
@@ -1450,6 +1458,50 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     };
 
     /**
+     * @param {string} url
+     * @param {IAjaxOptions} options
+     * @returns {Promise}
+     */
+    Platform.prototype.get = function(url, options) {
+        options.url = url;
+        options.method = 'GET';
+        return this.apiCall(options);
+    };
+
+    /**
+     * @param {string} url
+     * @param {IAjaxOptions} options
+     * @returns {Promise}
+     */
+    Platform.prototype.post = function(url, options) {
+        options.url = url;
+        options.method = 'POST';
+        return this.apiCall(options);
+    };
+
+    /**
+     * @param {string} url
+     * @param {IAjaxOptions} options
+     * @returns {Promise}
+     */
+    Platform.prototype.put = function(url, options) {
+        options.url = url;
+        options.method = 'PUT';
+        return this.apiCall(options);
+    };
+
+    /**
+     * @param {string} url
+     * @param {IAjaxOptions} options
+     * @returns {Promise}
+     */
+    Platform.prototype.remove = function(url, options) {
+        options.url = url;
+        options.method = 'DELETE';
+        return this.apiCall(options);
+    };
+
+    /**
      * @param {IAjaxOptions} options
      * @returns {Promise}
      */
@@ -1457,7 +1509,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         options = options || {};
         options.method = options.method || 'POST';
-        options.post = Utils.queryStringify(options.post);
         options.url = this.apiUrl(options.url, {addServer: true});
 
         return this.getRequest()
@@ -6425,7 +6476,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
     /**
      * @constructor
-     * @extends Observable
      * @alias RCSDK.core.Headers
      */
     function Headers() {
@@ -6436,6 +6486,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
     Headers.jsonContentType = 'application/json';
     Headers.multipartContentType = 'multipart/mixed';
+    Headers.urlencodedContentType = 'application/x-www-form-urlencoded';
 
     /**
      * @param {string} name
@@ -6509,6 +6560,13 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     /**
      * @returns {boolean}
      */
+    Headers.prototype.isUrlEncoded = function() {
+        return this.isContentType(Headers.urlencodedContentType);
+    };
+
+    /**
+     * @returns {boolean}
+     */
     Headers.prototype.isJson = function() {
         return this.isContentType(Headers.jsonContentType);
     };
@@ -6523,5 +6581,5 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 /***/ }
 /******/ ])
 });
-
+;
 //# sourceMappingURL=rc-sdk.js.map

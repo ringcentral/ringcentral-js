@@ -146,14 +146,14 @@ application can log in so that it can access the features of the API.
 ## Login
 
 Login is accomplished by calling the `platform.authorize()` method of the Platform singleton with username, extension
-(optional), and password as parameters. A Promise instance is returned, resolved with an Ajax object.
+(optional), and password as parameters. A `Promise` instance is returned, resolved with an AJAX `Response` object.
 
 ```js
 platform.authorize({
     username: '18001234567', // phone number in full format
     extension: '', // leave blank if direct number is used
     password: 'yourpassword'
-}).then(function(ajax) {
+}).then(function(response) {
       // your code here
 }).catch(function(e) {
     alert(e.message  || 'Server cannot authorize user');
@@ -174,7 +174,8 @@ and such.
 Login can, of course, fail - a user can enter the incorrect password or mistype their user name.
 
 To handle cases where login fails, you can provide an error handler function in a call to the promise's `catch` method.
-To keep this example simple, a simple JavaScript alert is being used. In a real application, you will want to provide a good UX in your login form UI.
+To keep this example simple, a simple JavaScript alert is being used. In a real application, you will want to provide
+a good UX in your login form UI.
 
 ### Checking Authentication State
 
@@ -208,11 +209,24 @@ platform.apiCall({
     headers: {},
     get: {},
     post: 'POSTDATA',
-}).then(function(ajax){
-    alert(ajax.data.name);
+}).then(function(response){
+
+    alert(response.data.name);
+    
 }).catch(function(e){
+
     alert(e.message);
-    // e may have or may not have "ajax" property with Ajax object
+    
+    // please note that ajax property may not be accessible if error occurred before AJAX send
+    if ('ajax' in e) {
+    
+        var response = e.ajax;
+        
+        // request object can be accessed via response.request property
+        alert('Ajax error for URL' + response.request.url);
+        
+    }
+    
 });
 ```
 
@@ -308,7 +322,7 @@ function destroy() {
 
 window.addEventListener('beforeunload', destroy); // listener has to be SYNCHRONOUS
 
-platform.on([platform.events.accessViolation, platform.events.beforeLogout], destroy);
+platform.on([platform.events.accessViolation], destroy);
 
 // This occurs when user navigates away from the controller
 $scope.$on('$destroy', function() {
@@ -461,13 +475,13 @@ function loadCalls() {
 
     platform.apiCall(Call.loadRequest(null, {
         get: $scope.getOptions,
-    })).then(function(ajax) {
+    })).then(function(response) {
 
-        $scope.calls = ajax.data.records
+        $scope.calls = response.data.records
             .filter(Call.filter({direction: 'Inbound'}))
             .sort(Call.comparator({sortBy: 'startTime'}));
 
-        $scope.nextPageExists = Call.nextPageExists(ajax.data); // feed raw data from server to helper function
+        $scope.nextPageExists = Call.nextPageExists(response.data); // feed raw data from server to helper function
 
     }).catch(function(e) {
         alert('Error', e.message);
@@ -514,9 +528,9 @@ function create(unsavedRingout) {
 
     platform
         .apiCall(Ringout.saveRequest(unsavedRingout))
-        .then(function(ajax) {
+        .then(function(response) {
     
-            Utils.extend(ringout, ajax.data);
+            Utils.extend(ringout, response.data);
             Log.info('First status:', ringout.status.callStatus);
             timeout = Utils.poll(update, 500, timeout);
     
@@ -535,9 +549,9 @@ function update(next, delay) {
 
     platform
         .apiCall(Ringout.loadRequest(ringout))
-        .then(function(ajax) {
+        .then(function(response) {
     
-            Utils.extend(ringout, ajax.data);
+            Utils.extend(ringout, response.data);
             Log.info('Current status:', ringout.status.callStatus);
             timeout = next(delay);
     
@@ -621,8 +635,8 @@ var platform = rcsdk.getPlatform(),
     Presence = rcsdk.getPresenceHelper(),
     accountPresence = {};
 
-platform.apiCall(Presence.loadRequest()).then(function(ajax) {
-    rcsdk.getUtils().extend(accountPresence, ajax.data);
+platform.apiCall(Presence.loadRequest()).then(function(response) {
+    rcsdk.getUtils().extend(accountPresence, response.data);
 }).catch(function(e) {
     alert('Load Presence Error: ' + e.message);
     });
@@ -637,7 +651,7 @@ subscription.on(subscription.events.notification, function(msg) {
     rcsdk.getUtils().extend(accountPresence, msg);
 });
 
-subscription.register().then(function(ajax) {
+subscription.register().then(function(response) {
     alert('Success: Subscription is listening');
 }).catch(function(e) {
     alert('Subscription Error: ' + e.message);
@@ -659,8 +673,8 @@ platform.apiCall(Call.loadRequest(null, {
         page: 1,
         perPage: 10
     }
-})).then(function(ajax) {
-    activeCalls = Call.merge(activeCalls, ajax.data.records); // safely merge existing active calls with new ones
+})).then(function(response) {
+    activeCalls = Call.merge(activeCalls, response.data.records); // safely merge existing active calls with new ones
 }.catch(function(e) {
     alert('Active Calls Error: ' + e.message);
 });
@@ -678,8 +692,8 @@ platform.apiCall(Call.loadRequest(null, {
         page: 1,
         perPage: 10
     },
-})).then(function(ajax) {
-    calls = Call.merge(calls, ajax.data.records); // safely merge existing active calls with new ones
+})).then(function(response) {
+    calls = Call.merge(calls, response.data.records); // safely merge existing active calls with new ones
 }).catch(function(e) {
     alert('Recent Calls Error: ' + e.message);
 });
@@ -704,8 +718,8 @@ platform.apiCall({
         ],
         text: 'Message content'
     }
-}).then(function(ajax) {
-    alert('Success: ' + ajax.data.id);
+}).then(function(response) {
+    alert('Success: ' + response.data.id);
 }).catch(function(e) {
     alert('Error: ' + e.message);
 });
@@ -755,8 +769,8 @@ and registering observers on its various events:
 
 ```js
 var observer = rcsdk.getAjaxObserver();
-observer.on(observer.events.beforeRequest, function(ajax) {});
-observer.on(observer.events.requestSuccess, function(ajax) {});
+observer.on(observer.events.beforeRequest, function(request) {});
+observer.on(observer.events.requestSuccess, function(response) {});
 observer.on(observer.events.requestError, function(e) {});
 ```
 
