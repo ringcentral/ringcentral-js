@@ -146,11 +146,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         // Core
 
         /**
+         * This is for internal use only
+         * @protected
          * @returns {Request}
          */
         RCSDK.prototype.getRequest = function() { return __webpack_require__(7).$get(this.getContext()); };
 
         /**
+         * This is for internal use only
+         * @protected
          * @returns {Response}
          */
         RCSDK.prototype.getResponse = function(request, status, body, headers) {
@@ -163,6 +167,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         RCSDK.prototype.getAjaxObserver = function() { return __webpack_require__(9).$get(this.getContext()); };
 
         /**
+         * This is for internal use only
+         * @protected
          * @returns {XhrResponse}
          */
         RCSDK.prototype.getXhrResponse = function() { return __webpack_require__(10).$get(this.getContext()); };
@@ -476,9 +482,11 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @property {string} url
      * @property {string} method?
      * @property {boolean} async?
-     * @property {Object} post?
-     * @property {Object} get?
+     * @property {Object} body?
+     * @property {Object} query?
      * @property {Object} headers?
+     * @property {Object} post? // @deprecated
+     * @property {Object} get? // @deprecated
      */
 
     /**
@@ -2249,12 +2257,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
     Helper.prototype.saveRequest = function(object, options) {
 
-        if (!object && !(options && options.post)) throw new Error('No Object');
+        if (!object && !(options && (options.post || options.body))) throw new Error('No Object');
 
         return Utils.extend(options || {}, {
             method: (options && options.method) || (this.isNew(object) ? 'POST' : 'PUT'),
             url: (options && options.url) || this.getUri(object) || this.createUrl(),
-            post: (options && options.post) || object
+            body: (options && (options.body || options.post)) || object
         });
 
     };
@@ -2289,15 +2297,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         options = options || {};
 
         options.url = options.url || this.createUrl({sync: true});
-        options.get = options.get || {};
+        options.query = options.query || options.get || {};
 
-        if (!!options.get.syncToken) {
-            options.get = {
+        if (!!options.query.syncToken) {
+            options.query = {
                 syncType: 'ISync',
                 syncToken: options.get.syncToken
             };
         } else {
-            options.get.syncType = 'FSync';
+            options.query.syncType = 'FSync';
         }
 
         return options;

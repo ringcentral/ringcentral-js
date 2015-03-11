@@ -207,8 +207,8 @@ platform.apiCall({
     async: true,
     method: 'GET', // GET | POST | PUT | DELETE
     headers: {},
-    get: {},
-    post: 'POSTDATA',
+    query: {},
+    body: 'POSTDATA',
 }).then(function(response){
 
     alert(response.data.name);
@@ -229,6 +229,35 @@ platform.apiCall({
     
 });
 ```
+
+You can also use short-hand methods:
+
+```js
+platform.get('/account/~/extension/~', {...options...}).then(function(response){ ... });
+platform.post('/account/~/extension/~', {...options...}).then(function(response){ ... });
+platform.put('/account/~/extension/~', {...options...}).then(function(response){ ... });
+platform.remove('/account/~/extension/~', {...options...}).then(function(response){ ... });
+```
+
+Take a look on [sms example](#sms) to see how POST request can be sent.
+
+### Important note for users of versions prior to **1.2.0**:
+
+AjaxOptions now has `body` and `query` properties instead of `post` and `get` respectively. You can continue to use old
+`post` and `get` properties, backwards compatibility is maintained, but they both were deprecated since **1.2.0**.
+
+If application send both `body` and `post` or `query` and `get` at the same time then `post` and `get` will be ignored.
+
+### Sending things other than JSON
+
+You can set `headers['Content-Type']` property of AJAX options to `false` in order to let XHR library to figure out
+appropriate `Content-Type` header automatically.
+
+Important notes:
+
+- Automatic guessing of `Content-Type` is unreliable, if you know `Content-Type` then set it explicitly
+- NodeJS cannot set `multipart/mixed` header with appropriate boundary automatically when sending `Buffer` object
+    so your application must take care of that
 
 ## Logout
 
@@ -464,17 +493,17 @@ var platform = rcsdk.getPlatform(),
 
 $scope.calls = [];
 $scope.nextPageExists = true;
-$scope.getOptions = {page: 1, perPage: 'max'}; // page and perPage may be set from template
+$scope.queryParams = {page: 1, perPage: 'max'}; // page and perPage may be set from template
 
 $scope.requestNextPage = function() { // can be called from template to request next page
-    $scope.getOptions.page++;
+    $scope.queryParams.page++;
     loadCalls();
 };
 
 function loadCalls() {
 
     platform.apiCall(Call.loadRequest(null, {
-        get: $scope.getOptions,
+        query: $scope.queryParams,
     })).then(function(response) {
 
         $scope.calls = response.data.records
@@ -669,7 +698,7 @@ var activeCalls = [],
 // This call may be repeated when needed, for example as a response to incoming Subscription
 platform.apiCall(Call.loadRequest(null, {
     url: Call.createUrl({active: true}),
-    get: { // this can be omitted
+    query: { // this can be omitted
         page: 1,
         perPage: 10
     }
@@ -688,7 +717,7 @@ var calls = [],
 
 // This call may be repeated when needed, for example as a response to incoming Subscription
 platform.apiCall(Call.loadRequest(null, {
-    get: { // this can be omitted
+    query: { // this can be omitted
         page: 1,
         perPage: 10
     },
@@ -700,7 +729,7 @@ platform.apiCall(Call.loadRequest(null, {
 ```
     
 By default, the load request returns calls that were made during the last week. To alter the time frame, provide custom
-`get.dateTo` and `get.dateFrom` properties.
+`query.dateTo` and `query.dateFrom` properties.
 
 # SMS
 
@@ -708,10 +737,8 @@ In order to send an SMS using the API, simply make a POST request to `/account/~
 
 ```js
 var platform = rcsdk.getPlatform();
-platform.apiCall({
-    url: '/account/~/extension/~/sms',
-    method: 'POST',
-    post: {
+platform.post('/account/~/extension/~/sms', {
+    body: {
         from: {phoneNumber:'+12223334444'}, // Your sms-enabled phone number
         to: [
             {phoneNumber:'+15556667777'} // Second party's phone number
