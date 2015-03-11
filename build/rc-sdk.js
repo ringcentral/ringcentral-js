@@ -136,7 +136,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         }
 
-        RCSDK.version = '1.1.7';
+        RCSDK.version = '1.2.0';
 
         // Internals
 
