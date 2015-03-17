@@ -220,10 +220,10 @@ platform.apiCall({
     // please note that ajax property may not be accessible if error occurred before AJAX send
     if ('ajax' in e) {
     
-        var response = e.ajax;
+        var response = e.response, // or e.ajax for backward compatibility
+            request = e.request;
         
-        // request object can be accessed via response.request property
-        alert('Ajax error for URL' + response.request.url);
+        alert('Ajax error ' + e.message + ' for URL' + request.url + ' ' + response.getError());
         
     }
     
@@ -797,7 +797,7 @@ and registering observers on its various events:
 ```js
 var observer = rcsdk.getAjaxObserver();
 observer.on(observer.events.beforeRequest, function(request) {});
-observer.on(observer.events.requestSuccess, function(response) {});
+observer.on(observer.events.requestSuccess, function(response, request) {});
 observer.on(observer.events.requestError, function(e) {});
 ```
 
