@@ -157,8 +157,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
          * @protected
          * @returns {Response}
          */
-        RCSDK.prototype.getResponse = function(request, status, body, headers) {
-            return __webpack_require__(8).$get(this.getContext(), request, status, body, headers);
+        RCSDK.prototype.getResponse = function(status, statusText, body, headers) {
+            return __webpack_require__(8).$get(this.getContext(), status, statusText, body, headers);
         };
 
         /**
@@ -599,14 +599,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
             xhr.onload = function() {
 
-                var response = Response.$get(this.context, this, xhr.status, xhr.responseText, {
+                var response = Response.$get(this.context, xhr.status, xhr.statusText, xhr.responseText, {
                     'Content-Type': xhr.getResponseHeader('Content-Type') || Headers.jsonContentType // if no header, set default
+                    //TODO Add more headers
                 });
 
                 if (response.error) {
                     var e = response.error;
-                    // backwards compatibility
-                    e.ajax = response; //FIXME Circular
+                    e.ajax = response; // backwards compatibility
+                    e.response = response; //FIXME Circular
+                    e.request = this;
                     reject(e);
                 } else {
                     resolve(response);
@@ -615,8 +617,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
             }.bind(this);
 
             xhr.onerror = function(event) { // CORS or network issue
-                reject(new Error('The request cannot be sent'));
-            };
+                var e = new Error('The request cannot be sent');
+                e.request = this;
+                e.response = null;
+                e.ajax = null; // backwards compatibility
+                reject(e);
+            }.bind(this);
 
             Utils.forEach(this.headers, function(value, header) {
                 if (!!value) xhr.setRequestHeader(header, value);
@@ -631,7 +637,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         return responsePromise
             .then(function(response) {
 
-                this.observer.emit(this.observer.events.requestSuccess, response);
+                this.observer.emit(this.observer.events.requestSuccess, response, this);
 
                 return response;
 
@@ -703,12 +709,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @extends Observable
      * @alias RCSDK.core.Response
      * @param {Context} [context]
-     * @param {Request} [request]
      * @param {number} [status]
+     * @param {string} [statusText]
      * @param {string} [body]
      * @param {object|string} [headers]
      */
-    function Response(context, request, status, body, headers) {
+    function Response(context, status, statusText, body, headers) {
 
         Headers.call(this);
 
@@ -727,17 +733,21 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         }
 
-        this.request = request;
-
         /** @type {Response[]|object} */
         this.data = null;
 
-        /** @type {Error|null} */
+        /** @type {object} */
+        this.json = null;
+
+        /** @type {Response[]} */
+        this.responses = [];
+
+        /** @type {Error} */
         this.error = null;
 
         this.status = status;
+        this.statusText = statusText;
         this.body = body;
-        this.headers = {};
 
         this.context = context;
 
@@ -771,13 +781,12 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
             if (this.isJson() && !!this.body && typeof(this.body) === 'string') { // Handle 204 No Content -- response may be empty
 
-                this.data = JSON.parse(this.body);
+                this.json = JSON.parse(this.body);
+                this.data = this.json; // backwards compatibility
 
-                //TODO this.json = this.data; // + documentation
+                if (!this.checkStatus()) this.error = new Error(this.getError());
 
-                if (!this.checkStatus()) this.error = new Error(this.data.message || this.data.error_description || this.data.description || 'Unknown error');
-
-            } else if (this.isMultipart()) {
+            } else if (this.isMultipart()) { // Handle 207 Multi-Status
 
                 // Step 2.1. Split multipart response
 
@@ -789,19 +798,19 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
                 // Step 2.2. Parse status info
 
-                var statusInfo = new Response(this.context, null, this.status, parts.shift());
+                var statusInfo = new Response(this.context, this.status, '', parts.shift());
 
                 // Step 2.3. Parse all other parts
 
-                this.data = parts.map(function(part, i) {
+                this.responses = parts.map(function(part, i) {
 
                     var status = statusInfo.data.response[i].status;
 
-                    return new Response(this.context, null, status, part);
+                    return new Response(this.context, status, '', part);
 
                 }, this);
 
-                //TODO this.responses = this.data; // + documentation
+                this.data = this.responses; // backwards compatibility
 
             } else { //TODO Add more parsers
 
@@ -835,19 +844,26 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         return this.status.toString().substr(0, 1) == '2';
     };
 
+    Response.prototype.getError = function() {
+        return this.data.message ||
+               this.data.error_description ||
+               this.data.description ||
+               'Unknown error';
+    };
+
     module.exports = {
         Class: Response,
         /**
          * @static
          * @param {Context} [context]
-         * @param {Request} [request]
          * @param {number} [status]
+         * @param {string} [statusText]
          * @param {string} [body]
          * @param {object|string} [headers]
          * @returns {Response}
          */
-        $get: function(context, request, status, body, headers) {
-            return new Response(context, request, status, body, headers);
+        $get: function(context, status, statusText, body, headers) {
+            return new Response(context, status, statusText, body, headers);
 
         }
     };
