@@ -557,7 +557,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         this.method = this.method ? this.method.toUpperCase() : 'GET';
 
-        if (['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'].indexOf(this.method) < 0) throw new Error('Method has wrong value');
+        if (['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'].indexOf(this.method) < 0) throw new Error('Method has wrong value');
 
         return this;
 
@@ -600,10 +600,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
             xhr.onload = function() {
 
-                var response = Response.$get(this.context, xhr.status, xhr.statusText, xhr.responseText, {
-                    'Content-Type': xhr.getResponseHeader('Content-Type') || Headers.jsonContentType // if no header, set default
-                    //TODO Add more headers (xhr.getAllResponseHeaders())
-                });
+                //TODO http://jira.ringcentral.com/browse/PLA-10585
+                var response = Response
+                    .$get(this.context, xhr.status, xhr.statusText, xhr.responseText, xhr.getAllResponseHeaders());
 
                 if (response.error) {
                     var e = response.error;
@@ -779,6 +778,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
                 this.setHeaders(headers);
 
             }
+
+            // Step 1.1. JEDI proxy sometimes may omit Content-Type header
+
+            if (!this.hasHeader(Headers.contentType)) this.setHeader(Headers.contentType, Headers.jsonContentType);
 
             // Step 2. Parse body
 
@@ -6406,6 +6409,14 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/**
         this.requestHeaders[header.toLowerCase()] = value;
     };
 
+    XhrMock.prototype.getAllResponseHeaders = function() {
+        var res = [];
+        Utils.forEach(this.responseHeaders, function(value, name) {
+            res.push(name + ':' + value);
+        });
+        return res.join('\n');
+    };
+
     XhrMock.prototype.open = function(method, url, async) {
         this.method = method;
         this.url = url;
@@ -6509,11 +6520,13 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @alias RCSDK.core.Headers
      */
     function Headers() {
+        /** @private */
         this.headers = {};
     }
 
     Object.defineProperty(Headers.prototype, 'constructor', {value: Headers, enumerable: false});
 
+    Headers.contentType = 'Content-Type';
     Headers.jsonContentType = 'application/json';
     Headers.multipartContentType = 'multipart/mixed';
     Headers.urlencodedContentType = 'application/x-www-form-urlencoded';
@@ -6577,7 +6590,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @returns {string}
      */
     Headers.prototype.getContentType = function() {
-        return this.getHeader('Content-Type') || '';
+        return this.getHeader(Headers.contentType) || '';
     };
 
     /**
