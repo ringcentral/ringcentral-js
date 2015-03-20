@@ -490,6 +490,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      */
 
     /**
+     * TODO @see https://github.com/github/fetch/blob/master/fetch.js
      * @constructor
      * @extends Observable
      * @alias RCSDK.core.Request
@@ -601,7 +602,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
                 var response = Response.$get(this.context, xhr.status, xhr.statusText, xhr.responseText, {
                     'Content-Type': xhr.getResponseHeader('Content-Type') || Headers.jsonContentType // if no header, set default
-                    //TODO Add more headers
+                    //TODO Add more headers (xhr.getAllResponseHeaders())
                 });
 
                 if (response.error) {
@@ -745,6 +746,8 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         /** @type {Error} */
         this.error = null;
 
+        if (status == 1223) status = 204; //@see http://stackoverflow.com/questions/10046972/msie-returns-status-code-of-1223-for-ajax-request
+
         this.status = status;
         this.statusText = statusText;
         this.body = body;
@@ -841,7 +844,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
     };
 
     Response.prototype.checkStatus = function() {
-        return this.status.toString().substr(0, 1) == '2';
+        return this.status >= 200 && this.status < 300;
     };
 
     Response.prototype.getError = function() {
@@ -1482,10 +1485,11 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
     /**
      * @param {string} url
-     * @param {IAjaxOptions} options
+     * @param {IAjaxOptions} [options]
      * @returns {Promise}
      */
     Platform.prototype.get = function(url, options) {
+        options = options || {};
         options.url = url;
         options.method = 'GET';
         return this.apiCall(options);
@@ -1497,6 +1501,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @returns {Promise}
      */
     Platform.prototype.post = function(url, options) {
+        options = options || {};
         options.url = url;
         options.method = 'POST';
         return this.apiCall(options);
@@ -1508,6 +1513,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
      * @returns {Promise}
      */
     Platform.prototype.put = function(url, options) {
+        options = options || {};
         options.url = url;
         options.method = 'PUT';
         return this.apiCall(options);
@@ -1515,10 +1521,11 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
     /**
      * @param {string} url
-     * @param {IAjaxOptions} options
+     * @param {IAjaxOptions} [options]
      * @returns {Promise}
      */
-    Platform.prototype.remove = function(url, options) {
+    Platform.prototype['delete'] = function(url, options) {
+        options = options || {};
         options.url = url;
         options.method = 'DELETE';
         return this.apiCall(options);

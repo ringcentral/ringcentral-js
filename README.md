@@ -236,7 +236,7 @@ You can also use short-hand methods:
 platform.get('/account/~/extension/~', {...options...}).then(function(response){ ... });
 platform.post('/account/~/extension/~', {...options...}).then(function(response){ ... });
 platform.put('/account/~/extension/~', {...options...}).then(function(response){ ... });
-platform.remove('/account/~/extension/~', {...options...}).then(function(response){ ... });
+platform.delete('/account/~/extension/~', {...options...}).then(function(response){ ... });
 ```
 
 Take a look on [sms example](#sms) to see how POST request can be sent.
