@@ -7,7 +7,7 @@ module.exports = function(config) {
         frameworks: [
             'mocha',
             'requirejs',
-            'sinon-chai'
+            'chai'
         ],
 
         files: [
@@ -71,7 +71,7 @@ module.exports = function(config) {
             'karma-mocha-reporter',
             'karma-phantomjs-launcher',
             'karma-requirejs',
-            'karma-sinon-chai'
+            'karma-chai'
         ],
 
         singleRun: true,

@@ -53,8 +53,7 @@
     gulp.task('rjs', ['clean', 'jshint'], function() {
 
         var webpack = require('gulp-webpack-build'),
-            path = require('path'),
-            rename = require('gulp-rename');
+            path = require('path');
 
         return gulp.src(path.join('.', webpack.config.CONFIG_FILENAME), {base: path.resolve('./lib')})
 
@@ -63,11 +62,7 @@
                 progress: false
             }))
 
-            .pipe(webpack.overrides({
-                debug: true,
-                devtool: '#source-map',
-                watchDelay: 200
-            }))
+            //.pipe(webpack.overrides({}))
 
             .pipe(webpack.compile())
 

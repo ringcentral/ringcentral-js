@@ -14,6 +14,9 @@ function getExternal(root, cjs) {
 
 module.exports = {
 
+    debug: true,
+    devtool: '#source-map',
+
     entry: ['./lib/browser'],
 
     output: {
@@ -33,6 +36,8 @@ module.exports = {
         buffer: false
     },
 
-    plugins: []
+    plugins: [],
+
+    watchDelay: 200
 
 };
