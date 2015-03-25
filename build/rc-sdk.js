@@ -136,7 +136,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
 
         }
 
-        RCSDK.version = '1.2.0';
+        RCSDK.version = '1.2.1';
 
         // Internals
 
@@ -2039,6 +2039,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;!(__WEBPACK_AMD_DEFINE_RESULT__ = function(req
         var PUBNUB = this.getPubnub();
 
         this.pubnub = PUBNUB.init({
+            ssl: true,
             subscribe_key: this.subscription.deliveryMode.subscriberKey
         });
 
