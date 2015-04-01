@@ -23,7 +23,7 @@
                 platform
                     .authorize({
                         username: $scope.user.username,
-                        extension: $scope.user.extension,
+                        extension: $scope.user.extension || '',
                         password: $scope.user.password,
                         remember: $scope.user.remember
                     })
@@ -31,7 +31,7 @@
                         $scope.options.loading = false;
                         if ($scope.user.remember) {
                             localStorage.setItem('rscdk-demo-login-username', $scope.user.username);
-                            localStorage.setItem('rscdk-demo-login-extension', $scope.user.extension);
+                            localStorage.setItem('rscdk-demo-login-extension', $scope.user.extension || '');
                             localStorage.setItem('rscdk-demo-login-password', $scope.user.password);
                             localStorage.setItem('rscdk-demo-login-remember', $scope.user.remember);
                         }

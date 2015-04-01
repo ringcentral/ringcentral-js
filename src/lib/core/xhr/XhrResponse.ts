@@ -1,6 +1,6 @@
 import context = require('../Context');
-import xhrMock = require('./XhrMock'); //TODO Fix circular
-import response = require('../http/Response'); //TODO Fix circular
+import r = require('../http/Response');
+import xhrMock = require('./XhrMock'); //FIXME Circular
 
 export class XhrResponse {
 
@@ -37,7 +37,7 @@ export class XhrResponse {
 
 export interface IXhrResponse {
     path?:string;
-    response?:(xhr?:xhrMock.XhrMock)=>Promise<response.Response>;
+    response?:(xhr?:xhrMock.XhrMock)=>Promise<r.Response>;
     test?:(xhr:xhrMock.XhrMock)=>boolean;
 }
 

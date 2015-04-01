@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('../core/Context');
 import helper = require('../core/Helper');
@@ -73,7 +73,7 @@ export class Extension extends helper.Helper {
             {
                 condition: options.search.toLocaleLowerCase(),
                 filterFn: this.list.containsFilter,
-                extractFn: function (item) {
+                extractFn: (item) => {
                     return (item.name && (item.name.toLocaleLowerCase() + ' ')) +
                         (item.extensionNumber && item.extensionNumber.toString().toLocaleLowerCase());
                 }

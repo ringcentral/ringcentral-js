@@ -1,14 +1,14 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
-import rcsdk = require('../../lib/RCSDK');
+import RCSDK = require('../../lib/RCSDK');
 import xhrResponse = require('../../lib/core/xhr/XhrResponse');
 import xhrMock = require('../../lib/core/xhr/XhrMock');
 
 export class Mock {
 
-    public rcsdk:rcsdk.RCSDK;
+    public rcsdk:RCSDK;
 
-    constructor(rcsdk:rcsdk.RCSDK) {
+    constructor(rcsdk:RCSDK) {
 
         this.rcsdk = rcsdk;
 

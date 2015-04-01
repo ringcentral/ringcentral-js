@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('../core/Context');
 import helper = require('../core/Helper');
@@ -48,7 +48,7 @@ export class PhoneNumber extends helper.Helper {
     comparator(options?:list.IListComparatorOptions) {
 
         return this.list.comparator(this.utils.extend({
-            extractFn: function (item:IPhoneNumber) {
+            extractFn: (item:IPhoneNumber) => {
                 return item.usageType + '-' +
                     item.paymentType + '-' +
                     item.type;

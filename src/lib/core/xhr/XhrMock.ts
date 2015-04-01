@@ -1,7 +1,7 @@
 import context = require('../Context');
 import utils = require('../Utils');
 import log = require('../Log');
-import xhrResponse = require('./XhrResponse');
+import xhrResponse = require('./XhrResponse'); //FIXME Circular
 
 export class XhrMock {
 

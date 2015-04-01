@@ -1,3 +1,8 @@
+/// <reference path="../typings/externals.d.ts" />
+
+declare
+var require:(name:string)=>any;
+
 import headers = require('./core/http/Headers');
 import request = require('./core/http/Request');
 import response = require('./core/http/Response');
@@ -39,21 +44,50 @@ import shippingMethodHelper = require('./helpers/ShippingMethod');
 import stateHelper = require('./helpers/State');
 import timezoneHelper = require('./helpers/Timezone');
 
-export class RCSDK {
+import promise = require('es6-promise');
+import pubnub = require('pubnub');
+import rcsdk = require('./RCSDK');
 
-    public static version = '1.2.1';
-    private static injections:context.IInjections;
+require('crypto-js/aes');
+require('crypto-js/mode-ecb');
 
-    public static setInjections(injections:context.IInjections) {
-        this.injections = injections;
-        return this;
-    }
+class RCSDK {
+
+    public static version = '1.3.0';
+
+    public static CryptoJS = require('crypto-js/core');
+
+    public static XHR = () => {
+        try { return new XMLHttpRequest(); } catch (e) {}
+        try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); } catch (e1) {}
+        try { return new ActiveXObject("Msxml2.XMLHTTP.3.0"); } catch (e2) {}
+        try { return new ActiveXObject("Msxml2.XMLHTTP"); } catch (e3) {}
+        try { return new (require('xhr' + '2'))(); } catch (e4) {} // Node only
+        throw new Error("This browser does not support XMLHttpRequest.");
+    };
+
+    public static injections = <context.IInjections>{
+        CryptoJS: RCSDK.CryptoJS,
+        localStorage: (typeof(localStorage) !== 'undefined'
+            ? localStorage
+            : require('dom-' + 'storage')), // Node only
+        Promise: typeof(Promise) !== 'undefined' ? Promise : promise.Promise,
+        PUBNUB: pubnub,
+        XHR: RCSDK.XHR,
+        pubnubMock: pubnubMock,
+        xhrMock: xhrMock
+    };
 
     private _context:context.Context;
 
-    constructor(options?:IOptions) {
+    constructor(options?:{
+        server:string;
+        appKey:string;
+        appSecret:string;
+        cachePrefix?:string;
+    }) {
 
-        options = options || <IOptions>{};
+        options = options || <any>{};
 
         this._context = context.$get(RCSDK.injections);
 
@@ -144,22 +178,4 @@ export class RCSDK {
 
 }
 
-export function factory(injections):typeof RCSDK {
-
-    if (!injections
-        || !('CryptoJS' in injections)
-        || !('localStorage' in injections)
-        || !('Promise' in injections)
-        || !('PUBNUB' in injections)
-        || !('XHR' in injections)) throw new Error('Injections object is not complete');
-
-    return RCSDK.setInjections(injections);
-
-}
-
-export interface IOptions {
-    server:string;
-    appKey:string;
-    appSecret:string;
-    cachePrefix?:string;
-}
+export = RCSDK;

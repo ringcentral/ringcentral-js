@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 declare
 var require:(name:string)=>any;

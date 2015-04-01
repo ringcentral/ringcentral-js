@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('../core/Context');
 import helper = require('../core/Helper');
@@ -150,7 +150,7 @@ export class Message extends helper.Helper {
         var self = this;
 
         // Flatten all caller infos from all messages
-        var callerInfos = messages.reduce(function(callerInfos, message) {
+        var callerInfos = messages.reduce((callerInfos, message) => {
 
             return callerInfos.concat(self.getAllCallerInfos(message));
 

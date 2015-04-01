@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('../core/Context');
 import helper = require('../core/Helper');
@@ -30,7 +30,7 @@ export class DeviceModel extends helper.Helper {
 
         if (device.addons && device.addons.length > 0) {
 
-            device.addons.forEach(function(addon, i) {
+            device.addons.forEach((addon, i) => {
                 delete device.addons[i].name;
             });
 

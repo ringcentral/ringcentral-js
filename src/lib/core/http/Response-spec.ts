@@ -1,7 +1,7 @@
-/// <reference path="../../../typings/tsd.d.ts" />
+/// <reference path="../../../typings/externals.d.ts" />
 
 export import mocha = require('../../../test/mocha');
-import r = require('./response');
+import r = require('./Response');
 var expect = mocha.chai.expect;
 var rcsdk = mocha.mock.rcsdk;
 

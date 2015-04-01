@@ -105,7 +105,8 @@ require.config({
     packages: [
         {
             name: 'crypto-js',
-            location: 'path-to-scripts/crypto-js'
+            location: 'path-to-scripts/crypto-js',
+            main: 'index'
         }
     ],
     shim: {

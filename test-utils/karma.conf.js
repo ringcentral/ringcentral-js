@@ -7,8 +7,8 @@ module.exports = function(config) {
         basePath: '../',
 
         frameworks: [
+            'requirejs',
             'mocha',
-            'cajon',
             'chai',
             'sinon-chai'
         ],
@@ -16,14 +16,18 @@ module.exports = function(config) {
         files: [
             // specify but not include files
             {pattern: './build/**/*.js', included: false},
-            {pattern: './test/**/*.js', included: false},
-            {pattern: './lib/**/*.js', included: false},
+            {pattern: './lib/*/**/*.js', included: false},
+            {pattern: './lib/RCSDK.js', included: false}, // need to be separately mentioned otherwise not included (*)
+            {pattern: './lib/RCSDK-spec.js', included: false},
+            {pattern: './test/lib/**/*.js', included: false}, // do not use * instead of lib -- skip specs-api
+            {pattern: './test/mocha.js', included: false}, // need to be separately mentioned otherwise not included (*)
             {pattern: './bower_components/crypto-js/**/*.js', included: false},
             {pattern: './bower_components/pubnub/web/*.*', included: false},
             {pattern: './bower_components/es6-promise-polyfill/*.*', included: false},
             // include files
-            {pattern: './lib/requirejs-config.js', included: true},
-            {pattern: './test/karma.js', included: true}
+            {pattern: require.resolve('karma-chai-plugins/function-bind-polyfill'), included: true},
+            {pattern: './test-utils/requirejs-config.js', included: true},
+            {pattern: './test-utils/karma.js', included: true}
         ],
 
         exclude: [
@@ -48,9 +52,7 @@ module.exports = function(config) {
         logLevel: config.LOG_ERROR, // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
 
         preprocessors: {
-            './lib/browser.js': ['coverage'],
-            './lib/RCSDK.js': ['coverage'],
-            './lib/*/**/!(*spec).js': ['coverage']
+            './lib/**/!(*spec).js': ['coverage']
         },
 
         browsers: [
@@ -65,7 +67,7 @@ module.exports = function(config) {
             'karma-mocha',
             'karma-mocha-reporter',
             'karma-phantomjs-launcher',
-            'karma-cajon',
+            'karma-requirejs',
             'karma-chai-plugins'
         ],
 

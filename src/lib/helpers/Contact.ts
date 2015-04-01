@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('../core/Context');
 import helper = require('../core/Helper');
@@ -38,7 +38,7 @@ export class Contact extends helper.Helper {
      */
     protected getFieldValues(where:IContact, fields?:string[], asHash?:boolean):any {
 
-        return fields.reduce(function(result:string[], field:string) {
+        return fields.reduce((result:string[], field:string) => {
 
             if (where && where[field]) {
                 if (asHash) {
@@ -124,7 +124,7 @@ export class Contact extends helper.Helper {
             // skip unnecessary cycles if match has been found or no field value
             if (!contact[field] || found) return;
 
-            this.addressSubFields.forEach(function(subField) {
+            this.addressSubFields.forEach((subField) => {
                 matchWith(contact[field][subField]);
             });
 
@@ -162,12 +162,12 @@ export class Contact extends helper.Helper {
                 return callerInfo.phoneNumber;
             }, true);
 
-        this.utils.forEach(callerInfoIndex, function(indexedCallerInfos, phoneNumber) {
+        this.utils.forEach(callerInfoIndex, (indexedCallerInfos, phoneNumber) => {
 
-            var foundContact = null,
+            var foundContact:IContact = null,
                 foundPhone = null;
 
-            contacts.some(function(contact) {
+            contacts.some((contact:IContact) => {
 
                 foundPhone = self.matchAsPhone(contact, phoneNumber, options);
 
@@ -192,11 +192,9 @@ export class Contact extends helper.Helper {
 
     comparator(options?:list.IListComparatorOptions) {
 
-        var self = this;
-
         return this.list.comparator(this.utils.extend({
-            extractFn: function(contact, options) {
-                return self.getFullName(contact);
+            extractFn: (contact:IContact, options) => {
+                return this.getFullName(contact);
             }
         }, options));
 

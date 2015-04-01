@@ -1,6 +1,6 @@
 {
   "name": "rcsdk",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "main": "./build/rc-sdk.min.js",
   "ignore": [
     "**/*",
@@ -16,6 +16,7 @@
   "dependencies": {
     "pubnub": "*",
     "crypto-js": "*",
+    "es6-promise": "*",
     "es6-promise-polyfill": "*"
   },
   "devDependencies": {

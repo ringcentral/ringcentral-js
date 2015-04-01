@@ -1,7 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
-
-import pubnubMock = require('./pubnub/PubnubMock'); //TODO Fix circular
-import xhrMock = require('./xhr/XhrMock'); //TODO Fix circular
+/// <reference path="../../typings/externals.d.ts" />
 
 export class Context {
 
@@ -39,7 +36,7 @@ export class Context {
     }
 
     getPubnub():PUBNUB.PUBNUB {
-        return this.stubPubnub ? pubnubMock.$get(this) : this.injections.PUBNUB;
+        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.injections.PUBNUB;
     }
 
     getLocalStorage():Storage {
@@ -61,7 +58,7 @@ export class Context {
     }
 
     getXHR():XMLHttpRequest {
-        return <XMLHttpRequest>(this.stubAjax ? xhrMock.$get(this) : new (<any> this.injections.XHR)());
+        return <XMLHttpRequest>(this.stubAjax ? this.injections.xhrMock.$get(this) : (<any>this.injections.XHR)());
     }
 
 }
@@ -75,9 +72,11 @@ export interface ISingletons {
 }
 
 export interface IInjections {
-    PUBNUB:PUBNUB.PUBNUB;
-    CryptoJS:CryptoJS.CryptoJSStatic;
-    localStorage:Storage;
-    XHR:typeof XMLHttpRequest;
-    Promise:typeof Promise;
+    pubnubMock:any;
+    xhrMock:any;
+    PUBNUB:any;
+    CryptoJS:any;
+    localStorage:any;
+    XHR:any;
+    Promise:any;
 }

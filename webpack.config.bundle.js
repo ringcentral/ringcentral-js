@@ -1,12 +1,18 @@
-var config = JSON.parse(JSON.stringify(require('./webpack.config'))), // Make a clone
+function clone(obj) {
+
+    return Object.keys(obj).reduce(function(res, v) {
+        res[v] = obj[v];
+        return res;
+    }, {});
+
+}
+
+var config = clone(require('./webpack.config')),
     path = require('path');
 
-config.entry = {'rc-sdk-bundle.js': './lib/index.js'};
+config.entry = {'rc-sdk-bundle.js': './src/lib/RCSDK.ts'};
 
-config.resolve = config.resolve || {};
-config.resolve.alias = config.resolve.alias || {};
-config.resolve.alias.pubnub = path.resolve('./bower_components/pubnub/web/pubnub.js');
-
+config.externals = clone(config.externals);
 delete config.externals['crypto-js/core'];
 delete config.externals['crypto-js/aes'];
 delete config.externals['crypto-js/mode-ecb'];

@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('../core/Context');
 import helper = require('../core/Helper');
@@ -40,7 +40,7 @@ export class Presence extends helper.Helper {
                        presences:IPresence[],
                        options?:IPresenceOptions):subscription.Subscription {
 
-        var events = presences.map(this.getId, this).map(function (id) {
+        var events = presences.map(this.getId, this).map((id) => {
             return this.createUrl(options, id);
         }, this);
 

@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('./Context');
 
@@ -8,7 +8,7 @@ var hasOwn = Object.prototype.hasOwnProperty,
     class2type = {};
 
 // Populate the class2type map
-'Boolean Number String Function Array Date RegExp Object'.split(' ').forEach(function (name) {
+'Boolean Number String Function Array Date RegExp Object'.split(' ').forEach((name) => {
     class2type["[object " + name + "]"] = name.toLowerCase();
 });
 

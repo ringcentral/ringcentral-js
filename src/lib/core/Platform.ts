@@ -1,4 +1,9 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
+
+declare class Buffer {
+    constructor(str:string);
+    toString(encoding:string):string;
+}
 
 import context = require('./Context');
 import utils = require('./Utils');
@@ -465,13 +470,7 @@ export class Platform extends observable.Observable {
 
     }
 
-    /**
-     *
-     * @param url
-     * @param {{addMethod?: string, addToken?: boolean, addServer?: boolean}} [options]
-     * @returns {string}
-     */
-    apiUrl(url, options) {
+    apiUrl(url, options?:{addMethod?: string; addToken?: boolean; addServer?: boolean}):string {
 
         url = url || '';
         options = options || {};

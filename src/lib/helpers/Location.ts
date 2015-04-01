@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('../core/Context');
 import helper = require('../core/Helper');
@@ -32,9 +32,9 @@ export class Location extends helper.Helper {
         return this.list.filter([
             {
                 condition: options.stateId,
-                filterFn: function(item:ILocation, opts) {
+                filterFn: (item:ILocation, opts) => {
                     return (this.state.getId(item.state) == opts.condition);
-                }.bind(this)
+                }
             },
             {
                 condition: options.onlyUniqueNPA,

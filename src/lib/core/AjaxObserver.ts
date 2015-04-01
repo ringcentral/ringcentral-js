@@ -1,3 +1,5 @@
+/// <reference path="../../typings/externals.d.ts" />
+
 import observable = require('./Observable');
 import context = require('./Context');
 

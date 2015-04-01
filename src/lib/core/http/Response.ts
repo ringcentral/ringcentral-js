@@ -1,4 +1,4 @@
-/// <reference path="../../../typings/tsd.d.ts" />
+/// <reference path="../../../typings/externals.d.ts" />
 
 import h = require('./Headers');
 import utils = require('../Utils');

@@ -1,10 +1,11 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import observable = require('./Observable');
 import utils = require('./Utils');
 import log = require('./Log');
 import context = require('./Context');
-import response = require('./http/Response');
+import platform = require('./Platform');
+import r = require('./http/Response');
 
 export class Subscription extends observable.Observable {
 
@@ -65,7 +66,7 @@ export class Subscription extends observable.Observable {
 
     getPlatform() {
 
-        return require('./Platform').$get(this.context);
+        return platform.$get(this.context);
 
     }
 
@@ -74,7 +75,7 @@ export class Subscription extends observable.Observable {
      * @param {{events?:string[]}} [options] New array of events
      * @returns {Promise}
      */
-    register(options?:{events?:string[]}):Promise<response.Response> {
+    register(options?:{events?:string[]}):Promise<r.Response> {
 
         if (this.isSubscribed()) {
             return this.renew(options);
@@ -102,7 +103,7 @@ export class Subscription extends observable.Observable {
 
     }
 
-    subscribe(options?:{events?:string[]}):Promise<response.Response> {
+    subscribe(options?:{events?:string[]}):Promise<r.Response> {
 
         options = options || {};
         if (options.events) this.eventFilters = options.events;
@@ -124,7 +125,7 @@ export class Subscription extends observable.Observable {
                 }
             }));
 
-        }).then((ajax:response.Response) => {
+        }).then((ajax:r.Response) => {
 
                     this.updateSubscription(ajax.data)
                         .subscribeAtPubnub()
@@ -143,7 +144,7 @@ export class Subscription extends observable.Observable {
 
     }
 
-    renew(options?:{events?:string[]}):Promise<response.Response> {
+    renew(options?:{events?:string[]}):Promise<r.Response> {
 
         options = options || {};
         if (options.events) this.eventFilters = options.events;
@@ -157,7 +158,7 @@ export class Subscription extends observable.Observable {
 
             resolve();
 
-        }).then(() => {
+        }).then(():Promise<r.Response> => {
 
                     return this.getPlatform().apiCall({
                         method: 'PUT',
@@ -168,7 +169,7 @@ export class Subscription extends observable.Observable {
                     });
 
                 })
-            .then((ajax:response.Response) => {
+            .then((ajax:any) => {
 
                       this.updateSubscription(ajax.data)
                           .emit(this.events.renewSuccess, ajax.data);
@@ -176,7 +177,7 @@ export class Subscription extends observable.Observable {
                       return ajax;
 
                   })
-            .catch((e) => {
+            .catch((e):any => {
 
                        this.unsubscribe()
                            .emit(this.events.renewError, e);
@@ -187,7 +188,7 @@ export class Subscription extends observable.Observable {
 
     }
 
-    remove(options?:{async?:boolean}):Promise<response.Response> {
+    remove(options?:{async?:boolean}):Promise<r.Response> {
 
         options = this.utils.extend({
             async: true
@@ -204,7 +205,7 @@ export class Subscription extends observable.Observable {
                 url: '/restapi/v1.0/subscription/' + this.subscription.id
             }));
 
-        }).then((ajax:response.Response) => {
+        }).then((ajax:r.Response) => {
 
                     this.unsubscribe()
                         .emit(this.events.removeSuccess, ajax);

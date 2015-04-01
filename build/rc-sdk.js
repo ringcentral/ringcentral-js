@@ -2,7 +2,7 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("es6-promise"), require("pubnub"), require("crypto-js/aes"), require("crypto-js/mode-ecb"), require("crypto-js/core"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()), require("dom-storage"));
 	else if(typeof define === 'function' && define.amd)
-		define(["es6-promise", "pubnub", "crypto-js/aes", "crypto-js/mode-ecb", "crypto-js/core", "empty:", "empty:"], factory);
+		define(["es6-promise", "pubnub", "crypto-js/aes", "crypto-js/mode-ecb", "crypto-js/core", "exports", "exports"], factory);
 	else if(typeof exports === 'object')
 		exports["RCSDK"] = factory(require("es6-promise"), require("pubnub"), require("crypto-js/aes"), require("crypto-js/mode-ecb"), require("crypto-js/core"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()), require("dom-storage"));
 	else
@@ -54,126 +54,47 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../typings/externals.d.ts" />
+var pubnubMock = __webpack_require__(8);
+var xhrMock = __webpack_require__(9);
+var xhrResponse = __webpack_require__(10);
+var ajaxObserver = __webpack_require__(11);
+var cache = __webpack_require__(12);
+var context = __webpack_require__(13);
+var helper = __webpack_require__(14);
+var list = __webpack_require__(15);
+var log = __webpack_require__(16);
+var observable = __webpack_require__(17);
+var pageVisibility = __webpack_require__(18);
+var platform = __webpack_require__(19);
+var subscription = __webpack_require__(20);
+var utils = __webpack_require__(21);
+var validator = __webpack_require__(22);
+var accountHelper = __webpack_require__(23);
+var blockedNumberHelper = __webpack_require__(24);
+var callHelper = __webpack_require__(25);
+var contactHelper = __webpack_require__(26);
+var contactGroupHelper = __webpack_require__(27);
+var conferencingHelper = __webpack_require__(28);
+var countryHelper = __webpack_require__(29);
+var deviceHelper = __webpack_require__(30);
+var deviceModelHelper = __webpack_require__(31);
+var extensionHelper = __webpack_require__(32);
+var forwardingNumberHelper = __webpack_require__(33);
+var languageHelper = __webpack_require__(34);
+var locationHelper = __webpack_require__(35);
+var messageHelper = __webpack_require__(36);
+var phoneNumberHelper = __webpack_require__(37);
+var presenceHelper = __webpack_require__(38);
+var ringoutHelper = __webpack_require__(39);
+var serviceHelper = __webpack_require__(40);
+var shippingMethodHelper = __webpack_require__(41);
+var stateHelper = __webpack_require__(42);
+var timezoneHelper = __webpack_require__(43);
 var promise = __webpack_require__(1);
 var pubnub = __webpack_require__(2);
-var rcsdk = __webpack_require__(8);
 __webpack_require__(3);
 __webpack_require__(4);
-var CryptoJS = __webpack_require__(5);
-var XHR = (typeof (XMLHttpRequest) !== 'undefined' ? XMLHttpRequest : function () {
-    try {
-        return new ActiveXObject("Msxml2.XMLHTTP.6.0");
-    }
-    catch (e1) {
-    }
-    try {
-        return new ActiveXObject("Msxml2.XMLHTTP.3.0");
-    }
-    catch (e2) {
-    }
-    try {
-        return new ActiveXObject("Msxml2.XMLHTTP");
-    }
-    catch (e3) {
-    }
-    try {
-        return __webpack_require__(6);
-    }
-    catch (e3) {
-    }
-    throw new Error("This browser does not support XMLHttpRequest.");
-});
-exports = module.exports = rcsdk.factory({
-    CryptoJS: CryptoJS,
-    localStorage: typeof (localStorage) !== 'undefined' ? localStorage : __webpack_require__(7),
-    Promise: typeof (Promise) !== 'undefined' ? Promise : promise.Promise,
-    PUBNUB: pubnub,
-    XHR: XHR
-});
-
-
-/***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
-
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-if(typeof __WEBPACK_EXTERNAL_MODULE_6__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
-module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-var xhrResponse = __webpack_require__(9);
-var ajaxObserver = __webpack_require__(10);
-var cache = __webpack_require__(11);
-var context = __webpack_require__(12);
-var helper = __webpack_require__(13);
-var list = __webpack_require__(14);
-var log = __webpack_require__(15);
-var observable = __webpack_require__(16);
-var pageVisibility = __webpack_require__(17);
-var platform = __webpack_require__(18);
-var subscription = __webpack_require__(19);
-var utils = __webpack_require__(20);
-var validator = __webpack_require__(21);
-var accountHelper = __webpack_require__(22);
-var blockedNumberHelper = __webpack_require__(23);
-var callHelper = __webpack_require__(24);
-var contactHelper = __webpack_require__(25);
-var contactGroupHelper = __webpack_require__(26);
-var conferencingHelper = __webpack_require__(27);
-var countryHelper = __webpack_require__(28);
-var deviceHelper = __webpack_require__(29);
-var deviceModelHelper = __webpack_require__(30);
-var extensionHelper = __webpack_require__(31);
-var forwardingNumberHelper = __webpack_require__(32);
-var languageHelper = __webpack_require__(33);
-var locationHelper = __webpack_require__(34);
-var messageHelper = __webpack_require__(35);
-var phoneNumberHelper = __webpack_require__(36);
-var presenceHelper = __webpack_require__(37);
-var ringoutHelper = __webpack_require__(38);
-var serviceHelper = __webpack_require__(39);
-var shippingMethodHelper = __webpack_require__(40);
-var stateHelper = __webpack_require__(41);
-var timezoneHelper = __webpack_require__(42);
 var RCSDK = (function () {
     function RCSDK(options) {
         options = options || {};
@@ -182,10 +103,6 @@ var RCSDK = (function () {
         this.getPlatform().setServer(options.server || '').setCredentials(options.appKey || '', options.appSecret || '');
         //TODO Link Platform events with Subscriptions and the rest
     }
-    RCSDK.setInjections = function (injections) {
-        this.injections = injections;
-        return this;
-    };
     // Internals
     RCSDK.prototype.getContext = function () {
         return this._context;
@@ -291,20 +208,235 @@ var RCSDK = (function () {
     RCSDK.prototype.getServiceHelper = function () {
         return serviceHelper.$get(this.getContext());
     };
-    RCSDK.version = '1.2.1';
+    RCSDK.version = '1.3.0';
+    RCSDK.CryptoJS = __webpack_require__(5);
+    RCSDK.XHR = function () {
+        try {
+            return new XMLHttpRequest();
+        }
+        catch (e) {
+        }
+        try {
+            return new ActiveXObject("Msxml2.XMLHTTP.6.0");
+        }
+        catch (e1) {
+        }
+        try {
+            return new ActiveXObject("Msxml2.XMLHTTP.3.0");
+        }
+        catch (e2) {
+        }
+        try {
+            return new ActiveXObject("Msxml2.XMLHTTP");
+        }
+        catch (e3) {
+        }
+        try {
+            return new (__webpack_require__(6))();
+        }
+        catch (e4) {
+        }
+        throw new Error("This browser does not support XMLHttpRequest.");
+    };
+    RCSDK.injections = {
+        CryptoJS: RCSDK.CryptoJS,
+        localStorage: (typeof (localStorage) !== 'undefined' ? localStorage : __webpack_require__(7)),
+        Promise: typeof (Promise) !== 'undefined' ? Promise : promise.Promise,
+        PUBNUB: pubnub,
+        XHR: RCSDK.XHR,
+        pubnubMock: pubnubMock,
+        xhrMock: xhrMock
+    };
     return RCSDK;
 })();
-exports.RCSDK = RCSDK;
-function factory(injections) {
-    if (!injections || !('CryptoJS' in injections) || !('localStorage' in injections) || !('Promise' in injections) || !('PUBNUB' in injections) || !('XHR' in injections))
-        throw new Error('Injections object is not complete');
-    return RCSDK.setInjections(injections);
+module.exports = RCSDK;
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+if(typeof __WEBPACK_EXTERNAL_MODULE_6__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
+module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+/// <reference path="../../../typings/externals.d.ts" />
+var PubnubMock = (function () {
+    function PubnubMock() {
+    }
+    PubnubMock.prototype.ready = function () {
+    };
+    PubnubMock.prototype.unsubscribe = function (options) {
+    };
+    PubnubMock.prototype.subscribe = function (options) {
+        this.onMessage = options.message;
+    };
+    PubnubMock.prototype.receiveMessage = function (msg) {
+        this.onMessage(msg, 'env', 'channel');
+    };
+    return PubnubMock;
+})();
+exports.PubnubMock = PubnubMock;
+var PubnubFactory = (function () {
+    function PubnubFactory(context) {
+        this.context = context;
+    }
+    PubnubFactory.prototype.init = function (options) {
+        return new PubnubMock();
+    };
+    return PubnubFactory;
+})();
+exports.PubnubFactory = PubnubFactory;
+function $get(context) {
+    return new PubnubFactory(context);
 }
-exports.factory = factory;
+exports.$get = $get;
 
 
 /***/ },
 /* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+var utils = __webpack_require__(21);
+var log = __webpack_require__(16);
+var xhrResponse = __webpack_require__(10); //FIXME Circular
+var XhrMock = (function () {
+    function XhrMock(context) {
+        // Service
+        this.context = context;
+        this.responses = xhrResponse.$get(context);
+        this.log = log.$get(context);
+        this.utils = utils.$get(context);
+        // Request
+        this.async = true;
+        this.method = '';
+        this.url = '';
+        this.requestHeaders = {};
+        this.withCredentials = false;
+        // Response
+        this.data = null;
+        this.readyState = 0;
+        this.responseHeaders = {};
+        this.status = 0;
+    }
+    XhrMock.prototype.getResponseHeader = function (header) {
+        return this.responseHeaders[header.toLowerCase()];
+    };
+    XhrMock.prototype.setRequestHeader = function (header, value) {
+        this.requestHeaders[header.toLowerCase()] = value;
+    };
+    XhrMock.prototype.getAllResponseHeaders = function () {
+        var res = [];
+        this.utils.forEach(this.responseHeaders, function (value, name) {
+            res.push(name + ':' + value);
+        });
+        return res.join('\n');
+    };
+    XhrMock.prototype.open = function (method, url, async) {
+        this.method = method;
+        this.url = url;
+        this.async = async;
+    };
+    XhrMock.prototype.send = function (data) {
+        var _this = this;
+        var contentType = this.getRequestHeader('Content-Type');
+        this.data = data;
+        if (this.data && typeof this.data == 'string') {
+            // For convenience encoded post data will be decoded
+            if (contentType == 'application/json')
+                this.data = JSON.parse(this.data);
+            if (contentType == 'application/x-www-form-urlencoded')
+                this.data = this.utils.parseQueryString(this.data);
+        }
+        this.log.debug('API REQUEST', this.method, this.url);
+        var currentResponse = this.responses.find(this);
+        if (!currentResponse) {
+            setTimeout(function () {
+                if (_this.onerror)
+                    _this.onerror(new Error('Unknown request: ' + _this.url));
+            }, 1);
+            return;
+        }
+        this.setStatus(200);
+        this.setResponseHeader('Content-Type', 'application/json');
+        var res = currentResponse.response(this), Promise = this.context.getPromise(), onLoad = function (res) {
+            if (_this.getResponseHeader('Content-Type') == 'application/json')
+                res = JSON.stringify(res);
+            _this.responseText = res;
+            setTimeout(function () {
+                if (_this.onload)
+                    _this.onload();
+            }, 1);
+        };
+        if (res instanceof Promise) {
+            res.then(onLoad.bind(this)).catch(this.onerror.bind(this));
+        }
+        else
+            onLoad(res);
+    };
+    XhrMock.prototype.abort = function () {
+        this.log.debug('XhrMock.destroy(): Aborted');
+    };
+    XhrMock.prototype.getRequestHeader = function (header) {
+        return this.requestHeaders[header.toLowerCase()];
+    };
+    XhrMock.prototype.setResponseHeader = function (header, value) {
+        this.responseHeaders[header.toLowerCase()] = value;
+    };
+    XhrMock.prototype.setStatus = function (status) {
+        this.status = status;
+        return this;
+    };
+    return XhrMock;
+})();
+exports.XhrMock = XhrMock;
+function $get(context) {
+    return new XhrMock(context);
+}
+exports.$get = $get;
+
+
+/***/ },
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 var XhrResponse = (function () {
@@ -338,16 +470,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(16);
+var observable = __webpack_require__(17);
 var AjaxObserver = (function (_super) {
     __extends(AjaxObserver, _super);
     function AjaxObserver() {
@@ -370,10 +503,10 @@ exports.$get = $get;
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var Cache = (function () {
     function Cache(context) {
         this.setPrefix();
@@ -424,12 +557,10 @@ exports.$get = $get;
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
-var pubnubMock = __webpack_require__(43); //TODO Fix circular
-var xhrMock = __webpack_require__(44); //TODO Fix circular
+/// <reference path="../../typings/externals.d.ts" />
 var Context = (function () {
     function Context(injections) {
         this.singletons = {};
@@ -454,7 +585,7 @@ var Context = (function () {
         return this.injections.CryptoJS;
     };
     Context.prototype.getPubnub = function () {
-        return this.stubPubnub ? pubnubMock.$get(this) : this.injections.PUBNUB;
+        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.injections.PUBNUB;
     };
     Context.prototype.getLocalStorage = function () {
         var _this = this;
@@ -469,7 +600,7 @@ var Context = (function () {
         return this.injections.Promise;
     };
     Context.prototype.getXHR = function () {
-        return (this.stubAjax ? xhrMock.$get(this) : new this.injections.XHR());
+        return (this.stubAjax ? this.injections.xhrMock.$get(this) : this.injections.XHR());
     };
     return Context;
 })();
@@ -481,11 +612,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
-var utils = __webpack_require__(20);
+/// <reference path="../../typings/externals.d.ts" />
+var utils = __webpack_require__(21);
 var Helper = (function () {
     function Helper(context) {
         this.defaultProperty = 'id';
@@ -641,11 +772,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
-var utils = __webpack_require__(20);
+/// <reference path="../../typings/externals.d.ts" />
+var utils = __webpack_require__(21);
 var List = (function () {
     function List(context) {
         this.context = context;
@@ -759,11 +890,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
-var utils = __webpack_require__(20);
+/// <reference path="../../typings/externals.d.ts" />
+var utils = __webpack_require__(21);
 var Log = (function () {
     function Log(context, console) {
         if (!console) {
@@ -849,12 +980,12 @@ exports.$get = $get;
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
-var utils = __webpack_require__(20);
-var log = __webpack_require__(15);
+/// <reference path="../../typings/externals.d.ts" />
+var utils = __webpack_require__(21);
+var log = __webpack_require__(16);
 var Observable = (function () {
     /**
      * @constructor
@@ -982,17 +1113,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(16);
+var observable = __webpack_require__(17);
 var PageVisibility = (function (_super) {
     __extends(PageVisibility, _super);
     function PageVisibility(context) {
@@ -1044,19 +1175,19 @@ exports.$get = $get;
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(16);
-var cache = __webpack_require__(11);
-var request = __webpack_require__(45);
+var observable = __webpack_require__(17);
+var cache = __webpack_require__(12);
+var request = __webpack_require__(44);
 var Platform = (function (_super) {
     __extends(Platform, _super);
     function Platform(context) {
@@ -1348,12 +1479,6 @@ var Platform = (function (_super) {
         options.url = this.apiUrl(options.url, { addServer: true });
         return this.getRequest().setOptions(options).setHeader('Content-Type', 'application/x-www-form-urlencoded').setHeader('Accept', 'application/json').setHeader('Authorization', 'Basic ' + this.apiKey).send();
     };
-    /**
-     *
-     * @param url
-     * @param {{addMethod?: string, addToken?: boolean, addServer?: boolean}} [options]
-     * @returns {string}
-     */
     Platform.prototype.apiUrl = function (url, options) {
         url = url || '';
         options = options || {};
@@ -1402,17 +1527,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(16);
+var observable = __webpack_require__(17);
+var platform = __webpack_require__(19);
 var Subscription = (function (_super) {
     __extends(Subscription, _super);
     function Subscription(context) {
@@ -1453,7 +1579,7 @@ var Subscription = (function (_super) {
         return this.context.getCryptoJS();
     };
     Subscription.prototype.getPlatform = function () {
-        return __webpack_require__(18).$get(this.context);
+        return platform.$get(this.context);
     };
     /**
      * Creates or updates subscription if there is an active one
@@ -1661,10 +1787,10 @@ exports.$get = $get;
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var hasOwn = Object.prototype.hasOwnProperty, toString = Object.prototype.toString, rdigit = /\d/, class2type = {};
 // Populate the class2type map
 'Boolean Number String Function Array Date RegExp Object'.split(' ').forEach(function (name) {
@@ -1886,11 +2012,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
-var utils = __webpack_require__(20);
+/// <reference path="../../typings/externals.d.ts" />
+var utils = __webpack_require__(21);
 var Validator = (function () {
     function Validator(context) {
         this.context = context;
@@ -1967,17 +2093,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
+var helper = __webpack_require__(14);
 var Account = (function (_super) {
     __extends(Account, _super);
     function Account() {
@@ -1998,18 +2124,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var validator = __webpack_require__(21);
+var helper = __webpack_require__(14);
+var validator = __webpack_require__(22);
 var BlockedNumber = (function (_super) {
     __extends(BlockedNumber, _super);
     function BlockedNumber(context) {
@@ -2039,20 +2165,20 @@ exports.$get = $get;
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var list = __webpack_require__(14);
-var presence = __webpack_require__(37);
-var contact = __webpack_require__(25);
+var helper = __webpack_require__(14);
+var list = __webpack_require__(15);
+var presence = __webpack_require__(38);
+var contact = __webpack_require__(26);
 var Call = (function (_super) {
     __extends(Call, _super);
     function Call(context) {
@@ -2123,10 +2249,10 @@ var Call = (function (_super) {
      * and calls
      */
     Call.prototype.attachContacts = function (contacts, calls, options) {
-        var self = this;
+        var _this = this;
         // Flatten all caller infos from all messages
         var callerInfos = calls.reduce(function (callerInfos, call) {
-            return callerInfos.concat(self.getAllCallerInfos(call));
+            return callerInfos.concat(_this.getAllCallerInfos(call));
         }, []);
         this.contact.attachToCallerInfos(callerInfos, contacts, options);
     };
@@ -2134,9 +2260,9 @@ var Call = (function (_super) {
      * Check whether pair of calls are two legs of RingOut
      */
     Call.prototype.checkMergeability = function (outboundRingOutCall, inboundCall, options) {
-        function getTime(dateString) {
+        var getTime = function (dateString) {
             return (new Date(dateString)).getTime();
-        }
+        };
         return ((!options.strict || outboundRingOutCall.action && outboundRingOutCall.action.toLowerCase().indexOf('ringout') != -1) && outboundRingOutCall.direction == 'Outbound' && inboundCall.direction == 'Inbound' && ((!inboundCall.startTime && !outboundRingOutCall.startTime) || Math.abs(getTime(inboundCall.startTime) - getTime(outboundRingOutCall.startTime)) < (options.maxStartTimeDiscrepancy || 5000)) && inboundCall.from.phoneNumber == outboundRingOutCall.to.phoneNumber && (inboundCall.to.phoneNumber == outboundRingOutCall.from.phoneNumber || inboundCall.to.name == outboundRingOutCall.from.name));
     };
     Call.prototype.combineCalls = function (outboundRingOutCall, inboundCall, options) {
@@ -2234,9 +2360,9 @@ var Call = (function (_super) {
         });
     };
     Call.prototype.getSignature = function (call) {
-        function cleanup(phoneNumber) {
+        var cleanup = function (phoneNumber) {
             return (phoneNumber || '').toString().replace(/[^0-9]/ig, '');
-        }
+        };
         return call.direction + '|' + (call.from && cleanup(call.from.phoneNumber)) + '|' + (call.to && cleanup(call.to.phoneNumber));
     };
     Call.prototype.mergePresenceCalls = function (presenceCalls, presence) {
@@ -2270,19 +2396,19 @@ exports.$get = $get;
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var validator = __webpack_require__(21);
-var list = __webpack_require__(14);
+var helper = __webpack_require__(14);
+var validator = __webpack_require__(22);
+var list = __webpack_require__(15);
 var Contact = (function (_super) {
     __extends(Contact, _super);
     function Contact(context) {
@@ -2457,10 +2583,10 @@ var Contact = (function (_super) {
         });
     };
     Contact.prototype.comparator = function (options) {
-        var self = this;
+        var _this = this;
         return this.list.comparator(this.utils.extend({
             extractFn: function (contact, options) {
-                return self.getFullName(contact);
+                return _this.getFullName(contact);
             }
         }, options));
     };
@@ -2509,18 +2635,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var validator = __webpack_require__(21);
+var helper = __webpack_require__(14);
+var validator = __webpack_require__(22);
 var ContactGroup = (function (_super) {
     __extends(ContactGroup, _super);
     function ContactGroup(context) {
@@ -2547,17 +2673,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
+var helper = __webpack_require__(14);
 var Conferencing = (function (_super) {
     __extends(Conferencing, _super);
     function Conferencing() {
@@ -2578,17 +2704,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
+var helper = __webpack_require__(14);
 var Country = (function (_super) {
     __extends(Country, _super);
     function Country() {
@@ -2609,20 +2735,20 @@ exports.$get = $get;
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var validator = __webpack_require__(21);
-var extension = __webpack_require__(31);
-var deviceModel = __webpack_require__(30);
+var helper = __webpack_require__(14);
+var validator = __webpack_require__(22);
+var extension = __webpack_require__(32);
+var deviceModel = __webpack_require__(31);
 var Device = (function (_super) {
     __extends(Device, _super);
     function Device(context) {
@@ -2664,17 +2790,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
+var helper = __webpack_require__(14);
 var DeviceModel = (function (_super) {
     __extends(DeviceModel, _super);
     function DeviceModel() {
@@ -2872,18 +2998,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var list = __webpack_require__(14);
+var helper = __webpack_require__(14);
+var list = __webpack_require__(15);
 var Extension = (function (_super) {
     __extends(Extension, _super);
     function Extension(context) {
@@ -2946,18 +3072,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var list = __webpack_require__(14);
+var helper = __webpack_require__(14);
+var list = __webpack_require__(15);
 var ForwardingNumber = (function (_super) {
     __extends(ForwardingNumber, _super);
     function ForwardingNumber(context) {
@@ -3005,17 +3131,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
+var helper = __webpack_require__(14);
 var Language = (function (_super) {
     __extends(Language, _super);
     function Language() {
@@ -3043,19 +3169,19 @@ exports.$get = $get;
 
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var list = __webpack_require__(14);
-var state = __webpack_require__(41);
+var helper = __webpack_require__(14);
+var list = __webpack_require__(15);
+var state = __webpack_require__(42);
 var Location = (function (_super) {
     __extends(Location, _super);
     function Location(context) {
@@ -3067,6 +3193,7 @@ var Location = (function (_super) {
         return '/dictionary/location';
     };
     Location.prototype.filter = function (options) {
+        var _this = this;
         var uniqueNPAs = [];
         options = this.utils.extend({
             stateId: '',
@@ -3076,8 +3203,8 @@ var Location = (function (_super) {
             {
                 condition: options.stateId,
                 filterFn: function (item, opts) {
-                    return (this.state.getId(item.state) == opts.condition);
-                }.bind(this)
+                    return (_this.state.getId(item.state) == opts.condition);
+                }
             },
             {
                 condition: options.onlyUniqueNPA,
@@ -3117,22 +3244,22 @@ exports.$get = $get;
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var list = __webpack_require__(14);
-var validator = __webpack_require__(21);
-var subscription = __webpack_require__(19);
-var platform = __webpack_require__(18);
-var contact = __webpack_require__(25);
+var helper = __webpack_require__(14);
+var list = __webpack_require__(15);
+var validator = __webpack_require__(22);
+var subscription = __webpack_require__(20);
+var platform = __webpack_require__(19);
+var contact = __webpack_require__(26);
 var Message = (function (_super) {
     __extends(Message, _super);
     function Message(context) {
@@ -3281,19 +3408,19 @@ exports.$get = $get;
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var list = __webpack_require__(14);
-var extension = __webpack_require__(31);
+var helper = __webpack_require__(14);
+var list = __webpack_require__(15);
+var extension = __webpack_require__(32);
 var PhoneNumber = (function (_super) {
     __extends(PhoneNumber, _super);
     function PhoneNumber(context) {
@@ -3363,19 +3490,19 @@ exports.$get = $get;
 
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var subscription = __webpack_require__(19);
-var extension = __webpack_require__(31);
+var helper = __webpack_require__(14);
+var subscription = __webpack_require__(20);
+var extension = __webpack_require__(32);
 var Presence = (function (_super) {
     __extends(Presence, _super);
     function Presence(context) {
@@ -3396,8 +3523,9 @@ var Presence = (function (_super) {
         return subscription.$get(this.context).setEvents([this.createUrl(options, id)]);
     };
     Presence.prototype.updateSubscription = function (subscription, presences, options) {
+        var _this = this;
         var events = presences.map(this.getId, this).map(function (id) {
-            return this.createUrl(options, id);
+            return _this.createUrl(options, id);
         }, this);
         subscription.addEvents(events);
         return subscription;
@@ -3433,18 +3561,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var validator = __webpack_require__(21);
+var helper = __webpack_require__(14);
+var validator = __webpack_require__(22);
 var Ringout = (function (_super) {
     __extends(Ringout, _super);
     function Ringout(context) {
@@ -3489,17 +3617,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
+var helper = __webpack_require__(14);
 var Service = (function (_super) {
     __extends(Service, _super);
     function Service() {
@@ -3537,8 +3665,9 @@ var Service = (function (_super) {
         }, false);
     };
     Service.prototype.isServiceFeatureEnabledMethod = function (feature) {
+        var _this = this;
         return function (serviceFeatures) {
-            return this.isEnabled(feature, serviceFeatures);
+            return _this.isEnabled(feature, serviceFeatures);
         };
     };
     return Service;
@@ -3553,17 +3682,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
+var helper = __webpack_require__(14);
 var ShippingMethod = (function (_super) {
     __extends(ShippingMethod, _super);
     function ShippingMethod() {
@@ -3598,19 +3727,19 @@ exports.$get = $get;
 
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
-var list = __webpack_require__(14);
-var country = __webpack_require__(28);
+var helper = __webpack_require__(14);
+var list = __webpack_require__(15);
+var country = __webpack_require__(29);
 var State = (function (_super) {
     __extends(State, _super);
     function State(context) {
@@ -3647,17 +3776,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(13);
+var helper = __webpack_require__(14);
 var Timezone = (function (_super) {
     __extends(Timezone, _super);
     function Timezone() {
@@ -3678,159 +3807,19 @@ exports.$get = $get;
 
 
 /***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../../typings/tsd.d.ts" />
-var PubnubMock = (function () {
-    function PubnubMock() {
-    }
-    PubnubMock.prototype.ready = function () {
-    };
-    PubnubMock.prototype.unsubscribe = function (options) {
-    };
-    PubnubMock.prototype.subscribe = function (options) {
-        this.onMessage = options.message;
-    };
-    PubnubMock.prototype.receiveMessage = function (msg) {
-        this.onMessage(msg, 'env', 'channel');
-    };
-    return PubnubMock;
-})();
-exports.PubnubMock = PubnubMock;
-var PubnubFactory = (function () {
-    function PubnubFactory(context) {
-        this.context = context;
-    }
-    PubnubFactory.prototype.init = function (options) {
-        return new PubnubMock();
-    };
-    return PubnubFactory;
-})();
-exports.PubnubFactory = PubnubFactory;
-function $get(context) {
-    return new PubnubFactory(context);
-}
-exports.$get = $get;
-
-
-/***/ },
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-var utils = __webpack_require__(20);
-var log = __webpack_require__(15);
-var xhrResponse = __webpack_require__(9);
-var XhrMock = (function () {
-    function XhrMock(context) {
-        // Service
-        this.context = context;
-        this.responses = xhrResponse.$get(context);
-        this.log = log.$get(context);
-        this.utils = utils.$get(context);
-        // Request
-        this.async = true;
-        this.method = '';
-        this.url = '';
-        this.requestHeaders = {};
-        this.withCredentials = false;
-        // Response
-        this.data = null;
-        this.readyState = 0;
-        this.responseHeaders = {};
-        this.status = 0;
-    }
-    XhrMock.prototype.getResponseHeader = function (header) {
-        return this.responseHeaders[header.toLowerCase()];
-    };
-    XhrMock.prototype.setRequestHeader = function (header, value) {
-        this.requestHeaders[header.toLowerCase()] = value;
-    };
-    XhrMock.prototype.getAllResponseHeaders = function () {
-        var res = [];
-        this.utils.forEach(this.responseHeaders, function (value, name) {
-            res.push(name + ':' + value);
-        });
-        return res.join('\n');
-    };
-    XhrMock.prototype.open = function (method, url, async) {
-        this.method = method;
-        this.url = url;
-        this.async = async;
-    };
-    XhrMock.prototype.send = function (data) {
-        var _this = this;
-        var contentType = this.getRequestHeader('Content-Type');
-        this.data = data;
-        if (this.data && typeof this.data == 'string') {
-            // For convenience encoded post data will be decoded
-            if (contentType == 'application/json')
-                this.data = JSON.parse(this.data);
-            if (contentType == 'application/x-www-form-urlencoded')
-                this.data = this.utils.parseQueryString(this.data);
-        }
-        this.log.debug('API REQUEST', this.method, this.url);
-        var currentResponse = this.responses.find(this);
-        if (!currentResponse) {
-            setTimeout(function () {
-                if (_this.onerror)
-                    _this.onerror(new Error('Unknown request: ' + _this.url));
-            }, 1);
-            return;
-        }
-        this.setStatus(200);
-        this.setResponseHeader('Content-Type', 'application/json');
-        var res = currentResponse.response(this), Promise = this.context.getPromise(), onLoad = function (res) {
-            if (_this.getResponseHeader('Content-Type') == 'application/json')
-                res = JSON.stringify(res);
-            _this.responseText = res;
-            setTimeout(function () {
-                if (_this.onload)
-                    _this.onload();
-            }, 1);
-        };
-        if (res instanceof Promise) {
-            res.then(onLoad.bind(this)).catch(this.onerror.bind(this));
-        }
-        else
-            onLoad(res);
-    };
-    XhrMock.prototype.abort = function () {
-        this.log.debug('XhrMock.destroy(): Aborted');
-    };
-    XhrMock.prototype.getRequestHeader = function (header) {
-        return this.requestHeaders[header.toLowerCase()];
-    };
-    XhrMock.prototype.setResponseHeader = function (header, value) {
-        this.responseHeaders[header.toLowerCase()] = value;
-    };
-    XhrMock.prototype.setStatus = function (status) {
-        this.status = status;
-        return this;
-    };
-    return XhrMock;
-})();
-exports.XhrMock = XhrMock;
-function $get(context) {
-    return new XhrMock(context);
-}
-exports.$get = $get;
-
-
-/***/ },
-/* 45 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../../typings/tsd.d.ts" />
+/// <reference path="../../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var h = __webpack_require__(46);
-var ajaxObserver = __webpack_require__(10);
-var r = __webpack_require__(47);
+var h = __webpack_require__(45);
+var ajaxObserver = __webpack_require__(11);
+var r = __webpack_require__(46);
 /**
  * TODO @see https://github.com/github/fetch/blob/master/fetch.js
  */
@@ -3975,11 +3964,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 46 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../../typings/tsd.d.ts" />
-var utils = __webpack_require__(20);
+/// <reference path="../../../typings/externals.d.ts" />
+var utils = __webpack_require__(21);
 var Headers = (function () {
     function Headers(context) {
         this.headers = {};
@@ -4028,18 +4017,18 @@ exports.Headers = Headers;
 
 
 /***/ },
-/* 47 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../../typings/tsd.d.ts" />
+/// <reference path="../../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var h = __webpack_require__(46);
-var log = __webpack_require__(15);
+var h = __webpack_require__(45);
+var log = __webpack_require__(16);
 var Response = (function (_super) {
     __extends(Response, _super);
     function Response(context, status, statusText, body, headers) {

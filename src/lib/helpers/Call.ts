@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('../core/Context');
 import helper = require('../core/Helper');
@@ -115,12 +115,10 @@ export class Call extends helper.Helper {
      */
     attachContacts(contacts:contact.IContact[], calls:ICall[], options?:contact.IContactMatchOptions) {
 
-        var self = this;
-
         // Flatten all caller infos from all messages
-        var callerInfos = calls.reduce(function (callerInfos, call) {
+        var callerInfos = calls.reduce((callerInfos, call) => {
 
-            return callerInfos.concat(self.getAllCallerInfos(call));
+            return callerInfos.concat(this.getAllCallerInfos(call));
 
         }, []);
 
@@ -133,9 +131,9 @@ export class Call extends helper.Helper {
      */
     checkMergeability(outboundRingOutCall:ICall, inboundCall:ICall, options?:ICallProcessingOptions):boolean {
 
-        function getTime(dateString) {
+        var getTime = (dateString) => {
             return (new Date(dateString)).getTime();
-        }
+        };
 
         return (
         (!options.strict || outboundRingOutCall.action && outboundRingOutCall.action.toLowerCase().indexOf('ringout') != -1) &&
@@ -285,9 +283,9 @@ export class Call extends helper.Helper {
 
     getSignature(call:ICall) {
 
-        function cleanup(phoneNumber) {
+        var cleanup = (phoneNumber) => {
             return (phoneNumber || '').toString().replace(/[^0-9]/ig, '');
-        }
+        };
 
         return call.direction + '|' + (call.from && cleanup(call.from.phoneNumber)) + '|' + (call.to && cleanup(call.to.phoneNumber));
 

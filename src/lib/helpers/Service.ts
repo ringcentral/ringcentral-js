@@ -1,4 +1,4 @@
-/// <reference path="../../typings/tsd.d.ts" />
+/// <reference path="../../typings/externals.d.ts" />
 
 import context = require('../core/Context');
 import helper = require('../core/Helper');
@@ -11,7 +11,7 @@ export class Service extends helper.Helper {
 
     isEnabled(feature:string, serviceFeatures:IServiceFeature[]) {
 
-        return serviceFeatures.reduce(function(value, f) {
+        return serviceFeatures.reduce((value, f) => {
 
             if (f.featureName == feature) value = f.enabled;
             return value;
@@ -21,7 +21,7 @@ export class Service extends helper.Helper {
     }
 
     isServiceFeatureEnabledMethod(feature) {
-        return function(serviceFeatures) {
+        return (serviceFeatures) => {
             return this.isEnabled(feature, serviceFeatures);
         };
     }
