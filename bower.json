@@ -15,7 +15,7 @@
   ],
   "dependencies": {
     "pubnub": "*",
-    "cryptojslib": "*",
+    "crypto-js": "*",
     "es6-promise-polyfill": "*"
   },
   "devDependencies": {

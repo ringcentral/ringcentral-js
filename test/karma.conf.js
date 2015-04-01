@@ -19,7 +19,7 @@ module.exports = function(config) {
             {pattern: './lib/RCSDK.js', included: false},
             {pattern: './lib/RCSDK-spec.js', included: false},
             {pattern: './lib/test.js', included: false},
-            {pattern: './bower_components/cryptojslib/**/*.js', included: false},
+            {pattern: './bower_components/crypto-js/**/*.js', included: false},
             {pattern: './bower_components/pubnub/web/*.*', included: false},
             {pattern: './bower_components/es6-promise-polyfill/*.*', included: false},
             {pattern: './node_modules/chai-spies/chai-spies.js', included: false},
@@ -70,7 +70,7 @@ module.exports = function(config) {
             'karma-mocha',
             'karma-mocha-reporter',
             'karma-phantomjs-launcher',
-            'karma-requirejs',
+            'karma-cajon',
             'karma-chai'
         ],
 
