@@ -27,6 +27,7 @@ export class Log {
         }
 
         this.context = context;
+        this.console = console;
         this.utils = utils.$get(context);
 
         this.logDebug = false;

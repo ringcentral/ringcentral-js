@@ -25,55 +25,92 @@
 
 # Installation
 
-## 1. Get the code
+SDK can be used in 3 environments:
+
+1. [Browser](#1-set-things-up-in-browser)
+2. [NodeJS](#1-set-things-up-in-nodejs)
+3. [Browserify or Webpack](#3-set-things-up-for-browserify-or-webpack)
+
+## 1. Set things up in Browser
+
+### 1.1. Get the code
 
 Pick the option that works best for you:
 
-- Bower &mdash; `$ bower install rcsdk --save`, all dependencies will be downloaded to `bower_components` directory
-- NPM &mdash; `$ npm install rcsdk --save`
-- [ZIP file](https://github.com/ringcentral/js-sdk/archive/master.zip) and dependencies *(not recommended)*:
-    - [ES6 Promise Polyfill](https://github.com/lahmatiy/es6-promise-polyfill)
-    - [PUBNUB](http://www.pubnub.com/docs/javascript/javascript-sdk.html)
-    - [Crypto JS](https://code.google.com/p/crypto-js)
+- **Preferred way to install SDK is to use Bower**, all dependencies will be downloaded to `bower_components` directory:
 
-## 2a. Set things up in Browser (if you don't use RequireJS in your project)
+    ```sh
+    bower install rcsdk --save
+    ```Bower
+    
+- Download the bundle version, which includes CryptoJS, PUBNUB and ES6 Promise (choose which works best for you):
+    - [ZIP file with source code](https://github.com/ringcentral/js-sdk/archive/master.zip) or
+    - [Non-minified version](https://raw.githubusercontent.com/ringcentral/js-sdk/master/build/rc-sdk-bundle.js) or
+    - [Minified version](https://raw.githubusercontent.com/ringcentral/js-sdk/master/build/rc-sdk-bundle.js)
+    
+- Donwload everything manually *(not recommended)*:
+    - [ZIP file with source code](https://github.com/ringcentral/js-sdk/archive/master.zip)
+    - [ES6 Promise](https://github.com/jakearchibald/es6-promise)
+    - [PUBNUB](https://github.com/pubnub/javascript)
+    - [Crypto JS](https://github.com/evanvosberg/crypto-js)
+
+## 1.2.a. Add scripts to HTML page
+
+You can use bundle version (with CryptoJS, PUBNUB and ES6 Promise included in main file).
+
+Add this to your HTML:
+
+```html
+<script type="text/javascript" src="path-to-scripts/rcsdk/build/rc-sdk-bundle.js"></script>
+```
+
+Another option is to add dependencies and SDK separately.
 
 Add this to your HTML (order should be preserved):
 
 ```html
 <script type="text/javascript" src="path-to-scripts/es6-promise-polyfill/promise.js"></script>
-<script type="text/javascript" src="path-to-scripts/cryptojslib/rollups/aes.js"></script>
-<script type="text/javascript" src="path-to-scripts/cryptojslib/rollups/sha256.js"></script>
-<script type="text/javascript" src="path-to-scripts/cryptojslib/components/mode-ecb.js"></script>
+<script type="text/javascript" src="path-to-scripts/crypto-js/crypto-js.js"></script>
 <script type="text/javascript" src="path-to-scripts/pubnub/web/pubnub.js"></script>
 <script type="text/javascript" src="path-to-scripts/rcsdk/build/rc-sdk.js"></script><!-- or rc-sdk.min.js -->
 ```
 
-## 2b. Set things up in Browser (if you use RequireJS in your project)
+Preferred way is to use RequireJS or bundle version of SDK.
+
+If you wish to reduce the size of CryptoJS, instead of `crypto-js.js` which is more than 100K, you can include only
+needed by SDK (order should be preserved):
+
+```html
+<script type="text/javascript" src="path-to-scripts/crypto-js/core.js"></script>
+<script type="text/javascript" src="path-to-scripts/crypto-js/enc-base64.js"></script>
+<script type="text/javascript" src="path-to-scripts/crypto-js/md5.js"></script>
+<script type="text/javascript" src="path-to-scripts/crypto-js/sha1.js"></script>
+<script type="text/javascript" src="path-to-scripts/crypto-js/hmac.js"></script>
+<script type="text/javascript" src="path-to-scripts/crypto-js/evpkdf.js"></script>
+<script type="text/javascript" src="path-to-scripts/crypto-js/cipher-core.js"></script>
+<script type="text/javascript" src="path-to-scripts/crypto-js/aes.js"></script>
+<script type="text/javascript" src="path-to-scripts/crypto-js/mode-ecb.js"></script>
+```
+
+## 1.2.b. Set things up in Browser (if you use RequireJS in your project)
 
 ```js
 // Add this to your RequireJS configuration file
 require.config({
     paths: {
-        'rcsdk': 'path-to-scripts/rcsdk/build/rc-sdk.js', // or rc-sdk.min.js
+        'rcsdk': 'path-to-scripts/rcsdk/build/rc-sdk', // or rc-sdk.min
         'es6-promise': 'path-to-scripts/es6-promise-polyfill/promise',
         'pubnub': 'path-to-scripts/pubnub/web/pubnub'
     },
     packages: [
         {
             name: 'crypto-js',
-            location: 'path-to-scripts/cryptojslib',
-            main: 'components/mode-ecb'
+            location: 'path-to-scripts/crypto-js'
         }
     ],
     shim: {
         'pubnub': {
-            exports: 'PUBNUB',
-            deps: ['crypto-js/rollups/aes', 'crypto-js/rollups/sha256']
-        },
-        'crypto-js/components/mode-ecb': {
-            exports: 'CryptoJS',
-            deps: ['crypto-js/rollups/aes', 'crypto-js/rollups/sha256']
+            exports: 'PUBNUB'
         }
     }
 });
@@ -84,31 +121,53 @@ require(['rcsdk'], function(RCSDK) {
 });
 ```
 
-If you wish to use the raw version *(not recommended)*:
+## 2. Set things up in NodeJS
 
-```js
-// Add this to your RequireJS configuration file (including stuff from above)
-require.config({
-    packages: [
-        {
-            name: 'rcsdk-raw',
-            location: 'path-to-scripts/rcsdk',
-            main: 'lib/browser'
+1. Install the NPM package:
+
+    ```sh
+    npm install rcsdk --save
+    ```
+
+2. Require the SDK:
+
+    ```js
+    var RCSDK = require('rcsdk');
+    ```
+
+## 3. Set things up for Browserify or Webpack (experimental)
+
+***This is an experimental support, things may change in 1.3.0***
+
+1. Install the NPM package:
+
+    ```sh
+    npm install rcsdk --save
+    ```
+
+2. Require the SDK:
+
+    ```js
+    var RCSDK = require('rcsdk');
+    ```
+
+To reduce the size of Webpack bundle use browser version of PUBNUB (instead of the one that is installed via NPM along
+with the SDK). You can get PUBNUB via Bower or directly download the the source. More information can be found in
+[installation for browser](#1-set-things-up-in-browser).
+
+Add the following to your Webpack config:
+
+```json
+{
+    resolve: {
+        alias: {
+            'pubnub': path.resolve('./bower_components/pubnub/web/pubnub.js')
         }
-    ]
-});
-
-// Then you can use the SDK like any other AMD component
-require(['rcsdk-raw'], function(RCSDK) {
-    // your code here
-});
+    }
+}
 ```
 
-## 2c. Set things up on NodeJS
-
-```js
-var RCSDK = require('rcsdk');
-```
+Path should be relative to Webpack configuration file.
 
 ***
 

@@ -1,3 +1,5 @@
+var path = require('path');
+
 module.exports = function(config) {
 
     config.set({
@@ -6,33 +8,26 @@ module.exports = function(config) {
 
         frameworks: [
             'mocha',
-            'requirejs',
-            'chai'
+            'cajon',
+            'chai',
+            'sinon-chai'
         ],
 
         files: [
             // specify but not include files
             {pattern: './build/**/*.js', included: false},
-            {pattern: './test/lib/**/*.js', included: false},
-            {pattern: './lib/*/**/*.js', included: false},
-            {pattern: './lib/browser.js', included: false},
-            {pattern: './lib/RCSDK.js', included: false},
-            {pattern: './lib/RCSDK-spec.js', included: false},
-            {pattern: './lib/test.js', included: false},
+            {pattern: './test/**/*.js', included: false},
+            {pattern: './lib/**/*.js', included: false},
             {pattern: './bower_components/crypto-js/**/*.js', included: false},
             {pattern: './bower_components/pubnub/web/*.*', included: false},
             {pattern: './bower_components/es6-promise-polyfill/*.*', included: false},
-            {pattern: './node_modules/chai-spies/chai-spies.js', included: false},
             // include files
-            {pattern: './test/phantomjs-bind.js', included: true},
             {pattern: './lib/requirejs-config.js', included: true},
             {pattern: './test/karma.js', included: true}
         ],
 
         exclude: [
-            './lib/requirejs-wrap.js',
-            './lib/index.js',
-            './lib/index-test.js'
+            './lib/requirejs-wrap.js'
         ],
 
         reporters: [
@@ -71,7 +66,7 @@ module.exports = function(config) {
             'karma-mocha-reporter',
             'karma-phantomjs-launcher',
             'karma-cajon',
-            'karma-chai'
+            'karma-chai-plugins'
         ],
 
         singleRun: true,
