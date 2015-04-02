@@ -25,7 +25,7 @@
     "chai": "*",
     "express": "*",
     "gulp": "*",
-    "gulp-jshint": "^1.9.0",
+    "gulp-jshint": "*",
     "gulp-rename": "*",
     "gulp-replace": "*",
     "gulp-sourcemaps": "*",
@@ -47,6 +47,7 @@
     "sinon-chai": "*",
     "soap": "*",
     "ts-loader": "*",
+    "typescript": "*",
     "webpack": "*"
   },
   "preferGlobal": false,

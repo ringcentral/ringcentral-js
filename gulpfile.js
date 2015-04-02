@@ -63,7 +63,7 @@
     gulp.task('tsc', ['clean'], function(cb) {
 
         var exec = require('child_process').exec,
-            command = 'tsc src/**/*.ts src/**/**/*.ts src/**/**/**/*.ts --outDir . --module commonjs'; //  --sourceMap --declaration
+            command = './node_modules/.bin/tsc src/**/*.ts src/**/**/*.ts src/**/**/**/*.ts --outDir . --module commonjs'; //  --sourceMap --declaration
 
         gutil.log('Command: ' + gutil.colors.cyan(command));
 
