@@ -180,7 +180,7 @@ export class Utils {
 
     }
 
-    isPhoneNumber(v:string) {
+    isPhoneNumber(v:string):boolean {
         return (/\+?1[0-9]{3}[0-9a-z]{7}/im.test(v.toString().split(/[^0-9a-z\+]/im).join('')));
     }
 
@@ -192,34 +192,34 @@ export class Utils {
         return Array.prototype.slice.call(args || [], 0);
     }
 
-    isDate(obj:any) {
+    isDate(obj:any):boolean {
         return this.type(obj) === "date";
     }
 
-    isFunction(obj:any) {
+    isFunction(obj:any):boolean {
         return this.type(obj) === "function";
     }
 
-    isArray(obj:any) {
+    isArray(obj:any):boolean {
         return Array.isArray ? Array.isArray(obj) : this.type(obj) === "array";
     }
 
     // A crude way of determining if an object is a window
-    isWindow(obj:any) {
+    isWindow(obj:any):boolean {
         return obj && typeof obj === "object" && "setInterval" in obj;
     }
 
-    isNaN(obj:any) {
+    isNaN(obj:any):boolean {
         return obj === null || !rdigit.test(obj) || isNaN(obj);
     }
 
-    type(obj:any) {
-        return obj === null ?
-               String(obj) :
-               class2type[toString.call(obj)] || "object";
+    type(obj:any):string {
+        return obj === null
+            ? String(obj)
+            : class2type[toString.call(obj)] || "object";
     }
 
-    isPlainObject(obj:any) {
+    isPlainObject(obj:any):boolean {
 
         // Must be an Object.
         // Because of IE, we also have to check the presence of the constructor property.
@@ -243,7 +243,7 @@ export class Utils {
 
     }
 
-    getProperty(obj, property) {
+    getProperty(obj:any, property:string):any {
 
         return property
             .split(/[.[\]]/)
@@ -282,11 +282,11 @@ export class Utils {
         if (timeout) clearTimeout(timeout);
     }
 
-    parseString(s) {
+    parseString(s:any):string {
         return s ? s.toString() : '';
     }
 
-    parseNumber(n) {
+    parseNumber(n:any):number {
         if (!n) return 0;
         n = parseFloat(n);
         return isNaN(n) ? 0 : n;

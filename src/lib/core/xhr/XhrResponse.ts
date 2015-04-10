@@ -20,7 +20,7 @@ export class XhrResponse {
 
     find(ajax:xhrMock.XhrMock):IXhrResponse {
 
-        var currentResponse;
+        var currentResponse:IXhrResponse = null;
 
         this.responses.forEach((response:IXhrResponse) => {
 

@@ -3,7 +3,10 @@
 import utils = require('../Utils');
 import context = require('../Context');
 
-export class Headers {
+/**
+ * @see https://github.com/Microsoft/TypeScript/issues/275
+ */
+export class Headers<T extends Headers<any>> {
 
     protected headers:IHeadersObject;
     protected context:context.Context;
@@ -20,11 +23,11 @@ export class Headers {
     static multipartContentType = 'multipart/mixed';
     static urlencodedContentType = 'application/x-www-form-urlencoded';
 
-    setHeader(name:string, value:string) {
+    setHeader(name:string, value:string):T {
 
         this.headers[name.toLowerCase()] = value;
 
-        return this;
+        return <any>this;
 
     }
 
@@ -40,18 +43,23 @@ export class Headers {
 
     }
 
-    setHeaders(headers:IHeadersObject) {
+    setHeaders(headers:IHeadersObject):T {
 
         this.utils.forEach(headers, (value:string, name:string) => {
             this.setHeader(name, value);
         });
 
-        return this;
+        return <any>this;
 
     }
 
     isContentType(contentType:string):boolean {
         return this.getContentType().indexOf(contentType) > -1;
+    }
+
+    setContentType(contentType:string):T {
+        this.setHeader(Headers.contentType, contentType);
+        return <any>this;
     }
 
     getContentType():string {

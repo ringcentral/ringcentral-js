@@ -1,11 +1,41 @@
+/**
+ * Build schema
+ *
+ *        ┏━━━━━ webpack ━━━━┳━ sourcemap ━━┓
+ *        ┃                  ┃              ┃
+ * clean ━╋━ webpack-bundle ━┛              ┣━ default
+ *        ┃                                 ┃
+ *        ┗━ tsc ━ wrap ━ jshint ━ version ━┛
+ *
+ * Watch tasks don't run jshint, version and default, the one must run full build befor commit
+ *
+ * For bold box drawings use https://www.branah.com/picker
+ */
 (function() {
 
     var gulp = require('gulp'),
         gutil = require('gulp-util'),
         sourcemaps = require('gulp-sourcemaps'),
         replace = require('gulp-replace'),
-
-        sourcemapsDebug = false;
+        ts = require('gulp-typescript'),
+        tsProject = ts.createProject({
+            declarationFiles: true,
+            noExternalResolve: true,
+            module: 'commonjs'
+        }),
+        sourcemapsDebug = false,
+        webpackConfigure = {
+            useMemoryFs: true,
+            progress: false
+        },
+        webpackFormat = {
+            version: true,
+            timings: true
+        },
+        webpackFailAfter = {
+            errors: true,
+            warnings: true
+        };
 
     gutil.log('Working directory:', gutil.colors.cyan(process.cwd()));
 
@@ -19,26 +49,31 @@
 
         return gulp.src(config, {base: path.resolve('./lib')})
 
-            .pipe(webpack.configure({
-                useMemoryFs: true,
-                progress: false
-            }))
-
-            //.pipe(webpack.overrides({}))
-
+            .pipe(webpack.configure(webpackConfigure))
             .pipe(webpack.compile())
-
-            .pipe(webpack.format({
-                version: true,
-                timings: true
-            }))
-
-            .pipe(webpack.failAfter({
-                errors: true,
-                warnings: true
-            }))
-
+            .pipe(webpack.format(webpackFormat))
+            .pipe(webpack.failAfter(webpackFailAfter))
             .pipe(gulp.dest('./build'));
+
+    }
+
+    function webpackWatch(event, bundle) {
+
+        var webpack = require('gulp-webpack-build'),
+            path = require('path'),
+            config = bundle ? 'webpack.config.bundle.js' : 'webpack.config.js';
+
+        gutil.log('Webpack config:', gutil.colors.cyan(config));
+
+        gulp.src(event.path, {base: path.resolve('./lib')})
+            .pipe(webpack.closest(config))
+            .pipe(webpack.configure(webpackConfigure))
+            .pipe(webpack.watch(function(err, stats) {
+                gulp.src(this.path, {base: this.base})
+                    .pipe(webpack.proxy(err, stats))
+                    .pipe(webpack.format(webpackFormat))
+                    .pipe(gulp.dest('./build'));
+            }));
 
     }
 
@@ -62,21 +97,11 @@
      */
     gulp.task('tsc', ['clean'], function(cb) {
 
-        var exec = require('child_process').exec,
-            command = './node_modules/.bin/tsc src/**/*.ts src/**/**/*.ts src/**/**/**/*.ts --outDir . --module commonjs'; //  --sourceMap --declaration
+        var ts = require('gulp-typescript');
 
-        gutil.log('Command: ' + gutil.colors.cyan(command));
-
-        exec(command, function(err, stdout) {
-            gutil.log(stdout);
-            gutil.log('STDOUT Length:', gutil.colors.magenta(stdout.length));
-            if (err) {
-                gutil.log(gutil.colors.red(err));
-                throw err;
-            } else {
-                cb();
-            }
-        });
+        return gulp.src(['./src/**/*.ts'])
+            .pipe(ts(tsProject))
+            .js.pipe(gulp.dest('.'));
 
     });
 
@@ -125,7 +150,7 @@
     /**
      * Compiles TypeScript modules into a Webpack bundle (including external dependencies CryptoJS, Promise and PUBNUB)
      */
-    gulp.task('webpack', ['jshint'], function() {
+    gulp.task('webpack', ['clean'], function() {
 
         return webpackCompile(true);
 
@@ -134,7 +159,7 @@
     /**
      * Compiles TypeScript modules into a Webpack build
      */
-    gulp.task('webpack-bundle', ['jshint'], function() {
+    gulp.task('webpack-bundle', ['clean'], function() {
 
         return webpackCompile(false);
 
@@ -172,11 +197,30 @@
 
     });
 
-    gulp.task('watch', ['default'], function() {
-        gulp.watch('lib/**/*.js', ['default']).on('change', function(event) {
-            //TODO Gulp-Webpack-Build watcher @see https://github.com/mdreizin/gulp-webpack-build/blob/master/docs/API.md
-            gutil.log(gutil.template('File <%= file %> was <%= type %>, running tasks', {file: gutil.colors.magenta(event.path), type: event.type}));
+    /**
+     * Quick watch procedure, only wrapped CommonJS modules, good for rapid development
+     */
+    gulp.task('watch', ['wrap'], function() {
+
+        gulp.watch('./src/**/*.ts', ['wrap']);
+
+    });
+
+    /**
+     * Quick watch + Webpack watch
+     */
+    gulp.task('watch-all', ['wrap', 'webpack', 'webpack-bundle'], function() {
+
+        gulp.watch('./src/**/*.ts', ['wrap']).on('change', function(event) {
+
+            //gutil.log(gutil.template('File <%= file %> was <%= type %>, running tasks', {file: gutil.colors.magenta(event.path), type: event.type}));
+
+            if (event.type === 'changed') {
+                webpackWatch(event, true);
+                webpackWatch(event, false);
+            }
         });
+
     });
 
 })();

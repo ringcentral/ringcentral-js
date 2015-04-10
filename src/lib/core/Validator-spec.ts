@@ -32,7 +32,7 @@ describe('RCSDK.core.Validator', function() {
 
         });
 
-        describe('pegative tests', function() {
+        describe('negative tests', function() {
 
             lengthValidator('should not validate a length that is above the max length', 5, 4, '123456', false);
             lengthValidator('should not validate a length that is below the min length', 5, 4, '123', false);

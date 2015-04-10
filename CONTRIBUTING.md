@@ -28,17 +28,29 @@ $ bower install
 
 # Building with GulpJS
 
-**Regular build**
+Build schema:
+
+```
+        ┏━━━━━ webpack ━━━━┳━ sourcemap ━━┓
+        ┃                  ┃              ┃
+ clean ━╋━ webpack-bundle ━┛              ┣━ default
+        ┃                                 ┃
+        ┗━ tsc ━ wrap ━ jshint ━ version ━┛
+```
+
+## Regular build
 
 ```
 $ npm run build
 ```
 
-**Watch**:
+## Watch
 
 ```
 $ npm run watch
 ```
+
+or `watch-all` will include Webpack watchers.
 
 ***
 

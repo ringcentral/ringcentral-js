@@ -1,21 +1,29 @@
 /// <reference path="../../../typings/externals.d.ts" />
 
 import context = require('../Context');
+import observable = require('../Observable')
 
-export class PubnubMock implements PUBNUB.PubnubInstance {
+export class PubnubMock extends observable.Observable<PubnubMock> implements PUBNUB.PubnubInstance {
 
-    onMessage:(message, env, channel) => void;
+    private options:PUBNUB.InitOptions;
+
+    constructor(context, options:PUBNUB.InitOptions) {
+        this.options = options;
+        super(context);
+    }
 
     ready() {}
 
-    unsubscribe(options) {}
-
-    subscribe(options:{message:(message, env, channel) => void}) {
-        this.onMessage = options.message;
+    subscribe(options:PUBNUB.SubscribeOptions) {
+        this.on('message-' + options.channel, options.message);
     }
 
-    receiveMessage(msg) {
-        this.onMessage(msg, 'env', 'channel');
+    unsubscribe(options:PUBNUB.UnsubscribeOptions) {
+        this.off('message-' + options.channel);
+    }
+
+    receiveMessage(msg, channel) {
+        this.emit('message-' + channel, msg, 'env', channel);
     }
 
 }
@@ -28,8 +36,8 @@ export class PubnubFactory implements PUBNUB.PUBNUB {
         this.context = context;
     }
 
-    init(options) {
-        return new PubnubMock();
+    init(options:PUBNUB.InitOptions) {
+        return new PubnubMock(this.context, options);
     }
 
 }

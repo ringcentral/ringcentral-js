@@ -54,7 +54,7 @@ export class Helper {
             // ajax.data has full array, leave only successful
             return ajax.data.filter((result) => {
                 return (!result.error);
-            }).map((result) => {
+            }).map((result:response.Response) => {
                 return result.data;
             });
 

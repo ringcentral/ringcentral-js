@@ -2,33 +2,39 @@ declare module PUBNUB {
 
     export interface PubnubInstance {
 
-        ready(options?:{
-            ssl?:boolean;
-            subscribe_key?:string
-        });
+        ready():void;
 
-        subscribe(options:{
-            channel?:string;
-            message?:(message, env, channel) => void;
-            connect?:()=>void
-        });
+        subscribe(options:SubscribeOptions);
 
-        unsubscribe(options:{
-            channel?:string
-        });
+        unsubscribe(options:UnsubscribeOptions);
 
-        receiveMessage(message:string); //TODO Remove
+        receiveMessage(message:string, channel:string); //TODO Remove
 
     }
 
     export interface PUBNUB {
 
-        init(options):PubnubInstance;
+        init(options:InitOptions):PubnubInstance;
 
+    }
+
+    export interface SubscribeOptions {
+        channel:string;
+        message?:(message, env, channel) => any;
+        connect?:(...args)=>void
+    }
+
+    export interface UnsubscribeOptions {
+        channel:string;
+    }
+
+    export interface InitOptions {
+        ssl?:boolean;
+        subscribe_key?:string
     }
 
 }
 
 declare module 'pubnub' {
-	var PUBNUB: typeof PUBNUB;
+    var PUBNUB:typeof PUBNUB;
 }

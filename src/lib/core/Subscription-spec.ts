@@ -199,7 +199,7 @@ describe('RCSDK.core.Subscription', function() {
                 .notify(aesMessage); // Directly call notify method
 
             // Simulate socket message
-            subscription.pubnub.receiveMessage(aesMessage);
+            subscription.pubnub.receiveMessage(aesMessage, 'foo');
 
             expect(nspy).to.be.calledTwice;
 

@@ -13,7 +13,7 @@ import log = require('./Log');
 import request = require('./http/Request');
 import r = require('./http/Response');
 
-export class Platform extends observable.Observable {
+export class Platform extends observable.Observable<Platform> {
 
     public server:string;
     public apiKey:string;
@@ -475,11 +475,12 @@ export class Platform extends observable.Observable {
         url = url || '';
         options = options || {};
 
-        var builtUrl = '';
+        var builtUrl = '',
+            hasHttp = url.indexOf('http://') != -1 || url.indexOf('https://') != -1;
 
-        if (options.addServer && url.indexOf('http://') == -1 && url.indexOf('https://') == -1) builtUrl += this.server;
+        if (options.addServer && !hasHttp) builtUrl += this.server;
 
-        if (url.indexOf(this.urlPrefix) == -1) builtUrl += this.urlPrefix + '/' + this.apiVersion;
+        if (url.indexOf(this.urlPrefix) == -1 && !hasHttp) builtUrl += this.urlPrefix + '/' + this.apiVersion;
 
         if (url.indexOf(this.accountPrefix) > -1) builtUrl.replace(this.accountPrefix + '~', this.accountPrefix + this.account);
 
@@ -492,25 +493,6 @@ export class Platform extends observable.Observable {
 
         return builtUrl;
 
-    }
-
-    destroy() {
-        super.destroy();
-        return this;
-    }
-
-    on(events, callback) {
-        super.on(events, callback);
-        return this;
-    }
-
-    off(events, callback?) {
-        super.on(events, callback);
-        return this;
-    }
-    emitAndCallback(event, args?, callback?) {
-        super.emitAndCallback(event, args, callback);
-        return this;
     }
 
 }

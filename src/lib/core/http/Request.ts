@@ -10,7 +10,7 @@ import r = require('./Response');
 /**
  * TODO @see https://github.com/github/fetch/blob/master/fetch.js
  */
-export class Request extends h.Headers {
+export class Request extends h.Headers<Request> {
 
     public async:boolean;
     public method:string;
@@ -39,18 +39,6 @@ export class Request extends h.Headers {
 
     isLoaded():boolean {
         return !!this.xhr;
-    }
-
-    //TODO Remove
-    setHeader(name:string, value:string):Request {
-        super.setHeader(name, value);
-        return this;
-    }
-
-    //TODO Remove
-    setHeaders(headers:h.IHeadersObject):Request {
-        super.setHeaders(headers);
-        return this;
     }
 
     setOptions(options?:IAjaxOptions):Request {

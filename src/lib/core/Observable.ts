@@ -4,7 +4,10 @@ import utils = require('./Utils');
 import log = require('./Log');
 import context = require('./Context');
 
-export class Observable {
+/**
+ * @see https://github.com/Microsoft/TypeScript/issues/275
+ */
+export class Observable<T extends Observable<any>> {
 
     protected context:context.Context;
     protected utils:utils.Utils;
@@ -14,10 +17,6 @@ export class Observable {
     private oneTimeEvents:any;
     private oneTimeArguments:any;
 
-    /**
-     * @constructor
-     * @alias RCSDK.core.Observable
-     */
     constructor(context:context.Context) {
         if (!(this instanceof Observable)) throw new Error('Observable(): New operator was omitted');
         Object.defineProperty(this, 'listeners', {value: {}, enumerable: false, writable: true});
@@ -32,12 +31,16 @@ export class Observable {
         return (event in this.listeners);
     }
 
-    registerOneTimeEvent(event) {
+    /**
+     * @deprecated
+     * @param {string} event
+     */
+    registerOneTimeEvent(event:string) {
         this.oneTimeEvents[event] = false;
         this.oneTimeArguments[event] = [];
     }
 
-    on(events, callback) {
+    on(events:any, callback:(...args)=>any):T {
 
         if (typeof events == 'string') events = [events];
         if (!events) throw new Error('No events to subscribe to');
@@ -45,7 +48,7 @@ export class Observable {
 
         var self = this;
 
-        events.forEach((event) => {
+        (<string[]>events).forEach((event) => {
 
             if (!self.hasListeners(event)) self.listeners[event] = [];
 
@@ -58,11 +61,11 @@ export class Observable {
 
         });
 
-        return this;
+        return <any>this;
 
     }
 
-    emit(event, ...args) {
+    emit(event:string, ...args):any {
 
         if (this.isOneTimeEventFired(event)) {
             this.log.debug('Observable.emit(%s): One-time event has been fired already', event);
@@ -78,7 +81,7 @@ export class Observable {
 
         if (!this.hasListeners(event)) return null;
 
-        this.listeners[event].some((callback) => {
+        this.listeners[event].some((callback:()=>any) => {
 
             result = callback.apply(this, args);
             return (result === false);
@@ -89,64 +92,94 @@ export class Observable {
 
     }
 
-    off(event, callback?) {
-        var self = this;
-        if (!callback) {
-            delete this.listeners[event];
+    off(event?:string, callback?):T {
+        if (!event) {
+            this.listeners = {};
+            this.oneTimeEvents = {};
+            this.oneTimeArguments = {};
         } else {
-            if (!this.hasListeners(event)) return this;
-            this.listeners[event].forEach((cb, i) => {
+            if (!callback) {
+                delete this.listeners[event];
+            } else {
+                if (!this.hasListeners(event)) return <any>this;
+                this.listeners[event].forEach((cb, i) => {
 
-                if (cb === callback) delete this.listeners[event][i];
+                    if (cb === callback) delete this.listeners[event][i];
 
-            });
+                });
+            }
         }
-        return this;
+        return <any>this;
     }
 
-    isOneTimeEvent(event) {
+    /**
+     * @deprecated
+     * @param event
+     * @returns {boolean}
+     */
+    isOneTimeEvent(event:string) {
         return (event in this.oneTimeEvents);
     }
 
-    isOneTimeEventFired(event) {
+    /**
+     * @deprecated
+     * @param {string} event
+     * @returns {boolean}
+     */
+    isOneTimeEventFired(event:string):boolean {
         if (!this.isOneTimeEvent(event)) return false;
         return (this.oneTimeEvents[event]);
     }
 
+    /**
+     * @deprecated
+     * @param event
+     */
     setOneTimeEventFired(event) {
         this.oneTimeEvents[event] = true;
     }
 
-    setOneTimeEventArgumens(event, args) {
+    /**
+     * @deprecated
+     * @param {string} event
+     * @param args
+     */
+    setOneTimeEventArgumens(event:string, args) {
         this.oneTimeArguments[event] = args;
     }
 
-    getOneTimeEventArgumens(event) {
+    /**
+     * @deprecated
+     * @param {string} event
+     * @returns {any}
+     */
+    getOneTimeEventArgumens(event:string) {
         return this.oneTimeArguments[event];
     }
 
-    offAll() {
-        this.listeners = {};
-        this.oneTimeEvents = {};
-        this.oneTimeArguments = {};
-        return this;
+    /**
+     * @deprecated
+     * @returns {T}
+     */
+    offAll():T {
+        return this.off();
     }
 
-    destroy() {
-        this.offAll();
+    destroy():T {
+        this.off();
         this.log.debug('Observable.destroy(): Listeners were destroyed');
-        return this;
+        return <any>this;
     }
 
-    emitAndCallback(event, args?, callback?) {
+    emitAndCallback(event, args?, callback?):T {
         args = this.utils.argumentsToArray(args);
         if (event) this.emit.apply(this, [event].concat(args));
         if (callback) callback.apply(this, args);
-        return this;
+        return <any>this;
     }
 
 }
 
-export function $get(context:context.Context):Observable {
-    return new Observable(context);
+export function $get(context:context.Context):Observable<any> {
+    return new Observable<any>(context);
 }

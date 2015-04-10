@@ -3,7 +3,7 @@
 import observable = require('./Observable');
 import context = require('./Context');
 
-export class AjaxObserver extends observable.Observable {
+export class AjaxObserver extends observable.Observable<AjaxObserver> {
 
     public events = {
         beforeRequest: 'beforeRequest', // parameters: ajax

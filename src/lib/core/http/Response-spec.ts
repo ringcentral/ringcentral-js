@@ -9,7 +9,7 @@ describe('RCSDK.core.http.Response', function() {
 
     "use strict";
 
-    describe('constructor', function() {
+    describe('constructor tests', function() {
 
         var goodMultipartMixedResponse =
                 '--Boundary_1245_945802293_1394135045248\n' +

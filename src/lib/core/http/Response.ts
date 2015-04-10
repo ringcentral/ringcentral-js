@@ -5,7 +5,7 @@ import utils = require('../Utils');
 import log = require('../Log');
 import context = require('../Context');
 
-export class Response extends h.Headers {
+export class Response extends h.Headers<Response> {
 
     static boundarySeparator = '--';
     static headerSeparator = ':';

@@ -300,28 +300,39 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
-var PubnubMock = (function () {
-    function PubnubMock() {
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var observable = __webpack_require__(17);
+var PubnubMock = (function (_super) {
+    __extends(PubnubMock, _super);
+    function PubnubMock(context, options) {
+        this.options = options;
+        _super.call(this, context);
     }
     PubnubMock.prototype.ready = function () {
     };
-    PubnubMock.prototype.unsubscribe = function (options) {
-    };
     PubnubMock.prototype.subscribe = function (options) {
-        this.onMessage = options.message;
+        this.on('message-' + options.channel, options.message);
     };
-    PubnubMock.prototype.receiveMessage = function (msg) {
-        this.onMessage(msg, 'env', 'channel');
+    PubnubMock.prototype.unsubscribe = function (options) {
+        this.off('message-' + options.channel);
+    };
+    PubnubMock.prototype.receiveMessage = function (msg, channel) {
+        this.emit('message-' + channel, msg, 'env', channel);
     };
     return PubnubMock;
-})();
+})(observable.Observable);
 exports.PubnubMock = PubnubMock;
 var PubnubFactory = (function () {
     function PubnubFactory(context) {
         this.context = context;
     }
     PubnubFactory.prototype.init = function (options) {
-        return new PubnubMock();
+        return new PubnubMock(this.context, options);
     };
     return PubnubFactory;
 })();
@@ -450,7 +461,7 @@ var XhrResponse = (function () {
         this.responses = [];
     };
     XhrResponse.prototype.find = function (ajax) {
-        var currentResponse;
+        var currentResponse = null;
         this.responses.forEach(function (response) {
             if (ajax.url.indexOf(response.path) > -1 && (!response.test || response.test(ajax))) {
                 currentResponse = response;
@@ -986,11 +997,10 @@ exports.$get = $get;
 /// <reference path="../../typings/externals.d.ts" />
 var utils = __webpack_require__(21);
 var log = __webpack_require__(16);
+/**
+ * @see https://github.com/Microsoft/TypeScript/issues/275
+ */
 var Observable = (function () {
-    /**
-     * @constructor
-     * @alias RCSDK.core.Observable
-     */
     function Observable(context) {
         if (!(this instanceof Observable))
             throw new Error('Observable(): New operator was omitted');
@@ -1004,6 +1014,10 @@ var Observable = (function () {
     Observable.prototype.hasListeners = function (event) {
         return (event in this.listeners);
     };
+    /**
+     * @deprecated
+     * @param {string} event
+     */
     Observable.prototype.registerOneTimeEvent = function (event) {
         this.oneTimeEvents[event] = false;
         this.oneTimeArguments[event] = [];
@@ -1053,45 +1067,76 @@ var Observable = (function () {
     };
     Observable.prototype.off = function (event, callback) {
         var _this = this;
-        var self = this;
-        if (!callback) {
-            delete this.listeners[event];
+        if (!event) {
+            this.listeners = {};
+            this.oneTimeEvents = {};
+            this.oneTimeArguments = {};
         }
         else {
-            if (!this.hasListeners(event))
-                return this;
-            this.listeners[event].forEach(function (cb, i) {
-                if (cb === callback)
-                    delete _this.listeners[event][i];
-            });
+            if (!callback) {
+                delete this.listeners[event];
+            }
+            else {
+                if (!this.hasListeners(event))
+                    return this;
+                this.listeners[event].forEach(function (cb, i) {
+                    if (cb === callback)
+                        delete _this.listeners[event][i];
+                });
+            }
         }
         return this;
     };
+    /**
+     * @deprecated
+     * @param event
+     * @returns {boolean}
+     */
     Observable.prototype.isOneTimeEvent = function (event) {
         return (event in this.oneTimeEvents);
     };
+    /**
+     * @deprecated
+     * @param {string} event
+     * @returns {boolean}
+     */
     Observable.prototype.isOneTimeEventFired = function (event) {
         if (!this.isOneTimeEvent(event))
             return false;
         return (this.oneTimeEvents[event]);
     };
+    /**
+     * @deprecated
+     * @param event
+     */
     Observable.prototype.setOneTimeEventFired = function (event) {
         this.oneTimeEvents[event] = true;
     };
+    /**
+     * @deprecated
+     * @param {string} event
+     * @param args
+     */
     Observable.prototype.setOneTimeEventArgumens = function (event, args) {
         this.oneTimeArguments[event] = args;
     };
+    /**
+     * @deprecated
+     * @param {string} event
+     * @returns {any}
+     */
     Observable.prototype.getOneTimeEventArgumens = function (event) {
         return this.oneTimeArguments[event];
     };
+    /**
+     * @deprecated
+     * @returns {T}
+     */
     Observable.prototype.offAll = function () {
-        this.listeners = {};
-        this.oneTimeEvents = {};
-        this.oneTimeArguments = {};
-        return this;
+        return this.off();
     };
     Observable.prototype.destroy = function () {
-        this.offAll();
+        this.off();
         this.log.debug('Observable.destroy(): Listeners were destroyed');
         return this;
     };
@@ -1482,10 +1527,10 @@ var Platform = (function (_super) {
     Platform.prototype.apiUrl = function (url, options) {
         url = url || '';
         options = options || {};
-        var builtUrl = '';
-        if (options.addServer && url.indexOf('http://') == -1 && url.indexOf('https://') == -1)
+        var builtUrl = '', hasHttp = url.indexOf('http://') != -1 || url.indexOf('https://') != -1;
+        if (options.addServer && !hasHttp)
             builtUrl += this.server;
-        if (url.indexOf(this.urlPrefix) == -1)
+        if (url.indexOf(this.urlPrefix) == -1 && !hasHttp)
             builtUrl += this.urlPrefix + '/' + this.apiVersion;
         if (url.indexOf(this.accountPrefix) > -1)
             builtUrl.replace(this.accountPrefix + '~', this.accountPrefix + this.account);
@@ -1497,22 +1542,6 @@ var Platform = (function (_super) {
         if (options.addToken)
             builtUrl += (options.addMethod ? '&' : '') + 'access_token=' + this.getToken();
         return builtUrl;
-    };
-    Platform.prototype.destroy = function () {
-        _super.prototype.destroy.call(this);
-        return this;
-    };
-    Platform.prototype.on = function (events, callback) {
-        _super.prototype.on.call(this, events, callback);
-        return this;
-    };
-    Platform.prototype.off = function (events, callback) {
-        _super.prototype.on.call(this, events, callback);
-        return this;
-    };
-    Platform.prototype.emitAndCallback = function (event, args, callback) {
-        _super.prototype.emitAndCallback.call(this, event, args, callback);
-        return this;
     };
     Platform.forcedTokenType = 'forced';
     return Platform;
@@ -1762,18 +1791,6 @@ var Subscription = (function (_super) {
                 _this.log.info('RC.core.Subscription: PUBNUB connected');
             }
         });
-        return this;
-    };
-    Subscription.prototype.on = function (events, callback) {
-        _super.prototype.on.call(this, events, callback);
-        return this;
-    };
-    Subscription.prototype.off = function (events, callback) {
-        _super.prototype.on.call(this, events, callback);
-        return this;
-    };
-    Subscription.prototype.emitAndCallback = function (event, args, callback) {
-        _super.prototype.emitAndCallback.call(this, event, args, callback);
         return this;
     };
     Subscription.renewHandicapMs = 60 * 1000;
@@ -3839,16 +3856,6 @@ var Request = (function (_super) {
     Request.prototype.isLoaded = function () {
         return !!this.xhr;
     };
-    //TODO Remove
-    Request.prototype.setHeader = function (name, value) {
-        _super.prototype.setHeader.call(this, name, value);
-        return this;
-    };
-    //TODO Remove
-    Request.prototype.setHeaders = function (headers) {
-        _super.prototype.setHeaders.call(this, headers);
-        return this;
-    };
     Request.prototype.setOptions = function (options) {
         options = options || {};
         // backwards compatibility
@@ -3969,6 +3976,9 @@ exports.$get = $get;
 
 /// <reference path="../../../typings/externals.d.ts" />
 var utils = __webpack_require__(21);
+/**
+ * @see https://github.com/Microsoft/TypeScript/issues/275
+ */
 var Headers = (function () {
     function Headers(context) {
         this.headers = {};
@@ -3994,6 +4004,10 @@ var Headers = (function () {
     };
     Headers.prototype.isContentType = function (contentType) {
         return this.getContentType().indexOf(contentType) > -1;
+    };
+    Headers.prototype.setContentType = function (contentType) {
+        this.setHeader(Headers.contentType, contentType);
+        return this;
     };
     Headers.prototype.getContentType = function () {
         return this.getHeader(Headers.contentType) || '';

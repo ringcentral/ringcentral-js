@@ -7,7 +7,7 @@ import context = require('./Context');
 import platform = require('./Platform');
 import r = require('./http/Response');
 
-export class Subscription extends observable.Observable {
+export class Subscription extends observable.Observable<Subscription> {
 
     static renewHandicapMs = 60 * 1000;
 
@@ -337,20 +337,6 @@ export class Subscription extends observable.Observable {
 
         return this;
 
-    }
-
-    on(events, callback) {
-        super.on(events, callback);
-        return this;
-    }
-
-    off(events, callback?) {
-        super.on(events, callback);
-        return this;
-    }
-    emitAndCallback(event, args?, callback?) {
-        super.emitAndCallback(event, args, callback);
-        return this;
     }
 
 }

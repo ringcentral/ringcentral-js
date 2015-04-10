@@ -3,7 +3,7 @@
 import context = require('./Context');
 import observable = require('./Observable');
 
-export class PageVisibility extends observable.Observable {
+export class PageVisibility extends observable.Observable<PageVisibility> {
 
     public events = {
         change: 'change'

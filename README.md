@@ -122,6 +122,24 @@ require(['rcsdk'], function(RCSDK) {
 });
 ```
 
+If you wish to use raw unbuilt version for RequireJS, add this to previous section:
+
+```js
+require.config({
+    packages: [
+        {
+            name: 'rcsdk-raw',
+            location: 'path-to-scripts/rcsdk',
+            main: 'RCSDK'
+        }
+    ]
+});
+
+require(['rcsdk-raw'], function(RCSDK) {
+    // your code here
+});
+```
+
 ## 2. Set things up in NodeJS
 
 1. Install the NPM package:
@@ -152,23 +170,26 @@ require(['rcsdk'], function(RCSDK) {
     var RCSDK = require('rcsdk');
     ```
 
-To reduce the size of Webpack bundle use browser version of PUBNUB (instead of the one that is installed via NPM along
-with the SDK). You can get PUBNUB via Bower or directly download the the source. More information can be found in
-[installation for browser](#1-set-things-up-in-browser).
-
-Add the following to your Webpack config:
-
-```json
-{
-    resolve: {
-        alias: {
-            'pubnub': path.resolve('./bower_components/pubnub/web/pubnub.js')
+3. Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
+    
+    ```json
+    {
+        externals: {
+            'xhr2': 'XMLHttpRequest',
+            'dom-storage': 'localStorage'
+        },
+        resolve: {
+            alias: {
+                'pubnub': path.resolve('./bower_components/pubnub/web/pubnub.js')
+            }
         }
     }
-}
-```
+    ```
 
-Path should be relative to Webpack configuration file.
+To reduce the size of your Webpack bundle it's better to use browser version of PUBNUB (instead of the one that is
+installed via NPM along with the SDK). You can get PUBNUB via Bower or directly download the the source.
+More information can be found in [installation for browser](#1-set-things-up-in-browser). Also it's not needed to use
+NPM's `xhr2` and `dom-storage` packages since both objects  exist in browser by default, so they can be externalized.
 
 ***
 
@@ -278,7 +299,7 @@ platform.apiCall({
     alert(e.message);
     
     // please note that ajax property may not be accessible if error occurred before AJAX send
-    if ('ajax' in e) {
+    if ('response' in e && 'request' in e) {
     
         var response = e.response, // or e.ajax for backward compatibility
             request = e.request;
