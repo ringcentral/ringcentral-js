@@ -1,23 +1,18 @@
-(function() {
-
-    var chai = require('chai'),
-        spies = require('chai-spies'),
-        requirejs = require('requirejs'),
-        RCSDK = require('../lib/index'),
-        rcsdk = new RCSDK({
-            server: 'http://whatever',
-            appKey: 'whatever',
-            appSecret: 'whatever'
-        });
-
-    chai.use(spies);
-
-    global.chai = chai;
-    global.expect = chai.expect;
-    global.define = requirejs.define;
-    global.requirejs = requirejs;
-    global.rcsdk = rcsdk;
-    global.RCSDK = RCSDK;
-    global.Mock = requirejs('../test/lib/Mock')(rcsdk);
-
-})();
+var define = typeof define === 'function' && define.amd ? define : function (factory) {
+    factory(require, exports, module);
+};
+define(function (require, exports, module) {
+    var _mock = require('./lib/Mock');
+    exports.chai = require('chai');
+    exports.sinon = require('sinon');
+    exports.sinonChai = require('sinon-chai');
+    exports.mocha = require('mocha');
+    exports.RCSDK = require('../lib/RCSDK');
+    exports.rcsdk = new exports.RCSDK({
+        server: 'http://whatever',
+        appKey: 'whatever',
+        appSecret: 'whatever'
+    });
+    exports.mock = new _mock.Mock(exports.rcsdk);
+    exports.chai.use(exports.sinonChai);
+});

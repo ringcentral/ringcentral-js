@@ -1,8 +1,11 @@
 {
   "curly": false,
   "eqeqeq": false,
+  "expr": true, // Chai's expect(...).to.be.calledOnce;
   "indent": 4,
   "latedef": true,
   "laxbreak": true,
-  "plusplus": false
+  "plusplus": false,
+  "shadow": true, // TSC double class declaration
+  "sub": true // TSC foo['bar']['baz']
 }
