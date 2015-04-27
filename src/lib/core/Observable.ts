@@ -168,7 +168,7 @@ export class Observable<T extends Observable<any>> {
     destroy():T {
         this.off();
         this.log.debug('Observable.destroy(): Listeners were destroyed');
-        return <any>this;
+        return <T>this;
     }
 
     emitAndCallback(event, args?, callback?):T {

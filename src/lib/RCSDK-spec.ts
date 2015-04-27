@@ -8,13 +8,38 @@ var rcsdk = mocha.rcsdk;
 
 describe('RCSDK', function() {
 
-    describe('production server', function() {
+    describe('actual connection', function() {
 
-        it('returns info', function(done) {
+        it('connects to sandbox', function(done) {
 
             this.timeout(10000); // Per SLA should be 3 seconds
 
-            var server = 'https://platform.devtest.ringcentral.com',
+            var server = mocha.RCSDK.url.sandbox,
+                rcsdk = new mocha.RCSDK({server: server, appKey: '', appSecret: ''}),
+                platform = rcsdk.getPlatform();
+
+            platform.forceAuthentication();
+
+            platform
+                .apiCall({
+                    url: ''
+                })
+                .then(function(ajax) {
+                    expect(ajax.data.uri).to.equal(server + '/restapi/v1.0');
+                    done();
+                })
+                .catch(function(e) {
+                    done(e);
+                });
+
+
+        });
+
+        it('connects to production', function(done) {
+
+            this.timeout(10000); // Per SLA should be 3 seconds
+
+            var server = mocha.RCSDK.url.production,
                 rcsdk = new mocha.RCSDK({server: server, appKey: '', appSecret: ''}),
                 platform = rcsdk.getPlatform();
 

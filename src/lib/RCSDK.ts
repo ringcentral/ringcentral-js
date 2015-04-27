@@ -46,7 +46,6 @@ import timezoneHelper = require('./helpers/Timezone');
 
 import promise = require('es6-promise');
 import pubnub = require('pubnub');
-import rcsdk = require('./RCSDK');
 
 require('crypto-js/aes');
 require('crypto-js/mode-ecb');
@@ -55,25 +54,26 @@ class RCSDK {
 
     public static version = '1.3.0';
 
-    public static CryptoJS = require('crypto-js/core');
-
-    public static XHR = () => {
-        try { return new XMLHttpRequest(); } catch (e) {}
-        try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); } catch (e1) {}
-        try { return new ActiveXObject("Msxml2.XMLHTTP.3.0"); } catch (e2) {}
-        try { return new ActiveXObject("Msxml2.XMLHTTP"); } catch (e3) {}
-        try { return new (require('xhr' + '2'))(); } catch (e4) {} // Node only
-        throw new Error("This browser does not support XMLHttpRequest.");
+    public static url = {
+        sandbox: 'https://platform.devtest.ringcentral.com',
+        production: 'https://platform.ringcentral.com'
     };
 
-    public static injections = <context.IInjections>{
-        CryptoJS: RCSDK.CryptoJS,
+    private static injections = <context.IInjections>{
+        CryptoJS: require('crypto-js/core'),
         localStorage: (typeof(localStorage) !== 'undefined'
             ? localStorage
             : require('dom-' + 'storage')), // Node only
         Promise: typeof(Promise) !== 'undefined' ? Promise : promise.Promise,
         PUBNUB: pubnub,
-        XHR: RCSDK.XHR,
+        XHR: () => {
+            try { return new XMLHttpRequest(); } catch (e) {}
+            try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); } catch (e1) {}
+            try { return new ActiveXObject("Msxml2.XMLHTTP.3.0"); } catch (e2) {}
+            try { return new ActiveXObject("Msxml2.XMLHTTP"); } catch (e3) {}
+            try { return new (require('xhr' + '2'))(); } catch (e4) {} // Node only
+            throw new Error("This browser does not support XMLHttpRequest.");
+        },
         pubnubMock: pubnubMock,
         xhrMock: xhrMock
     };

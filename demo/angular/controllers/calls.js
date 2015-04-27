@@ -220,12 +220,12 @@
                 onPresenceUpdate(msg.body);
             });
 
-            subscription.register({
-                success: function(ajax) {},
-                error: function(e) {
+            subscription
+                .register()
+                .then(function(ajax) {})
+                .catch(function(e) {
                     errorHandler(e, 'Presence Subscription Error');
-                }
-            });
+                });
 
             updatePresence();
 

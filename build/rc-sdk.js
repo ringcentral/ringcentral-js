@@ -1,12 +1,12 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("es6-promise"), require("pubnub"), require("crypto-js/aes"), require("crypto-js/mode-ecb"), require("crypto-js/core"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()), require("dom-storage"));
+		module.exports = factory(require("es6-promise"), require("pubnub"), require("crypto-js/aes"), require("crypto-js/mode-ecb"), require("crypto-js/core"), require("dom-storage"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()));
 	else if(typeof define === 'function' && define.amd)
 		define(["es6-promise", "pubnub", "crypto-js/aes", "crypto-js/mode-ecb", "crypto-js/core", "exports", "exports"], factory);
 	else if(typeof exports === 'object')
-		exports["RCSDK"] = factory(require("es6-promise"), require("pubnub"), require("crypto-js/aes"), require("crypto-js/mode-ecb"), require("crypto-js/core"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()), require("dom-storage"));
+		exports["RCSDK"] = factory(require("es6-promise"), require("pubnub"), require("crypto-js/aes"), require("crypto-js/mode-ecb"), require("crypto-js/core"), require("dom-storage"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()));
 	else
-		root["RCSDK"] = factory(root["Promise"], root["PUBNUB"], root["CryptoJS"]["AES"], root["CryptoJS"]["mode"]["ECB"], root["CryptoJS"], root["XMLHttpRequest"], root["localStorage"]);
+		root["RCSDK"] = factory(root["Promise"], root["PUBNUB"], root["CryptoJS"]["AES"], root["CryptoJS"]["mode"]["ECB"], root["CryptoJS"], root["localStorage"], root["XMLHttpRequest"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_4__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_7__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -209,41 +209,43 @@ var RCSDK = (function () {
         return serviceHelper.$get(this.getContext());
     };
     RCSDK.version = '1.3.0';
-    RCSDK.CryptoJS = __webpack_require__(5);
-    RCSDK.XHR = function () {
-        try {
-            return new XMLHttpRequest();
-        }
-        catch (e) {
-        }
-        try {
-            return new ActiveXObject("Msxml2.XMLHTTP.6.0");
-        }
-        catch (e1) {
-        }
-        try {
-            return new ActiveXObject("Msxml2.XMLHTTP.3.0");
-        }
-        catch (e2) {
-        }
-        try {
-            return new ActiveXObject("Msxml2.XMLHTTP");
-        }
-        catch (e3) {
-        }
-        try {
-            return new (__webpack_require__(6))();
-        }
-        catch (e4) {
-        }
-        throw new Error("This browser does not support XMLHttpRequest.");
+    RCSDK.url = {
+        sandbox: 'https://platform.devtest.ringcentral.com',
+        production: 'https://platform.ringcentral.com'
     };
     RCSDK.injections = {
-        CryptoJS: RCSDK.CryptoJS,
-        localStorage: (typeof (localStorage) !== 'undefined' ? localStorage : __webpack_require__(7)),
+        CryptoJS: __webpack_require__(5),
+        localStorage: (typeof (localStorage) !== 'undefined' ? localStorage : __webpack_require__(6)),
         Promise: typeof (Promise) !== 'undefined' ? Promise : promise.Promise,
         PUBNUB: pubnub,
-        XHR: RCSDK.XHR,
+        XHR: function () {
+            try {
+                return new XMLHttpRequest();
+            }
+            catch (e) {
+            }
+            try {
+                return new ActiveXObject("Msxml2.XMLHTTP.6.0");
+            }
+            catch (e1) {
+            }
+            try {
+                return new ActiveXObject("Msxml2.XMLHTTP.3.0");
+            }
+            catch (e2) {
+            }
+            try {
+                return new ActiveXObject("Msxml2.XMLHTTP");
+            }
+            catch (e3) {
+            }
+            try {
+                return new (__webpack_require__(7))();
+            }
+            catch (e4) {
+            }
+            throw new Error("This browser does not support XMLHttpRequest.");
+        },
         pubnubMock: pubnubMock,
         xhrMock: xhrMock
     };
@@ -286,13 +288,13 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-if(typeof __WEBPACK_EXTERNAL_MODULE_6__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
 module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
 
 /***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
+if(typeof __WEBPACK_EXTERNAL_MODULE_7__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
 module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
 
 /***/ },

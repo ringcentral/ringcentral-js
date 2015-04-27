@@ -222,7 +222,7 @@ export class Subscription extends observable.Observable<Subscription> {
 
     }
 
-    destroy() {
+    destroy():any { //TODO Fix any
 
         this.unsubscribe();
 

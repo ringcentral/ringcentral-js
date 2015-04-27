@@ -152,7 +152,7 @@
      */
     gulp.task('webpack', ['clean'], function() {
 
-        return webpackCompile(true);
+        return webpackCompile(false);
 
     });
 
@@ -161,7 +161,7 @@
      */
     gulp.task('webpack-bundle', ['clean'], function() {
 
-        return webpackCompile(false);
+        return webpackCompile(true);
 
     });
 

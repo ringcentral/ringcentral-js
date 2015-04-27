@@ -17,7 +17,7 @@ export class MultipartRequest extends req.Request {
         return this;
     }
 
-    public setBoundary(boundary:string){
+    public setBoundary(boundary:string) {
         this.boundary = boundary;
         return this;
     }
@@ -56,11 +56,9 @@ export class MultipartRequest extends req.Request {
 
         this.setContentType('multipart/mixed; boundary=' + this.boundary);
 
-        var buffers = messageParts.map((msg) => {
+        this.body = Buffer.concat(messageParts.map((msg) => {
             return (msg instanceof Buffer) ? msg : new Buffer(msg, 'utf-8')
-        });
-
-        this.body = Buffer.concat(buffers);
+        }));
 
     }
 
@@ -75,6 +73,8 @@ export class MultipartRequest extends req.Request {
         });
 
         this.setContentType('');
+
+        this.body = formData;
 
     }
 

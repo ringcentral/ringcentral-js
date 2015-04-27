@@ -16,9 +16,7 @@ module.exports = function(config) {
         files: [
             // specify but not include files
             {pattern: './build/**/*.js', included: false},
-            {pattern: './lib/*/**/*.js', included: false},
-            {pattern: './lib/RCSDK.js', included: false}, // need to be separately mentioned otherwise not included (*)
-            {pattern: './lib/RCSDK-spec.js', included: false},
+            {pattern: './lib/**/*.js', included: false},
             {pattern: './test/lib/**/*.js', included: false}, // do not use * instead of lib -- skip specs-api
             {pattern: './test/mocha.js', included: false}, // need to be separately mentioned otherwise not included (*)
             {pattern: './bower_components/crypto-js/**/*.js', included: false},
@@ -30,9 +28,7 @@ module.exports = function(config) {
             {pattern: './test-utils/karma.js', included: true}
         ],
 
-        exclude: [
-            './lib/requirejs-wrap.js'
-        ],
+        exclude: [],
 
         reporters: [
             //'html',
