@@ -24,7 +24,10 @@ describe('RCSDK.helpers.Call', function() {
             expect(Call.createUrl({active: true})).to.equal('/account/~/extension/~/active-calls');
             expect(Call.createUrl({active: true, personal: true})).to.equal('/account/~/extension/~/active-calls');
             expect(Call.createUrl({active: true}, 'foo')).to.equal('/account/~/extension/~/active-calls/foo');
-            expect(Call.createUrl({active: true, extensionId: 'bar'}, 'foo')).to.equal('/account/~/extension/bar/active-calls/foo');
+            expect(Call.createUrl({
+                active: true,
+                extensionId: 'bar'
+            }, 'foo')).to.equal('/account/~/extension/bar/active-calls/foo');
 
         });
 
@@ -168,8 +171,32 @@ describe('RCSDK.helpers.Call', function() {
             },
             activeCalls: [],
             calls: [
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iTLeNN-expL4g", "id": "B0iTLeNN-expL4g", "sessionId": "88052061020", "startTime": "2014-12-11T00:48:08.000Z", "duration": 11, "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "Accepted", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}},
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iNkuy10B0FLG0", "id": "B0iNkuy10B0FLG0", "sessionId": "88051027020", "startTime": "2014-12-11T00:40:13.000Z", "duration": 11, "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "Accepted", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}}
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iTLeNN-expL4g",
+                    "id": "B0iTLeNN-expL4g",
+                    "sessionId": "88052061020",
+                    "startTime": "2014-12-11T00:48:08.000Z",
+                    "duration": 11,
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "Accepted",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                },
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iNkuy10B0FLG0",
+                    "id": "B0iNkuy10B0FLG0",
+                    "sessionId": "88051027020",
+                    "startTime": "2014-12-11T00:40:13.000Z",
+                    "duration": 11,
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "Accepted",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                }
             ]
         },
         ringing: {
@@ -177,17 +204,72 @@ describe('RCSDK.helpers.Call', function() {
                 "extensionId": 62480591,
                 "telephonyStatus": "Ringing",
                 "activeCalls": [
-                    {"id": "1e8b5e8847924ab49f383bc8d355ee33", "direction": "Inbound", "from": "1650CALLER0", "to": "1855COMPANY", "telephonyStatus": "Ringing", "sessionId": "88052513020"}
+                    {
+                        "id": "1e8b5e8847924ab49f383bc8d355ee33",
+                        "direction": "Inbound",
+                        "from": "1650CALLER0",
+                        "to": "1855COMPANY",
+                        "telephonyStatus": "Ringing",
+                        "sessionId": "88052513020"
+                    }
                 ],
                 "sequence": 7272442
             },
             activeCalls: [
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMM", "id": "B0iVoSn2fxQRMMM", "sessionId": "88052513020", "startTime": "2014-12-11T00:51:23.000Z", "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "In Progress", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}, wayToDetermineOverwrite: true}
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMM",
+                    "id": "B0iVoSn2fxQRMMM",
+                    "sessionId": "88052513020",
+                    "startTime": "2014-12-11T00:51:23.000Z",
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "In Progress",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"},
+                    wayToDetermineOverwrite: true
+                }
             ],
             calls: [
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMM", "id": "B0iVoSn2fxQRMMM", "sessionId": "88052513020", "startTime": "2014-12-11T00:51:23.000Z", "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "In Progress", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}, wayToDetermineItsACall: true},
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iTLeNN-expL4g", "id": "B0iTLeNN-expL4g", "sessionId": "88052061020", "startTime": "2014-12-11T00:48:08.000Z", "duration": 11, "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "Accepted", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}},
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iNkuy10B0FLG0", "id": "B0iNkuy10B0FLG0", "sessionId": "88051027020", "startTime": "2014-12-11T00:40:13.000Z", "duration": 11, "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "Accepted", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}}
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMM",
+                    "id": "B0iVoSn2fxQRMMM",
+                    "sessionId": "88052513020",
+                    "startTime": "2014-12-11T00:51:23.000Z",
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "In Progress",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"},
+                    wayToDetermineItsACall: true
+                },
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iTLeNN-expL4g",
+                    "id": "B0iTLeNN-expL4g",
+                    "sessionId": "88052061020",
+                    "startTime": "2014-12-11T00:48:08.000Z",
+                    "duration": 11,
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "Accepted",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                },
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iNkuy10B0FLG0",
+                    "id": "B0iNkuy10B0FLG0",
+                    "sessionId": "88051027020",
+                    "startTime": "2014-12-11T00:40:13.000Z",
+                    "duration": 11,
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "Accepted",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                }
             ]
         },
         pickup: {
@@ -195,17 +277,70 @@ describe('RCSDK.helpers.Call', function() {
                 "extensionId": 62480591,
                 "telephonyStatus": "CallConnected",
                 "activeCalls": [
-                    {"id": "1e8b5e8847924ab49f383bc8d355ee33", "direction": "Inbound", "from": "1650CALLER0", "to": "1855COMPANY", "telephonyStatus": "CallConnected", "sessionId": "88052513020"}
+                    {
+                        "id": "1e8b5e8847924ab49f383bc8d355ee33",
+                        "direction": "Inbound",
+                        "from": "1650CALLER0",
+                        "to": "1855COMPANY",
+                        "telephonyStatus": "CallConnected",
+                        "sessionId": "88052513020"
+                    }
                 ],
                 "sequence": 7272469
             },
             activeCalls: [
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMM", "id": "B0iVoSn2fxQRMMM", "sessionId": "88052513020", "startTime": "2014-12-11T00:51:23.000Z", "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "In Progress", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}}
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMM",
+                    "id": "B0iVoSn2fxQRMMM",
+                    "sessionId": "88052513020",
+                    "startTime": "2014-12-11T00:51:23.000Z",
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "In Progress",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                }
             ],
             calls: [
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMM", "id": "B0iVoSn2fxQRMMM", "sessionId": "88052513020", "startTime": "2014-12-11T00:51:23.000Z", "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "In Progress", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}},
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iTLeNN-expL4g", "id": "B0iTLeNN-expL4g", "sessionId": "88052061020", "startTime": "2014-12-11T00:48:08.000Z", "duration": 11, "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "Accepted", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}},
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iNkuy10B0FLG0", "id": "B0iNkuy10B0FLG0", "sessionId": "88051027020", "startTime": "2014-12-11T00:40:13.000Z", "duration": 11, "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "Accepted", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}}
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMM",
+                    "id": "B0iVoSn2fxQRMMM",
+                    "sessionId": "88052513020",
+                    "startTime": "2014-12-11T00:51:23.000Z",
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "In Progress",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                },
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iTLeNN-expL4g",
+                    "id": "B0iTLeNN-expL4g",
+                    "sessionId": "88052061020",
+                    "startTime": "2014-12-11T00:48:08.000Z",
+                    "duration": 11,
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "Accepted",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                },
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iNkuy10B0FLG0",
+                    "id": "B0iNkuy10B0FLG0",
+                    "sessionId": "88051027020",
+                    "startTime": "2014-12-11T00:40:13.000Z",
+                    "duration": 11,
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "Accepted",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                }
             ]
         },
         hangup: {
@@ -213,15 +348,58 @@ describe('RCSDK.helpers.Call', function() {
                 "extensionId": 62480591,
                 "telephonyStatus": "NoCall",
                 "activeCalls": [
-                    {"id": "1e8b5e8847924ab49f383bc8d355ee33", "direction": "Inbound", "from": "1650CALLER0", "to": "1855COMPANY", "telephonyStatus": "NoCall", "sessionId": "88052513020"}
+                    {
+                        "id": "1e8b5e8847924ab49f383bc8d355ee33",
+                        "direction": "Inbound",
+                        "from": "1650CALLER0",
+                        "to": "1855COMPANY",
+                        "telephonyStatus": "NoCall",
+                        "sessionId": "88052513020"
+                    }
                 ],
                 "sequence": 7272495
             },
             activeCalls: [],
             calls: [
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMQ", "id": "B0iVoSn2fxQRMMQ", "sessionId": "88052513020", "startTime": "2014-12-11T00:51:24.000Z", "duration": 42, "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "Accepted", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}},
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iTLeNN-expL4g", "id": "B0iTLeNN-expL4g", "sessionId": "88052061020", "startTime": "2014-12-11T00:48:08.000Z", "duration": 11, "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "Accepted", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}},
-                {"uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iNkuy10B0FLG0", "id": "B0iNkuy10B0FLG0", "sessionId": "88051027020", "startTime": "2014-12-11T00:40:13.000Z", "duration": 11, "type": "Voice", "direction": "Inbound", "action": "Phone Call", "result": "Accepted", "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"}, "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}}
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iVoSn2fxQRMMQ",
+                    "id": "B0iVoSn2fxQRMMQ",
+                    "sessionId": "88052513020",
+                    "startTime": "2014-12-11T00:51:24.000Z",
+                    "duration": 42,
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "Accepted",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                },
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iTLeNN-expL4g",
+                    "id": "B0iTLeNN-expL4g",
+                    "sessionId": "88052061020",
+                    "startTime": "2014-12-11T00:48:08.000Z",
+                    "duration": 11,
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "Accepted",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                },
+                {
+                    "uri": "https://api.ringcentral.com/restapi/v1.0/account/123/extension/321/call-log/B0iNkuy10B0FLG0",
+                    "id": "B0iNkuy10B0FLG0",
+                    "sessionId": "88051027020",
+                    "startTime": "2014-12-11T00:40:13.000Z",
+                    "duration": 11,
+                    "type": "Voice",
+                    "direction": "Inbound",
+                    "action": "Phone Call",
+                    "result": "Accepted",
+                    "to": {"phoneNumber": "1855COMPANY", "name": "Called Ext Name"},
+                    "from": {"phoneNumber": "1650CALLER0", "name": "Called Ext Name", "location": "San Mateo, CA"}
+                }
             ]
         }
     };

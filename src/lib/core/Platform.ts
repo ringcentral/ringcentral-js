@@ -1,7 +1,9 @@
 /// <reference path="../../typings/externals.d.ts" />
 
-declare class Buffer {
+declare
+class Buffer {
     constructor(str:string);
+
     toString(encoding:string):string;
 }
 
@@ -418,10 +420,10 @@ export class Platform extends observable.Observable<Platform> {
                 .refresh()
                 .then(() => {
 
-                          // Re-send with same options
-                          return this.apiCall(options);
+                    // Re-send with same options
+                    return this.apiCall(options);
 
-                      });
+                });
 
         });
 

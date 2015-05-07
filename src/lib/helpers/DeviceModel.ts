@@ -4,7 +4,7 @@ import context = require('../core/Context');
 import helper = require('../core/Helper');
 
 export class DeviceModel extends helper.Helper {
-    
+
     getId(device:IDeviceModel) {
 
         if (!device) return null;
@@ -200,7 +200,7 @@ export class DeviceModel extends helper.Helper {
             deviceClass: 'Desk Phone'
         }
     ];
-    
+
 }
 
 export function $get(context:context.Context):DeviceModel {

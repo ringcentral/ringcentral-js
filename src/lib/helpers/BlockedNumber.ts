@@ -18,9 +18,9 @@ export class BlockedNumber extends helper.Helper {
         options = options || {};
 
         return '/account/~/extension/' +
-            (options.extensionId ? options.extensionId : '~') +
-            '/blocked-number' +
-            (id ? '/' + id : '');
+               (options.extensionId ? options.extensionId : '~') +
+               '/blocked-number' +
+               (id ? '/' + id : '');
 
     }
 

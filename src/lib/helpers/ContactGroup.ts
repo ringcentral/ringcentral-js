@@ -5,14 +5,14 @@ import helper = require('../core/Helper');
 import validator = require('../core/Validator');
 
 export class ContactGroup extends helper.Helper {
-    
+
     private validator:validator.Validator;
-    
-    constructor(context:context.Context){
+
+    constructor(context:context.Context) {
         super(context);
         this.validator = validator.$get(context);
     }
-    
+
     createUrl(options?:any, id?:string) {
         return '/account/~/extension/~/address-book/group' + (id ? '/' + id : '');
     }

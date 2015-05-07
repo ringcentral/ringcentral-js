@@ -93,8 +93,6 @@ var stateHelper = __webpack_require__(37);
 var timezoneHelper = __webpack_require__(38);
 var promise = __webpack_require__(40);
 var pubnub = __webpack_require__(39);
-__webpack_require__(41);
-__webpack_require__(42);
 var RCSDK = (function () {
     function RCSDK(options) {
         options = options || {};
@@ -214,7 +212,6 @@ var RCSDK = (function () {
         production: 'https://platform.ringcentral.com'
     };
     RCSDK.injections = {
-        CryptoJS: __webpack_require__(43),
         localStorage: (typeof (localStorage) !== 'undefined' ? localStorage : __webpack_require__(1)),
         Promise: typeof (Promise) !== 'undefined' ? Promise : promise.Promise,
         PUBNUB: pubnub,
@@ -283,6 +280,7 @@ var PubnubMock = (function (_super) {
     __extends(PubnubMock, _super);
     function PubnubMock(context, options) {
         this.options = options;
+        this.crypto_obj = context.getPubnubReal().crypto_obj;
         _super.call(this, context);
     }
     PubnubMock.prototype.ready = function () {
@@ -302,6 +300,7 @@ exports.PubnubMock = PubnubMock;
 var PubnubFactory = (function () {
     function PubnubFactory(context) {
         this.context = context;
+        this.crypto_obj = context.getPubnubReal().crypto_obj;
     }
     PubnubFactory.prototype.init = function (options) {
         return new PubnubMock(this.context, options);
@@ -564,11 +563,11 @@ var Context = (function () {
         this.stubAjax = !!flag;
         return this;
     };
-    Context.prototype.getCryptoJS = function () {
-        return this.injections.CryptoJS;
-    };
     Context.prototype.getPubnub = function () {
-        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.injections.PUBNUB;
+        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.getPubnubReal();
+    };
+    Context.prototype.getPubnubReal = function () {
+        return this.injections.PUBNUB;
     };
     Context.prototype.getLocalStorage = function () {
         var _this = this;
@@ -1204,7 +1203,7 @@ var __extends = this.__extends || function (d, b) {
 };
 var observable = __webpack_require__(12);
 var cache = __webpack_require__(7);
-var request = __webpack_require__(44);
+var request = __webpack_require__(41);
 var Platform = (function (_super) {
     __extends(Platform, _super);
     function Platform(context) {
@@ -1576,9 +1575,6 @@ var Subscription = (function (_super) {
     Subscription.prototype.getPubnub = function () {
         return this.context.getPubnub();
     };
-    Subscription.prototype.getCrypto = function () {
-        return this.context.getCryptoJS();
-    };
     Subscription.prototype.getPlatform = function () {
         return platform.$get(this.context);
     };
@@ -1722,26 +1718,28 @@ var Subscription = (function (_super) {
     };
     /**
      * Do not use this method! Internal use only
-     * @param message
-     * @returns {Subscription}
+     */
+    Subscription.prototype.decrypt = function (message) {
+        if (this.isSubscribed() && this.subscription.deliveryMode.encryptionKey) {
+            var PUBNUB = this.getPubnub();
+            message = PUBNUB.crypto_obj.decrypt(message, this.subscription.deliveryMode.encryptionKey, {
+                encryptKey: false,
+                keyEncoding: 'base64',
+                keyLength: 128,
+                mode: 'ecb'
+            });
+        }
+        return message;
+    };
+    /**
+     * Do not use this method! Internal use only
      */
     Subscription.prototype.notify = function (message) {
-        if (this.isSubscribed() && this.subscription.deliveryMode.encryptionKey) {
-            var CryptoJS = this.getCrypto();
-            var key = CryptoJS.enc.Base64.parse(this.subscription.deliveryMode.encryptionKey);
-            var data = CryptoJS.enc.Base64.parse(message);
-            var decrypted = CryptoJS.AES.decrypt({ ciphertext: data }, key, {
-                mode: CryptoJS.mode.ECB,
-                padding: CryptoJS.pad.Pkcs7
-            }).toString(CryptoJS.enc.Utf8);
-            message = JSON.parse(decrypted);
-        }
-        this.emit(this.events.notification, message);
+        this.emit(this.events.notification, this.decrypt(message));
         return this;
     };
     /**
      * Do not use this method! Internal use only
-     * @returns {Subscription}
      */
     Subscription.prototype.subscribeAtPubnub = function () {
         var _this = this;
@@ -2757,12 +2755,30 @@ var Device = (function (_super) {
      */
     Device.prototype.validate = function (item) {
         return this.validator.validate([
-            { field: 'emergencyServiceAddress-street', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.street) },
-            { field: 'emergencyServiceAddress-city', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.city) },
-            { field: 'emergencyServiceAddress-state', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.state) },
-            { field: 'emergencyServiceAddress-country', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.country) },
-            { field: 'emergencyServiceAddress-zip', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.zip) },
-            { field: 'emergencyServiceAddress-customerName', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.customerName) },
+            {
+                field: 'emergencyServiceAddress-street',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.street)
+            },
+            {
+                field: 'emergencyServiceAddress-city',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.city)
+            },
+            {
+                field: 'emergencyServiceAddress-state',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.state)
+            },
+            {
+                field: 'emergencyServiceAddress-country',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.country)
+            },
+            {
+                field: 'emergencyServiceAddress-zip',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.zip)
+            },
+            {
+                field: 'emergencyServiceAddress-customerName',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.customerName)
+            },
             { field: 'extension', validator: this.validator.required(this.extension.getId(item && item.extension)) },
             { field: 'model', validator: this.validator.required(this.deviceModel.getId(item && item.model)) }
         ]);
@@ -3305,7 +3321,11 @@ var Message = (function (_super) {
         return message;
     };
     Message.prototype.getAttachmentUrl = function (message, i) {
-        return message.attachments[i] ? this.platform.apiUrl(message.attachments[i].uri, { addMethod: 'GET', addServer: true, addToken: true }) : '';
+        return message.attachments[i] ? this.platform.apiUrl(message.attachments[i].uri, {
+            addMethod: 'GET',
+            addServer: true,
+            addToken: true
+        }) : '';
     };
     Message.prototype.getAttachmentContentType = function (message, i) {
         return message.attachments[i] ? message.attachments[i].contentType : '';
@@ -4115,6 +4135,13 @@ function map( list, fun ) {
     return fin;
 }
 
+
+function pam_encode(str) {
+  return encodeURIComponent(str).replace(/[!'()*~]/g, function(c) {
+    return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+  });
+}
+
 /**
  * ENCODE
  * ======
@@ -4306,7 +4333,7 @@ function PN_API(setup) {
 
         for (var i in l) {
             var k = l[i]
-            si += k + "=" + encode(params[k]) ;
+            si += k + "=" + pam_encode(params[k]) ;
             if (i != l.length - 1) si += "&"
         }
         return si;
@@ -5060,7 +5087,6 @@ function PN_API(setup) {
             ,   channel_group   = args['channel_group']
             ,   callback        = callback            || args['callback']
             ,   callback        = callback            || args['message']
-            ,   auth_key        = args['auth_key']    || AUTH_KEY
             ,   connect         = args['connect']     || function(){}
             ,   reconnect       = args['reconnect']   || function(){}
             ,   disconnect      = args['disconnect']  || function(){}
@@ -5076,6 +5102,8 @@ function PN_API(setup) {
             ,   heartbeat       = args['heartbeat'] || args['pnexpires']
             ,   heartbeat_interval = args['heartbeat_interval']
             ,   restore         = args['restore'] || SUB_RESTORE;
+
+            AUTH_KEY            = args['auth_key']    || AUTH_KEY;
 
             // Restore Enabled?
             SUB_RESTORE = restore;
@@ -5139,7 +5167,7 @@ function PN_API(setup) {
                     if (noheresync) return;
                     SELF['here_now']({
                         'channel'  : channel,
-                        'data'     : _get_url_params({ 'uuid' : UUID, 'auth' : auth_key }),
+                        'data'     : _get_url_params({ 'uuid' : UUID, 'auth' : AUTH_KEY }),
                         'callback' : function(here) {
                             each( 'uuids' in here ? here['uuids'] : [],
                             function(uid) { presence( {
@@ -5179,7 +5207,7 @@ function PN_API(setup) {
                         'channel_group'  : channel_group + PRESENCE_SUFFIX,
                         'callback' : presence,
                         'restore'  : restore,
-                        'auth_key' : auth_key
+                        'auth_key' : AUTH_KEY
                     });
 
                     // Presence Subscribed?
@@ -5189,7 +5217,7 @@ function PN_API(setup) {
                     if (noheresync) return;
                     SELF['here_now']({
                         'channel_group'  : channel_group,
-                        'data'           : _get_url_params({ 'uuid' : UUID, 'auth' : auth_key }),
+                        'data'           : _get_url_params({ 'uuid' : UUID, 'auth' : AUTH_KEY }),
                         'callback' : function(here) {
                             each( 'uuids' in here ? here['uuids'] : [],
                             function(uid) { presence( {
@@ -5266,7 +5294,7 @@ function PN_API(setup) {
                 // Connect to PubNub Subscribe Servers
                 _reset_offline();
 
-                var data = _get_url_params({ 'uuid' : UUID, 'auth' : auth_key });
+                var data = _get_url_params({ 'uuid' : UUID, 'auth' : AUTH_KEY });
 
                 if (channel_groups) {
                     data['channel-group'] = channel_groups;
@@ -5607,14 +5635,14 @@ function PN_API(setup) {
         'grant' : function( args, callback ) {
             var callback        = args['callback'] || callback
             ,   err             = args['error']    || function(){}
-            ,   channel         = args['channel']
+            ,   channel         = args['channel']  || args['channels']
             ,   channel_group   = args['channel_group']
             ,   jsonp           = jsonp_cb()
             ,   ttl             = args['ttl']
             ,   r               = (args['read'] )?"1":"0"
             ,   w               = (args['write'])?"1":"0"
             ,   m               = (args['manage'])?"1":"0"
-            ,   auth_key        = args['auth_key'];
+            ,   auth_key        = args['auth_key'] || args['auth_keys'];
 
             if (!callback)      return error('Missing Callback');
             if (!SUBSCRIBE_KEY) return error('Missing Subscribe Key');
@@ -5632,6 +5660,12 @@ function PN_API(setup) {
             };
             if (args['manage']) {
                 data['m'] = m;
+            }
+            if (isArray(channel)) {
+                channel = channel['join'](',');
+            }
+            if (isArray(auth_key)) {
+                auth_key = auth_key['join'](',');
             }
             if (typeof channel != 'undefined' && channel != null && channel.length > 0) data['channel'] = channel;
             if (typeof channel_group != 'undefined' && channel_group != null && channel_group.length > 0) {
@@ -5945,34 +5979,97 @@ function PN_API(setup) {
 
     return SELF;
 }
+function crypto_obj() {
 
-function crypto_obj (){
+    function SHA256(s) {
+        return CryptoJS['SHA256'](s)['toString'](CryptoJS['enc']['Hex']);
+    }
+
+    var iv = "0123456789012345";
+
+    var allowedKeyEncodings = ['hex', 'utf8', 'base64', 'binary'];
+    var allowedKeyLengths = [128, 256];
+    var allowedModes = ['ecb', 'cbc'];
+
+    var defaultOptions = {
+        'encryptKey': true,
+        'keyEncoding': 'utf8',
+        'keyLength': 256,
+        'mode': 'cbc'
+    };
+
+    function parse_options(options) {
+
+        // Defaults
+        options = options || {};
+        if (!options['hasOwnProperty']('encryptKey')) options['encryptKey'] = defaultOptions['encryptKey'];
+        if (!options['hasOwnProperty']('keyEncoding')) options['keyEncoding'] = defaultOptions['keyEncoding'];
+        if (!options['hasOwnProperty']('keyLength')) options['keyLength'] = defaultOptions['keyLength'];
+        if (!options['hasOwnProperty']('mode')) options['mode'] = defaultOptions['mode'];
+
+        // Validation
+        if (allowedKeyEncodings['indexOf'](options['keyEncoding']['toLowerCase']()) == -1) options['keyEncoding'] = defaultOptions['keyEncoding'];
+        if (allowedKeyLengths['indexOf'](parseInt(options['keyLength'], 10)) == -1) options['keyLength'] = defaultOptions['keyLength'];
+        if (allowedModes['indexOf'](options['mode']['toLowerCase']()) == -1) options['mode'] = defaultOptions['mode'];
+
+        return options;
+
+    }
+
+    function decode_key(key, options) {
+        if (options['keyEncoding'] == 'base64') {
+            return CryptoJS['enc']['Base64']['parse'](key);
+        } else if (options['keyEncoding'] == 'hex') {
+            return CryptoJS['enc']['Hex']['parse'](key);
+        } else {
+            return key;
+        }
+    }
+
+    function get_padded_key(key, options) {
+        key = decode_key(key, options);
+        if (options['encryptKey']) {
+            return CryptoJS['enc']['Utf8']['parse'](SHA256(key)['slice'](0, 32));
+        } else {
+            return key;
+        }
+    }
+
+    function get_mode(options) {
+        if (options['mode'] == 'ecb') {
+            return CryptoJS['mode']['ECB'];
+        } else {
+            return CryptoJS['mode']['CBC'];
+        }
+    }
+
+    function get_iv(options) {
+        return (options['mode'] == 'cbc') ? CryptoJS['enc']['Utf8']['parse'](iv) : null;
+    }
 
     return {
 
         'encrypt': function(data, key, options) {
-            options = options || {};
             if (!key) return data;
-            var cipher_key = options.encryptKey ? CryptoJS.SHA256(key) : key;
+            options = parse_options(options);
+            var iv = get_iv(options);
+            var mode = get_mode(options);
+            var cipher_key = get_padded_key(key, options);
             var hex_message = JSON['stringify'](data);
-            var encryptedHexArray = CryptoJS.AES.encrypt(hex_message, cipher_key, {
-                mode: options.mode == 'ECB' ? CryptoJS.mode.ECB : CryptoJS.mode.CBC,
-                padding: CryptoJS.pad.Pkcs7
-            });
-            var base_64_encrypted = CryptoJS.enc.Base64.stringify(encryptedHexArray);
-            return base_64_encrypted;
+            var encryptedHexArray = CryptoJS['AES']['encrypt'](hex_message, cipher_key, {'iv': iv, 'mode': mode})['ciphertext'];
+            var base_64_encrypted = encryptedHexArray['toString'](CryptoJS['enc']['Base64']);
+            return base_64_encrypted || data;
         },
 
         'decrypt': function(data, key, options) {
-            options = options || {};
             if (!key) return data;
-            var cipher_key = options.encryptKey ? CryptoJS.SHA256(key) : key;
+            options = parse_options(options);
+            var iv = get_iv(options);
+            var mode = get_mode(options);
+            var cipher_key = get_padded_key(key, options);
             try {
-                var binary_enc = CryptoJS.enc.Base64.parse(data);
-                var json_plain = CryptoJS.AES.decrypt({ciphertext: data}, key, {
-                    mode: options.mode == 'ECB' ? CryptoJS.mode.ECB : CryptoJS.mode.CBC,
-                    padding: CryptoJS.pad.Pkcs7
-                }).toString(CryptoJS.enc.Utf8);
+                var binary_enc = CryptoJS['enc']['Base64']['parse'](data);
+                var json_plain = CryptoJS['AES']['decrypt']({'ciphertext': binary_enc}, cipher_key, {'iv': iv, 'mode': mode})['toString'](CryptoJS['enc']['Utf8']);
                 var plaintext = JSON['parse'](json_plain);
                 return plaintext;
             }
@@ -6401,9 +6498,7 @@ var PDIV          = $('pubnub') || 0
     SELF['events']      = events;
     SELF['init']        = SELF;
     SELF['secure']      = SELF;
-
-    SELF['hmac_SHA256'] = get_hmac_SHA256;
-    SELF['crypto_obj'] = crypto_obj();
+    SELF['crypto_obj']  = crypto_obj(); // export to instance
 
 
     // Add Leave Functions
@@ -6423,6 +6518,7 @@ var PDIV          = $('pubnub') || 0
 };
 CREATE_PUBNUB['init']   = CREATE_PUBNUB;
 CREATE_PUBNUB['secure'] = CREATE_PUBNUB;
+CREATE_PUBNUB['crypto_obj'] = crypto_obj(); // export to constructor
 
 // Bind for PUBNUB Readiness to Subscribe
 if (document.readyState === 'complete') {
@@ -6613,27 +6709,21 @@ r=g.WordArray=m.extend({init:function(a,c){a=this.words=a||[];this.sigBytes=c!=s
 u=g.BufferedBlockAlgorithm=m.extend({reset:function(){this._data=new r.init;this._nDataBytes=0},_append:function(a){"string"==typeof a&&(a=j.parse(a));this._data.concat(a);this._nDataBytes+=a.sigBytes},_process:function(a){var c=this._data,d=c.words,b=c.sigBytes,e=this.blockSize,f=b/(4*e),f=a?h.ceil(f):h.max((f|0)-this._minBufferSize,0);a=f*e;b=h.min(4*a,b);if(a){for(var g=0;g<a;g+=e)this._doProcessBlock(d,g);g=d.splice(0,a);c.sigBytes-=b}return new r.init(g,b)},clone:function(){var a=m.clone.call(this);
 a._data=this._data.clone();return a},_minBufferSize:0});g.Hasher=u.extend({cfg:m.extend(),init:function(a){this.cfg=this.cfg.extend(a);this.reset()},reset:function(){u.reset.call(this);this._doReset()},update:function(a){this._append(a);this._process();return this},finalize:function(a){a&&this._append(a);return this._doFinalize()},blockSize:16,_createHelper:function(a){return function(c,d){return(new a.init(d)).finalize(c)}},_createHmacHelper:function(a){return function(c,d){return(new t.HMAC.init(a,
 d)).finalize(c)}}});var t=f.algo={};return f}(Math);
+
+// SHA256
 (function(h){for(var s=CryptoJS,f=s.lib,g=f.WordArray,q=f.Hasher,f=s.algo,m=[],r=[],l=function(a){return 4294967296*(a-(a|0))|0},k=2,n=0;64>n;){var j;a:{j=k;for(var u=h.sqrt(j),t=2;t<=u;t++)if(!(j%t)){j=!1;break a}j=!0}j&&(8>n&&(m[n]=l(h.pow(k,0.5))),r[n]=l(h.pow(k,1/3)),n++);k++}var a=[],f=f.SHA256=q.extend({_doReset:function(){this._hash=new g.init(m.slice(0))},_doProcessBlock:function(c,d){for(var b=this._hash.words,e=b[0],f=b[1],g=b[2],j=b[3],h=b[4],m=b[5],n=b[6],q=b[7],p=0;64>p;p++){if(16>p)a[p]=
 c[d+p]|0;else{var k=a[p-15],l=a[p-2];a[p]=((k<<25|k>>>7)^(k<<14|k>>>18)^k>>>3)+a[p-7]+((l<<15|l>>>17)^(l<<13|l>>>19)^l>>>10)+a[p-16]}k=q+((h<<26|h>>>6)^(h<<21|h>>>11)^(h<<7|h>>>25))+(h&m^~h&n)+r[p]+a[p];l=((e<<30|e>>>2)^(e<<19|e>>>13)^(e<<10|e>>>22))+(e&f^e&g^f&g);q=n;n=m;m=h;h=j+k|0;j=g;g=f;f=e;e=k+l|0}b[0]=b[0]+e|0;b[1]=b[1]+f|0;b[2]=b[2]+g|0;b[3]=b[3]+j|0;b[4]=b[4]+h|0;b[5]=b[5]+m|0;b[6]=b[6]+n|0;b[7]=b[7]+q|0},_doFinalize:function(){var a=this._data,d=a.words,b=8*this._nDataBytes,e=8*a.sigBytes;
 d[e>>>5]|=128<<24-e%32;d[(e+64>>>9<<4)+14]=h.floor(b/4294967296);d[(e+64>>>9<<4)+15]=b;a.sigBytes=4*d.length;this._process();return this._hash},clone:function(){var a=q.clone.call(this);a._hash=this._hash.clone();return a}});s.SHA256=q._createHelper(f);s.HmacSHA256=q._createHmacHelper(f)})(Math);
+
+// HMAC SHA256
 (function(){var h=CryptoJS,s=h.enc.Utf8;h.algo.HMAC=h.lib.Base.extend({init:function(f,g){f=this._hasher=new f.init;"string"==typeof g&&(g=s.parse(g));var h=f.blockSize,m=4*h;g.sigBytes>m&&(g=f.finalize(g));g.clamp();for(var r=this._oKey=g.clone(),l=this._iKey=g.clone(),k=r.words,n=l.words,j=0;j<h;j++)k[j]^=1549556828,n[j]^=909522486;r.sigBytes=l.sigBytes=m;this.reset()},reset:function(){var f=this._hasher;f.reset();f.update(this._iKey)},update:function(f){this._hasher.update(f);return this},finalize:function(f){var g=
 this._hasher;f=g.finalize(f);g.reset();return g.finalize(this._oKey.clone().concat(f))}})})();
-/*
-CryptoJS v3.1.2
-code.google.com/p/crypto-js
-(c) 2009-2013 by Jeff Mott. All rights reserved.
-code.google.com/p/crypto-js/wiki/License
-*/
-(function(){var h=CryptoJS,j=h.lib.WordArray;h.enc.Base64={stringify:function(b){var e=b.words,f=b.sigBytes,c=this._map;b.clamp();b=[];for(var a=0;a<f;a+=3)for(var d=(e[a>>>2]>>>24-8*(a%4)&255)<<16|(e[a+1>>>2]>>>24-8*((a+1)%4)&255)<<8|e[a+2>>>2]>>>24-8*((a+2)%4)&255,g=0;4>g&&a+0.75*g<f;g++)b.push(c.charAt(d>>>6*(3-g)&63));if(e=c.charAt(64))for(;b.length%4;)b.push(e);return b.join("")},parse:function(b){var e=b.length,f=this._map,c=f.charAt(64);c&&(c=b.indexOf(c),-1!=c&&(e=c));for(var c=[],a=0,d=0;d<
-e;d++)if(d%4){var g=f.indexOf(b.charAt(d-1))<<2*(d%4),h=f.indexOf(b.charAt(d))>>>6-2*(d%4);c[a>>>2]|=(g|h)<<24-8*(a%4);a++}return j.create(c,a)},_map:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="}})();
-/*
-CryptoJS v3.1.2
-code.google.com/p/crypto-js
-(c) 2009-2013 by Jeff Mott. All rights reserved.
-code.google.com/p/crypto-js/wiki/License
-*/
+
+// Base64
 (function(){var u=CryptoJS,p=u.lib.WordArray;u.enc.Base64={stringify:function(d){var l=d.words,p=d.sigBytes,t=this._map;d.clamp();d=[];for(var r=0;r<p;r+=3)for(var w=(l[r>>>2]>>>24-8*(r%4)&255)<<16|(l[r+1>>>2]>>>24-8*((r+1)%4)&255)<<8|l[r+2>>>2]>>>24-8*((r+2)%4)&255,v=0;4>v&&r+0.75*v<p;v++)d.push(t.charAt(w>>>6*(3-v)&63));if(l=t.charAt(64))for(;d.length%4;)d.push(l);return d.join("")},parse:function(d){var l=d.length,s=this._map,t=s.charAt(64);t&&(t=d.indexOf(t),-1!=t&&(l=t));for(var t=[],r=0,w=0;w<
 l;w++)if(w%4){var v=s.indexOf(d.charAt(w-1))<<2*(w%4),b=s.indexOf(d.charAt(w))>>>6-2*(w%4);t[r>>>2]|=(v|b)<<24-8*(r%4);r++}return p.create(t,r)},_map:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="}})();
+
+// BlockCipher
 (function(u){function p(b,n,a,c,e,j,k){b=b+(n&a|~n&c)+e+k;return(b<<j|b>>>32-j)+n}function d(b,n,a,c,e,j,k){b=b+(n&c|a&~c)+e+k;return(b<<j|b>>>32-j)+n}function l(b,n,a,c,e,j,k){b=b+(n^a^c)+e+k;return(b<<j|b>>>32-j)+n}function s(b,n,a,c,e,j,k){b=b+(a^(n|~c))+e+k;return(b<<j|b>>>32-j)+n}for(var t=CryptoJS,r=t.lib,w=r.WordArray,v=r.Hasher,r=t.algo,b=[],x=0;64>x;x++)b[x]=4294967296*u.abs(u.sin(x+1))|0;r=r.MD5=v.extend({_doReset:function(){this._hash=new w.init([1732584193,4023233417,2562383102,271733878])},
 _doProcessBlock:function(q,n){for(var a=0;16>a;a++){var c=n+a,e=q[c];q[c]=(e<<8|e>>>24)&16711935|(e<<24|e>>>8)&4278255360}var a=this._hash.words,c=q[n+0],e=q[n+1],j=q[n+2],k=q[n+3],z=q[n+4],r=q[n+5],t=q[n+6],w=q[n+7],v=q[n+8],A=q[n+9],B=q[n+10],C=q[n+11],u=q[n+12],D=q[n+13],E=q[n+14],x=q[n+15],f=a[0],m=a[1],g=a[2],h=a[3],f=p(f,m,g,h,c,7,b[0]),h=p(h,f,m,g,e,12,b[1]),g=p(g,h,f,m,j,17,b[2]),m=p(m,g,h,f,k,22,b[3]),f=p(f,m,g,h,z,7,b[4]),h=p(h,f,m,g,r,12,b[5]),g=p(g,h,f,m,t,17,b[6]),m=p(m,g,h,f,w,22,b[7]),
 f=p(f,m,g,h,v,7,b[8]),h=p(h,f,m,g,A,12,b[9]),g=p(g,h,f,m,B,17,b[10]),m=p(m,g,h,f,C,22,b[11]),f=p(f,m,g,h,u,7,b[12]),h=p(h,f,m,g,D,12,b[13]),g=p(g,h,f,m,E,17,b[14]),m=p(m,g,h,f,x,22,b[15]),f=d(f,m,g,h,e,5,b[16]),h=d(h,f,m,g,t,9,b[17]),g=d(g,h,f,m,C,14,b[18]),m=d(m,g,h,f,c,20,b[19]),f=d(f,m,g,h,r,5,b[20]),h=d(h,f,m,g,B,9,b[21]),g=d(g,h,f,m,x,14,b[22]),m=d(m,g,h,f,z,20,b[23]),f=d(f,m,g,h,A,5,b[24]),h=d(h,f,m,g,E,9,b[25]),g=d(g,h,f,m,k,14,b[26]),m=d(m,g,h,f,v,20,b[27]),f=d(f,m,g,h,D,5,b[28]),h=d(h,f,
@@ -6642,6 +6732,8 @@ E,15,b[50]),m=s(m,g,h,f,r,21,b[51]),f=s(f,m,g,h,u,6,b[52]),h=s(h,f,m,g,k,10,b[53
 4294967296);n[(c+64>>>9<<4)+15]=(e<<8|e>>>24)&16711935|(e<<24|e>>>8)&4278255360;n[(c+64>>>9<<4)+14]=(a<<8|a>>>24)&16711935|(a<<24|a>>>8)&4278255360;b.sigBytes=4*(n.length+1);this._process();b=this._hash;n=b.words;for(a=0;4>a;a++)c=n[a],n[a]=(c<<8|c>>>24)&16711935|(c<<24|c>>>8)&4278255360;return b},clone:function(){var b=v.clone.call(this);b._hash=this._hash.clone();return b}});t.MD5=v._createHelper(r);t.HmacMD5=v._createHmacHelper(r)})(Math);
 (function(){var u=CryptoJS,p=u.lib,d=p.Base,l=p.WordArray,p=u.algo,s=p.EvpKDF=d.extend({cfg:d.extend({keySize:4,hasher:p.MD5,iterations:1}),init:function(d){this.cfg=this.cfg.extend(d)},compute:function(d,r){for(var p=this.cfg,s=p.hasher.create(),b=l.create(),u=b.words,q=p.keySize,p=p.iterations;u.length<q;){n&&s.update(n);var n=s.update(d).finalize(r);s.reset();for(var a=1;a<p;a++)n=s.finalize(n),s.reset();b.concat(n)}b.sigBytes=4*q;return b}});u.EvpKDF=function(d,l,p){return s.create(p).compute(d,
 l)}})();
+
+// Cipher
 CryptoJS.lib.Cipher||function(u){var p=CryptoJS,d=p.lib,l=d.Base,s=d.WordArray,t=d.BufferedBlockAlgorithm,r=p.enc.Base64,w=p.algo.EvpKDF,v=d.Cipher=t.extend({cfg:l.extend(),createEncryptor:function(e,a){return this.create(this._ENC_XFORM_MODE,e,a)},createDecryptor:function(e,a){return this.create(this._DEC_XFORM_MODE,e,a)},init:function(e,a,b){this.cfg=this.cfg.extend(b);this._xformMode=e;this._key=a;this.reset()},reset:function(){t.reset.call(this);this._doReset()},process:function(e){this._append(e);return this._process()},
 finalize:function(e){e&&this._append(e);return this._doFinalize()},keySize:4,ivSize:4,_ENC_XFORM_MODE:1,_DEC_XFORM_MODE:2,_createHelper:function(e){return{encrypt:function(b,k,d){return("string"==typeof k?c:a).encrypt(e,b,k,d)},decrypt:function(b,k,d){return("string"==typeof k?c:a).decrypt(e,b,k,d)}}}});d.StreamCipher=v.extend({_doFinalize:function(){return this._process(!0)},blockSize:1});var b=p.mode={},x=function(e,a,b){var c=this._iv;c?this._iv=u:c=this._prevBlock;for(var d=0;d<b;d++)e[a+d]^=
 c[d]},q=(d.BlockCipherMode=l.extend({createEncryptor:function(e,a){return this.Encryptor.create(e,a)},createDecryptor:function(e,a){return this.Decryptor.create(e,a)},init:function(e,a){this._cipher=e;this._iv=a}})).extend();q.Encryptor=q.extend({processBlock:function(e,a){var b=this._cipher,c=b.blockSize;x.call(this,e,a,c);b.encryptBlock(e,a);this._prevBlock=e.slice(a,a+c)}});q.Decryptor=q.extend({processBlock:function(e,a){var b=this._cipher,c=b.blockSize,d=e.slice(a,a+c);b.decryptBlock(e,a);x.call(this,
@@ -6650,999 +6742,368 @@ this,b&&b.words)},_doProcessBlock:function(a,b){this._mode.processBlock(a,b)},_d
 1701076831]).concat(a).concat(b):b).toString(r)},parse:function(a){a=r.parse(a);var b=a.words;if(1398893684==b[0]&&1701076831==b[1]){var c=s.create(b.slice(2,4));b.splice(0,4);a.sigBytes-=16}return n.create({ciphertext:a,salt:c})}},a=d.SerializableCipher=l.extend({cfg:l.extend({format:b}),encrypt:function(a,b,c,d){d=this.cfg.extend(d);var l=a.createEncryptor(c,d);b=l.finalize(b);l=l.cfg;return n.create({ciphertext:b,key:c,iv:l.iv,algorithm:a,mode:l.mode,padding:l.padding,blockSize:a.blockSize,formatter:d.format})},
 decrypt:function(a,b,c,d){d=this.cfg.extend(d);b=this._parse(b,d.format);return a.createDecryptor(c,d).finalize(b.ciphertext)},_parse:function(a,b){return"string"==typeof a?b.parse(a,this):a}}),p=(p.kdf={}).OpenSSL={execute:function(a,b,c,d){d||(d=s.random(8));a=w.create({keySize:b+c}).compute(a,d);c=s.create(a.words.slice(b),4*c);a.sigBytes=4*b;return n.create({key:a,iv:c,salt:d})}},c=d.PasswordBasedCipher=a.extend({cfg:a.cfg.extend({kdf:p}),encrypt:function(b,c,d,l){l=this.cfg.extend(l);d=l.kdf.execute(d,
 b.keySize,b.ivSize);l.iv=d.iv;b=a.encrypt.call(this,b,c,d.key,l);b.mixIn(d);return b},decrypt:function(b,c,d,l){l=this.cfg.extend(l);c=this._parse(c,l.format);d=l.kdf.execute(d,b.keySize,b.ivSize,c.salt);l.iv=d.iv;return a.decrypt.call(this,b,c,d.key,l)}})}();
+
+// AES
 (function(){for(var u=CryptoJS,p=u.lib.BlockCipher,d=u.algo,l=[],s=[],t=[],r=[],w=[],v=[],b=[],x=[],q=[],n=[],a=[],c=0;256>c;c++)a[c]=128>c?c<<1:c<<1^283;for(var e=0,j=0,c=0;256>c;c++){var k=j^j<<1^j<<2^j<<3^j<<4,k=k>>>8^k&255^99;l[e]=k;s[k]=e;var z=a[e],F=a[z],G=a[F],y=257*a[k]^16843008*k;t[e]=y<<24|y>>>8;r[e]=y<<16|y>>>16;w[e]=y<<8|y>>>24;v[e]=y;y=16843009*G^65537*F^257*z^16843008*e;b[k]=y<<24|y>>>8;x[k]=y<<16|y>>>16;q[k]=y<<8|y>>>24;n[k]=y;e?(e=z^a[a[a[G^z]]],j^=a[a[j]]):e=j=1}var H=[0,1,2,4,8,
 16,32,64,128,27,54],d=d.AES=p.extend({_doReset:function(){for(var a=this._key,c=a.words,d=a.sigBytes/4,a=4*((this._nRounds=d+6)+1),e=this._keySchedule=[],j=0;j<a;j++)if(j<d)e[j]=c[j];else{var k=e[j-1];j%d?6<d&&4==j%d&&(k=l[k>>>24]<<24|l[k>>>16&255]<<16|l[k>>>8&255]<<8|l[k&255]):(k=k<<8|k>>>24,k=l[k>>>24]<<24|l[k>>>16&255]<<16|l[k>>>8&255]<<8|l[k&255],k^=H[j/d|0]<<24);e[j]=e[j-d]^k}c=this._invKeySchedule=[];for(d=0;d<a;d++)j=a-d,k=d%4?e[j]:e[j-4],c[d]=4>d||4>=j?k:b[l[k>>>24]]^x[l[k>>>16&255]]^q[l[k>>>
 8&255]]^n[l[k&255]]},encryptBlock:function(a,b){this._doCryptBlock(a,b,this._keySchedule,t,r,w,v,l)},decryptBlock:function(a,c){var d=a[c+1];a[c+1]=a[c+3];a[c+3]=d;this._doCryptBlock(a,c,this._invKeySchedule,b,x,q,n,s);d=a[c+1];a[c+1]=a[c+3];a[c+3]=d},_doCryptBlock:function(a,b,c,d,e,j,l,f){for(var m=this._nRounds,g=a[b]^c[0],h=a[b+1]^c[1],k=a[b+2]^c[2],n=a[b+3]^c[3],p=4,r=1;r<m;r++)var q=d[g>>>24]^e[h>>>16&255]^j[k>>>8&255]^l[n&255]^c[p++],s=d[h>>>24]^e[k>>>16&255]^j[n>>>8&255]^l[g&255]^c[p++],t=
 d[k>>>24]^e[n>>>16&255]^j[g>>>8&255]^l[h&255]^c[p++],n=d[n>>>24]^e[g>>>16&255]^j[h>>>8&255]^l[k&255]^c[p++],g=q,h=s,k=t;q=(f[g>>>24]<<24|f[h>>>16&255]<<16|f[k>>>8&255]<<8|f[n&255])^c[p++];s=(f[h>>>24]<<24|f[k>>>16&255]<<16|f[n>>>8&255]<<8|f[g&255])^c[p++];t=(f[k>>>24]<<24|f[n>>>16&255]<<16|f[g>>>8&255]<<8|f[h&255])^c[p++];n=(f[n>>>24]<<24|f[g>>>16&255]<<16|f[h>>>8&255]<<8|f[k&255])^c[p++];a[b]=q;a[b+1]=s;a[b+2]=t;a[b+3]=n},keySize:8});u.AES=p._createHelper(d)})();
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(49)(module)))
+// Mode ECB
+CryptoJS.mode.ECB = (function () {
+    var ECB = CryptoJS.lib.BlockCipherMode.extend();
+
+    ECB.Encryptor = ECB.extend({
+        processBlock: function (words, offset) {
+            this._cipher.encryptBlock(words, offset);
+        }
+    });
+
+    ECB.Decryptor = ECB.extend({
+        processBlock: function (words, offset) {
+            this._cipher.decryptBlock(words, offset);
+        }
+    });
+
+    return ECB;
+}());// Moved to hmac-sha-256.js
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43)(module)))
 
 /***/ },
 /* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process, global, module) {/*!
- * @overview es6-promise - a tiny implementation of Promises/A+.
- * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
- * @license   Licensed under MIT license
- *            See https://raw.githubusercontent.com/jakearchibald/es6-promise/master/LICENSE
- * @version   2.0.1
- */
+/* WEBPACK VAR INJECTION */(function(setImmediate) {(function(global){
 
-(function() {
-    "use strict";
+//
+// Check for native Promise and it has correct interface
+//
 
-    function $$utils$$objectOrFunction(x) {
-      return typeof x === 'function' || (typeof x === 'object' && x !== null);
+var NativePromise = global['Promise'];
+var nativePromiseSupported =
+  NativePromise &&
+  // Some of these methods are missing from
+  // Firefox/Chrome experimental implementations
+  'resolve' in NativePromise &&
+  'reject' in NativePromise &&
+  'all' in NativePromise &&
+  'race' in NativePromise &&
+  // Older version of the spec had a resolver object
+  // as the arg rather than a function
+  (function(){
+    var resolve;
+    new NativePromise(function(r){ resolve = r; });
+    return typeof resolve === 'function';
+  })();
+
+
+//
+// export if necessary
+//
+
+if (typeof exports !== 'undefined' && exports)
+{
+  // node.js
+  exports.Promise = Promise || NativePromise;
+}
+else
+{
+  // in browser add to global
+  if (!nativePromiseSupported)
+    global['Promise'] = Promise;
+}
+
+
+//
+// Polyfill
+//
+
+var PENDING = 'pending';
+var SEALED = 'sealed';
+var FULFILLED = 'fulfilled';
+var REJECTED = 'rejected';
+var NOOP = function(){};
+
+// async calls
+var asyncSetTimer = typeof setImmediate !== 'undefined' ? setImmediate : setTimeout;
+var asyncQueue = [];
+var asyncTimer;
+
+function asyncFlush(){
+  // run promise callbacks
+  for (var i = 0; i < asyncQueue.length; i++)
+    asyncQueue[i][0](asyncQueue[i][1]);
+
+  // reset async asyncQueue
+  asyncQueue = [];
+  asyncTimer = false;
+}
+
+function asyncCall(callback, arg){
+  asyncQueue.push([callback, arg]);
+
+  if (!asyncTimer)
+  {
+    asyncTimer = true;
+    asyncSetTimer(asyncFlush, 0);
+  }
+}
+
+
+function invokeResolver(resolver, promise) {
+  function resolvePromise(value) {
+    resolve(promise, value);
+  }
+
+  function rejectPromise(reason) {
+    reject(promise, reason);
+  }
+
+  try {
+    resolver(resolvePromise, rejectPromise);
+  } catch(e) {
+    rejectPromise(e);
+  }
+}
+
+function invokeCallback(subscriber){
+  var owner = subscriber.owner;
+  var settled = owner.state_;
+  var value = owner.data_;  
+  var callback = subscriber[settled];
+  var promise = subscriber.then;
+
+  if (typeof callback === 'function')
+  {
+    settled = FULFILLED;
+    try {
+      value = callback(value);
+    } catch(e) {
+      reject(promise, e);
     }
+  }
 
-    function $$utils$$isFunction(x) {
-      return typeof x === 'function';
-    }
+  if (!handleThenable(promise, value))
+  {
+    if (settled === FULFILLED)
+      resolve(promise, value);
 
-    function $$utils$$isMaybeThenable(x) {
-      return typeof x === 'object' && x !== null;
-    }
+    if (settled === REJECTED)
+      reject(promise, value);
+  }
+}
 
-    var $$utils$$_isArray;
+function handleThenable(promise, value) {
+  var resolved;
 
-    if (!Array.isArray) {
-      $$utils$$_isArray = function (x) {
-        return Object.prototype.toString.call(x) === '[object Array]';
-      };
-    } else {
-      $$utils$$_isArray = Array.isArray;
-    }
+  try {
+    if (promise === value)
+      throw new TypeError('A promises callback cannot return that same promise.');
 
-    var $$utils$$isArray = $$utils$$_isArray;
-    var $$utils$$now = Date.now || function() { return new Date().getTime(); };
-    function $$utils$$F() { }
+    if (value && (typeof value === 'function' || typeof value === 'object'))
+    {
+      var then = value.then;  // then should be retrived only once
 
-    var $$utils$$o_create = (Object.create || function (o) {
-      if (arguments.length > 1) {
-        throw new Error('Second argument not supported');
-      }
-      if (typeof o !== 'object') {
-        throw new TypeError('Argument must be an object');
-      }
-      $$utils$$F.prototype = o;
-      return new $$utils$$F();
-    });
+      if (typeof then === 'function')
+      {
+        then.call(value, function(val){
+          if (!resolved)
+          {
+            resolved = true;
 
-    var $$asap$$len = 0;
-
-    var $$asap$$default = function asap(callback, arg) {
-      $$asap$$queue[$$asap$$len] = callback;
-      $$asap$$queue[$$asap$$len + 1] = arg;
-      $$asap$$len += 2;
-      if ($$asap$$len === 2) {
-        // If len is 1, that means that we need to schedule an async flush.
-        // If additional callbacks are queued before the queue is flushed, they
-        // will be processed by this flush that we are scheduling.
-        $$asap$$scheduleFlush();
-      }
-    };
-
-    var $$asap$$browserGlobal = (typeof window !== 'undefined') ? window : {};
-    var $$asap$$BrowserMutationObserver = $$asap$$browserGlobal.MutationObserver || $$asap$$browserGlobal.WebKitMutationObserver;
-
-    // test for web worker but not in IE10
-    var $$asap$$isWorker = typeof Uint8ClampedArray !== 'undefined' &&
-      typeof importScripts !== 'undefined' &&
-      typeof MessageChannel !== 'undefined';
-
-    // node
-    function $$asap$$useNextTick() {
-      return function() {
-        process.nextTick($$asap$$flush);
-      };
-    }
-
-    function $$asap$$useMutationObserver() {
-      var iterations = 0;
-      var observer = new $$asap$$BrowserMutationObserver($$asap$$flush);
-      var node = document.createTextNode('');
-      observer.observe(node, { characterData: true });
-
-      return function() {
-        node.data = (iterations = ++iterations % 2);
-      };
-    }
-
-    // web worker
-    function $$asap$$useMessageChannel() {
-      var channel = new MessageChannel();
-      channel.port1.onmessage = $$asap$$flush;
-      return function () {
-        channel.port2.postMessage(0);
-      };
-    }
-
-    function $$asap$$useSetTimeout() {
-      return function() {
-        setTimeout($$asap$$flush, 1);
-      };
-    }
-
-    var $$asap$$queue = new Array(1000);
-
-    function $$asap$$flush() {
-      for (var i = 0; i < $$asap$$len; i+=2) {
-        var callback = $$asap$$queue[i];
-        var arg = $$asap$$queue[i+1];
-
-        callback(arg);
-
-        $$asap$$queue[i] = undefined;
-        $$asap$$queue[i+1] = undefined;
-      }
-
-      $$asap$$len = 0;
-    }
-
-    var $$asap$$scheduleFlush;
-
-    // Decide what async method to use to triggering processing of queued callbacks:
-    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
-      $$asap$$scheduleFlush = $$asap$$useNextTick();
-    } else if ($$asap$$BrowserMutationObserver) {
-      $$asap$$scheduleFlush = $$asap$$useMutationObserver();
-    } else if ($$asap$$isWorker) {
-      $$asap$$scheduleFlush = $$asap$$useMessageChannel();
-    } else {
-      $$asap$$scheduleFlush = $$asap$$useSetTimeout();
-    }
-
-    function $$$internal$$noop() {}
-    var $$$internal$$PENDING   = void 0;
-    var $$$internal$$FULFILLED = 1;
-    var $$$internal$$REJECTED  = 2;
-    var $$$internal$$GET_THEN_ERROR = new $$$internal$$ErrorObject();
-
-    function $$$internal$$selfFullfillment() {
-      return new TypeError("You cannot resolve a promise with itself");
-    }
-
-    function $$$internal$$cannotReturnOwn() {
-      return new TypeError('A promises callback cannot return that same promise.')
-    }
-
-    function $$$internal$$getThen(promise) {
-      try {
-        return promise.then;
-      } catch(error) {
-        $$$internal$$GET_THEN_ERROR.error = error;
-        return $$$internal$$GET_THEN_ERROR;
-      }
-    }
-
-    function $$$internal$$tryThen(then, value, fulfillmentHandler, rejectionHandler) {
-      try {
-        then.call(value, fulfillmentHandler, rejectionHandler);
-      } catch(e) {
-        return e;
-      }
-    }
-
-    function $$$internal$$handleForeignThenable(promise, thenable, then) {
-       $$asap$$default(function(promise) {
-        var sealed = false;
-        var error = $$$internal$$tryThen(then, thenable, function(value) {
-          if (sealed) { return; }
-          sealed = true;
-          if (thenable !== value) {
-            $$$internal$$resolve(promise, value);
-          } else {
-            $$$internal$$fulfill(promise, value);
+            if (value !== val)
+              resolve(promise, val);
+            else
+              fulfill(promise, val);
           }
-        }, function(reason) {
-          if (sealed) { return; }
-          sealed = true;
+        }, function(reason){
+          if (!resolved)
+          {
+            resolved = true;
 
-          $$$internal$$reject(promise, reason);
-        }, 'Settle: ' + (promise._label || ' unknown promise'));
-
-        if (!sealed && error) {
-          sealed = true;
-          $$$internal$$reject(promise, error);
-        }
-      }, promise);
-    }
-
-    function $$$internal$$handleOwnThenable(promise, thenable) {
-      if (thenable._state === $$$internal$$FULFILLED) {
-        $$$internal$$fulfill(promise, thenable._result);
-      } else if (promise._state === $$$internal$$REJECTED) {
-        $$$internal$$reject(promise, thenable._result);
-      } else {
-        $$$internal$$subscribe(thenable, undefined, function(value) {
-          $$$internal$$resolve(promise, value);
-        }, function(reason) {
-          $$$internal$$reject(promise, reason);
-        });
-      }
-    }
-
-    function $$$internal$$handleMaybeThenable(promise, maybeThenable) {
-      if (maybeThenable.constructor === promise.constructor) {
-        $$$internal$$handleOwnThenable(promise, maybeThenable);
-      } else {
-        var then = $$$internal$$getThen(maybeThenable);
-
-        if (then === $$$internal$$GET_THEN_ERROR) {
-          $$$internal$$reject(promise, $$$internal$$GET_THEN_ERROR.error);
-        } else if (then === undefined) {
-          $$$internal$$fulfill(promise, maybeThenable);
-        } else if ($$utils$$isFunction(then)) {
-          $$$internal$$handleForeignThenable(promise, maybeThenable, then);
-        } else {
-          $$$internal$$fulfill(promise, maybeThenable);
-        }
-      }
-    }
-
-    function $$$internal$$resolve(promise, value) {
-      if (promise === value) {
-        $$$internal$$reject(promise, $$$internal$$selfFullfillment());
-      } else if ($$utils$$objectOrFunction(value)) {
-        $$$internal$$handleMaybeThenable(promise, value);
-      } else {
-        $$$internal$$fulfill(promise, value);
-      }
-    }
-
-    function $$$internal$$publishRejection(promise) {
-      if (promise._onerror) {
-        promise._onerror(promise._result);
-      }
-
-      $$$internal$$publish(promise);
-    }
-
-    function $$$internal$$fulfill(promise, value) {
-      if (promise._state !== $$$internal$$PENDING) { return; }
-
-      promise._result = value;
-      promise._state = $$$internal$$FULFILLED;
-
-      if (promise._subscribers.length === 0) {
-      } else {
-        $$asap$$default($$$internal$$publish, promise);
-      }
-    }
-
-    function $$$internal$$reject(promise, reason) {
-      if (promise._state !== $$$internal$$PENDING) { return; }
-      promise._state = $$$internal$$REJECTED;
-      promise._result = reason;
-
-      $$asap$$default($$$internal$$publishRejection, promise);
-    }
-
-    function $$$internal$$subscribe(parent, child, onFulfillment, onRejection) {
-      var subscribers = parent._subscribers;
-      var length = subscribers.length;
-
-      parent._onerror = null;
-
-      subscribers[length] = child;
-      subscribers[length + $$$internal$$FULFILLED] = onFulfillment;
-      subscribers[length + $$$internal$$REJECTED]  = onRejection;
-
-      if (length === 0 && parent._state) {
-        $$asap$$default($$$internal$$publish, parent);
-      }
-    }
-
-    function $$$internal$$publish(promise) {
-      var subscribers = promise._subscribers;
-      var settled = promise._state;
-
-      if (subscribers.length === 0) { return; }
-
-      var child, callback, detail = promise._result;
-
-      for (var i = 0; i < subscribers.length; i += 3) {
-        child = subscribers[i];
-        callback = subscribers[i + settled];
-
-        if (child) {
-          $$$internal$$invokeCallback(settled, child, callback, detail);
-        } else {
-          callback(detail);
-        }
-      }
-
-      promise._subscribers.length = 0;
-    }
-
-    function $$$internal$$ErrorObject() {
-      this.error = null;
-    }
-
-    var $$$internal$$TRY_CATCH_ERROR = new $$$internal$$ErrorObject();
-
-    function $$$internal$$tryCatch(callback, detail) {
-      try {
-        return callback(detail);
-      } catch(e) {
-        $$$internal$$TRY_CATCH_ERROR.error = e;
-        return $$$internal$$TRY_CATCH_ERROR;
-      }
-    }
-
-    function $$$internal$$invokeCallback(settled, promise, callback, detail) {
-      var hasCallback = $$utils$$isFunction(callback),
-          value, error, succeeded, failed;
-
-      if (hasCallback) {
-        value = $$$internal$$tryCatch(callback, detail);
-
-        if (value === $$$internal$$TRY_CATCH_ERROR) {
-          failed = true;
-          error = value.error;
-          value = null;
-        } else {
-          succeeded = true;
-        }
-
-        if (promise === value) {
-          $$$internal$$reject(promise, $$$internal$$cannotReturnOwn());
-          return;
-        }
-
-      } else {
-        value = detail;
-        succeeded = true;
-      }
-
-      if (promise._state !== $$$internal$$PENDING) {
-        // noop
-      } else if (hasCallback && succeeded) {
-        $$$internal$$resolve(promise, value);
-      } else if (failed) {
-        $$$internal$$reject(promise, error);
-      } else if (settled === $$$internal$$FULFILLED) {
-        $$$internal$$fulfill(promise, value);
-      } else if (settled === $$$internal$$REJECTED) {
-        $$$internal$$reject(promise, value);
-      }
-    }
-
-    function $$$internal$$initializePromise(promise, resolver) {
-      try {
-        resolver(function resolvePromise(value){
-          $$$internal$$resolve(promise, value);
-        }, function rejectPromise(reason) {
-          $$$internal$$reject(promise, reason);
-        });
-      } catch(e) {
-        $$$internal$$reject(promise, e);
-      }
-    }
-
-    function $$$enumerator$$makeSettledResult(state, position, value) {
-      if (state === $$$internal$$FULFILLED) {
-        return {
-          state: 'fulfilled',
-          value: value
-        };
-      } else {
-        return {
-          state: 'rejected',
-          reason: value
-        };
-      }
-    }
-
-    function $$$enumerator$$Enumerator(Constructor, input, abortOnReject, label) {
-      this._instanceConstructor = Constructor;
-      this.promise = new Constructor($$$internal$$noop, label);
-      this._abortOnReject = abortOnReject;
-
-      if (this._validateInput(input)) {
-        this._input     = input;
-        this.length     = input.length;
-        this._remaining = input.length;
-
-        this._init();
-
-        if (this.length === 0) {
-          $$$internal$$fulfill(this.promise, this._result);
-        } else {
-          this.length = this.length || 0;
-          this._enumerate();
-          if (this._remaining === 0) {
-            $$$internal$$fulfill(this.promise, this._result);
+            reject(promise, reason);
           }
-        }
-      } else {
-        $$$internal$$reject(this.promise, this._validationError());
-      }
-    }
-
-    $$$enumerator$$Enumerator.prototype._validateInput = function(input) {
-      return $$utils$$isArray(input);
-    };
-
-    $$$enumerator$$Enumerator.prototype._validationError = function() {
-      return new Error('Array Methods must be provided an Array');
-    };
-
-    $$$enumerator$$Enumerator.prototype._init = function() {
-      this._result = new Array(this.length);
-    };
-
-    var $$$enumerator$$default = $$$enumerator$$Enumerator;
-
-    $$$enumerator$$Enumerator.prototype._enumerate = function() {
-      var length  = this.length;
-      var promise = this.promise;
-      var input   = this._input;
-
-      for (var i = 0; promise._state === $$$internal$$PENDING && i < length; i++) {
-        this._eachEntry(input[i], i);
-      }
-    };
-
-    $$$enumerator$$Enumerator.prototype._eachEntry = function(entry, i) {
-      var c = this._instanceConstructor;
-      if ($$utils$$isMaybeThenable(entry)) {
-        if (entry.constructor === c && entry._state !== $$$internal$$PENDING) {
-          entry._onerror = null;
-          this._settledAt(entry._state, i, entry._result);
-        } else {
-          this._willSettleAt(c.resolve(entry), i);
-        }
-      } else {
-        this._remaining--;
-        this._result[i] = this._makeResult($$$internal$$FULFILLED, i, entry);
-      }
-    };
-
-    $$$enumerator$$Enumerator.prototype._settledAt = function(state, i, value) {
-      var promise = this.promise;
-
-      if (promise._state === $$$internal$$PENDING) {
-        this._remaining--;
-
-        if (this._abortOnReject && state === $$$internal$$REJECTED) {
-          $$$internal$$reject(promise, value);
-        } else {
-          this._result[i] = this._makeResult(state, i, value);
-        }
-      }
-
-      if (this._remaining === 0) {
-        $$$internal$$fulfill(promise, this._result);
-      }
-    };
-
-    $$$enumerator$$Enumerator.prototype._makeResult = function(state, i, value) {
-      return value;
-    };
-
-    $$$enumerator$$Enumerator.prototype._willSettleAt = function(promise, i) {
-      var enumerator = this;
-
-      $$$internal$$subscribe(promise, undefined, function(value) {
-        enumerator._settledAt($$$internal$$FULFILLED, i, value);
-      }, function(reason) {
-        enumerator._settledAt($$$internal$$REJECTED, i, reason);
-      });
-    };
-
-    var $$promise$all$$default = function all(entries, label) {
-      return new $$$enumerator$$default(this, entries, true /* abort on reject */, label).promise;
-    };
-
-    var $$promise$race$$default = function race(entries, label) {
-      /*jshint validthis:true */
-      var Constructor = this;
-
-      var promise = new Constructor($$$internal$$noop, label);
-
-      if (!$$utils$$isArray(entries)) {
-        $$$internal$$reject(promise, new TypeError('You must pass an array to race.'));
-        return promise;
-      }
-
-      var length = entries.length;
-
-      function onFulfillment(value) {
-        $$$internal$$resolve(promise, value);
-      }
-
-      function onRejection(reason) {
-        $$$internal$$reject(promise, reason);
-      }
-
-      for (var i = 0; promise._state === $$$internal$$PENDING && i < length; i++) {
-        $$$internal$$subscribe(Constructor.resolve(entries[i]), undefined, onFulfillment, onRejection);
-      }
-
-      return promise;
-    };
-
-    var $$promise$resolve$$default = function resolve(object, label) {
-      /*jshint validthis:true */
-      var Constructor = this;
-
-      if (object && typeof object === 'object' && object.constructor === Constructor) {
-        return object;
-      }
-
-      var promise = new Constructor($$$internal$$noop, label);
-      $$$internal$$resolve(promise, object);
-      return promise;
-    };
-
-    var $$promise$reject$$default = function reject(reason, label) {
-      /*jshint validthis:true */
-      var Constructor = this;
-      var promise = new Constructor($$$internal$$noop, label);
-      $$$internal$$reject(promise, reason);
-      return promise;
-    };
-
-    var $$es6$promise$promise$$counter = 0;
-
-    function $$es6$promise$promise$$needsResolver() {
-      throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
-    }
-
-    function $$es6$promise$promise$$needsNew() {
-      throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
-    }
-
-    var $$es6$promise$promise$$default = $$es6$promise$promise$$Promise;
-
-    /**
-      Promise objects represent the eventual result of an asynchronous operation. The
-      primary way of interacting with a promise is through its `then` method, which
-      registers callbacks to receive either a promise’s eventual value or the reason
-      why the promise cannot be fulfilled.
-
-      Terminology
-      -----------
-
-      - `promise` is an object or function with a `then` method whose behavior conforms to this specification.
-      - `thenable` is an object or function that defines a `then` method.
-      - `value` is any legal JavaScript value (including undefined, a thenable, or a promise).
-      - `exception` is a value that is thrown using the throw statement.
-      - `reason` is a value that indicates why a promise was rejected.
-      - `settled` the final resting state of a promise, fulfilled or rejected.
-
-      A promise can be in one of three states: pending, fulfilled, or rejected.
-
-      Promises that are fulfilled have a fulfillment value and are in the fulfilled
-      state.  Promises that are rejected have a rejection reason and are in the
-      rejected state.  A fulfillment value is never a thenable.
-
-      Promises can also be said to *resolve* a value.  If this value is also a
-      promise, then the original promise's settled state will match the value's
-      settled state.  So a promise that *resolves* a promise that rejects will
-      itself reject, and a promise that *resolves* a promise that fulfills will
-      itself fulfill.
-
-
-      Basic Usage:
-      ------------
-
-      ```js
-      var promise = new Promise(function(resolve, reject) {
-        // on success
-        resolve(value);
-
-        // on failure
-        reject(reason);
-      });
-
-      promise.then(function(value) {
-        // on fulfillment
-      }, function(reason) {
-        // on rejection
-      });
-      ```
-
-      Advanced Usage:
-      ---------------
-
-      Promises shine when abstracting away asynchronous interactions such as
-      `XMLHttpRequest`s.
-
-      ```js
-      function getJSON(url) {
-        return new Promise(function(resolve, reject){
-          var xhr = new XMLHttpRequest();
-
-          xhr.open('GET', url);
-          xhr.onreadystatechange = handler;
-          xhr.responseType = 'json';
-          xhr.setRequestHeader('Accept', 'application/json');
-          xhr.send();
-
-          function handler() {
-            if (this.readyState === this.DONE) {
-              if (this.status === 200) {
-                resolve(this.response);
-              } else {
-                reject(new Error('getJSON: `' + url + '` failed with status: [' + this.status + ']'));
-              }
-            }
-          };
         });
-      }
 
-      getJSON('/posts.json').then(function(json) {
-        // on fulfillment
-      }, function(reason) {
-        // on rejection
-      });
-      ```
-
-      Unlike callbacks, promises are great composable primitives.
-
-      ```js
-      Promise.all([
-        getJSON('/posts'),
-        getJSON('/comments')
-      ]).then(function(values){
-        values[0] // => postsJSON
-        values[1] // => commentsJSON
-
-        return values;
-      });
-      ```
-
-      @class Promise
-      @param {function} resolver
-      Useful for tooling.
-      @constructor
-    */
-    function $$es6$promise$promise$$Promise(resolver) {
-      this._id = $$es6$promise$promise$$counter++;
-      this._state = undefined;
-      this._result = undefined;
-      this._subscribers = [];
-
-      if ($$$internal$$noop !== resolver) {
-        if (!$$utils$$isFunction(resolver)) {
-          $$es6$promise$promise$$needsResolver();
-        }
-
-        if (!(this instanceof $$es6$promise$promise$$Promise)) {
-          $$es6$promise$promise$$needsNew();
-        }
-
-        $$$internal$$initializePromise(this, resolver);
+        return true;
       }
     }
+  } catch (e) {
+    if (!resolved)
+      reject(promise, e);
 
-    $$es6$promise$promise$$Promise.all = $$promise$all$$default;
-    $$es6$promise$promise$$Promise.race = $$promise$race$$default;
-    $$es6$promise$promise$$Promise.resolve = $$promise$resolve$$default;
-    $$es6$promise$promise$$Promise.reject = $$promise$reject$$default;
+    return true;
+  }
 
-    $$es6$promise$promise$$Promise.prototype = {
-      constructor: $$es6$promise$promise$$Promise,
+  return false;
+}
 
-    /**
-      The primary way of interacting with a promise is through its `then` method,
-      which registers callbacks to receive either a promise's eventual value or the
-      reason why the promise cannot be fulfilled.
+function resolve(promise, value){
+  if (promise === value || !handleThenable(promise, value))
+    fulfill(promise, value);
+}
 
-      ```js
-      findUser().then(function(user){
-        // user is available
-      }, function(reason){
-        // user is unavailable, and you are given the reason why
-      });
-      ```
+function fulfill(promise, value){
+  if (promise.state_ === PENDING)
+  {
+    promise.state_ = SEALED;
+    promise.data_ = value;
 
-      Chaining
-      --------
+    asyncCall(publishFulfillment, promise);
+  }
+}
 
-      The return value of `then` is itself a promise.  This second, 'downstream'
-      promise is resolved with the return value of the first promise's fulfillment
-      or rejection handler, or rejected if the handler throws an exception.
+function reject(promise, reason){
+  if (promise.state_ === PENDING)
+  {
+    promise.state_ = SEALED;
+    promise.data_ = reason;
 
-      ```js
-      findUser().then(function (user) {
-        return user.name;
-      }, function (reason) {
-        return 'default name';
-      }).then(function (userName) {
-        // If `findUser` fulfilled, `userName` will be the user's name, otherwise it
-        // will be `'default name'`
-      });
+    asyncCall(publishRejection, promise);
+  }
+}
 
-      findUser().then(function (user) {
-        throw new Error('Found user, but still unhappy');
-      }, function (reason) {
-        throw new Error('`findUser` rejected and we're unhappy');
-      }).then(function (value) {
-        // never reached
-      }, function (reason) {
-        // if `findUser` fulfilled, `reason` will be 'Found user, but still unhappy'.
-        // If `findUser` rejected, `reason` will be '`findUser` rejected and we're unhappy'.
-      });
-      ```
-      If the downstream promise does not specify a rejection handler, rejection reasons will be propagated further downstream.
+function publish(promise) {
+  promise.then_ = promise.then_.forEach(invokeCallback);
+}
 
-      ```js
-      findUser().then(function (user) {
-        throw new PedagogicalException('Upstream error');
-      }).then(function (value) {
-        // never reached
-      }).then(function (value) {
-        // never reached
-      }, function (reason) {
-        // The `PedgagocialException` is propagated all the way down to here
-      });
-      ```
+function publishFulfillment(promise){
+  promise.state_ = FULFILLED;
+  publish(promise);
+}
 
-      Assimilation
-      ------------
+function publishRejection(promise){
+  promise.state_ = REJECTED;
+  publish(promise);
+}
 
-      Sometimes the value you want to propagate to a downstream promise can only be
-      retrieved asynchronously. This can be achieved by returning a promise in the
-      fulfillment or rejection handler. The downstream promise will then be pending
-      until the returned promise is settled. This is called *assimilation*.
+/**
+* @class
+*/
+function Promise(resolver){
+  if (typeof resolver !== 'function')
+    throw new TypeError('Promise constructor takes a function argument');
 
-      ```js
-      findUser().then(function (user) {
-        return findCommentsByAuthor(user);
-      }).then(function (comments) {
-        // The user's comments are now available
-      });
-      ```
+  if (this instanceof Promise === false)
+    throw new TypeError('Failed to construct \'Promise\': Please use the \'new\' operator, this object constructor cannot be called as a function.');
 
-      If the assimliated promise rejects, then the downstream promise will also reject.
+  this.then_ = [];
 
-      ```js
-      findUser().then(function (user) {
-        return findCommentsByAuthor(user);
-      }).then(function (comments) {
-        // If `findCommentsByAuthor` fulfills, we'll have the value here
-      }, function (reason) {
-        // If `findCommentsByAuthor` rejects, we'll have the reason here
-      });
-      ```
+  invokeResolver(resolver, this);
+}
 
-      Simple Example
-      --------------
+Promise.prototype = {
+  constructor: Promise,
 
-      Synchronous Example
+  state_: PENDING,
+  then_: null,
+  data_: undefined,
 
-      ```javascript
-      var result;
-
-      try {
-        result = findResult();
-        // success
-      } catch(reason) {
-        // failure
-      }
-      ```
-
-      Errback Example
-
-      ```js
-      findResult(function(result, err){
-        if (err) {
-          // failure
-        } else {
-          // success
-        }
-      });
-      ```
-
-      Promise Example;
-
-      ```javascript
-      findResult().then(function(result){
-        // success
-      }, function(reason){
-        // failure
-      });
-      ```
-
-      Advanced Example
-      --------------
-
-      Synchronous Example
-
-      ```javascript
-      var author, books;
-
-      try {
-        author = findAuthor();
-        books  = findBooksByAuthor(author);
-        // success
-      } catch(reason) {
-        // failure
-      }
-      ```
-
-      Errback Example
-
-      ```js
-
-      function foundBooks(books) {
-
-      }
-
-      function failure(reason) {
-
-      }
-
-      findAuthor(function(author, err){
-        if (err) {
-          failure(err);
-          // failure
-        } else {
-          try {
-            findBoooksByAuthor(author, function(books, err) {
-              if (err) {
-                failure(err);
-              } else {
-                try {
-                  foundBooks(books);
-                } catch(reason) {
-                  failure(reason);
-                }
-              }
-            });
-          } catch(error) {
-            failure(err);
-          }
-          // success
-        }
-      });
-      ```
-
-      Promise Example;
-
-      ```javascript
-      findAuthor().
-        then(findBooksByAuthor).
-        then(function(books){
-          // found books
-      }).catch(function(reason){
-        // something went wrong
-      });
-      ```
-
-      @method then
-      @param {Function} onFulfilled
-      @param {Function} onRejected
-      Useful for tooling.
-      @return {Promise}
-    */
-      then: function(onFulfillment, onRejection) {
-        var parent = this;
-        var state = parent._state;
-
-        if (state === $$$internal$$FULFILLED && !onFulfillment || state === $$$internal$$REJECTED && !onRejection) {
-          return this;
-        }
-
-        var child = new this.constructor($$$internal$$noop);
-        var result = parent._result;
-
-        if (state) {
-          var callback = arguments[state - 1];
-          $$asap$$default(function(){
-            $$$internal$$invokeCallback(state, child, callback, result);
-          });
-        } else {
-          $$$internal$$subscribe(parent, child, onFulfillment, onRejection);
-        }
-
-        return child;
-      },
-
-    /**
-      `catch` is simply sugar for `then(undefined, onRejection)` which makes it the same
-      as the catch block of a try/catch statement.
-
-      ```js
-      function findAuthor(){
-        throw new Error('couldn't find that author');
-      }
-
-      // synchronous
-      try {
-        findAuthor();
-      } catch(reason) {
-        // something went wrong
-      }
-
-      // async with promises
-      findAuthor().catch(function(reason){
-        // something went wrong
-      });
-      ```
-
-      @method catch
-      @param {Function} onRejection
-      Useful for tooling.
-      @return {Promise}
-    */
-      'catch': function(onRejection) {
-        return this.then(null, onRejection);
-      }
+  then: function(onFulfillment, onRejection){
+    var subscriber = {
+      owner: this,
+      then: new this.constructor(NOOP),
+      fulfilled: onFulfillment,
+      rejected: onRejection
     };
 
-    var $$es6$promise$polyfill$$default = function polyfill() {
-      var local;
-
-      if (typeof global !== 'undefined') {
-        local = global;
-      } else if (typeof window !== 'undefined' && window.document) {
-        local = window;
-      } else {
-        local = self;
-      }
-
-      var es6PromiseSupport =
-        "Promise" in local &&
-        // Some of these methods are missing from
-        // Firefox/Chrome experimental implementations
-        "resolve" in local.Promise &&
-        "reject" in local.Promise &&
-        "all" in local.Promise &&
-        "race" in local.Promise &&
-        // Older version of the spec had a resolver object
-        // as the arg rather than a function
-        (function() {
-          var resolve;
-          new local.Promise(function(r) { resolve = r; });
-          return $$utils$$isFunction(resolve);
-        }());
-
-      if (!es6PromiseSupport) {
-        local.Promise = $$es6$promise$promise$$default;
-      }
-    };
-
-    var es6$promise$umd$$ES6Promise = {
-      'Promise': $$es6$promise$promise$$default,
-      'polyfill': $$es6$promise$polyfill$$default
-    };
-
-    /* global define:true module:true window: true */
-    if ("function" === 'function' && __webpack_require__(50)['amd']) {
-      !(__WEBPACK_AMD_DEFINE_RESULT__ = function() { return es6$promise$umd$$ES6Promise; }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-    } else if (typeof module !== 'undefined' && module['exports']) {
-      module['exports'] = es6$promise$umd$$ES6Promise;
-    } else if (typeof this !== 'undefined') {
-      this['ES6Promise'] = es6$promise$umd$$ES6Promise;
+    if (this.state_ === FULFILLED || this.state_ === REJECTED)
+    {
+      // already resolved, call callback async
+      asyncCall(invokeCallback, subscriber);
     }
-}).call(this);
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(53), (function() { return this; }()), __webpack_require__(49)(module)))
+    else
+    {
+      // subscribe
+      this.then_.push(subscriber);
+    }
+
+    return subscriber.then;
+  },
+
+  'catch': function(onRejection) {
+    return this.then(null, onRejection);
+  }
+};
+
+Promise.all = function(promises){
+  var Class = this;
+
+  if (!Array.isArray(promises))
+    throw new TypeError('You must pass an array to Promise.all().');
+
+  return new Class(function(resolve, reject){
+    var results = [];
+    var remaining = 0;
+
+    function resolver(index){
+      remaining++;
+      return function(value){
+        results[index] = value;
+        if (!--remaining)
+          resolve(results);
+      };
+    }
+
+    for (var i = 0, promise; i < promises.length; i++)
+    {
+      promise = promises[i];
+
+      if (promise && typeof promise.then === 'function')
+        promise.then(resolver(i), reject);
+      else
+        results[i] = promise;
+    }
+
+    if (!remaining)
+      resolve(results);
+  });
+};
+
+Promise.race = function(promises){
+  var Class = this;
+
+  if (!Array.isArray(promises))
+    throw new TypeError('You must pass an array to Promise.race().');
+
+  return new Class(function(resolve, reject) {
+    for (var i = 0, promise; i < promises.length; i++)
+    {
+      promise = promises[i];
+
+      if (promise && typeof promise.then === 'function')
+        promise.then(resolve, reject);
+      else
+        resolve(promise);
+    }
+  });
+};
+
+Promise.resolve = function(value){
+  var Class = this;
+
+  if (value && typeof value === 'object' && value.constructor === Class)
+    return value;
+
+  return new Class(function(resolve){
+    resolve(value);
+  });
+};
+
+Promise.reject = function(reason){
+  var Class = this;
+
+  return new Class(function(resolve, reject){
+    reject(reason);
+  });
+};
+
+})(new Function('return this')());
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42).setImmediate))
 
 /***/ },
 /* 41 */
-/***/ function(module, exports, __webpack_require__) {
-
-(function(e,r){true?module.exports=exports=r(__webpack_require__(43),__webpack_require__(45),__webpack_require__(46),__webpack_require__(47),__webpack_require__(48)):"function"==typeof define&&define.amd?define(["./core","./enc-base64","./md5","./evpkdf","./cipher-core"],r):r(e.CryptoJS)})(this,function(e){return function(){var r=e,t=r.lib,i=t.BlockCipher,o=r.algo,n=[],c=[],s=[],a=[],f=[],u=[],h=[],p=[],d=[],l=[];(function(){for(var e=[],r=0;256>r;r++)e[r]=128>r?r<<1:283^r<<1;for(var t=0,i=0,r=0;256>r;r++){var o=i^i<<1^i<<2^i<<3^i<<4;o=99^(o>>>8^255&o),n[t]=o,c[o]=t;var y=e[t],v=e[y],m=e[v],x=257*e[o]^16843008*o;s[t]=x<<24|x>>>8,a[t]=x<<16|x>>>16,f[t]=x<<8|x>>>24,u[t]=x;var x=16843009*m^65537*v^257*y^16843008*t;h[o]=x<<24|x>>>8,p[o]=x<<16|x>>>16,d[o]=x<<8|x>>>24,l[o]=x,t?(t=y^e[e[e[m^y]]],i^=e[e[i]]):t=i=1}})();var y=[0,1,2,4,8,16,32,64,128,27,54],v=o.AES=i.extend({_doReset:function(){for(var e=this._key,r=e.words,t=e.sigBytes/4,i=this._nRounds=t+6,o=4*(i+1),c=this._keySchedule=[],s=0;o>s;s++)if(t>s)c[s]=r[s];else{var a=c[s-1];s%t?t>6&&4==s%t&&(a=n[a>>>24]<<24|n[255&a>>>16]<<16|n[255&a>>>8]<<8|n[255&a]):(a=a<<8|a>>>24,a=n[a>>>24]<<24|n[255&a>>>16]<<16|n[255&a>>>8]<<8|n[255&a],a^=y[0|s/t]<<24),c[s]=c[s-t]^a}for(var f=this._invKeySchedule=[],u=0;o>u;u++){var s=o-u;if(u%4)var a=c[s];else var a=c[s-4];f[u]=4>u||4>=s?a:h[n[a>>>24]]^p[n[255&a>>>16]]^d[n[255&a>>>8]]^l[n[255&a]]}},encryptBlock:function(e,r){this._doCryptBlock(e,r,this._keySchedule,s,a,f,u,n)},decryptBlock:function(e,r){var t=e[r+1];e[r+1]=e[r+3],e[r+3]=t,this._doCryptBlock(e,r,this._invKeySchedule,h,p,d,l,c);var t=e[r+1];e[r+1]=e[r+3],e[r+3]=t},_doCryptBlock:function(e,r,t,i,o,n,c,s){for(var a=this._nRounds,f=e[r]^t[0],u=e[r+1]^t[1],h=e[r+2]^t[2],p=e[r+3]^t[3],d=4,l=1;a>l;l++){var y=i[f>>>24]^o[255&u>>>16]^n[255&h>>>8]^c[255&p]^t[d++],v=i[u>>>24]^o[255&h>>>16]^n[255&p>>>8]^c[255&f]^t[d++],m=i[h>>>24]^o[255&p>>>16]^n[255&f>>>8]^c[255&u]^t[d++],x=i[p>>>24]^o[255&f>>>16]^n[255&u>>>8]^c[255&h]^t[d++];f=y,u=v,h=m,p=x}var y=(s[f>>>24]<<24|s[255&u>>>16]<<16|s[255&h>>>8]<<8|s[255&p])^t[d++],v=(s[u>>>24]<<24|s[255&h>>>16]<<16|s[255&p>>>8]<<8|s[255&f])^t[d++],m=(s[h>>>24]<<24|s[255&p>>>16]<<16|s[255&f>>>8]<<8|s[255&u])^t[d++],x=(s[p>>>24]<<24|s[255&f>>>16]<<16|s[255&u>>>8]<<8|s[255&h])^t[d++];e[r]=y,e[r+1]=v,e[r+2]=m,e[r+3]=x},keySize:8});r.AES=i._createHelper(v)}(),e.AES});
-
-/***/ },
-/* 42 */
-/***/ function(module, exports, __webpack_require__) {
-
-(function(e,r){true?module.exports=exports=r(__webpack_require__(43),__webpack_require__(48)):"function"==typeof define&&define.amd?define(["./core","./cipher-core"],r):r(e.CryptoJS)})(this,function(e){return e.mode.ECB=function(){var r=e.lib.BlockCipherMode.extend();return r.Encryptor=r.extend({processBlock:function(e,r){this._cipher.encryptBlock(e,r)}}),r.Decryptor=r.extend({processBlock:function(e,r){this._cipher.decryptBlock(e,r)}}),r}(),e.mode.ECB});
-
-/***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-(function(e,r){true?module.exports=exports=r():"function"==typeof define&&define.amd?define([],r):e.CryptoJS=r()})(this,function(){var e=e||function(e,r){var t={},i=t.lib={},n=i.Base=function(){function e(){}return{extend:function(r){e.prototype=this;var t=new e;return r&&t.mixIn(r),t.hasOwnProperty("init")||(t.init=function(){t.$super.init.apply(this,arguments)}),t.init.prototype=t,t.$super=this,t},create:function(){var e=this.extend();return e.init.apply(e,arguments),e},init:function(){},mixIn:function(e){for(var r in e)e.hasOwnProperty(r)&&(this[r]=e[r]);e.hasOwnProperty("toString")&&(this.toString=e.toString)},clone:function(){return this.init.prototype.extend(this)}}}(),o=i.WordArray=n.extend({init:function(e,t){e=this.words=e||[],this.sigBytes=t!=r?t:4*e.length},toString:function(e){return(e||s).stringify(this)},concat:function(e){var r=this.words,t=e.words,i=this.sigBytes,n=e.sigBytes;if(this.clamp(),i%4)for(var o=0;n>o;o++){var c=255&t[o>>>2]>>>24-8*(o%4);r[i+o>>>2]|=c<<24-8*((i+o)%4)}else if(t.length>65535)for(var o=0;n>o;o+=4)r[i+o>>>2]=t[o>>>2];else r.push.apply(r,t);return this.sigBytes+=n,this},clamp:function(){var r=this.words,t=this.sigBytes;r[t>>>2]&=4294967295<<32-8*(t%4),r.length=e.ceil(t/4)},clone:function(){var e=n.clone.call(this);return e.words=this.words.slice(0),e},random:function(r){for(var t=[],i=0;r>i;i+=4)t.push(0|4294967296*e.random());return new o.init(t,r)}}),c=t.enc={},s=c.Hex={stringify:function(e){for(var r=e.words,t=e.sigBytes,i=[],n=0;t>n;n++){var o=255&r[n>>>2]>>>24-8*(n%4);i.push((o>>>4).toString(16)),i.push((15&o).toString(16))}return i.join("")},parse:function(e){for(var r=e.length,t=[],i=0;r>i;i+=2)t[i>>>3]|=parseInt(e.substr(i,2),16)<<24-4*(i%8);return new o.init(t,r/2)}},u=c.Latin1={stringify:function(e){for(var r=e.words,t=e.sigBytes,i=[],n=0;t>n;n++){var o=255&r[n>>>2]>>>24-8*(n%4);i.push(String.fromCharCode(o))}return i.join("")},parse:function(e){for(var r=e.length,t=[],i=0;r>i;i++)t[i>>>2]|=(255&e.charCodeAt(i))<<24-8*(i%4);return new o.init(t,r)}},f=c.Utf8={stringify:function(e){try{return decodeURIComponent(escape(u.stringify(e)))}catch(r){throw Error("Malformed UTF-8 data")}},parse:function(e){return u.parse(unescape(encodeURIComponent(e)))}},a=i.BufferedBlockAlgorithm=n.extend({reset:function(){this._data=new o.init,this._nDataBytes=0},_append:function(e){"string"==typeof e&&(e=f.parse(e)),this._data.concat(e),this._nDataBytes+=e.sigBytes},_process:function(r){var t=this._data,i=t.words,n=t.sigBytes,c=this.blockSize,s=4*c,u=n/s;u=r?e.ceil(u):e.max((0|u)-this._minBufferSize,0);var f=u*c,a=e.min(4*f,n);if(f){for(var p=0;f>p;p+=c)this._doProcessBlock(i,p);var d=i.splice(0,f);t.sigBytes-=a}return new o.init(d,a)},clone:function(){var e=n.clone.call(this);return e._data=this._data.clone(),e},_minBufferSize:0});i.Hasher=a.extend({cfg:n.extend(),init:function(e){this.cfg=this.cfg.extend(e),this.reset()},reset:function(){a.reset.call(this),this._doReset()},update:function(e){return this._append(e),this._process(),this},finalize:function(e){e&&this._append(e);var r=this._doFinalize();return r},blockSize:16,_createHelper:function(e){return function(r,t){return new e.init(t).finalize(r)}},_createHmacHelper:function(e){return function(r,t){return new p.HMAC.init(e,t).finalize(r)}}});var p=t.algo={};return t}(Math);return e});
-
-/***/ },
-/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
@@ -7652,9 +7113,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var h = __webpack_require__(51);
+var h = __webpack_require__(44);
 var ajaxObserver = __webpack_require__(6);
-var r = __webpack_require__(52);
+var r = __webpack_require__(45);
 /**
  * TODO @see https://github.com/github/fetch/blob/master/fetch.js
  */
@@ -7789,31 +7250,89 @@ exports.$get = $get;
 
 
 /***/ },
-/* 45 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-(function(e,r){true?module.exports=exports=r(__webpack_require__(43)):"function"==typeof define&&define.amd?define(["./core"],r):r(e.CryptoJS)})(this,function(e){return function(){var r=e,t=r.lib,n=t.WordArray,i=r.enc;i.Base64={stringify:function(e){var r=e.words,t=e.sigBytes,n=this._map;e.clamp();for(var i=[],o=0;t>o;o+=3)for(var c=255&r[o>>>2]>>>24-8*(o%4),f=255&r[o+1>>>2]>>>24-8*((o+1)%4),s=255&r[o+2>>>2]>>>24-8*((o+2)%4),a=c<<16|f<<8|s,u=0;4>u&&t>o+.75*u;u++)i.push(n.charAt(63&a>>>6*(3-u)));var p=n.charAt(64);if(p)for(;i.length%4;)i.push(p);return i.join("")},parse:function(e){var r=e.length,t=this._map,i=t.charAt(64);if(i){var o=e.indexOf(i);-1!=o&&(r=o)}for(var c=[],f=0,s=0;r>s;s++)if(s%4){var a=t.indexOf(e.charAt(s-1))<<2*(s%4),u=t.indexOf(e.charAt(s))>>>6-2*(s%4);c[f>>>2]|=(a|u)<<24-8*(f%4),f++}return n.create(c,f)},_map:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="}}(),e.enc.Base64});
+/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(46).nextTick;
+var apply = Function.prototype.apply;
+var slice = Array.prototype.slice;
+var immediateIds = {};
+var nextImmediateId = 0;
+
+// DOM APIs, for completeness
+
+exports.setTimeout = function() {
+  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+};
+exports.setInterval = function() {
+  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+};
+exports.clearTimeout =
+exports.clearInterval = function(timeout) { timeout.close(); };
+
+function Timeout(id, clearFn) {
+  this._id = id;
+  this._clearFn = clearFn;
+}
+Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+Timeout.prototype.close = function() {
+  this._clearFn.call(window, this._id);
+};
+
+// Does not start the time, just sets up the members needed.
+exports.enroll = function(item, msecs) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = msecs;
+};
+
+exports.unenroll = function(item) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = -1;
+};
+
+exports._unrefActive = exports.active = function(item) {
+  clearTimeout(item._idleTimeoutId);
+
+  var msecs = item._idleTimeout;
+  if (msecs >= 0) {
+    item._idleTimeoutId = setTimeout(function onTimeout() {
+      if (item._onTimeout)
+        item._onTimeout();
+    }, msecs);
+  }
+};
+
+// That's not how node.js implements it but the exposed api is the same.
+exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
+  var id = nextImmediateId++;
+  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+
+  immediateIds[id] = true;
+
+  nextTick(function onNextTick() {
+    if (immediateIds[id]) {
+      // fn.call() is faster so we optimize for the common use-case
+      // @see http://jsperf.com/call-apply-segu
+      if (args) {
+        fn.apply(null, args);
+      } else {
+        fn.call(null);
+      }
+      // Prevent ids from leaking
+      exports.clearImmediate(id);
+    }
+  });
+
+  return id;
+};
+
+exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
+  delete immediateIds[id];
+};
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42).setImmediate, __webpack_require__(42).clearImmediate))
 
 /***/ },
-/* 46 */
-/***/ function(module, exports, __webpack_require__) {
-
-(function(e,r){true?module.exports=exports=r(__webpack_require__(43)):"function"==typeof define&&define.amd?define(["./core"],r):r(e.CryptoJS)})(this,function(e){return function(r){function t(e,r,t,n,i,o,c){var s=e+(r&t|~r&n)+i+c;return(s<<o|s>>>32-o)+r}function n(e,r,t,n,i,o,c){var s=e+(r&n|t&~n)+i+c;return(s<<o|s>>>32-o)+r}function i(e,r,t,n,i,o,c){var s=e+(r^t^n)+i+c;return(s<<o|s>>>32-o)+r}function o(e,r,t,n,i,o,c){var s=e+(t^(r|~n))+i+c;return(s<<o|s>>>32-o)+r}var c=e,s=c.lib,f=s.WordArray,a=s.Hasher,u=c.algo,p=[];(function(){for(var e=0;64>e;e++)p[e]=0|4294967296*r.abs(r.sin(e+1))})();var d=u.MD5=a.extend({_doReset:function(){this._hash=new f.init([1732584193,4023233417,2562383102,271733878])},_doProcessBlock:function(e,r){for(var c=0;16>c;c++){var s=r+c,f=e[s];e[s]=16711935&(f<<8|f>>>24)|4278255360&(f<<24|f>>>8)}var a=this._hash.words,u=e[r+0],d=e[r+1],h=e[r+2],y=e[r+3],m=e[r+4],l=e[r+5],x=e[r+6],q=e[r+7],g=e[r+8],v=e[r+9],b=e[r+10],S=e[r+11],A=e[r+12],w=e[r+13],_=e[r+14],C=e[r+15],B=a[0],H=a[1],j=a[2],J=a[3];B=t(B,H,j,J,u,7,p[0]),J=t(J,B,H,j,d,12,p[1]),j=t(j,J,B,H,h,17,p[2]),H=t(H,j,J,B,y,22,p[3]),B=t(B,H,j,J,m,7,p[4]),J=t(J,B,H,j,l,12,p[5]),j=t(j,J,B,H,x,17,p[6]),H=t(H,j,J,B,q,22,p[7]),B=t(B,H,j,J,g,7,p[8]),J=t(J,B,H,j,v,12,p[9]),j=t(j,J,B,H,b,17,p[10]),H=t(H,j,J,B,S,22,p[11]),B=t(B,H,j,J,A,7,p[12]),J=t(J,B,H,j,w,12,p[13]),j=t(j,J,B,H,_,17,p[14]),H=t(H,j,J,B,C,22,p[15]),B=n(B,H,j,J,d,5,p[16]),J=n(J,B,H,j,x,9,p[17]),j=n(j,J,B,H,S,14,p[18]),H=n(H,j,J,B,u,20,p[19]),B=n(B,H,j,J,l,5,p[20]),J=n(J,B,H,j,b,9,p[21]),j=n(j,J,B,H,C,14,p[22]),H=n(H,j,J,B,m,20,p[23]),B=n(B,H,j,J,v,5,p[24]),J=n(J,B,H,j,_,9,p[25]),j=n(j,J,B,H,y,14,p[26]),H=n(H,j,J,B,g,20,p[27]),B=n(B,H,j,J,w,5,p[28]),J=n(J,B,H,j,h,9,p[29]),j=n(j,J,B,H,q,14,p[30]),H=n(H,j,J,B,A,20,p[31]),B=i(B,H,j,J,l,4,p[32]),J=i(J,B,H,j,g,11,p[33]),j=i(j,J,B,H,S,16,p[34]),H=i(H,j,J,B,_,23,p[35]),B=i(B,H,j,J,d,4,p[36]),J=i(J,B,H,j,m,11,p[37]),j=i(j,J,B,H,q,16,p[38]),H=i(H,j,J,B,b,23,p[39]),B=i(B,H,j,J,w,4,p[40]),J=i(J,B,H,j,u,11,p[41]),j=i(j,J,B,H,y,16,p[42]),H=i(H,j,J,B,x,23,p[43]),B=i(B,H,j,J,v,4,p[44]),J=i(J,B,H,j,A,11,p[45]),j=i(j,J,B,H,C,16,p[46]),H=i(H,j,J,B,h,23,p[47]),B=o(B,H,j,J,u,6,p[48]),J=o(J,B,H,j,q,10,p[49]),j=o(j,J,B,H,_,15,p[50]),H=o(H,j,J,B,l,21,p[51]),B=o(B,H,j,J,A,6,p[52]),J=o(J,B,H,j,y,10,p[53]),j=o(j,J,B,H,b,15,p[54]),H=o(H,j,J,B,d,21,p[55]),B=o(B,H,j,J,g,6,p[56]),J=o(J,B,H,j,C,10,p[57]),j=o(j,J,B,H,x,15,p[58]),H=o(H,j,J,B,w,21,p[59]),B=o(B,H,j,J,m,6,p[60]),J=o(J,B,H,j,S,10,p[61]),j=o(j,J,B,H,h,15,p[62]),H=o(H,j,J,B,v,21,p[63]),a[0]=0|a[0]+B,a[1]=0|a[1]+H,a[2]=0|a[2]+j,a[3]=0|a[3]+J},_doFinalize:function(){var e=this._data,t=e.words,n=8*this._nDataBytes,i=8*e.sigBytes;t[i>>>5]|=128<<24-i%32;var o=r.floor(n/4294967296),c=n;t[(i+64>>>9<<4)+15]=16711935&(o<<8|o>>>24)|4278255360&(o<<24|o>>>8),t[(i+64>>>9<<4)+14]=16711935&(c<<8|c>>>24)|4278255360&(c<<24|c>>>8),e.sigBytes=4*(t.length+1),this._process();for(var s=this._hash,f=s.words,a=0;4>a;a++){var u=f[a];f[a]=16711935&(u<<8|u>>>24)|4278255360&(u<<24|u>>>8)}return s},clone:function(){var e=a.clone.call(this);return e._hash=this._hash.clone(),e}});c.MD5=a._createHelper(d),c.HmacMD5=a._createHmacHelper(d)}(Math),e.MD5});
-
-/***/ },
-/* 47 */
-/***/ function(module, exports, __webpack_require__) {
-
-(function(e,r){true?module.exports=exports=r(__webpack_require__(43),__webpack_require__(54),__webpack_require__(55)):"function"==typeof define&&define.amd?define(["./core","./sha1","./hmac"],r):r(e.CryptoJS)})(this,function(e){return function(){var r=e,t=r.lib,i=t.Base,n=t.WordArray,o=r.algo,a=o.MD5,s=o.EvpKDF=i.extend({cfg:i.extend({keySize:4,hasher:a,iterations:1}),init:function(e){this.cfg=this.cfg.extend(e)},compute:function(e,r){for(var t=this.cfg,i=t.hasher.create(),o=n.create(),a=o.words,s=t.keySize,c=t.iterations;s>a.length;){f&&i.update(f);var f=i.update(e).finalize(r);i.reset();for(var u=1;c>u;u++)f=i.finalize(f),i.reset();o.concat(f)}return o.sigBytes=4*s,o}});r.EvpKDF=function(e,r,t){return s.create(t).compute(e,r)}}(),e.EvpKDF});
-
-/***/ },
-/* 48 */
-/***/ function(module, exports, __webpack_require__) {
-
-(function(e,r){true?module.exports=exports=r(__webpack_require__(43)):"function"==typeof define&&define.amd?define(["./core"],r):r(e.CryptoJS)})(this,function(e){e.lib.Cipher||function(r){var t=e,i=t.lib,n=i.Base,o=i.WordArray,c=i.BufferedBlockAlgorithm,s=t.enc;s.Utf8;var a=s.Base64,f=t.algo,u=f.EvpKDF,h=i.Cipher=c.extend({cfg:n.extend(),createEncryptor:function(e,r){return this.create(this._ENC_XFORM_MODE,e,r)},createDecryptor:function(e,r){return this.create(this._DEC_XFORM_MODE,e,r)},init:function(e,r,t){this.cfg=this.cfg.extend(t),this._xformMode=e,this._key=r,this.reset()},reset:function(){c.reset.call(this),this._doReset()},process:function(e){return this._append(e),this._process()},finalize:function(e){e&&this._append(e);var r=this._doFinalize();return r},keySize:4,ivSize:4,_ENC_XFORM_MODE:1,_DEC_XFORM_MODE:2,_createHelper:function(){function e(e){return"string"==typeof e?q:_}return function(r){return{encrypt:function(t,i,n){return e(i).encrypt(r,t,i,n)},decrypt:function(t,i,n){return e(i).decrypt(r,t,i,n)}}}}()});i.StreamCipher=h.extend({_doFinalize:function(){var e=this._process(true);return e},blockSize:1});var d=t.mode={},p=i.BlockCipherMode=n.extend({createEncryptor:function(e,r){return this.Encryptor.create(e,r)},createDecryptor:function(e,r){return this.Decryptor.create(e,r)},init:function(e,r){this._cipher=e,this._iv=r}}),l=d.CBC=function(){function e(e,t,i){var n=this._iv;if(n){var o=n;this._iv=r}else var o=this._prevBlock;for(var c=0;i>c;c++)e[t+c]^=o[c]}var t=p.extend();return t.Encryptor=t.extend({processBlock:function(r,t){var i=this._cipher,n=i.blockSize;e.call(this,r,t,n),i.encryptBlock(r,t),this._prevBlock=r.slice(t,t+n)}}),t.Decryptor=t.extend({processBlock:function(r,t){var i=this._cipher,n=i.blockSize,o=r.slice(t,t+n);i.decryptBlock(r,t),e.call(this,r,t,n),this._prevBlock=o}}),t}(),y=t.pad={},v=y.Pkcs7={pad:function(e,r){for(var t=4*r,i=t-e.sigBytes%t,n=i<<24|i<<16|i<<8|i,c=[],s=0;i>s;s+=4)c.push(n);var a=o.create(c,i);e.concat(a)},unpad:function(e){var r=255&e.words[e.sigBytes-1>>>2];e.sigBytes-=r}};i.BlockCipher=h.extend({cfg:h.cfg.extend({mode:l,padding:v}),reset:function(){h.reset.call(this);var e=this.cfg,r=e.iv,t=e.mode;if(this._xformMode==this._ENC_XFORM_MODE)var i=t.createEncryptor;else{var i=t.createDecryptor;this._minBufferSize=1}this._mode=i.call(t,this,r&&r.words)},_doProcessBlock:function(e,r){this._mode.processBlock(e,r)},_doFinalize:function(){var e=this.cfg.padding;if(this._xformMode==this._ENC_XFORM_MODE){e.pad(this._data,this.blockSize);var r=this._process(true)}else{var r=this._process(true);e.unpad(r)}return r},blockSize:4});var g=i.CipherParams=n.extend({init:function(e){this.mixIn(e)},toString:function(e){return(e||this.formatter).stringify(this)}}),m=t.format={},x=m.OpenSSL={stringify:function(e){var r=e.ciphertext,t=e.salt;if(t)var i=o.create([1398893684,1701076831]).concat(t).concat(r);else var i=r;return i.toString(a)},parse:function(e){var r=a.parse(e),t=r.words;if(1398893684==t[0]&&1701076831==t[1]){var i=o.create(t.slice(2,4));t.splice(0,4),r.sigBytes-=16}return g.create({ciphertext:r,salt:i})}},_=i.SerializableCipher=n.extend({cfg:n.extend({format:x}),encrypt:function(e,r,t,i){i=this.cfg.extend(i);var n=e.createEncryptor(t,i),o=n.finalize(r),c=n.cfg;return g.create({ciphertext:o,key:t,iv:c.iv,algorithm:e,mode:c.mode,padding:c.padding,blockSize:e.blockSize,formatter:i.format})},decrypt:function(e,r,t,i){i=this.cfg.extend(i),r=this._parse(r,i.format);var n=e.createDecryptor(t,i).finalize(r.ciphertext);return n},_parse:function(e,r){return"string"==typeof e?r.parse(e,this):e}}),w=t.kdf={},S=w.OpenSSL={execute:function(e,r,t,i){i||(i=o.random(8));var n=u.create({keySize:r+t}).compute(e,i),c=o.create(n.words.slice(r),4*t);return n.sigBytes=4*r,g.create({key:n,iv:c,salt:i})}},q=i.PasswordBasedCipher=_.extend({cfg:_.cfg.extend({kdf:S}),encrypt:function(e,r,t,i){i=this.cfg.extend(i);var n=i.kdf.execute(t,e.keySize,e.ivSize);i.iv=n.iv;var o=_.encrypt.call(this,e,r,n.key,i);return o.mixIn(n),o},decrypt:function(e,r,t,i){i=this.cfg.extend(i),r=this._parse(r,i.format);var n=i.kdf.execute(t,e.keySize,e.ivSize,r.salt);i.iv=n.iv;var o=_.decrypt.call(this,e,r,n.key,i);return o}})}()});
-
-/***/ },
-/* 49 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 module.exports = function(module) {
@@ -7829,14 +7348,7 @@ module.exports = function(module) {
 
 
 /***/ },
-/* 50 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = function() { throw new Error("define cannot be used indirect"); };
-
-
-/***/ },
-/* 51 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
@@ -7896,7 +7408,7 @@ exports.Headers = Headers;
 
 
 /***/ },
-/* 52 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
@@ -7906,7 +7418,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var h = __webpack_require__(51);
+var h = __webpack_require__(44);
 var log = __webpack_require__(11);
 var Response = (function (_super) {
     __extends(Response, _super);
@@ -8012,7 +7524,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 53 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 // shim for using process in browser
@@ -8074,18 +7586,6 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-
-/***/ },
-/* 54 */
-/***/ function(module, exports, __webpack_require__) {
-
-(function(e,r){true?module.exports=exports=r(__webpack_require__(43)):"function"==typeof define&&define.amd?define(["./core"],r):r(e.CryptoJS)})(this,function(e){return function(){var r=e,t=r.lib,n=t.WordArray,i=t.Hasher,o=r.algo,s=[],c=o.SHA1=i.extend({_doReset:function(){this._hash=new n.init([1732584193,4023233417,2562383102,271733878,3285377520])},_doProcessBlock:function(e,r){for(var t=this._hash.words,n=t[0],i=t[1],o=t[2],c=t[3],a=t[4],f=0;80>f;f++){if(16>f)s[f]=0|e[r+f];else{var u=s[f-3]^s[f-8]^s[f-14]^s[f-16];s[f]=u<<1|u>>>31}var d=(n<<5|n>>>27)+a+s[f];d+=20>f?(i&o|~i&c)+1518500249:40>f?(i^o^c)+1859775393:60>f?(i&o|i&c|o&c)-1894007588:(i^o^c)-899497514,a=c,c=o,o=i<<30|i>>>2,i=n,n=d}t[0]=0|t[0]+n,t[1]=0|t[1]+i,t[2]=0|t[2]+o,t[3]=0|t[3]+c,t[4]=0|t[4]+a},_doFinalize:function(){var e=this._data,r=e.words,t=8*this._nDataBytes,n=8*e.sigBytes;return r[n>>>5]|=128<<24-n%32,r[(n+64>>>9<<4)+14]=Math.floor(t/4294967296),r[(n+64>>>9<<4)+15]=t,e.sigBytes=4*r.length,this._process(),this._hash},clone:function(){var e=i.clone.call(this);return e._hash=this._hash.clone(),e}});r.SHA1=i._createHelper(c),r.HmacSHA1=i._createHmacHelper(c)}(),e.SHA1});
-
-/***/ },
-/* 55 */
-/***/ function(module, exports, __webpack_require__) {
-
-(function(e,r){true?module.exports=exports=r(__webpack_require__(43)):"function"==typeof define&&define.amd?define(["./core"],r):r(e.CryptoJS)})(this,function(e){(function(){var r=e,t=r.lib,n=t.Base,i=r.enc,o=i.Utf8,a=r.algo;a.HMAC=n.extend({init:function(e,r){e=this._hasher=new e.init,"string"==typeof r&&(r=o.parse(r));var t=e.blockSize,n=4*t;r.sigBytes>n&&(r=e.finalize(r)),r.clamp();for(var i=this._oKey=r.clone(),a=this._iKey=r.clone(),s=i.words,c=a.words,f=0;t>f;f++)s[f]^=1549556828,c[f]^=909522486;i.sigBytes=a.sigBytes=n,this.reset()},reset:function(){var e=this._hasher;e.reset(),e.update(this._iKey)},update:function(e){return this._hasher.update(e),this},finalize:function(e){var r=this._hasher,t=r.finalize(e);r.reset();var n=r.finalize(this._oKey.clone().concat(t));return n}})})()});
 
 /***/ }
 /******/ ])

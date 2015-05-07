@@ -6,16 +6,16 @@ import list = require('../core/List');
 import country = require('./Country');
 
 export class State extends helper.Helper {
-    
+
     private countryHelper:country.Country;
     private list:list.List;
 
-    constructor(context:context.Context){
+    constructor(context:context.Context) {
         super(context);
         this.countryHelper = country.$get(context);
         this.list = list.$get(context);
     }
-    
+
     createUrl() {
         return '/dictionary/state';
     }
@@ -36,7 +36,7 @@ export class State extends helper.Helper {
         ]);
 
     }
-    
+
 }
 
 export function $get(context:context.Context):State {

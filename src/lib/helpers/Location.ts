@@ -70,7 +70,7 @@ export class Location extends helper.Helper {
         return this.list.comparator(options);
 
     }
-    
+
 }
 
 export function $get(context:context.Context):Location {

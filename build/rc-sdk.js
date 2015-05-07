@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("es6-promise"), require("pubnub"), require("crypto-js/aes"), require("crypto-js/mode-ecb"), require("crypto-js/core"), require("dom-storage"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()));
+		module.exports = factory(require("es6-promise"), require("pubnub"), require("dom-storage"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()));
 	else if(typeof define === 'function' && define.amd)
-		define(["es6-promise", "pubnub", "crypto-js/aes", "crypto-js/mode-ecb", "crypto-js/core", "exports", "exports"], factory);
+		define(["es6-promise", "pubnub", "exports", "exports"], factory);
 	else if(typeof exports === 'object')
-		exports["RCSDK"] = factory(require("es6-promise"), require("pubnub"), require("crypto-js/aes"), require("crypto-js/mode-ecb"), require("crypto-js/core"), require("dom-storage"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()));
+		exports["RCSDK"] = factory(require("es6-promise"), require("pubnub"), require("dom-storage"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()));
 	else
-		root["RCSDK"] = factory(root["Promise"], root["PUBNUB"], root["CryptoJS"]["AES"], root["CryptoJS"]["mode"]["ECB"], root["CryptoJS"], root["localStorage"], root["XMLHttpRequest"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_4__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_7__) {
+		root["RCSDK"] = factory(root["Promise"], root["PUBNUB"], root["localStorage"], root["XMLHttpRequest"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_4__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -55,46 +55,44 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../typings/externals.d.ts" />
-var pubnubMock = __webpack_require__(8);
-var xhrMock = __webpack_require__(9);
-var xhrResponse = __webpack_require__(10);
-var ajaxObserver = __webpack_require__(11);
-var cache = __webpack_require__(12);
-var context = __webpack_require__(13);
-var helper = __webpack_require__(14);
-var list = __webpack_require__(15);
-var log = __webpack_require__(16);
-var observable = __webpack_require__(17);
-var pageVisibility = __webpack_require__(18);
-var platform = __webpack_require__(19);
-var subscription = __webpack_require__(20);
-var utils = __webpack_require__(21);
-var validator = __webpack_require__(22);
-var accountHelper = __webpack_require__(23);
-var blockedNumberHelper = __webpack_require__(24);
-var callHelper = __webpack_require__(25);
-var contactHelper = __webpack_require__(26);
-var contactGroupHelper = __webpack_require__(27);
-var conferencingHelper = __webpack_require__(28);
-var countryHelper = __webpack_require__(29);
-var deviceHelper = __webpack_require__(30);
-var deviceModelHelper = __webpack_require__(31);
-var extensionHelper = __webpack_require__(32);
-var forwardingNumberHelper = __webpack_require__(33);
-var languageHelper = __webpack_require__(34);
-var locationHelper = __webpack_require__(35);
-var messageHelper = __webpack_require__(36);
-var phoneNumberHelper = __webpack_require__(37);
-var presenceHelper = __webpack_require__(38);
-var ringoutHelper = __webpack_require__(39);
-var serviceHelper = __webpack_require__(40);
-var shippingMethodHelper = __webpack_require__(41);
-var stateHelper = __webpack_require__(42);
-var timezoneHelper = __webpack_require__(43);
+var pubnubMock = __webpack_require__(5);
+var xhrMock = __webpack_require__(6);
+var xhrResponse = __webpack_require__(7);
+var ajaxObserver = __webpack_require__(8);
+var cache = __webpack_require__(9);
+var context = __webpack_require__(10);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var log = __webpack_require__(13);
+var observable = __webpack_require__(14);
+var pageVisibility = __webpack_require__(15);
+var platform = __webpack_require__(16);
+var subscription = __webpack_require__(17);
+var utils = __webpack_require__(18);
+var validator = __webpack_require__(19);
+var accountHelper = __webpack_require__(20);
+var blockedNumberHelper = __webpack_require__(21);
+var callHelper = __webpack_require__(22);
+var contactHelper = __webpack_require__(23);
+var contactGroupHelper = __webpack_require__(24);
+var conferencingHelper = __webpack_require__(25);
+var countryHelper = __webpack_require__(26);
+var deviceHelper = __webpack_require__(27);
+var deviceModelHelper = __webpack_require__(28);
+var extensionHelper = __webpack_require__(29);
+var forwardingNumberHelper = __webpack_require__(30);
+var languageHelper = __webpack_require__(31);
+var locationHelper = __webpack_require__(32);
+var messageHelper = __webpack_require__(33);
+var phoneNumberHelper = __webpack_require__(34);
+var presenceHelper = __webpack_require__(35);
+var ringoutHelper = __webpack_require__(36);
+var serviceHelper = __webpack_require__(37);
+var shippingMethodHelper = __webpack_require__(38);
+var stateHelper = __webpack_require__(39);
+var timezoneHelper = __webpack_require__(40);
 var promise = __webpack_require__(1);
 var pubnub = __webpack_require__(2);
-__webpack_require__(3);
-__webpack_require__(4);
 var RCSDK = (function () {
     function RCSDK(options) {
         options = options || {};
@@ -214,8 +212,7 @@ var RCSDK = (function () {
         production: 'https://platform.ringcentral.com'
     };
     RCSDK.injections = {
-        CryptoJS: __webpack_require__(5),
-        localStorage: (typeof (localStorage) !== 'undefined' ? localStorage : __webpack_require__(6)),
+        localStorage: (typeof (localStorage) !== 'undefined' ? localStorage : __webpack_require__(3)),
         Promise: typeof (Promise) !== 'undefined' ? Promise : promise.Promise,
         PUBNUB: pubnub,
         XHR: function () {
@@ -240,7 +237,7 @@ var RCSDK = (function () {
             catch (e3) {
             }
             try {
-                return new (__webpack_require__(7))();
+                return new (__webpack_require__(4))();
             }
             catch (e4) {
             }
@@ -276,29 +273,11 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
+if(typeof __WEBPACK_EXTERNAL_MODULE_4__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
 module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
 /***/ },
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-if(typeof __WEBPACK_EXTERNAL_MODULE_7__ === 'undefined') {var e = new Error("Cannot find module \"undefined\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
-module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
-
-/***/ },
-/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
@@ -308,11 +287,12 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(17);
+var observable = __webpack_require__(14);
 var PubnubMock = (function (_super) {
     __extends(PubnubMock, _super);
     function PubnubMock(context, options) {
         this.options = options;
+        this.crypto_obj = context.getPubnubReal().crypto_obj;
         _super.call(this, context);
     }
     PubnubMock.prototype.ready = function () {
@@ -332,6 +312,7 @@ exports.PubnubMock = PubnubMock;
 var PubnubFactory = (function () {
     function PubnubFactory(context) {
         this.context = context;
+        this.crypto_obj = context.getPubnubReal().crypto_obj;
     }
     PubnubFactory.prototype.init = function (options) {
         return new PubnubMock(this.context, options);
@@ -346,12 +327,12 @@ exports.$get = $get;
 
 
 /***/ },
-/* 9 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-var utils = __webpack_require__(21);
-var log = __webpack_require__(16);
-var xhrResponse = __webpack_require__(10); //FIXME Circular
+var utils = __webpack_require__(18);
+var log = __webpack_require__(13);
+var xhrResponse = __webpack_require__(7); //FIXME Circular
 var XhrMock = (function () {
     function XhrMock(context) {
         // Service
@@ -449,7 +430,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 10 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 var XhrResponse = (function () {
@@ -483,7 +464,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 11 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -493,7 +474,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(17);
+var observable = __webpack_require__(14);
 var AjaxObserver = (function (_super) {
     __extends(AjaxObserver, _super);
     function AjaxObserver() {
@@ -516,7 +497,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 12 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -570,7 +551,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 13 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -594,11 +575,11 @@ var Context = (function () {
         this.stubAjax = !!flag;
         return this;
     };
-    Context.prototype.getCryptoJS = function () {
-        return this.injections.CryptoJS;
-    };
     Context.prototype.getPubnub = function () {
-        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.injections.PUBNUB;
+        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.getPubnubReal();
+    };
+    Context.prototype.getPubnubReal = function () {
+        return this.injections.PUBNUB;
     };
     Context.prototype.getLocalStorage = function () {
         var _this = this;
@@ -625,11 +606,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 14 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(21);
+var utils = __webpack_require__(18);
 var Helper = (function () {
     function Helper(context) {
         this.defaultProperty = 'id';
@@ -785,11 +766,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 15 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(21);
+var utils = __webpack_require__(18);
 var List = (function () {
     function List(context) {
         this.context = context;
@@ -903,11 +884,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 16 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(21);
+var utils = __webpack_require__(18);
 var Log = (function () {
     function Log(context, console) {
         if (!console) {
@@ -993,12 +974,12 @@ exports.$get = $get;
 
 
 /***/ },
-/* 17 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(21);
-var log = __webpack_require__(16);
+var utils = __webpack_require__(18);
+var log = __webpack_require__(13);
 /**
  * @see https://github.com/Microsoft/TypeScript/issues/275
  */
@@ -1160,7 +1141,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 18 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1170,7 +1151,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(17);
+var observable = __webpack_require__(14);
 var PageVisibility = (function (_super) {
     __extends(PageVisibility, _super);
     function PageVisibility(context) {
@@ -1222,7 +1203,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 19 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1232,9 +1213,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(17);
-var cache = __webpack_require__(12);
-var request = __webpack_require__(44);
+var observable = __webpack_require__(14);
+var cache = __webpack_require__(9);
+var request = __webpack_require__(41);
 var Platform = (function (_super) {
     __extends(Platform, _super);
     function Platform(context) {
@@ -1558,7 +1539,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 20 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1568,8 +1549,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(17);
-var platform = __webpack_require__(19);
+var observable = __webpack_require__(14);
+var platform = __webpack_require__(16);
 var Subscription = (function (_super) {
     __extends(Subscription, _super);
     function Subscription(context) {
@@ -1605,9 +1586,6 @@ var Subscription = (function (_super) {
     }
     Subscription.prototype.getPubnub = function () {
         return this.context.getPubnub();
-    };
-    Subscription.prototype.getCrypto = function () {
-        return this.context.getCryptoJS();
     };
     Subscription.prototype.getPlatform = function () {
         return platform.$get(this.context);
@@ -1752,26 +1730,28 @@ var Subscription = (function (_super) {
     };
     /**
      * Do not use this method! Internal use only
-     * @param message
-     * @returns {Subscription}
+     */
+    Subscription.prototype.decrypt = function (message) {
+        if (this.isSubscribed() && this.subscription.deliveryMode.encryptionKey) {
+            var PUBNUB = this.getPubnub();
+            message = PUBNUB.crypto_obj.decrypt(message, this.subscription.deliveryMode.encryptionKey, {
+                encryptKey: false,
+                keyEncoding: 'base64',
+                keyLength: 128,
+                mode: 'ecb'
+            });
+        }
+        return message;
+    };
+    /**
+     * Do not use this method! Internal use only
      */
     Subscription.prototype.notify = function (message) {
-        if (this.isSubscribed() && this.subscription.deliveryMode.encryptionKey) {
-            var CryptoJS = this.getCrypto();
-            var key = CryptoJS.enc.Base64.parse(this.subscription.deliveryMode.encryptionKey);
-            var data = CryptoJS.enc.Base64.parse(message);
-            var decrypted = CryptoJS.AES.decrypt({ ciphertext: data }, key, {
-                mode: CryptoJS.mode.ECB,
-                padding: CryptoJS.pad.Pkcs7
-            }).toString(CryptoJS.enc.Utf8);
-            message = JSON.parse(decrypted);
-        }
-        this.emit(this.events.notification, message);
+        this.emit(this.events.notification, this.decrypt(message));
         return this;
     };
     /**
      * Do not use this method! Internal use only
-     * @returns {Subscription}
      */
     Subscription.prototype.subscribeAtPubnub = function () {
         var _this = this;
@@ -1806,7 +1786,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 21 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2031,11 +2011,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 22 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(21);
+var utils = __webpack_require__(18);
 var Validator = (function () {
     function Validator(context) {
         this.context = context;
@@ -2112,7 +2092,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 23 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2122,7 +2102,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
+var helper = __webpack_require__(11);
 var Account = (function (_super) {
     __extends(Account, _super);
     function Account() {
@@ -2143,7 +2123,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 24 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2153,8 +2133,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var validator = __webpack_require__(22);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
 var BlockedNumber = (function (_super) {
     __extends(BlockedNumber, _super);
     function BlockedNumber(context) {
@@ -2184,7 +2164,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 25 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2194,10 +2174,10 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var list = __webpack_require__(15);
-var presence = __webpack_require__(38);
-var contact = __webpack_require__(26);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var presence = __webpack_require__(35);
+var contact = __webpack_require__(23);
 var Call = (function (_super) {
     __extends(Call, _super);
     function Call(context) {
@@ -2415,7 +2395,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 26 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2425,9 +2405,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var validator = __webpack_require__(22);
-var list = __webpack_require__(15);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
+var list = __webpack_require__(12);
 var Contact = (function (_super) {
     __extends(Contact, _super);
     function Contact(context) {
@@ -2654,7 +2634,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 27 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2664,8 +2644,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var validator = __webpack_require__(22);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
 var ContactGroup = (function (_super) {
     __extends(ContactGroup, _super);
     function ContactGroup(context) {
@@ -2692,7 +2672,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 28 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2702,7 +2682,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
+var helper = __webpack_require__(11);
 var Conferencing = (function (_super) {
     __extends(Conferencing, _super);
     function Conferencing() {
@@ -2723,7 +2703,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 29 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2733,7 +2713,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
+var helper = __webpack_require__(11);
 var Country = (function (_super) {
     __extends(Country, _super);
     function Country() {
@@ -2754,7 +2734,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 30 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2764,10 +2744,10 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var validator = __webpack_require__(22);
-var extension = __webpack_require__(32);
-var deviceModel = __webpack_require__(31);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
+var extension = __webpack_require__(29);
+var deviceModel = __webpack_require__(28);
 var Device = (function (_super) {
     __extends(Device, _super);
     function Device(context) {
@@ -2787,12 +2767,30 @@ var Device = (function (_super) {
      */
     Device.prototype.validate = function (item) {
         return this.validator.validate([
-            { field: 'emergencyServiceAddress-street', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.street) },
-            { field: 'emergencyServiceAddress-city', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.city) },
-            { field: 'emergencyServiceAddress-state', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.state) },
-            { field: 'emergencyServiceAddress-country', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.country) },
-            { field: 'emergencyServiceAddress-zip', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.zip) },
-            { field: 'emergencyServiceAddress-customerName', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.customerName) },
+            {
+                field: 'emergencyServiceAddress-street',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.street)
+            },
+            {
+                field: 'emergencyServiceAddress-city',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.city)
+            },
+            {
+                field: 'emergencyServiceAddress-state',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.state)
+            },
+            {
+                field: 'emergencyServiceAddress-country',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.country)
+            },
+            {
+                field: 'emergencyServiceAddress-zip',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.zip)
+            },
+            {
+                field: 'emergencyServiceAddress-customerName',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.customerName)
+            },
             { field: 'extension', validator: this.validator.required(this.extension.getId(item && item.extension)) },
             { field: 'model', validator: this.validator.required(this.deviceModel.getId(item && item.model)) }
         ]);
@@ -2809,7 +2807,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 31 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2819,7 +2817,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
+var helper = __webpack_require__(11);
 var DeviceModel = (function (_super) {
     __extends(DeviceModel, _super);
     function DeviceModel() {
@@ -3017,7 +3015,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 32 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3027,8 +3025,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var list = __webpack_require__(15);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var Extension = (function (_super) {
     __extends(Extension, _super);
     function Extension(context) {
@@ -3091,7 +3089,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 33 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3101,8 +3099,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var list = __webpack_require__(15);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var ForwardingNumber = (function (_super) {
     __extends(ForwardingNumber, _super);
     function ForwardingNumber(context) {
@@ -3150,7 +3148,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 34 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3160,7 +3158,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
+var helper = __webpack_require__(11);
 var Language = (function (_super) {
     __extends(Language, _super);
     function Language() {
@@ -3188,7 +3186,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 35 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3198,9 +3196,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var list = __webpack_require__(15);
-var state = __webpack_require__(42);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var state = __webpack_require__(39);
 var Location = (function (_super) {
     __extends(Location, _super);
     function Location(context) {
@@ -3263,7 +3261,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 36 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3273,12 +3271,12 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var list = __webpack_require__(15);
-var validator = __webpack_require__(22);
-var subscription = __webpack_require__(20);
-var platform = __webpack_require__(19);
-var contact = __webpack_require__(26);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var validator = __webpack_require__(19);
+var subscription = __webpack_require__(17);
+var platform = __webpack_require__(16);
+var contact = __webpack_require__(23);
 var Message = (function (_super) {
     __extends(Message, _super);
     function Message(context) {
@@ -3335,7 +3333,11 @@ var Message = (function (_super) {
         return message;
     };
     Message.prototype.getAttachmentUrl = function (message, i) {
-        return message.attachments[i] ? this.platform.apiUrl(message.attachments[i].uri, { addMethod: 'GET', addServer: true, addToken: true }) : '';
+        return message.attachments[i] ? this.platform.apiUrl(message.attachments[i].uri, {
+            addMethod: 'GET',
+            addServer: true,
+            addToken: true
+        }) : '';
     };
     Message.prototype.getAttachmentContentType = function (message, i) {
         return message.attachments[i] ? message.attachments[i].contentType : '';
@@ -3427,7 +3429,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 37 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3437,9 +3439,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var list = __webpack_require__(15);
-var extension = __webpack_require__(32);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var extension = __webpack_require__(29);
 var PhoneNumber = (function (_super) {
     __extends(PhoneNumber, _super);
     function PhoneNumber(context) {
@@ -3509,7 +3511,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 38 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3519,9 +3521,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var subscription = __webpack_require__(20);
-var extension = __webpack_require__(32);
+var helper = __webpack_require__(11);
+var subscription = __webpack_require__(17);
+var extension = __webpack_require__(29);
 var Presence = (function (_super) {
     __extends(Presence, _super);
     function Presence(context) {
@@ -3580,7 +3582,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 39 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3590,8 +3592,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var validator = __webpack_require__(22);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
 var Ringout = (function (_super) {
     __extends(Ringout, _super);
     function Ringout(context) {
@@ -3636,7 +3638,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 40 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3646,7 +3648,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
+var helper = __webpack_require__(11);
 var Service = (function (_super) {
     __extends(Service, _super);
     function Service() {
@@ -3701,7 +3703,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 41 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3711,7 +3713,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
+var helper = __webpack_require__(11);
 var ShippingMethod = (function (_super) {
     __extends(ShippingMethod, _super);
     function ShippingMethod() {
@@ -3746,7 +3748,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 42 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3756,9 +3758,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
-var list = __webpack_require__(15);
-var country = __webpack_require__(29);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var country = __webpack_require__(26);
 var State = (function (_super) {
     __extends(State, _super);
     function State(context) {
@@ -3795,7 +3797,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 43 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -3805,7 +3807,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(14);
+var helper = __webpack_require__(11);
 var Timezone = (function (_super) {
     __extends(Timezone, _super);
     function Timezone() {
@@ -3826,7 +3828,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 44 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
@@ -3836,9 +3838,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var h = __webpack_require__(45);
-var ajaxObserver = __webpack_require__(11);
-var r = __webpack_require__(46);
+var h = __webpack_require__(42);
+var ajaxObserver = __webpack_require__(8);
+var r = __webpack_require__(43);
 /**
  * TODO @see https://github.com/github/fetch/blob/master/fetch.js
  */
@@ -3973,11 +3975,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 45 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
-var utils = __webpack_require__(21);
+var utils = __webpack_require__(18);
 /**
  * @see https://github.com/Microsoft/TypeScript/issues/275
  */
@@ -4033,7 +4035,7 @@ exports.Headers = Headers;
 
 
 /***/ },
-/* 46 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
@@ -4043,8 +4045,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var h = __webpack_require__(45);
-var log = __webpack_require__(16);
+var h = __webpack_require__(42);
+var log = __webpack_require__(13);
 var Response = (function (_super) {
     __extends(Response, _super);
     function Response(context, status, statusText, body, headers) {

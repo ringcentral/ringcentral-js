@@ -52,7 +52,7 @@ export class Cache {
         return this;
 
     }
-    
+
 }
 
 export function $get(context:context.Context):Cache {

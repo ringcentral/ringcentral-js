@@ -6,15 +6,15 @@ var spy = mocha.sinon.spy;
 var mock = mocha.mock;
 var rcsdk = mocha.rcsdk;
 
-describe('RCSDK.core.List', function () {
+describe('RCSDK.core.List', function() {
 
     'use strict';
 
     var List = rcsdk.getList();
 
-    describe('stringComparator', function () {
+    describe('stringComparator', function() {
 
-        it('compares values as strings', function () {
+        it('compares values as strings', function() {
 
             // numbers with different amount of digits
             expect(List.stringComparator('12', '2')).to.equal(-1);
@@ -39,7 +39,7 @@ describe('RCSDK.core.List', function () {
 
         });
 
-        it('compares values as numbers', function () {
+        it('compares values as numbers', function() {
 
             // numbers with different amount of digits as strings, <number> is used to convince TS
             expect(List.numberComparator('12', '2')).to.equal(10);
@@ -60,9 +60,9 @@ describe('RCSDK.core.List', function () {
 
     });
 
-    describe('comparator', function () {
+    describe('comparator', function() {
 
-        it('by default provides comparator function which calls stringComparator with pre-bound extract functions', function () {
+        it('by default provides comparator function which calls stringComparator with pre-bound extract functions', function() {
 
             var array = [
                     {id: '3'},
@@ -71,7 +71,7 @@ describe('RCSDK.core.List', function () {
                 ],
                 sortFn = List.comparator({sortBy: 'id'}),
                 result = array
-                    .map(function (item) {return item;}) // we need a copy, original array is sorted in-place
+                    .map(function(item) {return item;}) // we need a copy, original array is sorted in-place
                     .sort(sortFn);
 
             expect(result[0]).to.equal(array[2]);
@@ -80,7 +80,7 @@ describe('RCSDK.core.List', function () {
 
         });
 
-        it('allows to provide custom sortBy property', function () {
+        it('allows to provide custom sortBy property', function() {
 
             var array = [
                     {name: '3'},
@@ -89,7 +89,7 @@ describe('RCSDK.core.List', function () {
                 ],
                 sortFn = List.comparator({sortBy: 'name'}),
                 result = array
-                    .map(function (item) {return item;}) // we need a copy, original array is sorted in-place
+                    .map(function(item) {return item;}) // we need a copy, original array is sorted in-place
                     .sort(sortFn);
 
             expect(result[0]).to.equal(array[2]);
@@ -99,7 +99,7 @@ describe('RCSDK.core.List', function () {
 
         });
 
-        it('allows to provide custom extract and compare functions', function () {
+        it('allows to provide custom extract and compare functions', function() {
 
             var array = [
                     {id: '13'},
@@ -111,7 +111,7 @@ describe('RCSDK.core.List', function () {
                     sortBy: 'id'
                 }),
                 result = array
-                    .map(function (item) {return item;}) // we need a copy, original array is sorted in-place
+                    .map(function(item) {return item;}) // we need a copy, original array is sorted in-place
                     .sort(sortFn);
 
             expect(result[0]).to.equal(array[2]);
@@ -120,7 +120,7 @@ describe('RCSDK.core.List', function () {
 
         });
 
-        it('provides options to custom extract and compare functions', function () {
+        it('provides options to custom extract and compare functions', function() {
 
             var array = [
                     {id: '3'},
@@ -129,7 +129,7 @@ describe('RCSDK.core.List', function () {
                 ],
                 options = {
                     sortBy: 'id',
-                    extractFn: spy(function (item, opts) {
+                    extractFn: spy(function(item, opts) {
 
                         expect(opts.extractFn).to.equal(options.extractFn);
                         expect(opts.compareFn).to.equal(options.compareFn);
@@ -137,7 +137,7 @@ describe('RCSDK.core.List', function () {
                         return List.propertyExtractor('id')(item, opts);
 
                     }),
-                    compareFn: spy(function (a, b, opts) {
+                    compareFn: spy(function(a, b, opts) {
 
                         expect(opts.extractFn).to.equal(options.extractFn);
                         expect(opts.compareFn).to.equal(options.compareFn);
@@ -148,7 +148,7 @@ describe('RCSDK.core.List', function () {
                 },
                 sortFn = List.comparator(options),
                 result = array
-                    .map(function (item) {return item;}) // we need a copy, original array is sorted in-place
+                    .map(function(item) {return item;}) // we need a copy, original array is sorted in-place
                     .sort(sortFn);
 
             expect(result[0]).to.equal(array[2]);
@@ -162,9 +162,9 @@ describe('RCSDK.core.List', function () {
 
     });
 
-    describe('propertyExtractor', function () {
+    describe('propertyExtractor', function() {
 
-        it('returns a value of property', function () {
+        it('returns a value of property', function() {
 
             expect((<any>List.propertyExtractor('id'))({id: 'foo'})).to.equal('foo');
             expect((<any>List.propertyExtractor('id'))(undefined)).to.equal(null);

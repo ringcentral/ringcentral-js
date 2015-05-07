@@ -15,10 +15,9 @@
     "istanbul": "./node_modules/.bin/istanbul cover -x *-spec.js --dir=./build/coverage --report=lcov --hook-run-in-context ./node_modules/mocha/bin/_mocha -- --reporter spec lib/**/*-spec.js"
   },
   "dependencies": {
-    "crypto-js": "*",
     "dom-storage": "*",
     "es6-promise": "*",
-    "pubnub": "*",
+    "pubnub": "git://github.com/kirill-konshin/pubnub-javascript.git#develop",
     "xhr2": "*"
   },
   "devDependencies": {

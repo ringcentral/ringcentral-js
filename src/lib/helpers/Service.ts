@@ -4,7 +4,7 @@ import context = require('../core/Context');
 import helper = require('../core/Helper');
 
 export class Service extends helper.Helper {
-    
+
     createUrl() {
         return '/account/~/service-info';
     }
@@ -47,7 +47,7 @@ export class Service extends helper.Helper {
     isHipaaComplianceEnabled = this.isServiceFeatureEnabledMethod('HipaaCompliance');
     isCallParkEnabled = this.isServiceFeatureEnabledMethod('CallPark');
     isOnDemandCallRecordingEnabled = this.isServiceFeatureEnabledMethod('OnDemandCallRecording');
-    
+
 }
 
 export function $get(context:context.Context):Service {

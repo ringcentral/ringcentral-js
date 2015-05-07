@@ -6,21 +6,21 @@ var spy = mocha.sinon.spy;
 var mock = mocha.mock;
 var rcsdk = mocha.rcsdk;
 
-describe('RCSDK.core.Log', function () {
+describe('RCSDK.core.Log', function() {
 
     var log = rcsdk.getLog();
 
-    describe('Interface', function () {
+    describe('Interface', function() {
 
-        it('Enables and disables all', function () {
+        it('Enables and disables all', function() {
 
             var originalConsole = console;
 
             var c = log.console = <any> {
-                log: spy(function () {}),
-                info: spy(function () {}),
-                warn: spy(function () {}),
-                error: spy(function () {})
+                log: spy(function() {}),
+                info: spy(function() {}),
+                warn: spy(function() {}),
+                error: spy(function() {})
             };
 
             log.enableAll();

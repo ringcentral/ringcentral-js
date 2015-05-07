@@ -7,16 +7,16 @@ import list = require('../core/List');
 import call = require('./Call');
 
 export class Contact extends helper.Helper {
-    
+
     private list:list.List;
     private validator:validator.Validator;
-    
+
     constructor(context:context.Context) {
         super(context);
         this.list = list.$get(context);
         this.validator = validator.$get(context);
     }
-    
+
     createUrl(options?:IContactOptions, id?:string) {
 
         options = options || {};
@@ -283,8 +283,8 @@ export class Contact extends helper.Helper {
         'email2',
         'email3'
     ];
-    
-    
+
+
 }
 
 export function $get(context:context.Context):Contact {
@@ -373,5 +373,5 @@ export interface IContact extends helper.IHelperObject {
     // Faxes:
     businessFax?:string;
     otherFax?:string;
-    
+
 }

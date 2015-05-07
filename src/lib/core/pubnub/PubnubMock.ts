@@ -6,9 +6,11 @@ import observable = require('../Observable')
 export class PubnubMock extends observable.Observable<PubnubMock> implements PUBNUB.PubnubInstance {
 
     private options:PUBNUB.InitOptions;
+    public crypto_obj:PUBNUB.CryptoObj;
 
     constructor(context, options:PUBNUB.InitOptions) {
         this.options = options;
+        this.crypto_obj = context.getPubnubReal().crypto_obj;
         super(context);
     }
 
@@ -31,9 +33,11 @@ export class PubnubMock extends observable.Observable<PubnubMock> implements PUB
 export class PubnubFactory implements PUBNUB.PUBNUB {
 
     context:context.Context;
+    crypto_obj:PUBNUB.CryptoObj;
 
     constructor(context:context.Context) {
         this.context = context;
+        this.crypto_obj = context.getPubnubReal().crypto_obj;
     }
 
     init(options:PUBNUB.InitOptions) {

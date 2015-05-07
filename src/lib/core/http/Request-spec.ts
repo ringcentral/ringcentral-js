@@ -5,13 +5,13 @@ import r = require('./Request');
 var expect = mocha.chai.expect;
 var rcsdk = mocha.mock.rcsdk;
 
-describe('RCSDK.core.http.Request', function () {
+describe('RCSDK.core.http.Request', function() {
 
-    describe('send', function () {
+    describe('send', function() {
 
-        it('calls error callback if the URL is not specified or is falsy', function (done) {
+        it('calls error callback if the URL is not specified or is falsy', function(done) {
 
-            r.$get(rcsdk.getContext()).send().catch(function (e) {
+            r.$get(rcsdk.getContext()).send().catch(function(e) {
                 expect(e).to.be.instanceOf(Error);
                 done();
             });
@@ -20,9 +20,9 @@ describe('RCSDK.core.http.Request', function () {
 
     });
 
-    describe('checkOptions', function () {
+    describe('checkOptions', function() {
 
-        it('defaults the method option to GET', function () {
+        it('defaults the method option to GET', function() {
 
             var ajax = r.$get(rcsdk.getContext()).setOptions({url: '/foo/bar'});
             ajax.checkOptions();
@@ -30,7 +30,7 @@ describe('RCSDK.core.http.Request', function () {
 
         });
 
-        it('it uppercases the method option, if specified', function () {
+        it('it uppercases the method option, if specified', function() {
 
             var ajax = r.$get(rcsdk.getContext()).setOptions({url: '/foo/bar', method: 'get'});
             ajax.checkOptions();
@@ -38,7 +38,7 @@ describe('RCSDK.core.http.Request', function () {
 
         });
 
-        it('it uses the value of the async option, if specified', function () {
+        it('it uses the value of the async option, if specified', function() {
 
             var ajax = r.$get(rcsdk.getContext()).setOptions({url: '/foo/bar', async: false});
             ajax.checkOptions();
@@ -46,7 +46,7 @@ describe('RCSDK.core.http.Request', function () {
 
         });
 
-        it('it defaults the async option to true, if not specified', function () {
+        it('it defaults the async option to true, if not specified', function() {
 
             var ajax = r.$get(rcsdk.getContext()).setOptions({url: '/foo/bar'});
             ajax.checkOptions();
@@ -54,7 +54,7 @@ describe('RCSDK.core.http.Request', function () {
 
         });
 
-        it('it defaults the headers option to an empty object, and then merges it with the default headers', function () {
+        it('it defaults the headers option to an empty object, and then merges it with the default headers', function() {
 
             var ajax = r.$get(rcsdk.getContext()).setOptions({url: '/foo/bar'});
             ajax.checkOptions();
@@ -63,7 +63,7 @@ describe('RCSDK.core.http.Request', function () {
 
         });
 
-        it('it merges the specified headers with the default headers, giving the specified headers priority', function () {
+        it('it merges the specified headers with the default headers, giving the specified headers priority', function() {
 
             var ajax = r.$get(rcsdk.getContext()).setOptions({
                 url: '/foo/bar',
@@ -81,16 +81,16 @@ describe('RCSDK.core.http.Request', function () {
 
     });
 
-    describe('destroy', function () {
+    describe('destroy', function() {
 
-        it('aborts the native XHR object', function (done) {
+        it('aborts the native XHR object', function(done) {
 
             var ajax = r.$get(rcsdk.getContext());
 
             // Mock the XHR object
 
             ajax.xhr = <XMLHttpRequest> {
-                abort: function () {
+                abort: function() {
                     done();
                 }
             };

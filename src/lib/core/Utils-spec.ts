@@ -5,15 +5,15 @@ var expect = mocha.chai.expect;
 var mock = mocha.mock;
 var rcsdk = mocha.rcsdk;
 
-describe('RCSDK.core.Utils', function () {
+describe('RCSDK.core.Utils', function() {
 
     'use strict';
 
     var Utils = rcsdk.getUtils();
 
-    describe('parseQueryString & queryStringify', function () {
+    describe('parseQueryString & queryStringify', function() {
 
-        it('parses queryStrings', function () {
+        it('parses queryStrings', function() {
 
             expect(Utils.parseQueryString('foo=bar&bar=baz')).to.deep.equal({foo: 'bar', bar: 'baz'});
             expect(Utils.parseQueryString('foo=bar&foo=baz')).to.deep.equal({foo: ['bar', 'baz']});
@@ -21,14 +21,14 @@ describe('RCSDK.core.Utils', function () {
 
         });
 
-        it('builds queryStrings', function () {
+        it('builds queryStrings', function() {
 
             expect(Utils.queryStringify({foo: 'bar', bar: 'baz'})).to.equal('foo=bar&bar=baz');
             expect(Utils.queryStringify({foo: ['bar', 'baz']})).to.equal('foo=bar&foo=baz');
 
         });
 
-        it('decodes pre-encoded string representation of object to be equal to original object', function () {
+        it('decodes pre-encoded string representation of object to be equal to original object', function() {
 
             function encodeDecode(v) {
                 return Utils.parseQueryString(Utils.queryStringify(v));
@@ -44,9 +44,9 @@ describe('RCSDK.core.Utils', function () {
 
     });
 
-    describe('extend', function () {
+    describe('extend', function() {
 
-        it('applies properties of sources to target (only first level)', function () {
+        it('applies properties of sources to target (only first level)', function() {
 
             var target = {
                     foo: {
@@ -81,7 +81,7 @@ describe('RCSDK.core.Utils', function () {
 
         });
 
-        it('applies all properties of sources to target in deep mode', function () {
+        it('applies all properties of sources to target in deep mode', function() {
 
             var target = {
                     foo: {
@@ -118,7 +118,7 @@ describe('RCSDK.core.Utils', function () {
 
         });
 
-        it('copies all kinds of values', function () {
+        it('copies all kinds of values', function() {
 
             var target = <any> {
                     'array': []
@@ -150,11 +150,11 @@ describe('RCSDK.core.Utils', function () {
 
     });
 
-    describe('poll & stopPolling', function () {
+    describe('poll & stopPolling', function() {
 
-        it('allows to set custom delay', function (done) {
+        it('allows to set custom delay', function(done) {
 
-            Utils.poll(function (next, delay) {
+            Utils.poll(function(next, delay) {
 
                 expect(delay).to.equal(10);
                 done();
@@ -163,11 +163,11 @@ describe('RCSDK.core.Utils', function () {
 
         });
 
-        it('provides a method to do it continuously', function (done) {
+        it('provides a method to do it continuously', function(done) {
 
             var i = 0;
 
-            Utils.poll(function (next) {
+            Utils.poll(function(next) {
 
                 i++;
 
@@ -175,7 +175,7 @@ describe('RCSDK.core.Utils', function () {
 
             }, 1);
 
-            after(function () {
+            after(function() {
 
                 expect(i).to.equal(3);
 
@@ -183,9 +183,9 @@ describe('RCSDK.core.Utils', function () {
 
         });
 
-        it('provides a method stop', function (done) {
+        it('provides a method stop', function(done) {
 
-            var timeout = Utils.poll(function (next) {
+            var timeout = Utils.poll(function(next) {
 
                 done(new Error('This should never be reached'));
 
@@ -197,15 +197,15 @@ describe('RCSDK.core.Utils', function () {
 
         });
 
-        it('cancels a previous timeout if provided', function (done) {
+        it('cancels a previous timeout if provided', function(done) {
 
-            var timeout = Utils.poll(function (next) {
+            var timeout = Utils.poll(function(next) {
 
                 done(new Error('This should never be reached'));
 
             }, 10);
 
-            var timeout2 = Utils.poll(function (next) {
+            var timeout2 = Utils.poll(function(next) {
 
                 done();
 
@@ -215,9 +215,9 @@ describe('RCSDK.core.Utils', function () {
 
     });
 
-    describe('parseNumber', function () {
+    describe('parseNumber', function() {
 
-        it('extracts object itself as number if no options given', function () {
+        it('extracts object itself as number if no options given', function() {
 
             expect(Utils.parseNumber(1)).to.equal(1);
             expect(Utils.parseNumber('1')).to.equal(1);
@@ -232,9 +232,9 @@ describe('RCSDK.core.Utils', function () {
 
     });
 
-    describe('stringExtractor', function () {
+    describe('stringExtractor', function() {
 
-        it('extracts object itself as string if no options given', function () {
+        it('extracts object itself as string if no options given', function() {
 
             expect(Utils.parseString(1)).to.equal('1');
             expect(Utils.parseString(0)).to.equal('');
@@ -247,11 +247,11 @@ describe('RCSDK.core.Utils', function () {
 
     });
 
-    describe('isEmail', function () {
+    describe('isEmail', function() {
 
         function emailValidator(description, multiple, valueToTest, expectedValidationResult) {
 
-            it(description, function () {
+            it(description, function() {
 
                 expect(Utils.isEmail(valueToTest, multiple)).to.equal(expectedValidationResult);
 
@@ -259,7 +259,7 @@ describe('RCSDK.core.Utils', function () {
 
         }
 
-        describe('positive tests', function () {
+        describe('positive tests', function() {
 
             emailValidator('should validate simple addresses', false, 'foo@bar.com', true);
             emailValidator('should validate addresses with digits', false, '123@456.789', true);
@@ -269,7 +269,7 @@ describe('RCSDK.core.Utils', function () {
 
         });
 
-        describe('negative tests', function () {
+        describe('negative tests', function() {
 
             emailValidator('should not validate addresses with multiple @ symbols', false, 'foo@bar@baz.com', false);
             emailValidator('should not validate addresses with invalid characters', false, 'foo bar@baz.com', false);
@@ -281,11 +281,11 @@ describe('RCSDK.core.Utils', function () {
 
     });
 
-    describe('isPhone', function () {
+    describe('isPhone', function() {
 
         function phoneValidator(description, valueToTest, expectedValidationResult) {
 
-            it(description, function () {
+            it(description, function() {
 
                 expect(Utils.isPhoneNumber(valueToTest)).to.equal(expectedValidationResult);
 
@@ -293,7 +293,7 @@ describe('RCSDK.core.Utils', function () {
 
         }
 
-        describe('positive tests', function () {
+        describe('positive tests', function() {
 
             phoneValidator('should validate a phone number with no formatting characters', '16501234567', true);
             phoneValidator('should validate a phone number with typical formatting characters', '1 (650) 123-4567', true);
@@ -303,7 +303,7 @@ describe('RCSDK.core.Utils', function () {
 
         });
 
-        describe('negative tests', function () {
+        describe('negative tests', function() {
 
             phoneValidator('should not validate a phone number that is missing the country code', '(650) 123-4567', false);
             phoneValidator('should not validate a phone number that has too few digits', '1 (650) 123-456', false);
@@ -313,28 +313,28 @@ describe('RCSDK.core.Utils', function () {
 
     });
 
-    describe('is*', function () {
+    describe('is*', function() {
 
-        describe('isDate', function () {
+        describe('isDate', function() {
 
             expect(Utils.isDate(new Date())).to.equal(true);
 
         });
 
-        describe('isFunction', function () {
+        describe('isFunction', function() {
 
             expect(Utils.isFunction(Date)).to.equal(true);
-            expect(Utils.isFunction(function () {})).to.equal(true);
+            expect(Utils.isFunction(function() {})).to.equal(true);
 
         });
 
-        describe('isArray', function () {
+        describe('isArray', function() {
 
             expect(Utils.isArray([])).to.equal(true);
 
         });
 
-        describe('isNaN', function () {
+        describe('isNaN', function() {
 
             expect(Utils.isNaN(NaN)).to.equal(true);
 
@@ -342,9 +342,9 @@ describe('RCSDK.core.Utils', function () {
 
     });
 
-    describe('getProperty', function () {
+    describe('getProperty', function() {
 
-        it('returns a nested property', function () {
+        it('returns a nested property', function() {
 
             var foo = {
                 bar: {

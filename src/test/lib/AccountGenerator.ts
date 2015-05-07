@@ -40,13 +40,13 @@ export class AccountGenerator {
             return this.connectionPromise;
         }
 
-        this.connectionPromise = new Promise<any>(function (resolve, reject) {
+        this.connectionPromise = new Promise<any>(function(resolve, reject) {
 
             var url = self.server + '/ags/ws?wsdl';
 
             console.log('Connecting to', url);
 
-            soap.createClient(url, function (e, cl) {
+            soap.createClient(url, function(e, cl) {
                 console.info('AccountGenerator: SOAP has been connected', e && e.message || '');
                 if (e) throw e;
                 self.client = cl;
@@ -71,7 +71,7 @@ export class AccountGenerator {
 
             config.accountCount = config.accountCount.toString();
 
-            this.client.getAndLock(config, function (e, result) {
+            this.client.getAndLock(config, function(e, result) {
                 if (e) throw e;
                 var accounts = result.accounts.account.length ? result.accounts.account : [result.accounts.account];
                 resolve(accounts);
@@ -96,7 +96,7 @@ export class AccountGenerator {
 
             if (Array.isArray(config.rcUserIds)) config.rcUserIds = config.rcUserIds.join(','); //TODO This may not work
 
-            this.client.release(config, function (e, result) {
+            this.client.release(config, function(e, result) {
                 if (e) throw e;
                 resolve(result);
             });

@@ -50,7 +50,7 @@ export class Ringout extends helper.Helper {
         ]);
 
     }
-    
+
 }
 
 export function $get(context:context.Context):Ringout {

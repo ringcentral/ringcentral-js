@@ -23,7 +23,7 @@ export class Message extends helper.Helper {
         this.platform = platform.$get(context);
         this.validator = validator.$get(context);
     }
-    
+
     /**
      *
      * @exceptionalCase Different endpoint when creating SMS/Pager
@@ -82,7 +82,11 @@ export class Message extends helper.Helper {
     }
 
     getAttachmentUrl(message:IMessage, i:number) {
-        return message.attachments[i] ? this.platform.apiUrl(message.attachments[i].uri, {addMethod: 'GET', addServer: true, addToken: true}) : '';
+        return message.attachments[i] ? this.platform.apiUrl(message.attachments[i].uri, {
+            addMethod: 'GET',
+            addServer: true,
+            addToken: true
+        }) : '';
     }
 
     getAttachmentContentType(message:IMessage, i:number) {
@@ -200,7 +204,7 @@ export function $get(context:context.Context):Message {
     });
 }
 
-export interface IMessage extends helper.IHelperObject{
+export interface IMessage extends helper.IHelperObject {
     to?:call.ICallerInfo[];
     from?:call.ICallerInfo;
     type?:string;

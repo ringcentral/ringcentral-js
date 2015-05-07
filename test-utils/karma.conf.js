@@ -19,7 +19,6 @@ module.exports = function(config) {
             {pattern: './lib/**/*.js', included: false},
             {pattern: './test/lib/**/*.js', included: false}, // do not use * instead of lib -- skip specs-api
             {pattern: './test/mocha.js', included: false}, // need to be separately mentioned otherwise not included (*)
-            {pattern: './bower_components/crypto-js/**/*.js', included: false},
             {pattern: './bower_components/pubnub/web/*.*', included: false},
             {pattern: './bower_components/es6-promise-polyfill/*.*', included: false},
             // include files

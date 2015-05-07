@@ -23,9 +23,9 @@ export class PhoneNumber extends helper.Helper {
         if (options.lookup) return '/number-pool/lookup';
 
         return '/account/~' +
-            (options.extensionId ? '/extension/' + options.extensionId : '') +
-            '/phone-number' +
-            (id ? '/' + id : '');
+               (options.extensionId ? '/extension/' + options.extensionId : '') +
+               '/phone-number' +
+               (id ? '/' + id : '');
 
     }
 
@@ -50,8 +50,8 @@ export class PhoneNumber extends helper.Helper {
         return this.list.comparator(this.utils.extend({
             extractFn: (item:IPhoneNumber) => {
                 return item.usageType + '-' +
-                    item.paymentType + '-' +
-                    item.type;
+                       item.paymentType + '-' +
+                       item.type;
             }
         }, options));
 

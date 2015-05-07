@@ -17,7 +17,13 @@ describe('RCSDK.helpers.ForwardingNumber', function() {
         {usageType: 'AdditionalCompanyNumber', paymentType: 'TollFree', type: 'Voice', phoneNumber: '1', features: []},
         {usageType: 'AdditionalCompanyNumber', paymentType: 'Local', type: 'VoiceFax', phoneNumber: '1', features: []},
         {usageType: 'CompanyNumber', paymentType: 'Local', type: 'VoiceFax', phoneNumber: '1', features: []},
-        {usageType: 'DirectNumber', paymentType: 'Local', type: 'VoiceFax', phoneNumber: '1', features: ['SmsSender', 'CallerId']},
+        {
+            usageType: 'DirectNumber',
+            paymentType: 'Local',
+            type: 'VoiceFax',
+            phoneNumber: '1',
+            features: ['SmsSender', 'CallerId']
+        },
         {usageType: 'CompanyNumber', paymentType: 'Local', type: 'VoiceFax', phoneNumber: '1', features: []},
         {usageType: 'CompanyFaxNumber', paymentType: 'Local', type: 'Fax', phoneNumber: '1', features: []},
         {usageType: 'ForwardedNumber', paymentType: 'Local', type: 'VoiceFax', phoneNumber: '1', features: []}

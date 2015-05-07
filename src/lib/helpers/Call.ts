@@ -27,9 +27,9 @@ export class Call extends helper.Helper {
         if (!('personal' in options) && !('extensionId' in options)) options.personal = true;
 
         return '/account/~/' +
-            (options.personal || options.extensionId ? ('extension/' + (options.extensionId || '~') + '/') : '') +
-            (options.active ? 'active-calls' : 'call-log') +
-            (id ? '/' + id : '');
+               (options.personal || options.extensionId ? ('extension/' + (options.extensionId || '~') + '/') : '') +
+               (options.active ? 'active-calls' : 'call-log') +
+               (id ? '/' + id : '');
 
     }
 
@@ -137,12 +137,12 @@ export class Call extends helper.Helper {
 
         return (
         (!options.strict || outboundRingOutCall.action && outboundRingOutCall.action.toLowerCase().indexOf('ringout') != -1) &&
-            // Check directions
+        // Check directions
         outboundRingOutCall.direction == 'Outbound' &&
         inboundCall.direction == 'Inbound' &&
-            // Check that start times are equal or close enough
+        // Check that start times are equal or close enough
         ((!inboundCall.startTime && !outboundRingOutCall.startTime) || Math.abs(getTime(inboundCall.startTime) - getTime(outboundRingOutCall.startTime)) < (options.maxStartTimeDiscrepancy || 5000)) &&
-            // Check that numbers match
+        // Check that numbers match
         inboundCall.from.phoneNumber == outboundRingOutCall.to.phoneNumber &&
         (inboundCall.to.phoneNumber == outboundRingOutCall.from.phoneNumber || inboundCall.to.name == outboundRingOutCall.from.name) //TODO Maybe name check is not required
         );
@@ -298,10 +298,10 @@ export class Call extends helper.Helper {
             activeCalls = this
                 .parsePresenceCalls(presence && presence.activeCalls || [])
                 .map((call:ICall) => {
-                         // delete property to make sure it is skipped during merge
-                         delete call.startTime;
-                         return call;
-                     });
+                    // delete property to make sure it is skipped during merge
+                    delete call.startTime;
+                    return call;
+                });
 
         presenceCalls = this.merge(presenceCalls || [], activeCalls, this.getSessionId, true);
 

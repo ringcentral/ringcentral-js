@@ -14,7 +14,7 @@ export class Device extends helper.Helper {
     private extension:extension.Extension;
     private deviceModel:deviceModel.DeviceModel;
 
-    constructor(context:context.Context){
+    constructor(context:context.Context) {
         super(context);
         this.validator = validator.$get(context);
         this.extension = extension.$get(context);
@@ -40,12 +40,30 @@ export class Device extends helper.Helper {
     validate(item:IDevice) {
 
         return this.validator.validate([
-            {field: 'emergencyServiceAddress-street', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.street)},
-            {field: 'emergencyServiceAddress-city', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.city)},
-            {field: 'emergencyServiceAddress-state', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.state)},
-            {field: 'emergencyServiceAddress-country', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.country)},
-            {field: 'emergencyServiceAddress-zip', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.zip)},
-            {field: 'emergencyServiceAddress-customerName', validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.customerName)},
+            {
+                field: 'emergencyServiceAddress-street',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.street)
+            },
+            {
+                field: 'emergencyServiceAddress-city',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.city)
+            },
+            {
+                field: 'emergencyServiceAddress-state',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.state)
+            },
+            {
+                field: 'emergencyServiceAddress-country',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.country)
+            },
+            {
+                field: 'emergencyServiceAddress-zip',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.zip)
+            },
+            {
+                field: 'emergencyServiceAddress-customerName',
+                validator: this.validator.required(item && item.emergencyServiceAddress && item.emergencyServiceAddress.customerName)
+            },
             {field: 'extension', validator: this.validator.required(this.extension.getId(item && item.extension))},
             {field: 'model', validator: this.validator.required(this.deviceModel.getId(item && item.model))}
         ]);

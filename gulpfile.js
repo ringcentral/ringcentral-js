@@ -88,6 +88,8 @@
         extensions.forEach(function(ext) {
             var path = process.cwd() + '/build/rc-sdk' + ext;
             fs.existsSync(path) && fs.unlinkSync(path);
+            var pathBundle = process.cwd() + '/build/rc-sdk-bundle' + ext;
+            fs.existsSync(pathBundle) && fs.unlinkSync(pathBundle);
         });
 
     });

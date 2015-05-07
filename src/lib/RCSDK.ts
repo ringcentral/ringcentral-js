@@ -47,9 +47,6 @@ import timezoneHelper = require('./helpers/Timezone');
 import promise = require('es6-promise');
 import pubnub = require('pubnub');
 
-require('crypto-js/aes');
-require('crypto-js/mode-ecb');
-
 class RCSDK {
 
     public static version = '1.3.0';
@@ -60,7 +57,6 @@ class RCSDK {
     };
 
     private static injections = <context.IInjections>{
-        CryptoJS: require('crypto-js/core'),
         localStorage: (typeof(localStorage) !== 'undefined'
             ? localStorage
             : require('dom-' + 'storage')), // Node only

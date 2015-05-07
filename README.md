@@ -43,7 +43,7 @@ Pick the option that works best for you:
     bower install rcsdk --save
     ```Bower
     
-- Download the bundle version, which includes CryptoJS, PUBNUB and ES6 Promise (choose which works best for you):
+- Download the bundle version, which includes PUBNUB and ES6 Promise (choose which works best for you):
     - [ZIP file with source code](https://github.com/ringcentral/js-sdk/archive/master.zip) or
     - [Non-minified version](https://raw.githubusercontent.com/ringcentral/js-sdk/master/build/rc-sdk-bundle.js) or
     - [Minified version](https://raw.githubusercontent.com/ringcentral/js-sdk/master/build/rc-sdk-bundle.js)
@@ -52,11 +52,10 @@ Pick the option that works best for you:
     - [ZIP file with source code](https://github.com/ringcentral/js-sdk/archive/master.zip)
     - [ES6 Promise](https://github.com/jakearchibald/es6-promise)
     - [PUBNUB](https://github.com/pubnub/javascript)
-    - [Crypto JS](https://github.com/evanvosberg/crypto-js)
 
 ## 1.2.a. Add scripts to HTML page
 
-You can use bundle version (with CryptoJS, PUBNUB and ES6 Promise included in main file).
+You can use bundle version (with PUBNUB and ES6 Promise included in main file).
 
 Add this to your HTML:
 
@@ -70,27 +69,11 @@ Add this to your HTML (order should be preserved):
 
 ```html
 <script type="text/javascript" src="path-to-scripts/es6-promise-polyfill/promise.js"></script>
-<script type="text/javascript" src="path-to-scripts/crypto-js/crypto-js.js"></script>
 <script type="text/javascript" src="path-to-scripts/pubnub/web/pubnub.js"></script>
 <script type="text/javascript" src="path-to-scripts/rcsdk/build/rc-sdk.js"></script><!-- or rc-sdk.min.js -->
 ```
 
 Preferred way is to use RequireJS or bundle version of SDK.
-
-If you wish to reduce the size of CryptoJS, instead of `crypto-js.js` which is more than 100K, you can include only
-needed by SDK (order should be preserved):
-
-```html
-<script type="text/javascript" src="path-to-scripts/crypto-js/core.js"></script>
-<script type="text/javascript" src="path-to-scripts/crypto-js/enc-base64.js"></script>
-<script type="text/javascript" src="path-to-scripts/crypto-js/md5.js"></script>
-<script type="text/javascript" src="path-to-scripts/crypto-js/sha1.js"></script>
-<script type="text/javascript" src="path-to-scripts/crypto-js/hmac.js"></script>
-<script type="text/javascript" src="path-to-scripts/crypto-js/evpkdf.js"></script>
-<script type="text/javascript" src="path-to-scripts/crypto-js/cipher-core.js"></script>
-<script type="text/javascript" src="path-to-scripts/crypto-js/aes.js"></script>
-<script type="text/javascript" src="path-to-scripts/crypto-js/mode-ecb.js"></script>
-```
 
 ## 1.2.b. Set things up in Browser (if you use RequireJS in your project)
 
@@ -102,13 +85,6 @@ require.config({
         'es6-promise': 'path-to-scripts/es6-promise-polyfill/promise',
         'pubnub': 'path-to-scripts/pubnub/web/pubnub'
     },
-    packages: [
-        {
-            name: 'crypto-js',
-            location: 'path-to-scripts/crypto-js',
-            main: 'index'
-        }
-    ],
     shim: {
         'pubnub': {
             exports: 'PUBNUB'

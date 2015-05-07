@@ -134,9 +134,15 @@ describe('RCSDK.helpers.Message', function() {
             expect(Message.createUrl()).to.equal('/account/~/extension/~/message-store');
             expect(Message.createUrl({}, 1)).to.equal('/account/~/extension/~/message-store/1');
             expect(Message.createUrl({extensionId: 'foo'}, '1')).to.equal('/account/~/extension/foo/message-store/1');
-            expect(Message.createUrl({extensionId: 'foo', sync: true}, '1')).to.equal('/account/~/extension/foo/message-sync');
+            expect(Message.createUrl({
+                extensionId: 'foo',
+                sync: true
+            }, '1')).to.equal('/account/~/extension/foo/message-sync');
             expect(Message.createUrl({extensionId: 'foo', sms: true}, '1')).to.equal('/account/~/extension/foo/sms');
-            expect(Message.createUrl({extensionId: 'foo', pager: true}, '1')).to.equal('/account/~/extension/foo/company-pager');
+            expect(Message.createUrl({
+                extensionId: 'foo',
+                pager: true
+            }, '1')).to.equal('/account/~/extension/foo/company-pager');
 
         });
 
@@ -332,7 +338,11 @@ describe('RCSDK.helpers.Message', function() {
 
         it('passes PagerMessage validation if values are correct', function() {
 
-            var res = Message.validatePager(<any>{to: {extensionNumber: 'foo'}, from: {extensionNumber: 'foo'}, subject: 'foo'});
+            var res = Message.validatePager(<any>{
+                to: {extensionNumber: 'foo'},
+                from: {extensionNumber: 'foo'},
+                subject: 'foo'
+            });
 
             expect(res.isValid).to.equal(true);
             expect(res.errors).to.deep.equal({});

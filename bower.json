@@ -14,9 +14,7 @@
     "!lib/**/!(*spec).*"
   ],
   "dependencies": {
-    "pubnub": "*",
-    "crypto-js": "*",
-    "es6-promise": "*",
+    "pubnub": "git+https://github.com/kirill-konshin/pubnub-javascript.git#develop",
     "es6-promise-polyfill": "*"
   },
   "devDependencies": {

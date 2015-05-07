@@ -171,37 +171,43 @@ describe('RCSDK.core.Subscription', function() {
 
     });
 
-    describe('notify method', function() {
+    describe('decrypt method', function() {
+
+        it('provides access to PUBNUB.crypto_obj which has proper interface', function() {
+
+            var subscription = rcsdk.getSubscription();
+
+            expect(subscription.getPubnub().crypto_obj).to.be.an('object');
+            expect(subscription.getPubnub().crypto_obj.encrypt).to.be.a('function');
+            expect(subscription.getPubnub().crypto_obj.decrypt).to.be.a('function');
+
+        });
 
         it('decrypts AES-encrypted messages when the subscription has an encryption key', function() {
 
-            var subscription = rcsdk.getSubscription(),
-                nspy = spy(function(event) {
+            var aesMessage = 'gkw8EU4G1SDVa2/hrlv6+0ViIxB7N1i1z5MU/Hu2xkIKzH6yQzhr3vIc27IAN558kTOkacqE5DkLpRdnN1orwtI' +
+                             'BsUHmPMkMWTOLDzVr6eRk+2Gcj2Wft7ZKrCD+FCXlKYIoa98tUD2xvoYnRwxiE2QaNywl8UtjaqpTk1+WDImBrt' +
+                             '6uabB1WICY/qE0It3DqQ6vdUWISoTfjb+vT5h9kfZxWYUP4ykN2UtUW1biqCjj1Rb6GWGnTx6jPqF77ud0XgV1r' +
+                             'k/Q6heSFZWV/GP23/iytDPK1HGJoJqXPx7ErQU=',
+                subscription = rcsdk.getSubscription();
 
-                    expect(event).to.deep.equal({
-                        "timestamp": "2014-03-12T20:47:54.712+0000",
-                        "body": {
-                            "extensionId": 402853446008,
-                            "telephonyStatus": "OnHold"
-                        },
-                        "event": "/restapi/v1.0/account/~/extension/402853446008/presence",
-                        "uuid": "db01e7de-5f3c-4ee5-ab72-f8bd3b77e308"
-                    });
+            subscription.subscription = {
+                deliveryMode: {
+                    encryptionKey: 'e0bMTqmumPfFUbwzppkSbA==',
+                    subscriberKey: 'foo',
+                    address: 'foo'
+                }
+            };
 
-                }),
-                aesMessage = 'gkw8EU4G1SDVa2/hrlv6+0ViIxB7N1i1z5MU/Hu2xkIKzH6yQzhr3vIc27IAN558kTOkacqE5DkLpRdnN1orwtIBsUHmPMkMWTOLDzVr6eRk+2Gcj2Wft7ZKrCD+FCXlKYIoa98tUD2xvoYnRwxiE2QaNywl8UtjaqpTk1+WDImBrt6uabB1WICY/qE0It3DqQ6vdUWISoTfjb+vT5h9kfZxWYUP4ykN2UtUW1biqCjj1Rb6GWGnTx6jPqF77ud0XgV1rk/Q6heSFZWV/GP23/iytDPK1HGJoJqXPx7ErQU=';
-
-            subscription.subscription = {deliveryMode: {encryptionKey: 'e0bMTqmumPfFUbwzppkSbA==', subscriberKey: 'foo', address: 'foo'}};
-
-            subscription
-                .on(subscription.events.notification, nspy)
-                .subscribeAtPubnub() // Manually subscribe
-                .notify(aesMessage); // Directly call notify method
-
-            // Simulate socket message
-            subscription.pubnub.receiveMessage(aesMessage, 'foo');
-
-            expect(nspy).to.be.calledTwice;
+            expect(subscription.decrypt(aesMessage)).to.deep.equal({
+                "timestamp": "2014-03-12T20:47:54.712+0000",
+                "body": {
+                    "extensionId": 402853446008,
+                    "telephonyStatus": "OnHold"
+                },
+                "event": "/restapi/v1.0/account/~/extension/402853446008/presence",
+                "uuid": "db01e7de-5f3c-4ee5-ab72-f8bd3b77e308"
+            });
 
         });
 

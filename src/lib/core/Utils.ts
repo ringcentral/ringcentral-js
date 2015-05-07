@@ -248,9 +248,9 @@ export class Utils {
         return property
             .split(/[.[\]]/)
             .reduce((res, part) => {
-                        if (!res) return undefined;
-                        return part ? res[part] : res;
-                    }, obj);
+                if (!res) return undefined;
+                return part ? res[part] : res;
+            }, obj);
 
     }
 

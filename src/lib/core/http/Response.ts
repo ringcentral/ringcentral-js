@@ -71,15 +71,15 @@ export class Response extends h.Headers<Response> {
                     .split('\n')
                     .forEach((header:string) => {
 
-                                 if (!header) return;
+                        if (!header) return;
 
-                                 /** @type {string[]} */
-                                 var parts = header.split(Response.headerSeparator),
-                                     name = parts.shift().trim();
+                        /** @type {string[]} */
+                        var parts = header.split(Response.headerSeparator),
+                            name = parts.shift().trim();
 
-                                 this.setHeader(name, parts.join(Response.headerSeparator).trim());
+                        this.setHeader(name, parts.join(Response.headerSeparator).trim());
 
-                             });
+                    });
 
             } else {
 
@@ -158,9 +158,9 @@ export class Response extends h.Headers<Response> {
 
     getError() {
         return this.data.message ||
-            this.data.error_description ||
-            this.data.description ||
-            'Unknown error';
+               this.data.error_description ||
+               this.data.description ||
+               'Unknown error';
     }
 
 }

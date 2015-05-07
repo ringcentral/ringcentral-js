@@ -31,12 +31,12 @@ export class Context {
         return this;
     }
 
-    getCryptoJS():CryptoJS.CryptoJSStatic {
-        return this.injections.CryptoJS;
+    getPubnub():PUBNUB.PUBNUB {
+        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.getPubnubReal();
     }
 
-    getPubnub():PUBNUB.PUBNUB {
-        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.injections.PUBNUB;
+    getPubnubReal():PUBNUB.PUBNUB {
+        return this.injections.PUBNUB;
     }
 
     getLocalStorage():Storage {
@@ -75,7 +75,6 @@ export interface IInjections {
     pubnubMock:any;
     xhrMock:any;
     PUBNUB:any;
-    CryptoJS:any;
     localStorage:any;
     XHR:any;
     Promise:any;

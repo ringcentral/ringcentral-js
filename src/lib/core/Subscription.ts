@@ -58,12 +58,6 @@ export class Subscription extends observable.Observable<Subscription> {
 
     }
 
-    getCrypto() {
-
-        return this.context.getCryptoJS();
-
-    }
-
     getPlatform() {
 
         return platform.$get(this.context);
@@ -127,20 +121,20 @@ export class Subscription extends observable.Observable<Subscription> {
 
         }).then((ajax:r.Response) => {
 
-                    this.updateSubscription(ajax.data)
-                        .subscribeAtPubnub()
-                        .emit(this.events.subscribeSuccess, ajax.data);
+                this.updateSubscription(ajax.data)
+                    .subscribeAtPubnub()
+                    .emit(this.events.subscribeSuccess, ajax.data);
 
-                    return ajax;
+                return ajax;
 
-                }).catch((e) => {
+            }).catch((e) => {
 
-                             this.unsubscribe()
-                                 .emit(this.events.subscribeError, e);
+                this.unsubscribe()
+                    .emit(this.events.subscribeError, e);
 
-                             throw e;
+                throw e;
 
-                         });
+            });
 
     }
 
@@ -160,31 +154,31 @@ export class Subscription extends observable.Observable<Subscription> {
 
         }).then(():Promise<r.Response> => {
 
-                    return this.getPlatform().apiCall({
-                        method: 'PUT',
-                        url: '/restapi/v1.0/subscription/' + this.subscription.id,
-                        post: {
-                            eventFilters: this.getFullEventFilters()
-                        }
-                    });
+                return this.getPlatform().apiCall({
+                    method: 'PUT',
+                    url: '/restapi/v1.0/subscription/' + this.subscription.id,
+                    post: {
+                        eventFilters: this.getFullEventFilters()
+                    }
+                });
 
-                })
+            })
             .then((ajax:any) => {
 
-                      this.updateSubscription(ajax.data)
-                          .emit(this.events.renewSuccess, ajax.data);
+                this.updateSubscription(ajax.data)
+                    .emit(this.events.renewSuccess, ajax.data);
 
-                      return ajax;
+                return ajax;
 
-                  })
+            })
             .catch((e):any => {
 
-                       this.unsubscribe()
-                           .emit(this.events.renewError, e);
+                this.unsubscribe()
+                    .emit(this.events.renewError, e);
 
-                       throw e;
+                throw e;
 
-                   });
+            });
 
     }
 
@@ -207,18 +201,18 @@ export class Subscription extends observable.Observable<Subscription> {
 
         }).then((ajax:r.Response) => {
 
-                    this.unsubscribe()
-                        .emit(this.events.removeSuccess, ajax);
+                this.unsubscribe()
+                    .emit(this.events.removeSuccess, ajax);
 
-                    return ajax;
+                return ajax;
 
-                }).catch((e) => {
+            }).catch((e) => {
 
-                             this.emit(this.events.removeError, e);
+                this.emit(this.events.removeError, e);
 
-                             throw e;
+                throw e;
 
-                         });
+            });
 
     }
 
@@ -235,9 +229,9 @@ export class Subscription extends observable.Observable<Subscription> {
     isSubscribed() {
 
         return this.subscription &&
-            this.subscription.deliveryMode &&
-            this.subscription.deliveryMode.subscriberKey &&
-            this.subscription.deliveryMode.address;
+               this.subscription.deliveryMode &&
+               this.subscription.deliveryMode.subscriberKey &&
+               this.subscription.deliveryMode.address;
 
     }
 
@@ -280,26 +274,32 @@ export class Subscription extends observable.Observable<Subscription> {
 
     /**
      * Do not use this method! Internal use only
-     * @param message
-     * @returns {Subscription}
      */
-    notify(message) {
+    decrypt(message:any) {
 
         if (this.isSubscribed() && this.subscription.deliveryMode.encryptionKey) {
 
-            var CryptoJS = this.getCrypto();
+            var PUBNUB = this.getPubnub();
 
-            var key = CryptoJS.enc.Base64.parse(this.subscription.deliveryMode.encryptionKey);
-            var data = CryptoJS.enc.Base64.parse(message);
-            var decrypted = CryptoJS.AES.decrypt({ciphertext: data}, key, {
-                mode: CryptoJS.mode.ECB,
-                padding: CryptoJS.pad.Pkcs7
-            }).toString(CryptoJS.enc.Utf8);
-            message = JSON.parse(decrypted);
+            message = PUBNUB.crypto_obj.decrypt(message, this.subscription.deliveryMode.encryptionKey, {
+                encryptKey: false,
+                keyEncoding: 'base64',
+                keyLength: 128,
+                mode: 'ecb'
+            });
 
         }
 
-        this.emit(this.events.notification, message);
+        return message;
+
+    }
+
+    /**
+     * Do not use this method! Internal use only
+     */
+    notify(message:any) {
+
+        this.emit(this.events.notification, this.decrypt(message));
 
         return this;
 
@@ -307,9 +307,8 @@ export class Subscription extends observable.Observable<Subscription> {
 
     /**
      * Do not use this method! Internal use only
-     * @returns {Subscription}
      */
-    subscribeAtPubnub() {
+    subscribeAtPubnub():Subscription {
 
         if (!this.isSubscribed()) return this;
 

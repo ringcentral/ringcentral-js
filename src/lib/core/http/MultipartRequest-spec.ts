@@ -5,22 +5,22 @@ import r = require('./MultipartRequest');
 var expect = mocha.chai.expect;
 var rcsdk = mocha.mock.rcsdk;
 
-describe('RCSDK.core.http.MultipartRequest', function () {
+describe('RCSDK.core.http.MultipartRequest', function() {
 
-    describe.skip('createNodeMessage', function () {
+    describe.skip('createNodeMessage', function() {
 
-        it('assembles message', function () {
+        it('assembles message', function() {
 
             var req = r.$get(rcsdk.getContext()),
                 expected = '--Boundary_1428971641708\n' +
-                    'Content-Type: application/json\n' +
-                    '\n' +
-                    '{}\n' +
-                    '--Boundary_1428971641708\n' +
-                    'Content-Type: text/plain\n' +
-                    '\n' +
-                    'Foo\n' +
-                    '--Boundary_1428971641708--';
+                           'Content-Type: application/json\n' +
+                           '\n' +
+                           '{}\n' +
+                           '--Boundary_1428971641708\n' +
+                           'Content-Type: text/plain\n' +
+                           '\n' +
+                           'Foo\n' +
+                           '--Boundary_1428971641708--';
 
             req.setBoundary('Boundary_1428971641708')
                 .addAttachment({content: 'Foo'})
@@ -31,19 +31,19 @@ describe('RCSDK.core.http.MultipartRequest', function () {
 
         });
 
-        it('assembles message', function () {
+        it('assembles message', function() {
 
             var req = r.$get(rcsdk.getContext()),
                 expected = '--Boundary_1428971641708\n' +
-                    'Content-Type: application/json\n' +
-                    '\n' +
-                    '{}\n' +
-                    '--Boundary_1428971641708\n' +
-                    'Content-Type: application/json\n' +
-                    'Content-Disposition: attachment; filename=file.txt\n' +
-                    '\n' +
-                    '{"foo":"bar"}\n' +
-                    '--Boundary_1428971641708--';
+                           'Content-Type: application/json\n' +
+                           '\n' +
+                           '{}\n' +
+                           '--Boundary_1428971641708\n' +
+                           'Content-Type: application/json\n' +
+                           'Content-Disposition: attachment; filename=file.txt\n' +
+                           '\n' +
+                           '{"foo":"bar"}\n' +
+                           '--Boundary_1428971641708--';
 
             req.setBoundary('Boundary_1428971641708')
                 .addAttachment({contentType: 'application/json', content: new Buffer('{"foo":"bar"}', 'utf-8')})
@@ -54,19 +54,19 @@ describe('RCSDK.core.http.MultipartRequest', function () {
 
         });
 
-        it('assembles message', function () {
+        it('assembles message', function() {
 
             var req = r.$get(rcsdk.getContext()),
                 expected = '--Boundary_1428971641708\n' +
-                    'Content-Type: application/json\n' +
-                    '\n' +
-                    '{"to":[{"phoneNumber":"12223334455"}],"faxResolution":"Low"}\n' +
-                    '--Boundary_1428971641708\n' +
-                    'Content-Type: application/json\n' +
-                    'Content-Disposition: attachment; filename=file.txt\n' +
-                    '\n' +
-                    '{"foo":"bar"}\n' +
-                    '--Boundary_1428971641708--';
+                           'Content-Type: application/json\n' +
+                           '\n' +
+                           '{"to":[{"phoneNumber":"12223334455"}],"faxResolution":"Low"}\n' +
+                           '--Boundary_1428971641708\n' +
+                           'Content-Type: application/json\n' +
+                           'Content-Disposition: attachment; filename=file.txt\n' +
+                           '\n' +
+                           '{"foo":"bar"}\n' +
+                           '--Boundary_1428971641708--';
 
             req.body = {
                 "to": [{"phoneNumber": "12223334455"}],

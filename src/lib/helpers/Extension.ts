@@ -31,8 +31,8 @@ export class Extension extends helper.Helper {
         options = options || {};
 
         return '/account/~' +
-            (options.departmentId ? '/department/' + options.departmentId + '/members' : '/extension') +
-            (id ? '/' + id : '');
+               (options.departmentId ? '/department/' + options.departmentId + '/members' : '/extension') +
+               (id ? '/' + id : '');
 
     }
 
@@ -75,7 +75,7 @@ export class Extension extends helper.Helper {
                 filterFn: this.list.containsFilter,
                 extractFn: (item) => {
                     return (item.name && (item.name.toLocaleLowerCase() + ' ')) +
-                        (item.extensionNumber && item.extensionNumber.toString().toLocaleLowerCase());
+                           (item.extensionNumber && item.extensionNumber.toString().toLocaleLowerCase());
                 }
             }
         ]);
