@@ -17,7 +17,7 @@
   "dependencies": {
     "dom-storage": "*",
     "es6-promise": "*",
-    "pubnub": "git://github.com/kirill-konshin/pubnub-javascript.git#develop",
+    "pubnub": "git://github.com/pubnub/javascript.git#develop",
     "xhr2": "*"
   },
   "devDependencies": {
