@@ -1251,6 +1251,13 @@ var Platform = (function (_super) {
         this.apiKey = (typeof btoa == 'function') ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
         return this;
     };
+    Platform.prototype.getCredentials = function () {
+        var credentials = ((typeof atob == 'function') ? atob(this.apiKey) : new Buffer(this.apiKey, 'base64').toString('utf-8')).split(':');
+        return {
+            key: credentials[0],
+            secret: credentials[1]
+        };
+    };
     Platform.prototype.setServer = function (server) {
         this.server = server || '';
         return this;
@@ -1263,20 +1270,52 @@ var Platform = (function (_super) {
         }
         return this.getStorage().getItem(key) || false;
     };
+    Platform.prototype.getAuthURL = function (options) {
+        options = options || {};
+        return this.apiUrl('/restapi/oauth/authorize?' + this.utils.queryStringify({
+            'response_type': 'code',
+            'redirect_uri': options.redirectUri || '',
+            'client_id': this.getCredentials().key,
+            'state': options.state || '',
+            'brand_id': options.brandId || '',
+            'display': options.display || '',
+            'prompt': options.prompt || ''
+        }), { addServer: true });
+    };
+    Platform.prototype.parseAuthRedirectUrl = function (url) {
+        var qs = this.utils.parseQueryString(url.split('?').reverse()[0]), error = qs.error_description || qs.error;
+        if (error) {
+            var e = new Error(error);
+            e.error = qs.error;
+            throw e;
+        }
+        return qs;
+    };
     Platform.prototype.authorize = function (options) {
         var _this = this;
         options = options || {};
         options.remember = options.remember || false;
+        var body = {
+            "access_token_ttl": this.accessTokenTtl,
+            "refresh_token_ttl": options.remember ? this.refreshTokenTtlRemember : this.refreshTokenTtl
+        };
+        if (options.username) {
+            body.grant_type = 'password';
+            body.username = options.username;
+            body.password = options.password;
+            body.extension = options.extension || '';
+        }
+        else if (options.code) {
+            body.grant_type = 'authorization_code';
+            body.code = options.code;
+            body.redirect_uri = options.redirectUri;
+        }
+        else {
+            return this.context.getPromise().reject(new Error('Unsupported authorization flow'));
+        }
         return this.authCall({
             url: '/restapi/oauth/token',
-            post: {
-                "grant_type": "password",
-                "username": options.username,
-                "extension": options.extension || '',
-                "password": options.password,
-                "access_token_ttl": this.accessTokenTtl,
-                "refresh_token_ttl": options.remember ? this.refreshTokenTtlRemember : this.refreshTokenTtl
-            }
+            post: body
         }).then(function (response) {
             _this.setCache(response.data).remember(options.remember).emitAndCallback(_this.events.authorizeSuccess, []);
             return response;
@@ -7454,7 +7493,6 @@ var Response = (function (_super) {
                 (headers || '').split('\n').forEach(function (header) {
                     if (!header)
                         return;
-                    /** @type {string[]} */
                     var parts = header.split(Response.headerSeparator), name = parts.shift().trim();
                     _this.setHeader(name, parts.join(Response.headerSeparator).trim());
                 });

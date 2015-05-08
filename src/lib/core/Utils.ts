@@ -132,7 +132,7 @@ export class Utils {
      * @param {string} queryString
      * @returns {object}
      */
-    parseQueryString(queryString) {
+    parseQueryString(queryString):any {
 
         var argsParsed = {},
             self = this;

@@ -531,4 +531,9 @@ describe('RCSDK.core.Platform', function() {
 
     });
 
+    //TODO Add tests for this
+    describe.skip('parseAuthRedirectUrl', function(){});
+    describe.skip('getAuthURL', function(){});
+    describe.skip('getCredentials', function(){});
+
 });

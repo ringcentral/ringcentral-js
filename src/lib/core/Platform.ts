@@ -2,7 +2,7 @@
 
 declare
 class Buffer {
-    constructor(str:string);
+    constructor(str:string, encoding?:string);
 
     toString(encoding:string):string;
 }
@@ -103,6 +103,21 @@ export class Platform extends observable.Observable<Platform> {
 
     }
 
+    getCredentials():{key:string; secret:string} {
+
+        var credentials = (
+            (typeof atob == 'function')
+                ? atob(this.apiKey)
+                : new Buffer(this.apiKey, 'base64').toString('utf-8')
+        ).split(':');
+
+        return {
+            key: credentials[0],
+            secret: credentials[1]
+        };
+
+    }
+
     setServer(server) {
 
         this.server = server || '';
@@ -126,22 +141,85 @@ export class Platform extends observable.Observable<Platform> {
 
     }
 
-    authorize(options?:{username:string; password: string; extension?:string; remember?:boolean}) {
+    getAuthURL(options:{
+        redirectUri:string;
+        display?:string; // page|popup|touch|mobile, default 'page'
+        prompt?:string; // sso|login|consent, default is 'login sso consent'
+        state?:string;
+        brandId?:string|number;
+    }) {
+
+        options = options || <any>{};
+
+        return this.apiUrl('/restapi/oauth/authorize?' + this.utils.queryStringify({
+            'response_type': 'code',
+            'redirect_uri': options.redirectUri || '',
+            'client_id': this.getCredentials().key,
+            'state': options.state || '',
+            'brand_id': options.brandId || '',
+            'display': options.display || '',
+            'prompt': options.prompt || ''
+        }), {addServer: true})
+
+    }
+
+    parseAuthRedirectUrl(url:string) {
+
+        var qs = this.utils.parseQueryString(url.split('?').reverse()[0]),
+            error = qs.error_description || qs.error;
+
+        if (error) {
+            var e = <IAuthError> new Error(error);
+            e.error = qs.error;
+            throw e;
+        }
+
+        return qs;
+
+    }
+
+    authorize(options?:{
+        username?:string;
+        password?: string;
+        extension?:string;
+        code?:string;
+        redirectUri?:string;
+        clientId?:string;
+        remember?:boolean
+    }) {
 
         options = options || <any>{};
 
         options.remember = options.remember || false;
 
+        var body = <any>{
+            "access_token_ttl": this.accessTokenTtl,
+            "refresh_token_ttl": options.remember ? this.refreshTokenTtlRemember : this.refreshTokenTtl
+        };
+
+        if (options.username) {
+
+            body.grant_type = 'password';
+            body.username = options.username;
+            body.password = options.password;
+            body.extension = options.extension || '';
+
+        } else if (options.code) {
+
+            body.grant_type = 'authorization_code';
+            body.code = options.code;
+            body.redirect_uri = options.redirectUri;
+            //body.client_id = this.getCredentials().key; // not needed
+
+        } else {
+
+            return this.context.getPromise().reject(new Error('Unsupported authorization flow'));
+
+        }
+
         return this.authCall({
             url: '/restapi/oauth/token',
-            post: {
-                "grant_type": "password",
-                "username": options.username,
-                "extension": options.extension || '',
-                "password": options.password,
-                "access_token_ttl": this.accessTokenTtl,
-                "refresh_token_ttl": options.remember ? this.refreshTokenTtlRemember : this.refreshTokenTtl
-            }
+            post: body
         }).then((response) => {
 
             this.setCache(response.data)
@@ -497,6 +575,10 @@ export class Platform extends observable.Observable<Platform> {
 
     }
 
+}
+
+export interface IAuthError extends Error {
+    error?:string;
 }
 
 export interface IPlatformAuthInfo {

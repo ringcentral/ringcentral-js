@@ -73,8 +73,7 @@ export class Response extends h.Headers<Response> {
 
                         if (!header) return;
 
-                        /** @type {string[]} */
-                        var parts = header.split(Response.headerSeparator),
+                        var parts = <string[]>header.split(Response.headerSeparator),
                             name = parts.shift().trim();
 
                         this.setHeader(name, parts.join(Response.headerSeparator).trim());
