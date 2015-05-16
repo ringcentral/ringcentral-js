@@ -56,17 +56,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /// <reference path="../typings/externals.d.ts" />
 var pubnubMock = __webpack_require__(5);
-var xhrMock = __webpack_require__(7);
-var xhrResponse = __webpack_require__(8);
-var ajaxObserver = __webpack_require__(6);
+var xhrMock = __webpack_require__(6);
+var xhrResponse = __webpack_require__(7);
+var ajaxObserver = __webpack_require__(8);
 var cache = __webpack_require__(9);
 var context = __webpack_require__(10);
-var helper = __webpack_require__(12);
-var list = __webpack_require__(11);
-var log = __webpack_require__(14);
-var observable = __webpack_require__(13);
-var pageVisibility = __webpack_require__(16);
-var platform = __webpack_require__(15);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var log = __webpack_require__(13);
+var observable = __webpack_require__(14);
+var pageVisibility = __webpack_require__(15);
+var platform = __webpack_require__(16);
 var subscription = __webpack_require__(17);
 var utils = __webpack_require__(18);
 var validator = __webpack_require__(19);
@@ -287,7 +287,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(13);
+var observable = __webpack_require__(14);
 var PubnubMock = (function (_super) {
     __extends(PubnubMock, _super);
     function PubnubMock(context, options) {
@@ -330,42 +330,9 @@ exports.$get = $get;
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-var observable = __webpack_require__(13);
-var AjaxObserver = (function (_super) {
-    __extends(AjaxObserver, _super);
-    function AjaxObserver() {
-        _super.apply(this, arguments);
-        this.events = {
-            beforeRequest: 'beforeRequest',
-            requestSuccess: 'requestSuccess',
-            requestError: 'requestError' // means that request failed completely
-        };
-    }
-    return AjaxObserver;
-})(observable.Observable);
-exports.AjaxObserver = AjaxObserver;
-function $get(context) {
-    return context.createSingleton('AjaxObserver', function () {
-        return new AjaxObserver(context);
-    });
-}
-exports.$get = $get;
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
 var utils = __webpack_require__(18);
-var log = __webpack_require__(14);
-var xhrResponse = __webpack_require__(8); //FIXME Circular
+var log = __webpack_require__(13);
+var xhrResponse = __webpack_require__(7); //FIXME Circular
 var XhrMock = (function () {
     function XhrMock(context) {
         // Service
@@ -463,7 +430,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 8 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 var XhrResponse = (function () {
@@ -491,6 +458,39 @@ exports.XhrResponse = XhrResponse;
 function $get(context) {
     return context.createSingleton('XhrResponse', function () {
         return new XhrResponse(context);
+    });
+}
+exports.$get = $get;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+/// <reference path="../../typings/externals.d.ts" />
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var observable = __webpack_require__(14);
+var AjaxObserver = (function (_super) {
+    __extends(AjaxObserver, _super);
+    function AjaxObserver() {
+        _super.apply(this, arguments);
+        this.events = {
+            beforeRequest: 'beforeRequest',
+            requestSuccess: 'requestSuccess',
+            requestError: 'requestError' // means that request failed completely
+        };
+    }
+    return AjaxObserver;
+})(observable.Observable);
+exports.AjaxObserver = AjaxObserver;
+function $get(context) {
+    return context.createSingleton('AjaxObserver', function () {
+        return new AjaxObserver(context);
     });
 }
 exports.$get = $get;
@@ -607,124 +607,6 @@ exports.$get = $get;
 
 /***/ },
 /* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(18);
-var List = (function () {
-    function List(context) {
-        this.context = context;
-        this.utils = utils.$get(context);
-        this.numberComparator = this.numberComparator.bind(this);
-        this.stringComparator = this.stringComparator.bind(this);
-    }
-    /**
-     * TODO Use utils getProperty
-     * @param {string} property
-     * @returns {function(object)}
-     */
-    List.prototype.propertyExtractor = function (property) {
-        return function (item, options) {
-            return property ? ((item && item[property]) || null) : item;
-        };
-    };
-    /**
-     * Non-string types are converted to string
-     * Non-string types are extracted as an empty string if they could be converted to false
-     * If no options.sortBy given the item itself is extracted
-     * Compares strings:
-     * - if (a is less than b) return -1;
-     * - if (a is greater than b) return 1;
-     * - else (a must be equal to b) return 0;
-     * Exceptions in will be suppressed, if any - a is assumed to be less than b
-     */
-    List.prototype.stringComparator = function (a, b, options) {
-        return this.utils.parseString(a).localeCompare(this.utils.parseString(b));
-    };
-    /**
-     * Non-numeric types are extracted as 0 if they could be converted to false
-     * Objects that could not be converted to number are extracted as 0
-     * If no options.sortBy given the item itself is extracted
-     * See parseFloat for more info
-     * Compares numbers:
-     * - if (a is less than b) return -1;
-     * - if (a is greater than b) return 1;
-     * - else (a must be equal to b) return 0;
-     * Function does not check types
-     * Exceptions in will be suppressed, if any - a is assumed to be less than b
-     */
-    List.prototype.numberComparator = function (a, b, options) {
-        return (this.utils.parseNumber(a) - this.utils.parseNumber(b));
-    };
-    /**
-     * Function extracts (using _extractFn_ option) values of a property (_sortBy_ option) and compares them using
-     * compare function (_compareFn_ option, by default Helper.stringComparator)
-     * Merged options are provided to _extractFn_ and _compareFn_
-     * TODO Check memory leaks for all that options links
-     */
-    List.prototype.comparator = function (options) {
-        options = this.utils.extend({
-            extractFn: this.propertyExtractor((options && options.sortBy) || null).bind(this),
-            compareFn: this.stringComparator.bind(this)
-        }, options);
-        return function (item1, item2) {
-            return options.compareFn(options.extractFn(item1, options), options.extractFn(item2, options), options);
-        };
-    };
-    List.prototype.equalsFilter = function (obj, options) {
-        return (options.condition === obj);
-    };
-    /**
-     * @param {string} obj
-     * @param {IListFilterOptions} options
-     * @returns {boolean}
-     */
-    List.prototype.containsFilter = function (obj, options) {
-        return (obj && obj.toString().indexOf(options.condition) > -1);
-    };
-    List.prototype.regexpFilter = function (obj, options) {
-        if (!(options.condition instanceof RegExp))
-            throw new Error('Condition must be an instance of RegExp');
-        return (options.condition.test(obj));
-    };
-    /**
-     * Function extracts (using `extractFn` option) values of a property (`filterBy` option) and filters them using
-     * compare function (`filterFn` option, by default Helper.equalsFilter)
-     * Merged options are provided to `extractFn` and `compareFn`
-     * Set `filterBy` to null to force `propertyExtractor` to return object itself
-     * TODO Check memory leaks for all that options links
-     */
-    List.prototype.filter = function (filterConfigs) {
-        var _this = this;
-        var self = this;
-        filterConfigs = (filterConfigs || []).map(function (opt) {
-            return _this.utils.extend({
-                condition: '',
-                extractFn: self.propertyExtractor((opt && opt.filterBy) || null).bind(_this),
-                filterFn: self.equalsFilter.bind(_this)
-            }, opt);
-        });
-        return function (item) {
-            return filterConfigs.reduce(function (pass, opt) {
-                if (!pass || !opt.condition)
-                    return pass;
-                return opt.filterFn(opt.extractFn(item, opt), opt);
-            }, true);
-        };
-    };
-    return List;
-})();
-exports.List = List;
-function $get(context) {
-    return context.createSingleton('List', function () {
-        return new List(context);
-    });
-}
-exports.$get = $get;
-
-
-/***/ },
-/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -884,12 +766,220 @@ exports.$get = $get;
 
 
 /***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+/// <reference path="../../typings/externals.d.ts" />
+var utils = __webpack_require__(18);
+var List = (function () {
+    function List(context) {
+        this.context = context;
+        this.utils = utils.$get(context);
+        this.numberComparator = this.numberComparator.bind(this);
+        this.stringComparator = this.stringComparator.bind(this);
+    }
+    /**
+     * TODO Use utils getProperty
+     * @param {string} property
+     * @returns {function(object)}
+     */
+    List.prototype.propertyExtractor = function (property) {
+        return function (item, options) {
+            return property ? ((item && item[property]) || null) : item;
+        };
+    };
+    /**
+     * Non-string types are converted to string
+     * Non-string types are extracted as an empty string if they could be converted to false
+     * If no options.sortBy given the item itself is extracted
+     * Compares strings:
+     * - if (a is less than b) return -1;
+     * - if (a is greater than b) return 1;
+     * - else (a must be equal to b) return 0;
+     * Exceptions in will be suppressed, if any - a is assumed to be less than b
+     */
+    List.prototype.stringComparator = function (a, b, options) {
+        return this.utils.parseString(a).localeCompare(this.utils.parseString(b));
+    };
+    /**
+     * Non-numeric types are extracted as 0 if they could be converted to false
+     * Objects that could not be converted to number are extracted as 0
+     * If no options.sortBy given the item itself is extracted
+     * See parseFloat for more info
+     * Compares numbers:
+     * - if (a is less than b) return -1;
+     * - if (a is greater than b) return 1;
+     * - else (a must be equal to b) return 0;
+     * Function does not check types
+     * Exceptions in will be suppressed, if any - a is assumed to be less than b
+     */
+    List.prototype.numberComparator = function (a, b, options) {
+        return (this.utils.parseNumber(a) - this.utils.parseNumber(b));
+    };
+    /**
+     * Function extracts (using _extractFn_ option) values of a property (_sortBy_ option) and compares them using
+     * compare function (_compareFn_ option, by default Helper.stringComparator)
+     * Merged options are provided to _extractFn_ and _compareFn_
+     * TODO Check memory leaks for all that options links
+     */
+    List.prototype.comparator = function (options) {
+        options = this.utils.extend({
+            extractFn: this.propertyExtractor((options && options.sortBy) || null).bind(this),
+            compareFn: this.stringComparator.bind(this)
+        }, options);
+        return function (item1, item2) {
+            return options.compareFn(options.extractFn(item1, options), options.extractFn(item2, options), options);
+        };
+    };
+    List.prototype.equalsFilter = function (obj, options) {
+        return (options.condition === obj);
+    };
+    /**
+     * @param {string} obj
+     * @param {IListFilterOptions} options
+     * @returns {boolean}
+     */
+    List.prototype.containsFilter = function (obj, options) {
+        return (obj && obj.toString().indexOf(options.condition) > -1);
+    };
+    List.prototype.regexpFilter = function (obj, options) {
+        if (!(options.condition instanceof RegExp))
+            throw new Error('Condition must be an instance of RegExp');
+        return (options.condition.test(obj));
+    };
+    /**
+     * Function extracts (using `extractFn` option) values of a property (`filterBy` option) and filters them using
+     * compare function (`filterFn` option, by default Helper.equalsFilter)
+     * Merged options are provided to `extractFn` and `compareFn`
+     * Set `filterBy` to null to force `propertyExtractor` to return object itself
+     * TODO Check memory leaks for all that options links
+     */
+    List.prototype.filter = function (filterConfigs) {
+        var _this = this;
+        var self = this;
+        filterConfigs = (filterConfigs || []).map(function (opt) {
+            return _this.utils.extend({
+                condition: '',
+                extractFn: self.propertyExtractor((opt && opt.filterBy) || null).bind(_this),
+                filterFn: self.equalsFilter.bind(_this)
+            }, opt);
+        });
+        return function (item) {
+            return filterConfigs.reduce(function (pass, opt) {
+                if (!pass || !opt.condition)
+                    return pass;
+                return opt.filterFn(opt.extractFn(item, opt), opt);
+            }, true);
+        };
+    };
+    return List;
+})();
+exports.List = List;
+function $get(context) {
+    return context.createSingleton('List', function () {
+        return new List(context);
+    });
+}
+exports.$get = $get;
+
+
+/***/ },
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var utils = __webpack_require__(18);
-var log = __webpack_require__(14);
+var Log = (function () {
+    function Log(context, console) {
+        if (!console) {
+            console = {
+                log: function () {
+                },
+                warn: function () {
+                },
+                info: function () {
+                },
+                error: function () {
+                }
+            };
+        }
+        this.context = context;
+        this.console = console;
+        this.utils = utils.$get(context);
+        this.logDebug = false;
+        this.logInfo = false;
+        this.logWarnings = false;
+        this.logErrors = false;
+        this.addTimestamps = false;
+    }
+    Log.prototype.disableAll = function () {
+        this.logDebug = false;
+        this.logInfo = false;
+        this.logWarnings = false;
+        this.logErrors = false;
+    };
+    Log.prototype.enableAll = function () {
+        this.logDebug = true;
+        this.logInfo = true;
+        this.logWarnings = true;
+        this.logErrors = true;
+    };
+    Log.prototype.parseArguments = function (args) {
+        args = this.utils.argumentsToArray(args);
+        if (this.addTimestamps)
+            args.unshift(new Date().toLocaleString(), '-');
+        return args;
+    };
+    Log.prototype.debug = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        if (this.logDebug)
+            this.console.log.apply(this.console, this.parseArguments(arguments));
+    };
+    Log.prototype.info = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        if (this.logInfo)
+            this.console.info.apply(this.console, this.parseArguments(arguments));
+    };
+    Log.prototype.warn = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        if (this.logWarnings)
+            this.console.warn.apply(this.console, this.parseArguments(arguments));
+    };
+    Log.prototype.error = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        if (this.logErrors)
+            this.console.error.apply(this.console, this.parseArguments(arguments));
+    };
+    return Log;
+})();
+exports.Log = Log;
+function $get(context) {
+    return context.createSingleton('Log', function () {
+        return new Log(context, console);
+    });
+}
+exports.$get = $get;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+/// <reference path="../../typings/externals.d.ts" />
+var utils = __webpack_require__(18);
+var log = __webpack_require__(13);
 /**
  * @see https://github.com/Microsoft/TypeScript/issues/275
  */
@@ -1051,96 +1141,6 @@ exports.$get = $get;
 
 
 /***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(18);
-var Log = (function () {
-    function Log(context, console) {
-        if (!console) {
-            console = {
-                log: function () {
-                },
-                warn: function () {
-                },
-                info: function () {
-                },
-                error: function () {
-                }
-            };
-        }
-        this.context = context;
-        this.console = console;
-        this.utils = utils.$get(context);
-        this.logDebug = false;
-        this.logInfo = false;
-        this.logWarnings = false;
-        this.logErrors = false;
-        this.addTimestamps = false;
-    }
-    Log.prototype.disableAll = function () {
-        this.logDebug = false;
-        this.logInfo = false;
-        this.logWarnings = false;
-        this.logErrors = false;
-    };
-    Log.prototype.enableAll = function () {
-        this.logDebug = true;
-        this.logInfo = true;
-        this.logWarnings = true;
-        this.logErrors = true;
-    };
-    Log.prototype.parseArguments = function (args) {
-        args = this.utils.argumentsToArray(args);
-        if (this.addTimestamps)
-            args.unshift(new Date().toLocaleString(), '-');
-        return args;
-    };
-    Log.prototype.debug = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
-        }
-        if (this.logDebug)
-            this.console.log.apply(this.console, this.parseArguments(arguments));
-    };
-    Log.prototype.info = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
-        }
-        if (this.logInfo)
-            this.console.info.apply(this.console, this.parseArguments(arguments));
-    };
-    Log.prototype.warn = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
-        }
-        if (this.logWarnings)
-            this.console.warn.apply(this.console, this.parseArguments(arguments));
-    };
-    Log.prototype.error = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
-        }
-        if (this.logErrors)
-            this.console.error.apply(this.console, this.parseArguments(arguments));
-    };
-    return Log;
-})();
-exports.Log = Log;
-function $get(context) {
-    return context.createSingleton('Log', function () {
-        return new Log(context, console);
-    });
-}
-exports.$get = $get;
-
-
-/***/ },
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1151,7 +1151,69 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(13);
+var observable = __webpack_require__(14);
+var PageVisibility = (function (_super) {
+    __extends(PageVisibility, _super);
+    function PageVisibility(context) {
+        var _this = this;
+        _super.call(this, context);
+        this.events = {
+            change: 'change'
+        };
+        var hidden = "hidden", onchange = function (evt) {
+            evt = evt || window.event;
+            var v = 'visible', h = 'hidden', evtMap = {
+                focus: v,
+                focusin: v,
+                pageshow: v,
+                blur: h,
+                focusout: h,
+                pagehide: h
+            };
+            _this.visible = (evt.type in evtMap) ? evtMap[evt.type] == v : !document[hidden];
+            _this.emit(_this.events.change, _this.visible);
+        };
+        this.visible = true;
+        if (typeof document == 'undefined' || typeof window == 'undefined')
+            return;
+        // Standards:
+        if (hidden in document)
+            document.addEventListener("visibilitychange", onchange);
+        else if ((hidden = "mozHidden") in document)
+            document.addEventListener("mozvisibilitychange", onchange);
+        else if ((hidden = "webkitHidden") in document)
+            document.addEventListener("webkitvisibilitychange", onchange);
+        else if ((hidden = "msHidden") in document)
+            document.addEventListener("msvisibilitychange", onchange);
+        else if ('onfocusin' in document)
+            document.onfocusin = document.onfocusout = onchange;
+        else
+            window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onchange;
+    }
+    PageVisibility.prototype.isVisible = function () {
+        return this.visible;
+    };
+    return PageVisibility;
+})(observable.Observable);
+exports.PageVisibility = PageVisibility;
+function $get(context) {
+    return new PageVisibility(context);
+}
+exports.$get = $get;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+/// <reference path="../../typings/externals.d.ts" />
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var observable = __webpack_require__(14);
 var cache = __webpack_require__(9);
 var request = __webpack_require__(41);
 var Platform = (function (_super) {
@@ -1516,68 +1578,6 @@ exports.$get = $get;
 
 
 /***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-var observable = __webpack_require__(13);
-var PageVisibility = (function (_super) {
-    __extends(PageVisibility, _super);
-    function PageVisibility(context) {
-        var _this = this;
-        _super.call(this, context);
-        this.events = {
-            change: 'change'
-        };
-        var hidden = "hidden", onchange = function (evt) {
-            evt = evt || window.event;
-            var v = 'visible', h = 'hidden', evtMap = {
-                focus: v,
-                focusin: v,
-                pageshow: v,
-                blur: h,
-                focusout: h,
-                pagehide: h
-            };
-            _this.visible = (evt.type in evtMap) ? evtMap[evt.type] == v : !document[hidden];
-            _this.emit(_this.events.change, _this.visible);
-        };
-        this.visible = true;
-        if (typeof document == 'undefined' || typeof window == 'undefined')
-            return;
-        // Standards:
-        if (hidden in document)
-            document.addEventListener("visibilitychange", onchange);
-        else if ((hidden = "mozHidden") in document)
-            document.addEventListener("mozvisibilitychange", onchange);
-        else if ((hidden = "webkitHidden") in document)
-            document.addEventListener("webkitvisibilitychange", onchange);
-        else if ((hidden = "msHidden") in document)
-            document.addEventListener("msvisibilitychange", onchange);
-        else if ('onfocusin' in document)
-            document.onfocusin = document.onfocusout = onchange;
-        else
-            window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onchange;
-    }
-    PageVisibility.prototype.isVisible = function () {
-        return this.visible;
-    };
-    return PageVisibility;
-})(observable.Observable);
-exports.PageVisibility = PageVisibility;
-function $get(context) {
-    return new PageVisibility(context);
-}
-exports.$get = $get;
-
-
-/***/ },
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1588,8 +1588,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(13);
-var platform = __webpack_require__(15);
+var observable = __webpack_require__(14);
+var platform = __webpack_require__(16);
 var Subscription = (function (_super) {
     __extends(Subscription, _super);
     function Subscription(context) {
@@ -2141,7 +2141,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var Account = (function (_super) {
     __extends(Account, _super);
     function Account() {
@@ -2172,7 +2172,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var validator = __webpack_require__(19);
 var BlockedNumber = (function (_super) {
     __extends(BlockedNumber, _super);
@@ -2213,8 +2213,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
-var list = __webpack_require__(11);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var presence = __webpack_require__(35);
 var contact = __webpack_require__(23);
 var Call = (function (_super) {
@@ -2444,9 +2444,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var validator = __webpack_require__(19);
-var list = __webpack_require__(11);
+var list = __webpack_require__(12);
 var Contact = (function (_super) {
     __extends(Contact, _super);
     function Contact(context) {
@@ -2683,7 +2683,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var validator = __webpack_require__(19);
 var ContactGroup = (function (_super) {
     __extends(ContactGroup, _super);
@@ -2721,7 +2721,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var Conferencing = (function (_super) {
     __extends(Conferencing, _super);
     function Conferencing() {
@@ -2752,7 +2752,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var Country = (function (_super) {
     __extends(Country, _super);
     function Country() {
@@ -2783,7 +2783,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var validator = __webpack_require__(19);
 var extension = __webpack_require__(29);
 var deviceModel = __webpack_require__(28);
@@ -2856,7 +2856,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var DeviceModel = (function (_super) {
     __extends(DeviceModel, _super);
     function DeviceModel() {
@@ -3064,8 +3064,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
-var list = __webpack_require__(11);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var Extension = (function (_super) {
     __extends(Extension, _super);
     function Extension(context) {
@@ -3138,8 +3138,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
-var list = __webpack_require__(11);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var ForwardingNumber = (function (_super) {
     __extends(ForwardingNumber, _super);
     function ForwardingNumber(context) {
@@ -3197,7 +3197,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var Language = (function (_super) {
     __extends(Language, _super);
     function Language() {
@@ -3235,8 +3235,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
-var list = __webpack_require__(11);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var state = __webpack_require__(39);
 var Location = (function (_super) {
     __extends(Location, _super);
@@ -3310,11 +3310,11 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
-var list = __webpack_require__(11);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var validator = __webpack_require__(19);
 var subscription = __webpack_require__(17);
-var platform = __webpack_require__(15);
+var platform = __webpack_require__(16);
 var contact = __webpack_require__(23);
 var Message = (function (_super) {
     __extends(Message, _super);
@@ -3478,8 +3478,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
-var list = __webpack_require__(11);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var extension = __webpack_require__(29);
 var PhoneNumber = (function (_super) {
     __extends(PhoneNumber, _super);
@@ -3490,8 +3490,20 @@ var PhoneNumber = (function (_super) {
     }
     PhoneNumber.prototype.createUrl = function (options, id) {
         options = options || {};
-        if (options.lookup)
-            return '/number-pool/lookup';
+        if (options.lookup) {
+            var urlOptions = {
+                countryId: options.countryId,
+                paymentType: options.paymentType,
+                npa: options.npa
+            };
+            if (options.nxx)
+                urlOptions.nxx = options.nxx;
+            if (options.line)
+                urlOptions.line = options.line;
+            if (options.exclude)
+                urlOptions.exclude = options.exclude;
+            return '/number-pool/lookup?' + this.utils.queryStringify(urlOptions);
+        }
         return '/account/~' + (options.extensionId ? '/extension/' + options.extensionId : '') + '/phone-number' + (id ? '/' + id : '');
     };
     PhoneNumber.prototype.isSMS = function (phoneNumber) {
@@ -3560,7 +3572,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var subscription = __webpack_require__(17);
 var extension = __webpack_require__(29);
 var Presence = (function (_super) {
@@ -3631,7 +3643,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var validator = __webpack_require__(19);
 var Ringout = (function (_super) {
     __extends(Ringout, _super);
@@ -3687,7 +3699,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var Service = (function (_super) {
     __extends(Service, _super);
     function Service() {
@@ -3752,7 +3764,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var ShippingMethod = (function (_super) {
     __extends(ShippingMethod, _super);
     function ShippingMethod() {
@@ -3797,8 +3809,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
-var list = __webpack_require__(11);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var country = __webpack_require__(26);
 var State = (function (_super) {
     __extends(State, _super);
@@ -3846,7 +3858,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(12);
+var helper = __webpack_require__(11);
 var Timezone = (function (_super) {
     __extends(Timezone, _super);
     function Timezone() {
@@ -3878,7 +3890,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var h = __webpack_require__(42);
-var ajaxObserver = __webpack_require__(6);
+var ajaxObserver = __webpack_require__(8);
 var r = __webpack_require__(43);
 /**
  * TODO @see https://github.com/github/fetch/blob/master/fetch.js
@@ -4085,7 +4097,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var h = __webpack_require__(42);
-var log = __webpack_require__(14);
+var log = __webpack_require__(13);
 var Response = (function (_super) {
     __extends(Response, _super);
     function Response(context, status, statusText, body, headers) {
