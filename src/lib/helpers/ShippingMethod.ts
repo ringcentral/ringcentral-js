@@ -6,22 +6,11 @@ import helper = require('../core/Helper');
 export class ShippingMethod extends helper.Helper {
 
     /**
-     * TODO Remove when http://jira.ringcentral.com/browse/SDK-3 id done
+     * TODO Add or describe options http://jira.ringcentral.com/browse/SDK-3 id done
      */
-    shippingMethods:IShippingMethod[] = [
-        {
-            id: '1',
-            name: 'Ground Shipping (5-7 business days)'
-        },
-        {
-            id: '2',
-            name: '2-days Shipping'
-        },
-        {
-            id: '3',
-            name: 'Overnight Shipping'
-        }
-    ];
+    createUrl() {
+        return '/dictionary/shipping-options';
+    }
 
 }
 
@@ -31,6 +20,22 @@ export function $get(context:context.Context):ShippingMethod {
     });
 }
 
+export interface IShippingMethodOptions {
+    quantity?:number;
+    servicePlanId?:number;
+    brandId?:number;
+}
+
+export interface IShippingMethodInfo {
+    quantity?:string;
+    price?:string;
+    method?:IShippingMethod;
+}
+
+/**
+ * @discrepancy Methods does not have URI
+ */
 export interface IShippingMethod extends helper.IHelperObject {
+    id?:string;
     name?:string;
 }

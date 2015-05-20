@@ -20,21 +20,7 @@ export class PhoneNumber extends helper.Helper {
 
         options = options || {};
 
-        if (options.lookup) {
-
-            var urlOptions = <IPhoneNumberOptions>{
-                countryId: options.countryId,
-                paymentType: options.paymentType,
-                npa: options.npa
-            };
-
-            if (options.nxx) urlOptions.nxx = options.nxx;
-            if (options.line) urlOptions.line = options.line;
-            if (options.exclude) urlOptions.exclude = options.exclude;
-
-            return '/number-pool/lookup?' + this.utils.queryStringify(urlOptions);
-
-        }
+        if (options.lookup) return '/number-pool/lookup';
 
         return '/account/~' +
                (options.extensionId ? '/extension/' + options.extensionId : '') +

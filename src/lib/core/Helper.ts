@@ -187,7 +187,7 @@ export class Helper {
 
         var supplementIndex = this.index(supplement, getIdFn),
             updatedIDs = [],
-            result = target.map((item) => {
+            result = <IHelperObject[]>target.map((item) => {
 
                 var id = getIdFn(item),
                     newItem = supplementIndex[id];

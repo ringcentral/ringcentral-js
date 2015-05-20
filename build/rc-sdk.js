@@ -55,12 +55,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../typings/externals.d.ts" />
-var pubnubMock = __webpack_require__(5);
-var xhrMock = __webpack_require__(6);
-var xhrResponse = __webpack_require__(7);
-var ajaxObserver = __webpack_require__(8);
-var cache = __webpack_require__(9);
-var context = __webpack_require__(10);
+var pubnubMock = __webpack_require__(8);
+var xhrMock = __webpack_require__(9);
+var xhrResponse = __webpack_require__(10);
+var ajaxObserver = __webpack_require__(5);
+var cache = __webpack_require__(6);
+var context = __webpack_require__(7);
 var helper = __webpack_require__(11);
 var list = __webpack_require__(12);
 var log = __webpack_require__(13);
@@ -280,6 +280,148 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
+/// <reference path="../../typings/externals.d.ts" />
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var observable = __webpack_require__(14);
+var AjaxObserver = (function (_super) {
+    __extends(AjaxObserver, _super);
+    function AjaxObserver() {
+        _super.apply(this, arguments);
+        this.events = {
+            beforeRequest: 'beforeRequest',
+            requestSuccess: 'requestSuccess',
+            requestError: 'requestError' // means that request failed completely
+        };
+    }
+    return AjaxObserver;
+})(observable.Observable);
+exports.AjaxObserver = AjaxObserver;
+function $get(context) {
+    return context.createSingleton('AjaxObserver', function () {
+        return new AjaxObserver(context);
+    });
+}
+exports.$get = $get;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+/// <reference path="../../typings/externals.d.ts" />
+var Cache = (function () {
+    function Cache(context) {
+        this.setPrefix();
+        this.context = context;
+        this.storage = context.getLocalStorage(); // storage must be defined from outside
+    }
+    Cache.prototype.setPrefix = function (prefix) {
+        this.prefix = prefix || 'rc-';
+        return this;
+    };
+    Cache.prototype.prefixKey = function (key) {
+        return this.prefix + key;
+    };
+    Cache.prototype.setItem = function (key, data) {
+        this.storage.setItem(this.prefixKey(key), JSON.stringify(data));
+        return this;
+    };
+    Cache.prototype.removeItem = function (key) {
+        this.storage.removeItem(this.prefixKey(key));
+        return this;
+    };
+    Cache.prototype.getItem = function (key) {
+        var item = this.storage.getItem(this.prefixKey(key));
+        if (!item)
+            return null;
+        return JSON.parse(item);
+    };
+    Cache.prototype.clean = function () {
+        for (var key in this.storage) {
+            if (!this.storage.hasOwnProperty(key))
+                continue;
+            if (key.indexOf(this.prefix) === 0) {
+                this.storage.removeItem(key);
+                delete this.storage[key];
+            }
+        }
+        return this;
+    };
+    return Cache;
+})();
+exports.Cache = Cache;
+function $get(context) {
+    return context.createSingleton('Cache', function () {
+        return new Cache(context);
+    });
+}
+exports.$get = $get;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+/// <reference path="../../typings/externals.d.ts" />
+var Context = (function () {
+    function Context(injections) {
+        this.singletons = {};
+        this.injections = injections;
+        this.stubPubnub = false;
+        this.stubAjax = false;
+    }
+    Context.prototype.createSingleton = function (name, factory) {
+        if (!this.singletons[name])
+            this.singletons[name] = factory();
+        return this.singletons[name];
+    };
+    Context.prototype.usePubnubStub = function (flag) {
+        this.stubPubnub = !!flag;
+        return this;
+    };
+    Context.prototype.useAjaxStub = function (flag) {
+        this.stubAjax = !!flag;
+        return this;
+    };
+    Context.prototype.getPubnub = function () {
+        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.getPubnubReal();
+    };
+    Context.prototype.getPubnubReal = function () {
+        return this.injections.PUBNUB;
+    };
+    Context.prototype.getLocalStorage = function () {
+        var _this = this;
+        return this.createSingleton('localStorage', function () {
+            if (typeof _this.injections.localStorage !== 'function') {
+                return _this.injections.localStorage; // this is window.localStorage
+            }
+            return new _this.injections.localStorage(); // this is NPM dom-storage constructor
+        });
+    };
+    Context.prototype.getPromise = function () {
+        return this.injections.Promise;
+    };
+    Context.prototype.getXHR = function () {
+        return (this.stubAjax ? this.injections.xhrMock.$get(this) : this.injections.XHR());
+    };
+    return Context;
+})();
+exports.Context = Context;
+function $get(injections) {
+    return new Context(injections);
+}
+exports.$get = $get;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
 /// <reference path="../../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -327,12 +469,12 @@ exports.$get = $get;
 
 
 /***/ },
-/* 6 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 var utils = __webpack_require__(18);
 var log = __webpack_require__(13);
-var xhrResponse = __webpack_require__(7); //FIXME Circular
+var xhrResponse = __webpack_require__(10); //FIXME Circular
 var XhrMock = (function () {
     function XhrMock(context) {
         // Service
@@ -430,7 +572,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 7 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 var XhrResponse = (function () {
@@ -459,148 +601,6 @@ function $get(context) {
     return context.createSingleton('XhrResponse', function () {
         return new XhrResponse(context);
     });
-}
-exports.$get = $get;
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-var observable = __webpack_require__(14);
-var AjaxObserver = (function (_super) {
-    __extends(AjaxObserver, _super);
-    function AjaxObserver() {
-        _super.apply(this, arguments);
-        this.events = {
-            beforeRequest: 'beforeRequest',
-            requestSuccess: 'requestSuccess',
-            requestError: 'requestError' // means that request failed completely
-        };
-    }
-    return AjaxObserver;
-})(observable.Observable);
-exports.AjaxObserver = AjaxObserver;
-function $get(context) {
-    return context.createSingleton('AjaxObserver', function () {
-        return new AjaxObserver(context);
-    });
-}
-exports.$get = $get;
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../typings/externals.d.ts" />
-var Cache = (function () {
-    function Cache(context) {
-        this.setPrefix();
-        this.context = context;
-        this.storage = context.getLocalStorage(); // storage must be defined from outside
-    }
-    Cache.prototype.setPrefix = function (prefix) {
-        this.prefix = prefix || 'rc-';
-        return this;
-    };
-    Cache.prototype.prefixKey = function (key) {
-        return this.prefix + key;
-    };
-    Cache.prototype.setItem = function (key, data) {
-        this.storage.setItem(this.prefixKey(key), JSON.stringify(data));
-        return this;
-    };
-    Cache.prototype.removeItem = function (key) {
-        this.storage.removeItem(this.prefixKey(key));
-        return this;
-    };
-    Cache.prototype.getItem = function (key) {
-        var item = this.storage.getItem(this.prefixKey(key));
-        if (!item)
-            return null;
-        return JSON.parse(item);
-    };
-    Cache.prototype.clean = function () {
-        for (var key in this.storage) {
-            if (!this.storage.hasOwnProperty(key))
-                continue;
-            if (key.indexOf(this.prefix) === 0) {
-                this.storage.removeItem(key);
-                delete this.storage[key];
-            }
-        }
-        return this;
-    };
-    return Cache;
-})();
-exports.Cache = Cache;
-function $get(context) {
-    return context.createSingleton('Cache', function () {
-        return new Cache(context);
-    });
-}
-exports.$get = $get;
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../typings/externals.d.ts" />
-var Context = (function () {
-    function Context(injections) {
-        this.singletons = {};
-        this.injections = injections;
-        this.stubPubnub = false;
-        this.stubAjax = false;
-    }
-    Context.prototype.createSingleton = function (name, factory) {
-        if (!this.singletons[name])
-            this.singletons[name] = factory();
-        return this.singletons[name];
-    };
-    Context.prototype.usePubnubStub = function (flag) {
-        this.stubPubnub = !!flag;
-        return this;
-    };
-    Context.prototype.useAjaxStub = function (flag) {
-        this.stubAjax = !!flag;
-        return this;
-    };
-    Context.prototype.getPubnub = function () {
-        return this.stubPubnub ? this.injections.pubnubMock.$get(this) : this.getPubnubReal();
-    };
-    Context.prototype.getPubnubReal = function () {
-        return this.injections.PUBNUB;
-    };
-    Context.prototype.getLocalStorage = function () {
-        var _this = this;
-        return this.createSingleton('localStorage', function () {
-            if (typeof _this.injections.localStorage !== 'function') {
-                return _this.injections.localStorage; // this is window.localStorage
-            }
-            return new _this.injections.localStorage(); // this is NPM dom-storage constructor
-        });
-    };
-    Context.prototype.getPromise = function () {
-        return this.injections.Promise;
-    };
-    Context.prototype.getXHR = function () {
-        return (this.stubAjax ? this.injections.xhrMock.$get(this) : this.injections.XHR());
-    };
-    return Context;
-})();
-exports.Context = Context;
-function $get(injections) {
-    return new Context(injections);
 }
 exports.$get = $get;
 
@@ -1214,7 +1214,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var observable = __webpack_require__(14);
-var cache = __webpack_require__(9);
+var cache = __webpack_require__(6);
 var request = __webpack_require__(41);
 var Platform = (function (_super) {
     __extends(Platform, _super);
@@ -3490,20 +3490,8 @@ var PhoneNumber = (function (_super) {
     }
     PhoneNumber.prototype.createUrl = function (options, id) {
         options = options || {};
-        if (options.lookup) {
-            var urlOptions = {
-                countryId: options.countryId,
-                paymentType: options.paymentType,
-                npa: options.npa
-            };
-            if (options.nxx)
-                urlOptions.nxx = options.nxx;
-            if (options.line)
-                urlOptions.line = options.line;
-            if (options.exclude)
-                urlOptions.exclude = options.exclude;
-            return '/number-pool/lookup?' + this.utils.queryStringify(urlOptions);
-        }
+        if (options.lookup)
+            return '/number-pool/lookup';
         return '/account/~' + (options.extensionId ? '/extension/' + options.extensionId : '') + '/phone-number' + (id ? '/' + id : '');
     };
     PhoneNumber.prototype.isSMS = function (phoneNumber) {
@@ -3769,24 +3757,13 @@ var ShippingMethod = (function (_super) {
     __extends(ShippingMethod, _super);
     function ShippingMethod() {
         _super.apply(this, arguments);
-        /**
-         * TODO Remove when http://jira.ringcentral.com/browse/SDK-3 id done
-         */
-        this.shippingMethods = [
-            {
-                id: '1',
-                name: 'Ground Shipping (5-7 business days)'
-            },
-            {
-                id: '2',
-                name: '2-days Shipping'
-            },
-            {
-                id: '3',
-                name: 'Overnight Shipping'
-            }
-        ];
     }
+    /**
+     * TODO Add or describe options http://jira.ringcentral.com/browse/SDK-3 id done
+     */
+    ShippingMethod.prototype.createUrl = function () {
+        return '/dictionary/shipping-options';
+    };
     return ShippingMethod;
 })(helper.Helper);
 exports.ShippingMethod = ShippingMethod;
@@ -3890,7 +3867,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var h = __webpack_require__(42);
-var ajaxObserver = __webpack_require__(8);
+var ajaxObserver = __webpack_require__(5);
 var r = __webpack_require__(43);
 /**
  * TODO @see https://github.com/github/fetch/blob/master/fetch.js

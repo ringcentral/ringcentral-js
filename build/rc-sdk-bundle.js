@@ -3478,20 +3478,8 @@ var PhoneNumber = (function (_super) {
     }
     PhoneNumber.prototype.createUrl = function (options, id) {
         options = options || {};
-        if (options.lookup) {
-            var urlOptions = {
-                countryId: options.countryId,
-                paymentType: options.paymentType,
-                npa: options.npa
-            };
-            if (options.nxx)
-                urlOptions.nxx = options.nxx;
-            if (options.line)
-                urlOptions.line = options.line;
-            if (options.exclude)
-                urlOptions.exclude = options.exclude;
-            return '/number-pool/lookup?' + this.utils.queryStringify(urlOptions);
-        }
+        if (options.lookup)
+            return '/number-pool/lookup';
         return '/account/~' + (options.extensionId ? '/extension/' + options.extensionId : '') + '/phone-number' + (id ? '/' + id : '');
     };
     PhoneNumber.prototype.isSMS = function (phoneNumber) {
@@ -3757,24 +3745,13 @@ var ShippingMethod = (function (_super) {
     __extends(ShippingMethod, _super);
     function ShippingMethod() {
         _super.apply(this, arguments);
-        /**
-         * TODO Remove when http://jira.ringcentral.com/browse/SDK-3 id done
-         */
-        this.shippingMethods = [
-            {
-                id: '1',
-                name: 'Ground Shipping (5-7 business days)'
-            },
-            {
-                id: '2',
-                name: '2-days Shipping'
-            },
-            {
-                id: '3',
-                name: 'Overnight Shipping'
-            }
-        ];
     }
+    /**
+     * TODO Add or describe options http://jira.ringcentral.com/browse/SDK-3 id done
+     */
+    ShippingMethod.prototype.createUrl = function () {
+        return '/dictionary/shipping-options';
+    };
     return ShippingMethod;
 })(helper.Helper);
 exports.ShippingMethod = ShippingMethod;
@@ -6818,7 +6795,7 @@ CryptoJS.mode.ECB = (function () {
 
     return ECB;
 }());// Moved to hmac-sha-256.js
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42)(module)))
 
 /***/ },
 /* 40 */
@@ -7151,7 +7128,7 @@ Promise.reject = function(reason){
 
 })(new Function('return this')());
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43).setImmediate))
 
 /***/ },
 /* 41 */
@@ -7304,6 +7281,22 @@ exports.$get = $get;
 /* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		module.children = [];
+		module.webpackPolyfill = 1;
+	}
+	return module;
+}
+
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
 /* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(46).nextTick;
 var apply = Function.prototype.apply;
 var slice = Array.prototype.slice;
@@ -7380,23 +7373,7 @@ exports.setImmediate = typeof setImmediate === "function" ? setImmediate : funct
 exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
   delete immediateIds[id];
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42).setImmediate, __webpack_require__(42).clearImmediate))
-
-/***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		module.children = [];
-		module.webpackPolyfill = 1;
-	}
-	return module;
-}
-
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43).setImmediate, __webpack_require__(43).clearImmediate))
 
 /***/ },
 /* 44 */
