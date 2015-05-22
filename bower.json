@@ -14,7 +14,7 @@
     "!lib/**/!(*spec).*"
   ],
   "dependencies": {
-    "pubnub": "git+https://github.com/pubnub/javascript.git#develop",
+    "pubnub": "^3.7.11",
     "es6-promise-polyfill": "*"
   },
   "devDependencies": {

@@ -3847,7 +3847,7 @@ exports.$get = $get;
 /* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(module) {// Version: 3.7.10
+/* WEBPACK VAR INJECTION */(function(module) {// Version: 3.7.11
 /* =-====================================================================-= */
 /* =-====================================================================-= */
 /* =-=========================     JSON     =============================-= */
@@ -4011,7 +4011,7 @@ var NOW             = 1
 ,   PARAMSBIT       = '&'
 ,   PRESENCE_HB_THRESHOLD = 5
 ,   PRESENCE_HB_DEFAULT  = 30
-,   SDK_VER         = '3.7.10'
+,   SDK_VER         = '3.7.11'
 ,   REPL            = /{([\w\-]+)}/g;
 
 /**
@@ -6122,7 +6122,7 @@ window['PUBNUB'] || (function() {
 var SWF             = 'https://pubnub.a.ssl.fastly.net/pubnub.swf'
 ,   ASYNC           = 'async'
 ,   UA              = navigator.userAgent
-,   PNSDK           = 'PubNub-JS-' + 'Web' + '/' + '3.7.10'
+,   PNSDK           = 'PubNub-JS-' + 'Web' + '/' + '3.7.11'
 ,   XORIGN          = UA.indexOf('MSIE 6') == -1;
 
 /**
@@ -6434,8 +6434,8 @@ function ajax( setup ) {
               new XDomainRequest()  ||
               new XMLHttpRequest();
 
-        xhr.onerror = xhr.onabort   = function(){ done(
-            1, xhr.responseText || { "error" : "Network Connection Error"}
+        xhr.onerror = xhr.onabort   = function(e){ done(
+            1, e || (xhr && xhr.responseText) || { "error" : "Network Connection Error"}
         ) };
         xhr.onload  = xhr.onloadend = finished;
         xhr.onreadystatechange = function() {
