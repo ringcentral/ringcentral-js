@@ -10,7 +10,7 @@ describe('RCSDK', function() {
 
     describe('actual connection', function() {
 
-        it('connects to sandbox', function(done) {
+        it.skip('connects to sandbox', function(done) {
 
             this.timeout(10000); // Per SLA should be 3 seconds
 

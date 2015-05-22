@@ -47,8 +47,8 @@ export class PageVisibility extends observable.Observable<PageVisibility> {
         else if ((hidden = "msHidden") in document)
             document.addEventListener("msvisibilitychange", onchange);
         // IE 9 and lower:
-        else if ('onfocusin' in document)
-            document.onfocusin = document.onfocusout = onchange;
+        else if ('onfocusin' in <any>document)
+            (<any>document).onfocusin = (<any>document).onfocusout = onchange;
         // All others:
         else
             window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onchange;

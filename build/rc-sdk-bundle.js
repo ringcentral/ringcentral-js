@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("dom-storage"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()));
+		module.exports = factory((function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()), require("dom-storage"));
 	else if(typeof define === 'function' && define.amd)
 		define(["exports", "exports"], factory);
 	else if(typeof exports === 'object')
-		exports["RCSDK"] = factory(require("dom-storage"), (function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()));
+		exports["RCSDK"] = factory((function webpackLoadOptionalExternalModule() { try { return require("xhr2"); } catch(e) {} }()), require("dom-storage"));
 	else
-		root["RCSDK"] = factory(root["localStorage"], root["XMLHttpRequest"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) {
+		root["RCSDK"] = factory(root["XMLHttpRequest"], root["localStorage"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_23__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -55,27 +55,27 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../typings/externals.d.ts" />
-var pubnubMock = __webpack_require__(3);
-var xhrMock = __webpack_require__(4);
-var xhrResponse = __webpack_require__(5);
-var ajaxObserver = __webpack_require__(6);
-var cache = __webpack_require__(7);
-var context = __webpack_require__(8);
-var helper = __webpack_require__(9);
-var list = __webpack_require__(10);
-var log = __webpack_require__(11);
-var observable = __webpack_require__(12);
-var pageVisibility = __webpack_require__(13);
-var platform = __webpack_require__(14);
-var subscription = __webpack_require__(15);
-var utils = __webpack_require__(16);
-var validator = __webpack_require__(17);
-var accountHelper = __webpack_require__(18);
-var blockedNumberHelper = __webpack_require__(19);
-var callHelper = __webpack_require__(20);
-var contactHelper = __webpack_require__(21);
-var contactGroupHelper = __webpack_require__(22);
-var conferencingHelper = __webpack_require__(23);
+var pubnubMock = __webpack_require__(4);
+var xhrMock = __webpack_require__(5);
+var xhrResponse = __webpack_require__(6);
+var ajaxObserver = __webpack_require__(7);
+var cache = __webpack_require__(8);
+var context = __webpack_require__(9);
+var helper = __webpack_require__(10);
+var list = __webpack_require__(11);
+var log = __webpack_require__(12);
+var observable = __webpack_require__(13);
+var pageVisibility = __webpack_require__(14);
+var platform = __webpack_require__(15);
+var subscription = __webpack_require__(16);
+var utils = __webpack_require__(17);
+var validator = __webpack_require__(18);
+var accountHelper = __webpack_require__(19);
+var blockedNumberHelper = __webpack_require__(20);
+var callHelper = __webpack_require__(21);
+var contactHelper = __webpack_require__(22);
+var contactGroupHelper = __webpack_require__(1);
+var conferencingHelper = __webpack_require__(3);
 var countryHelper = __webpack_require__(24);
 var deviceHelper = __webpack_require__(25);
 var deviceModelHelper = __webpack_require__(26);
@@ -97,150 +97,82 @@ var RCSDK = (function () {
     function RCSDK(options) {
         options = options || {};
         this._context = context.$get(RCSDK.injections);
-        this.getCache().setPrefix(options.cachePrefix || '');
-        this.getPlatform().setServer(options.server || '').setCredentials(options.appKey || '', options.appSecret || '');
+        this.getCache()
+            .setPrefix(options.cachePrefix || '');
+        this.getPlatform()
+            .setServer(options.server || '')
+            .setCredentials(options.appKey || '', options.appSecret || '');
         //TODO Link Platform events with Subscriptions and the rest
     }
     // Internals
-    RCSDK.prototype.getContext = function () {
-        return this._context;
-    };
+    RCSDK.prototype.getContext = function () { return this._context; };
     // Core
-    RCSDK.prototype.getAjaxObserver = function () {
-        return ajaxObserver.$get(this.getContext());
-    };
-    RCSDK.prototype.getXhrResponse = function () {
-        return xhrResponse.$get(this.getContext());
-    };
-    RCSDK.prototype.getPlatform = function () {
-        return platform.$get(this.getContext());
-    };
-    RCSDK.prototype.getCache = function () {
-        return cache.$get(this.getContext());
-    };
-    RCSDK.prototype.getSubscription = function () {
-        return subscription.$get(this.getContext());
-    };
-    RCSDK.prototype.getPageVisibility = function () {
-        return pageVisibility.$get(this.getContext());
-    };
-    RCSDK.prototype.getHelper = function () {
-        return helper.$get(this.getContext());
-    };
-    RCSDK.prototype.getObservable = function () {
-        return observable.$get(this.getContext());
-    };
-    RCSDK.prototype.getValidator = function () {
-        return validator.$get(this.getContext());
-    };
-    RCSDK.prototype.getLog = function () {
-        return log.$get(this.getContext());
-    };
-    RCSDK.prototype.getUtils = function () {
-        return utils.$get(this.getContext());
-    };
-    RCSDK.prototype.getList = function () {
-        return list.$get(this.getContext());
-    };
+    RCSDK.prototype.getAjaxObserver = function () { return ajaxObserver.$get(this.getContext()); };
+    RCSDK.prototype.getXhrResponse = function () { return xhrResponse.$get(this.getContext()); };
+    RCSDK.prototype.getPlatform = function () { return platform.$get(this.getContext()); };
+    RCSDK.prototype.getCache = function () { return cache.$get(this.getContext()); };
+    RCSDK.prototype.getSubscription = function () { return subscription.$get(this.getContext()); };
+    RCSDK.prototype.getPageVisibility = function () { return pageVisibility.$get(this.getContext()); };
+    RCSDK.prototype.getHelper = function () { return helper.$get(this.getContext()); };
+    RCSDK.prototype.getObservable = function () { return observable.$get(this.getContext()); };
+    RCSDK.prototype.getValidator = function () { return validator.$get(this.getContext()); };
+    RCSDK.prototype.getLog = function () { return log.$get(this.getContext()); };
+    RCSDK.prototype.getUtils = function () { return utils.$get(this.getContext()); };
+    RCSDK.prototype.getList = function () { return list.$get(this.getContext()); };
     // Helpers
-    RCSDK.prototype.getCountryHelper = function () {
-        return countryHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getDeviceModelHelper = function () {
-        return deviceModelHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getLanguageHelper = function () {
-        return languageHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getLocationHelper = function () {
-        return locationHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getShippingMethodHelper = function () {
-        return shippingMethodHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getStateHelper = function () {
-        return stateHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getTimezoneHelper = function () {
-        return timezoneHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getAccountHelper = function () {
-        return accountHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getBlockedNumberHelper = function () {
-        return blockedNumberHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getCallHelper = function () {
-        return callHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getConferencingHelper = function () {
-        return conferencingHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getContactHelper = function () {
-        return contactHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getContactGroupHelper = function () {
-        return contactGroupHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getDeviceHelper = function () {
-        return deviceHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getExtensionHelper = function () {
-        return extensionHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getForwardingNumberHelper = function () {
-        return forwardingNumberHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getMessageHelper = function () {
-        return messageHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getPhoneNumberHelper = function () {
-        return phoneNumberHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getPresenceHelper = function () {
-        return presenceHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getRingoutHelper = function () {
-        return ringoutHelper.$get(this.getContext());
-    };
-    RCSDK.prototype.getServiceHelper = function () {
-        return serviceHelper.$get(this.getContext());
-    };
+    RCSDK.prototype.getCountryHelper = function () { return countryHelper.$get(this.getContext()); };
+    RCSDK.prototype.getDeviceModelHelper = function () { return deviceModelHelper.$get(this.getContext()); };
+    RCSDK.prototype.getLanguageHelper = function () { return languageHelper.$get(this.getContext()); };
+    RCSDK.prototype.getLocationHelper = function () { return locationHelper.$get(this.getContext()); };
+    RCSDK.prototype.getShippingMethodHelper = function () { return shippingMethodHelper.$get(this.getContext()); };
+    RCSDK.prototype.getStateHelper = function () { return stateHelper.$get(this.getContext()); };
+    RCSDK.prototype.getTimezoneHelper = function () { return timezoneHelper.$get(this.getContext()); };
+    RCSDK.prototype.getAccountHelper = function () { return accountHelper.$get(this.getContext()); };
+    RCSDK.prototype.getBlockedNumberHelper = function () { return blockedNumberHelper.$get(this.getContext()); };
+    RCSDK.prototype.getCallHelper = function () { return callHelper.$get(this.getContext()); };
+    RCSDK.prototype.getConferencingHelper = function () { return conferencingHelper.$get(this.getContext()); };
+    RCSDK.prototype.getContactHelper = function () { return contactHelper.$get(this.getContext()); };
+    RCSDK.prototype.getContactGroupHelper = function () { return contactGroupHelper.$get(this.getContext()); };
+    RCSDK.prototype.getDeviceHelper = function () { return deviceHelper.$get(this.getContext()); };
+    RCSDK.prototype.getExtensionHelper = function () { return extensionHelper.$get(this.getContext()); };
+    RCSDK.prototype.getForwardingNumberHelper = function () { return forwardingNumberHelper.$get(this.getContext()); };
+    RCSDK.prototype.getMessageHelper = function () { return messageHelper.$get(this.getContext()); };
+    RCSDK.prototype.getPhoneNumberHelper = function () { return phoneNumberHelper.$get(this.getContext()); };
+    RCSDK.prototype.getPresenceHelper = function () { return presenceHelper.$get(this.getContext()); };
+    RCSDK.prototype.getRingoutHelper = function () { return ringoutHelper.$get(this.getContext()); };
+    RCSDK.prototype.getServiceHelper = function () { return serviceHelper.$get(this.getContext()); };
     RCSDK.version = '1.3.0';
     RCSDK.url = {
         sandbox: 'https://platform.devtest.ringcentral.com',
         production: 'https://platform.ringcentral.com'
     };
     RCSDK.injections = {
-        localStorage: (typeof (localStorage) !== 'undefined' ? localStorage : __webpack_require__(1)),
+        localStorage: (typeof (localStorage) !== 'undefined'
+            ? localStorage
+            : __webpack_require__(23)),
         Promise: typeof (Promise) !== 'undefined' ? Promise : promise.Promise,
         PUBNUB: pubnub,
         XHR: function () {
             try {
                 return new XMLHttpRequest();
             }
-            catch (e) {
-            }
+            catch (e) { }
             try {
                 return new ActiveXObject("Msxml2.XMLHTTP.6.0");
             }
-            catch (e1) {
-            }
+            catch (e1) { }
             try {
                 return new ActiveXObject("Msxml2.XMLHTTP.3.0");
             }
-            catch (e2) {
-            }
+            catch (e2) { }
             try {
                 return new ActiveXObject("Msxml2.XMLHTTP");
             }
-            catch (e3) {
-            }
+            catch (e3) { }
             try {
                 return new (__webpack_require__(2))();
             }
-            catch (e4) {
-            }
+            catch (e4) { } // Node only
             throw new Error("This browser does not support XMLHttpRequest.");
         },
         pubnubMock: pubnubMock,
@@ -255,7 +187,39 @@ module.exports = RCSDK;
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
+/// <reference path="../../typings/externals.d.ts" />
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var helper = __webpack_require__(10);
+var validator = __webpack_require__(18);
+var ContactGroup = (function (_super) {
+    __extends(ContactGroup, _super);
+    function ContactGroup(context) {
+        _super.call(this, context);
+        this.validator = validator.$get(context);
+    }
+    ContactGroup.prototype.createUrl = function (options, id) {
+        return '/account/~/extension/~/address-book/group' + (id ? '/' + id : '');
+    };
+    ContactGroup.prototype.validate = function (item) {
+        return this.validator.validate([
+            { field: 'groupName', validator: this.validator.required(item && item.groupName) }
+        ]);
+    };
+    return ContactGroup;
+})(helper.Helper);
+exports.ContactGroup = ContactGroup;
+function $get(context) {
+    return context.createSingleton('ContactGroup', function () {
+        return new ContactGroup(context);
+    });
+}
+exports.$get = $get;
+
 
 /***/ },
 /* 2 */
@@ -268,6 +232,37 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
+/// <reference path="../../typings/externals.d.ts" />
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var helper = __webpack_require__(10);
+var Conferencing = (function (_super) {
+    __extends(Conferencing, _super);
+    function Conferencing() {
+        _super.apply(this, arguments);
+    }
+    Conferencing.prototype.createUrl = function () {
+        return '/account/~/extension/~/conferencing';
+    };
+    return Conferencing;
+})(helper.Helper);
+exports.Conferencing = Conferencing;
+function $get(context) {
+    return context.createSingleton('Conferencing', function () {
+        return new Conferencing(context);
+    });
+}
+exports.$get = $get;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
 /// <reference path="../../../typings/externals.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -275,7 +270,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(12);
+var observable = __webpack_require__(13);
 var PubnubMock = (function (_super) {
     __extends(PubnubMock, _super);
     function PubnubMock(context, options) {
@@ -283,8 +278,7 @@ var PubnubMock = (function (_super) {
         this.crypto_obj = context.getPubnubReal().crypto_obj;
         _super.call(this, context);
     }
-    PubnubMock.prototype.ready = function () {
-    };
+    PubnubMock.prototype.ready = function () { };
     PubnubMock.prototype.subscribe = function (options) {
         this.on('message-' + options.channel, options.message);
     };
@@ -315,12 +309,12 @@ exports.$get = $get;
 
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-var utils = __webpack_require__(16);
-var log = __webpack_require__(11);
-var xhrResponse = __webpack_require__(5); //FIXME Circular
+var utils = __webpack_require__(17);
+var log = __webpack_require__(12);
+var xhrResponse = __webpack_require__(6); //FIXME Circular
 var XhrMock = (function () {
     function XhrMock(context) {
         // Service
@@ -418,7 +412,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 var XhrResponse = (function () {
@@ -452,7 +446,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -462,7 +456,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(12);
+var observable = __webpack_require__(13);
 var AjaxObserver = (function (_super) {
     __extends(AjaxObserver, _super);
     function AjaxObserver() {
@@ -485,7 +479,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -539,7 +533,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -594,11 +588,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(16);
+var utils = __webpack_require__(17);
 var Helper = (function () {
     function Helper(context) {
         this.defaultProperty = 'id';
@@ -754,11 +748,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(16);
+var utils = __webpack_require__(17);
 var List = (function () {
     function List(context) {
         this.context = context;
@@ -872,23 +866,19 @@ exports.$get = $get;
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(16);
+var utils = __webpack_require__(17);
 var Log = (function () {
     function Log(context, console) {
         if (!console) {
             console = {
-                log: function () {
-                },
-                warn: function () {
-                },
-                info: function () {
-                },
-                error: function () {
-                }
+                log: function () { },
+                warn: function () { },
+                info: function () { },
+                error: function () { }
             };
         }
         this.context = context;
@@ -962,12 +952,12 @@ exports.$get = $get;
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(16);
-var log = __webpack_require__(11);
+var utils = __webpack_require__(17);
+var log = __webpack_require__(12);
 /**
  * @see https://github.com/Microsoft/TypeScript/issues/275
  */
@@ -1129,7 +1119,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1139,7 +1129,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(12);
+var observable = __webpack_require__(13);
 var PageVisibility = (function (_super) {
     __extends(PageVisibility, _super);
     function PageVisibility(context) {
@@ -1151,12 +1141,7 @@ var PageVisibility = (function (_super) {
         var hidden = "hidden", onchange = function (evt) {
             evt = evt || window.event;
             var v = 'visible', h = 'hidden', evtMap = {
-                focus: v,
-                focusin: v,
-                pageshow: v,
-                blur: h,
-                focusout: h,
-                pagehide: h
+                focus: v, focusin: v, pageshow: v, blur: h, focusout: h, pagehide: h
             };
             _this.visible = (evt.type in evtMap) ? evtMap[evt.type] == v : !document[hidden];
             _this.emit(_this.events.change, _this.visible);
@@ -1191,7 +1176,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1201,8 +1186,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(12);
-var cache = __webpack_require__(7);
+var observable = __webpack_require__(13);
+var cache = __webpack_require__(8);
 var request = __webpack_require__(41);
 var Platform = (function (_super) {
     __extends(Platform, _super);
@@ -1252,7 +1237,9 @@ var Platform = (function (_super) {
         return this;
     };
     Platform.prototype.getCredentials = function () {
-        var credentials = ((typeof atob == 'function') ? atob(this.apiKey) : new Buffer(this.apiKey, 'base64').toString('utf-8')).split(':');
+        var credentials = ((typeof atob == 'function')
+            ? atob(this.apiKey)
+            : new Buffer(this.apiKey, 'base64').toString('utf-8')).split(':');
         return {
             key: credentials[0],
             secret: credentials[1]
@@ -1317,10 +1304,13 @@ var Platform = (function (_super) {
             url: '/restapi/oauth/token',
             post: body
         }).then(function (response) {
-            _this.setCache(response.data).remember(options.remember).emitAndCallback(_this.events.authorizeSuccess, []);
+            _this.setCache(response.data)
+                .remember(options.remember)
+                .emitAndCallback(_this.events.authorizeSuccess, []);
             return response;
         }).catch(function (e) {
-            _this.clearStorage().emitAndCallback(_this.events.authorizeError, [e]);
+            _this.clearStorage()
+                .emitAndCallback(_this.events.authorizeError, [e]);
             throw e;
         });
     };
@@ -1380,7 +1370,8 @@ var Platform = (function (_super) {
                 e.ajax = response;
                 throw e;
             }
-            _this.setCache(response.data).resume();
+            _this.setCache(response.data)
+                .resume();
             return response;
         }).then(function (result) {
             _this.emit(_this.events.refreshSuccess, result);
@@ -1388,7 +1379,8 @@ var Platform = (function (_super) {
         }).catch(function (e) {
             if (_this.clearCacheOnRefreshError)
                 _this.clearStorage();
-            _this.emitAndCallback(_this.events.accessViolation, [e]).emitAndCallback(_this.events.refreshError, [e]);
+            _this.emitAndCallback(_this.events.accessViolation, [e])
+                .emitAndCallback(_this.events.refreshError, [e]);
             throw e;
         });
     };
@@ -1404,10 +1396,14 @@ var Platform = (function (_super) {
                 token: this.getToken()
             }
         }).then(function (response) {
-            _this.resume().clearStorage().emit(_this.events.logoutSuccess, response);
+            _this.resume()
+                .clearStorage()
+                .emit(_this.events.logoutSuccess, response);
             return response;
         }).catch(function (e) {
-            _this.resume().emitAndCallback(_this.events.accessViolation, [e]).emitAndCallback(_this.events.logoutError, [e]);
+            _this.resume()
+                .emitAndCallback(_this.events.accessViolation, [e])
+                .emitAndCallback(_this.events.logoutError, [e]);
             throw e;
         });
     };
@@ -1493,12 +1489,17 @@ var Platform = (function (_super) {
         options.url = this.apiUrl(options.url, { addServer: true });
         return this.isAuthorized().then(function () {
             var token = _this.getToken();
-            return _this.getRequest().setOptions(options).setHeader('Authorization', _this.getTokenType() + (token ? ' ' + token : '')).send();
+            return _this.getRequest()
+                .setOptions(options)
+                .setHeader('Authorization', _this.getTokenType() + (token ? ' ' + token : ''))
+                .send();
         }).catch(function (e) {
             if (!e.response || !e.response.isUnauthorized())
                 throw e;
             _this.cancelAccessToken();
-            return _this.refresh().then(function () {
+            return _this
+                .refresh()
+                .then(function () {
                 // Re-send with same options
                 return _this.apiCall(options);
             });
@@ -1532,7 +1533,12 @@ var Platform = (function (_super) {
         options = options || {};
         options.method = options.method || 'POST';
         options.url = this.apiUrl(options.url, { addServer: true });
-        return this.getRequest().setOptions(options).setHeader('Content-Type', 'application/x-www-form-urlencoded').setHeader('Accept', 'application/json').setHeader('Authorization', 'Basic ' + this.apiKey).send();
+        return this.getRequest()
+            .setOptions(options)
+            .setHeader('Content-Type', 'application/x-www-form-urlencoded')
+            .setHeader('Accept', 'application/json')
+            .setHeader('Authorization', 'Basic ' + this.apiKey)
+            .send();
     };
     Platform.prototype.apiUrl = function (url, options) {
         url = url || '';
@@ -1566,7 +1572,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1576,8 +1582,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var observable = __webpack_require__(12);
-var platform = __webpack_require__(14);
+var observable = __webpack_require__(13);
+var platform = __webpack_require__(15);
 var Subscription = (function (_super) {
     __extends(Subscription, _super);
     function Subscription(context) {
@@ -1664,10 +1670,13 @@ var Subscription = (function (_super) {
                 }
             }));
         }).then(function (ajax) {
-            _this.updateSubscription(ajax.data).subscribeAtPubnub().emit(_this.events.subscribeSuccess, ajax.data);
+            _this.updateSubscription(ajax.data)
+                .subscribeAtPubnub()
+                .emit(_this.events.subscribeSuccess, ajax.data);
             return ajax;
         }).catch(function (e) {
-            _this.unsubscribe().emit(_this.events.subscribeError, e);
+            _this.unsubscribe()
+                .emit(_this.events.subscribeError, e);
             throw e;
         });
     };
@@ -1691,11 +1700,15 @@ var Subscription = (function (_super) {
                     eventFilters: _this.getFullEventFilters()
                 }
             });
-        }).then(function (ajax) {
-            _this.updateSubscription(ajax.data).emit(_this.events.renewSuccess, ajax.data);
+        })
+            .then(function (ajax) {
+            _this.updateSubscription(ajax.data)
+                .emit(_this.events.renewSuccess, ajax.data);
             return ajax;
-        }).catch(function (e) {
-            _this.unsubscribe().emit(_this.events.renewError, e);
+        })
+            .catch(function (e) {
+            _this.unsubscribe()
+                .emit(_this.events.renewError, e);
             throw e;
         });
     };
@@ -1714,7 +1727,8 @@ var Subscription = (function (_super) {
                 url: '/restapi/v1.0/subscription/' + _this.subscription.id
             }));
         }).then(function (ajax) {
-            _this.unsubscribe().emit(_this.events.removeSuccess, ajax);
+            _this.unsubscribe()
+                .emit(_this.events.removeSuccess, ajax);
             return ajax;
         }).catch(function (e) {
             _this.emit(_this.events.removeError, e);
@@ -1727,7 +1741,10 @@ var Subscription = (function (_super) {
         return _super.prototype.destroy.call(this);
     };
     Subscription.prototype.isSubscribed = function () {
-        return this.subscription && this.subscription.deliveryMode && this.subscription.deliveryMode.subscriberKey && this.subscription.deliveryMode.address;
+        return this.subscription &&
+            this.subscription.deliveryMode &&
+            this.subscription.deliveryMode.subscriberKey &&
+            this.subscription.deliveryMode.address;
     };
     Subscription.prototype.setTimeout = function () {
         var _this = this;
@@ -1813,7 +1830,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1849,6 +1866,7 @@ var Utils = (function () {
         for (; i < length; i++) {
             // Only deal with non-null/undefined values
             if ((options = arguments[i]) !== null) {
+                // Extend the base object
                 for (name in options) {
                     src = target[name];
                     copy = options[name];
@@ -1974,7 +1992,9 @@ var Utils = (function () {
         return obj === null || !rdigit.test(obj) || isNaN(obj);
     };
     Utils.prototype.type = function (obj) {
-        return obj === null ? String(obj) : class2type[toString.call(obj)] || "object";
+        return obj === null
+            ? String(obj)
+            : class2type[toString.call(obj)] || "object";
     };
     Utils.prototype.isPlainObject = function (obj) {
         // Must be an Object.
@@ -1990,12 +2010,13 @@ var Utils = (function () {
         // Own properties are enumerated firstly, so to speed up,
         // if last one is own, then all properties are own.
         var key;
-        for (key in obj) {
-        }
+        for (key in obj) { }
         return key === undefined || hasOwn.call(obj, key);
     };
     Utils.prototype.getProperty = function (obj, property) {
-        return property.split(/[.[\]]/).reduce(function (res, part) {
+        return property
+            .split(/[.[\]]/)
+            .reduce(function (res, part) {
             if (!res)
                 return undefined;
             return part ? res[part] : res;
@@ -2038,11 +2059,11 @@ exports.$get = $get;
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(16);
+var utils = __webpack_require__(17);
 var Validator = (function () {
     function Validator(context) {
         this.context = context;
@@ -2119,7 +2140,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2129,7 +2150,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var Account = (function (_super) {
     __extends(Account, _super);
     function Account() {
@@ -2150,7 +2171,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2160,8 +2181,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var validator = __webpack_require__(17);
+var helper = __webpack_require__(10);
+var validator = __webpack_require__(18);
 var BlockedNumber = (function (_super) {
     __extends(BlockedNumber, _super);
     function BlockedNumber(context) {
@@ -2170,7 +2191,10 @@ var BlockedNumber = (function (_super) {
     }
     BlockedNumber.prototype.createUrl = function (options, id) {
         options = options || {};
-        return '/account/~/extension/' + (options.extensionId ? options.extensionId : '~') + '/blocked-number' + (id ? '/' + id : '');
+        return '/account/~/extension/' +
+            (options.extensionId ? options.extensionId : '~') +
+            '/blocked-number' +
+            (id ? '/' + id : '');
     };
     BlockedNumber.prototype.validate = function (item) {
         return this.validator.validate([
@@ -2191,7 +2215,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2201,10 +2225,10 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var list = __webpack_require__(10);
+var helper = __webpack_require__(10);
+var list = __webpack_require__(11);
 var presence = __webpack_require__(33);
-var contact = __webpack_require__(21);
+var contact = __webpack_require__(22);
 var Call = (function (_super) {
     __extends(Call, _super);
     function Call(context) {
@@ -2217,7 +2241,10 @@ var Call = (function (_super) {
         options = options || {};
         if (!('personal' in options) && !('extensionId' in options))
             options.personal = true;
-        return '/account/~/' + (options.personal || options.extensionId ? ('extension/' + (options.extensionId || '~') + '/') : '') + (options.active ? 'active-calls' : 'call-log') + (id ? '/' + id : '');
+        return '/account/~/' +
+            (options.personal || options.extensionId ? ('extension/' + (options.extensionId || '~') + '/') : '') +
+            (options.active ? 'active-calls' : 'call-log') +
+            (id ? '/' + id : '');
     };
     Call.prototype.getSessionId = function (call) {
         return (call && call.sessionId);
@@ -2260,6 +2287,7 @@ var Call = (function (_super) {
             type: ''
         }, options);
         return this.list.filter([
+            //{condition: options.alive, filterFn: this.isAlive},
             { filterBy: 'direction', condition: options.direction },
             { filterBy: 'type', condition: options.type }
         ]);
@@ -2289,7 +2317,16 @@ var Call = (function (_super) {
         var getTime = function (dateString) {
             return (new Date(dateString)).getTime();
         };
-        return ((!options.strict || outboundRingOutCall.action && outboundRingOutCall.action.toLowerCase().indexOf('ringout') != -1) && outboundRingOutCall.direction == 'Outbound' && inboundCall.direction == 'Inbound' && ((!inboundCall.startTime && !outboundRingOutCall.startTime) || Math.abs(getTime(inboundCall.startTime) - getTime(outboundRingOutCall.startTime)) < (options.maxStartTimeDiscrepancy || 5000)) && inboundCall.from.phoneNumber == outboundRingOutCall.to.phoneNumber && (inboundCall.to.phoneNumber == outboundRingOutCall.from.phoneNumber || inboundCall.to.name == outboundRingOutCall.from.name));
+        return ((!options.strict || outboundRingOutCall.action && outboundRingOutCall.action.toLowerCase().indexOf('ringout') != -1) &&
+            // Check directions
+            outboundRingOutCall.direction == 'Outbound' &&
+            inboundCall.direction == 'Inbound' &&
+            // Check that start times are equal or close enough
+            ((!inboundCall.startTime && !outboundRingOutCall.startTime) || Math.abs(getTime(inboundCall.startTime) - getTime(outboundRingOutCall.startTime)) < (options.maxStartTimeDiscrepancy || 5000)) &&
+            // Check that numbers match
+            inboundCall.from.phoneNumber == outboundRingOutCall.to.phoneNumber &&
+            (inboundCall.to.phoneNumber == outboundRingOutCall.from.phoneNumber || inboundCall.to.name == outboundRingOutCall.from.name) //TODO Maybe name check is not required
+        );
     };
     Call.prototype.combineCalls = function (outboundRingOutCall, inboundCall, options) {
         options = options || {};
@@ -2392,7 +2429,9 @@ var Call = (function (_super) {
         return call.direction + '|' + (call.from && cleanup(call.from.phoneNumber)) + '|' + (call.to && cleanup(call.to.phoneNumber));
     };
     Call.prototype.mergePresenceCalls = function (presenceCalls, presence) {
-        var currentDate = new Date(), activeCalls = this.parsePresenceCalls(presence && presence.activeCalls || []).map(function (call) {
+        var currentDate = new Date(), activeCalls = this
+            .parsePresenceCalls(presence && presence.activeCalls || [])
+            .map(function (call) {
             // delete property to make sure it is skipped during merge
             delete call.startTime;
             return call;
@@ -2422,7 +2461,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2432,9 +2471,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var validator = __webpack_require__(17);
-var list = __webpack_require__(10);
+var helper = __webpack_require__(10);
+var validator = __webpack_require__(18);
+var list = __webpack_require__(11);
 var Contact = (function (_super) {
     __extends(Contact, _super);
     function Contact(context) {
@@ -2488,10 +2527,14 @@ var Contact = (function (_super) {
     }
     Contact.prototype.createUrl = function (options, id) {
         options = options || {};
-        var root = '/account/~/extension/' + (options.extensionId ? options.extensionId : '~') + '/address-book';
+        var root = '/account/~/extension/' +
+            (options.extensionId ? options.extensionId : '~') +
+            '/address-book';
         if (options.sync)
             return root + '-sync';
-        return root + (options.groupId ? '/group/' + options.groupId + '/contact' : '/contact') + (id ? '/' + id : '');
+        return root +
+            (options.groupId ? '/group/' + options.groupId + '/contact' : '/contact') +
+            (id ? '/' + id : '');
     };
     /**
      * Returns all values of the given fields if value exists
@@ -2629,15 +2672,9 @@ var Contact = (function (_super) {
         }, options);
         return this.list.filter([
             { condition: options.alive, filterFn: this.isAlive },
-            { condition: options.startsWith, filterFn: function (item, opts) {
-                return _this.match(item, opts.condition);
-            } },
-            { condition: options.phonesOnly, filterFn: function (item, opts) {
-                return (_this.getPhones(item).length > 0);
-            } },
-            { condition: options.faxesOnly, filterFn: function (item, opts) {
-                return (_this.getFaxes(item).length > 0);
-            } }
+            { condition: options.startsWith, filterFn: function (item, opts) { return _this.match(item, opts.condition); } },
+            { condition: options.phonesOnly, filterFn: function (item, opts) { return (_this.getPhones(item).length > 0); } },
+            { condition: options.faxesOnly, filterFn: function (item, opts) { return (_this.getFaxes(item).length > 0); } }
         ]);
     };
     Contact.prototype.validate = function (item) {
@@ -2661,73 +2698,10 @@ exports.$get = $get;
 
 
 /***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-var helper = __webpack_require__(9);
-var validator = __webpack_require__(17);
-var ContactGroup = (function (_super) {
-    __extends(ContactGroup, _super);
-    function ContactGroup(context) {
-        _super.call(this, context);
-        this.validator = validator.$get(context);
-    }
-    ContactGroup.prototype.createUrl = function (options, id) {
-        return '/account/~/extension/~/address-book/group' + (id ? '/' + id : '');
-    };
-    ContactGroup.prototype.validate = function (item) {
-        return this.validator.validate([
-            { field: 'groupName', validator: this.validator.required(item && item.groupName) }
-        ]);
-    };
-    return ContactGroup;
-})(helper.Helper);
-exports.ContactGroup = ContactGroup;
-function $get(context) {
-    return context.createSingleton('ContactGroup', function () {
-        return new ContactGroup(context);
-    });
-}
-exports.$get = $get;
-
-
-/***/ },
 /* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-var helper = __webpack_require__(9);
-var Conferencing = (function (_super) {
-    __extends(Conferencing, _super);
-    function Conferencing() {
-        _super.apply(this, arguments);
-    }
-    Conferencing.prototype.createUrl = function () {
-        return '/account/~/extension/~/conferencing';
-    };
-    return Conferencing;
-})(helper.Helper);
-exports.Conferencing = Conferencing;
-function $get(context) {
-    return context.createSingleton('Conferencing', function () {
-        return new Conferencing(context);
-    });
-}
-exports.$get = $get;
-
+module.exports = __WEBPACK_EXTERNAL_MODULE_23__;
 
 /***/ },
 /* 24 */
@@ -2740,7 +2714,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var Country = (function (_super) {
     __extends(Country, _super);
     function Country() {
@@ -2771,8 +2745,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var validator = __webpack_require__(17);
+var helper = __webpack_require__(10);
+var validator = __webpack_require__(18);
 var extension = __webpack_require__(27);
 var deviceModel = __webpack_require__(26);
 var Device = (function (_super) {
@@ -2787,7 +2761,10 @@ var Device = (function (_super) {
         options = options || {};
         if (options.order)
             return '/account/~/order';
-        return '/account/~' + (options.extensionId ? '/extension/' + options.extensionId : '') + '/device' + (id ? '/' + id : '');
+        return '/account/~' +
+            (options.extensionId ? '/extension/' + options.extensionId : '') +
+            '/device' +
+            (id ? '/' + id : '');
     };
     /**
      * @param {IDevice} item
@@ -2844,7 +2821,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var DeviceModel = (function (_super) {
     __extends(DeviceModel, _super);
     function DeviceModel() {
@@ -3009,7 +2986,9 @@ var DeviceModel = (function (_super) {
     DeviceModel.prototype.getId = function (device) {
         if (!device)
             return null;
-        return device.id + (device.addons && device.addons[0] ? '-' + device.addons[0].id + '-' + device.addons[0].count : '');
+        return device.id + (device.addons && device.addons[0]
+            ? '-' + device.addons[0].id + '-' + device.addons[0].count
+            : '');
     };
     /**
      * Remove extra textual information from device
@@ -3052,8 +3031,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var list = __webpack_require__(10);
+var helper = __webpack_require__(10);
+var list = __webpack_require__(11);
 var Extension = (function (_super) {
     __extends(Extension, _super);
     function Extension(context) {
@@ -3068,7 +3047,9 @@ var Extension = (function (_super) {
     }
     Extension.prototype.createUrl = function (options, id) {
         options = options || {};
-        return '/account/~' + (options.departmentId ? '/department/' + options.departmentId + '/members' : '/extension') + (id ? '/' + id : '');
+        return '/account/~' +
+            (options.departmentId ? '/department/' + options.departmentId + '/members' : '/extension') +
+            (id ? '/' + id : '');
     };
     Extension.prototype.isUser = function (extension) {
         return extension && extension.type == this.type.user;
@@ -3099,7 +3080,8 @@ var Extension = (function (_super) {
                 condition: options.search.toLocaleLowerCase(),
                 filterFn: this.list.containsFilter,
                 extractFn: function (item) {
-                    return (item.name && (item.name.toLocaleLowerCase() + ' ')) + (item.extensionNumber && item.extensionNumber.toString().toLocaleLowerCase());
+                    return (item.name && (item.name.toLocaleLowerCase() + ' ')) +
+                        (item.extensionNumber && item.extensionNumber.toString().toLocaleLowerCase());
                 }
             }
         ]);
@@ -3126,8 +3108,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var list = __webpack_require__(10);
+var helper = __webpack_require__(10);
+var list = __webpack_require__(11);
 var ForwardingNumber = (function (_super) {
     __extends(ForwardingNumber, _super);
     function ForwardingNumber(context) {
@@ -3155,13 +3137,13 @@ var ForwardingNumber = (function (_super) {
             features: []
         }, options);
         return this.list.filter([{
-            condition: options.features.length,
-            filterFn: function (item) {
-                return options.features.some(function (feature) {
-                    return _this.hasFeature(item, feature);
-                });
-            }
-        }]);
+                condition: options.features.length,
+                filterFn: function (item) {
+                    return options.features.some(function (feature) {
+                        return _this.hasFeature(item, feature);
+                    });
+                }
+            }]);
     };
     return ForwardingNumber;
 })(helper.Helper);
@@ -3185,7 +3167,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var Language = (function (_super) {
     __extends(Language, _super);
     function Language() {
@@ -3223,8 +3205,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var list = __webpack_require__(10);
+var helper = __webpack_require__(10);
+var list = __webpack_require__(11);
 var state = __webpack_require__(37);
 var Location = (function (_super) {
     __extends(Location, _super);
@@ -3298,12 +3280,12 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var list = __webpack_require__(10);
-var validator = __webpack_require__(17);
-var subscription = __webpack_require__(15);
-var platform = __webpack_require__(14);
-var contact = __webpack_require__(21);
+var helper = __webpack_require__(10);
+var list = __webpack_require__(11);
+var validator = __webpack_require__(18);
+var subscription = __webpack_require__(16);
+var platform = __webpack_require__(15);
+var contact = __webpack_require__(22);
 var Message = (function (_super) {
     __extends(Message, _super);
     function Message(context) {
@@ -3466,8 +3448,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var list = __webpack_require__(10);
+var helper = __webpack_require__(10);
+var list = __webpack_require__(11);
 var extension = __webpack_require__(27);
 var PhoneNumber = (function (_super) {
     __extends(PhoneNumber, _super);
@@ -3480,7 +3462,10 @@ var PhoneNumber = (function (_super) {
         options = options || {};
         if (options.lookup)
             return '/number-pool/lookup';
-        return '/account/~' + (options.extensionId ? '/extension/' + options.extensionId : '') + '/phone-number' + (id ? '/' + id : '');
+        return '/account/~' +
+            (options.extensionId ? '/extension/' + options.extensionId : '') +
+            '/phone-number' +
+            (id ? '/' + id : '');
     };
     PhoneNumber.prototype.isSMS = function (phoneNumber) {
         return this.hasFeature(phoneNumber, 'SmsSender');
@@ -3497,7 +3482,9 @@ var PhoneNumber = (function (_super) {
     PhoneNumber.prototype.comparator = function (options) {
         return this.list.comparator(this.utils.extend({
             extractFn: function (item) {
-                return item.usageType + '-' + item.paymentType + '-' + item.type;
+                return item.usageType + '-' +
+                    item.paymentType + '-' +
+                    item.type;
             }
         }, options));
     };
@@ -3548,8 +3535,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var subscription = __webpack_require__(15);
+var helper = __webpack_require__(10);
+var subscription = __webpack_require__(16);
 var extension = __webpack_require__(27);
 var Presence = (function (_super) {
     __extends(Presence, _super);
@@ -3619,8 +3606,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var validator = __webpack_require__(17);
+var helper = __webpack_require__(10);
+var validator = __webpack_require__(18);
 var Ringout = (function (_super) {
     __extends(Ringout, _super);
     function Ringout(context) {
@@ -3675,7 +3662,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var Service = (function (_super) {
     __extends(Service, _super);
     function Service() {
@@ -3740,7 +3727,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var ShippingMethod = (function (_super) {
     __extends(ShippingMethod, _super);
     function ShippingMethod() {
@@ -3774,8 +3761,8 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
-var list = __webpack_require__(10);
+var helper = __webpack_require__(10);
+var list = __webpack_require__(11);
 var country = __webpack_require__(24);
 var State = (function (_super) {
     __extends(State, _super);
@@ -3823,7 +3810,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var helper = __webpack_require__(9);
+var helper = __webpack_require__(10);
 var Timezone = (function (_super) {
     __extends(Timezone, _super);
     function Timezone() {
@@ -6795,7 +6782,7 @@ CryptoJS.mode.ECB = (function () {
 
     return ECB;
 }());// Moved to hmac-sha-256.js
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43)(module)))
 
 /***/ },
 /* 40 */
@@ -7128,7 +7115,7 @@ Promise.reject = function(reason){
 
 })(new Function('return this')());
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42).setImmediate))
 
 /***/ },
 /* 41 */
@@ -7142,7 +7129,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var h = __webpack_require__(44);
-var ajaxObserver = __webpack_require__(6);
+var ajaxObserver = __webpack_require__(7);
 var r = __webpack_require__(45);
 /**
  * TODO @see https://github.com/github/fetch/blob/master/fetch.js
@@ -7281,22 +7268,6 @@ exports.$get = $get;
 /* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		module.children = [];
-		module.webpackPolyfill = 1;
-	}
-	return module;
-}
-
-
-/***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
 /* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(46).nextTick;
 var apply = Function.prototype.apply;
 var slice = Array.prototype.slice;
@@ -7373,14 +7344,30 @@ exports.setImmediate = typeof setImmediate === "function" ? setImmediate : funct
 exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
   delete immediateIds[id];
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43).setImmediate, __webpack_require__(43).clearImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(42).setImmediate, __webpack_require__(42).clearImmediate))
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		module.children = [];
+		module.webpackPolyfill = 1;
+	}
+	return module;
+}
+
 
 /***/ },
 /* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
-var utils = __webpack_require__(16);
+var utils = __webpack_require__(17);
 /**
  * @see https://github.com/Microsoft/TypeScript/issues/275
  */
@@ -7447,7 +7434,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var h = __webpack_require__(44);
-var log = __webpack_require__(11);
+var log = __webpack_require__(12);
 var Response = (function (_super) {
     __extends(Response, _super);
     function Response(context, status, statusText, body, headers) {
@@ -7479,7 +7466,9 @@ var Response = (function (_super) {
         try {
             // Step 1. Parse headers
             if (typeof (headers) === 'string') {
-                (headers || '').split('\n').forEach(function (header) {
+                (headers || '')
+                    .split('\n')
+                    .forEach(function (header) {
                     if (!header)
                         return;
                     var parts = header.split(Response.headerSeparator), name = parts.shift().trim();
@@ -7536,7 +7525,10 @@ var Response = (function (_super) {
         return this.status >= 200 && this.status < 300;
     };
     Response.prototype.getError = function () {
-        return this.data.message || this.data.error_description || this.data.description || 'Unknown error';
+        return this.data.message ||
+            this.data.error_description ||
+            this.data.description ||
+            'Unknown error';
     };
     Response.boundarySeparator = '--';
     Response.headerSeparator = ':';
@@ -7559,32 +7551,64 @@ exports.$get = $get;
 var process = module.exports = {};
 var queue = [];
 var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
 
 function drainQueue() {
     if (draining) {
         return;
     }
+    var timeout = setTimeout(cleanUpNextTick);
     draining = true;
-    var currentQueue;
+
     var len = queue.length;
     while(len) {
         currentQueue = queue;
         queue = [];
-        var i = -1;
-        while (++i < len) {
-            currentQueue[i]();
+        while (++queueIndex < len) {
+            currentQueue[queueIndex].run();
         }
+        queueIndex = -1;
         len = queue.length;
     }
+    currentQueue = null;
     draining = false;
+    clearTimeout(timeout);
 }
+
 process.nextTick = function (fun) {
-    queue.push(fun);
-    if (!draining) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
         setTimeout(drainQueue, 0);
     }
 };
 
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
 process.title = 'browser';
 process.browser = true;
 process.env = {};
