@@ -4,13 +4,12 @@ export import mocha = require('../test/mocha');
 var expect = mocha.chai.expect;
 var spy = mocha.sinon.spy;
 var mock = mocha.mock;
-var rcsdk = mocha.rcsdk;
 
 describe('RCSDK', function() {
 
     describe('actual connection', function() {
 
-        it.skip('connects to sandbox', function(done) {
+        it('connects to sandbox', function(done) {
 
             this.timeout(10000); // Per SLA should be 3 seconds
 

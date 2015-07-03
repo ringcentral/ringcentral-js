@@ -5,16 +5,11 @@ import helper = require('../core/Helper');
 
 export class Language extends helper.Helper {
 
-    languages:ILanguage[] = [
-        {
-            id: '1033',
-            name: 'English (US)'
-        },
-        {
-            id: '3084',
-            name: 'French (Canada)'
-        }
-    ];
+    createUrl(options?:any, id?:string) {
+
+        return '/dictionary/language';
+
+    }
 
 }
 
@@ -26,4 +21,6 @@ export function $get(context:context.Context):Language {
 
 export interface ILanguage extends helper.IHelperObject {
     name?:string;
+    isoCode?:string;
+    localeCode?:string;
 }

@@ -10,6 +10,8 @@ export class PhoneNumber extends helper.Helper {
     private extension:extension.Extension;
     private list:list.List;
 
+    public tollFreeAreaCodes = ['800', '844', '855', '866', '877', '888'];
+
     constructor(context:context.Context) {
         super(context);
         this.extension = extension.$get(context);

@@ -98,24 +98,6 @@ require(['rcsdk'], function(RCSDK) {
 });
 ```
 
-If you wish to use raw unbuilt version for RequireJS, add this to previous section:
-
-```js
-require.config({
-    packages: [
-        {
-            name: 'rcsdk-raw',
-            location: 'path-to-scripts/rcsdk',
-            main: 'RCSDK'
-        }
-    ]
-});
-
-require(['rcsdk-raw'], function(RCSDK) {
-    // your code here
-});
-```
-
 ## 2. Set things up in NodeJS
 
 1. Install the NPM package:

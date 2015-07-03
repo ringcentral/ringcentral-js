@@ -56,7 +56,7 @@ describe('RCSDK.helpers.Device', function() {
                     customerName: 'foo'
                 },
                 extension: {id: 'foo'},
-                model: {id: 'foo'}
+                model: {sku: 'foo'}
             });
 
             expect(res.isValid).to.equal(true);

@@ -3,7 +3,7 @@
     'use strict';
 
     function tests(file) {
-        return /-spec/.test(file);
+        return /specs/.test(file);
     }
 
     function normalize(file) {
@@ -26,7 +26,7 @@
     define('mocha', [], function() { return mocha; });
 
     require.config({
-        baseUrl: '/base/lib',
+        baseUrl: '/base/build',
         nodeIdCompat: true,
         waitSeconds: 5
     });
