@@ -28,10 +28,13 @@ function getExternal(root, cjs, amd) {
 
 function createConfig(config) {
 
-    var result = {
+    return {
 
         debug: true,
         devtool: '#source-map',
+
+        externals: config.externals,
+        entry: config.entry,
 
         output: {
             filename: './build/[name]',
@@ -66,11 +69,6 @@ function createConfig(config) {
         watchDelay: 200
 
     };
-
-    result.externals = config.externals;
-    result.entry = config.entry;
-
-    return result;
 
 }
 

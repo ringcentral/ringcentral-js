@@ -21,7 +21,7 @@ export class ForwardingNumber extends helper.Helper {
 
     }
 
-    getId(forwardingNumber) {
+    getId(forwardingNumber:IForwardingNumber) {
         return forwardingNumber && (forwardingNumber.id || (forwardingNumber.phoneNumber)); //TODO @exceptionalCase
     }
 

@@ -2,9 +2,9 @@
   "name": "rcsdk",
   "scripts": {
     "start": "node server.js",
-    "build": "./node_modules/.bin/gulp",
+    "build": "./node_modules/.bin/bower install && ./node_modules/.bin/gulp",
     "watch": "npm run build -- watch",
-    "test": "./node_modules/.bin/bower install && npm run build && npm run mocha && npm run karma",
+    "test": "npm run build && npm run mocha && npm run karma",
     "mocha": "./node_modules/.bin/mocha --recursive ./build/tests/specs.js",
     "mocha-api": "./node_modules/.bin/mocha --recursive ./build/tests/specs-api.js",
     "karma": "./node_modules/karma/bin/karma start ./test-utils/karma.conf.js",
