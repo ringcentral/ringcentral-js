@@ -1,6 +1,5 @@
 {
   "name": "rcsdk",
-  "version": "1.2.1",
   "main": "./build/rc-sdk.min.js",
   "ignore": [
     "**/*",
@@ -9,13 +8,16 @@
     "!build/rc-sdk.js.map",
     "!build/rc-sdk.min.js",
     "!build/rc-sdk.min.js.map",
+    "!build/rc-sdk-bundle.js",
+    "!build/rc-sdk-bundle.js.map",
+    "!build/rc-sdk-bundle.min.js",
+    "!build/rc-sd-bundlek.min.js.map",
     "!demo/**/*",
-    "!docs/*",
-    "!lib/**/!(*spec).*"
+    "!docs/**/*",
+    "!src/**/*"
   ],
   "dependencies": {
-    "pubnub": "*",
-    "cryptojslib": "*",
+    "pubnub": "^3.7.11",
     "es6-promise-polyfill": "*"
   },
   "devDependencies": {
