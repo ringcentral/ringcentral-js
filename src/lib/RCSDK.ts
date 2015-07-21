@@ -48,7 +48,7 @@ import pubnub = require('pubnub');
 
 class RCSDK {
 
-    public static version = '1.3.0';
+    public static version = '1.3.1';
 
     public static url = {
         sandbox: 'https://platform.devtest.ringcentral.com',

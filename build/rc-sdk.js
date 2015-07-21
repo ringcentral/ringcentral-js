@@ -148,7 +148,7 @@ var RCSDK = (function () {
     RCSDK.prototype.getPresenceHelper = function () { return presenceHelper.$get(this.getContext()); };
     RCSDK.prototype.getRingoutHelper = function () { return ringoutHelper.$get(this.getContext()); };
     RCSDK.prototype.getServiceHelper = function () { return serviceHelper.$get(this.getContext()); };
-    RCSDK.version = '1.3.0';
+    RCSDK.version = '1.3.1';
     RCSDK.url = {
         sandbox: 'https://platform.devtest.ringcentral.com',
         production: 'https://platform.ringcentral.com'

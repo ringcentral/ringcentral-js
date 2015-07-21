@@ -73,9 +73,31 @@
     });
 
     /**
+     * Propagates version number to package.json and bower.json
+     */
+    gulp.task('version', ['webpack'], function(cb) {
+
+        var fs = require('fs'),
+            pkg = require('./package.json'),
+            bower = require('./bower.json'),
+            version = require('./build/rc-sdk').version;
+
+        pkg.version = version;
+        bower.version = version;
+
+        fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));
+        fs.writeFileSync('./bower.json', JSON.stringify(bower, null, 2));
+
+        gutil.log('Current version is', gutil.colors.magenta(version));
+
+        cb();
+
+    });
+
+    /**
      * Default Task
      */
-    gulp.task('default', ['uglify']);
+    gulp.task('default', ['uglify', 'version']);
 
     /**
      * Watch Task
@@ -88,7 +110,7 @@
 
         gulp.watch('./src/**/*.ts').on('change', function(event) {
 
-            //gutil.log(gutil.template('File <%= file %> was <%= type %>, running tasks', {file: gutil.colors.magenta(event.path), type: event.type}));
+            gutil.log('File', gutil.colors.magenta(event.path), 'was', event.type);
 
             if (event.type === 'changed') {
 
