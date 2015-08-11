@@ -3,64 +3,94 @@
     /** @type {gulp.Gulp} */
     var gulp = require('gulp'),
         gutil = require('gulp-util'),
+        add = require('gulp-add'),
+        concat = require('gulp-concat'),
+        merge = require('merge2'),
+        rename = require('gulp-rename'),
         sourcemaps = require('gulp-sourcemaps'),
+        ts = require('gulp-typescript'),
+        uglify = require('gulp-uglify'),
+        wrap = require('gulp-wrap-js'),
         path = require('path'),
-        sourcemapsDebug = false,
-        webpackConfigure = {
-            useMemoryFs: true,
-            progress: false
-        },
-        webpackFormat = {
-            version: true,
-            timings: true
-        },
-        webpackFailAfter = {
-            errors: true,
-            warnings: true
-        };
+        fs = require('fs'),
+        sourcemapsDebug = true,
+        tsProject = ts.createProject('tsconfig.json', {sortOutput: true, noExternalResolve: true}), //, declarationFiles: true
+        tsTestProject = ts.createProject({sortOutput: true});
 
     /**
-     * Compiles TypeScript modules into a Webpack bundle (including external dependencies CryptoJS, Promise and PUBNUB)
-     * TODO TypeScript cache
-     * TODO Export definitions
+     * Compiles SDK
      */
-    gulp.task('webpack', [], function() {
+    gulp.task('typescript', function() {
 
-        var webpack = require('gulp-webpack-build');
+        var result = gulp
+            .src(['./src/**/!(*-spec|test).ts'])
+            .pipe(sourcemaps.init({debug: sourcemapsDebug}))
+            .pipe(ts(tsProject));
 
-        return gulp.src('./webpack.config.js', {base: path.resolve('./build')})
 
-            .pipe(webpack.init(webpackConfigure))
-            .pipe(webpack.run())
-            .pipe(webpack.format(webpackFormat))
-            .pipe(webpack.failAfter(webpackFailAfter))
-            .pipe(gulp.dest('./build'));
+        return merge([
+            result.dts
+                .pipe(gulp.dest('.')),
+            result.js
+                .pipe(concat('ringcentral.js'))
+                .pipe(sourcemaps.write('.', {debug: sourcemapsDebug}))
+                .pipe(gulp.dest('./build')),
+            result.js
+                .pipe(add({
+                    './bower_components/es6-promise/promise.js': fs.readFileSync('./bower_components/es6-promise/promise.js').toString(),
+                    './bower_components/fetch/fetch.js': fs.readFileSync('./bower_components/fetch/fetch.js').toString(),
+                    './bower_components/pubnub/web/pubnub.js': fs.readFileSync('./bower_components/pubnub/web/pubnub.js').toString()
+                }))
+                .pipe(concat('ringcentral-bundle.js'))
+                .pipe(sourcemaps.write('.', {debug: sourcemapsDebug}))
+                .pipe(gulp.dest('./build'))
+        ]);
 
     });
 
     /**
-     * Replaces Webpack stuff in source map files
+     * Adds NodeJS module to definition
      */
-    gulp.task('sourcemap', ['webpack'], function() {
+    gulp.task('definition', ['typescript'], function() {
 
-        var replace = require('gulp-replace');
+        var definition = fs.readFileSync('./build/ringcentral.d.ts').toString();
 
-        return gulp.src(['./build/rc-sdk.js.map', './build/rc-sdk-bundle.js.map'])
-            .pipe(replace(/webpack:\/\/\//g, ''))
-            .pipe(replace(/(\.\.\/src\/)/g, '.$1'))
-            .pipe(gulp.dest('./build'));
+        definition += [
+            'declare module "ringcentral" {',
+            '    export = RingCentral;',
+            '}'
+        ].join('\n');
+
+        fs.writeFileSync('./build/ringcentral.d.ts', definition);
 
     });
+
+    /**
+     * Compiles SDK Tests
+     */
+    gulp.task('tests', ['typescript', 'definition'], function() {
+
+        return gulp
+            .src(['./src/**/*-spec.ts', './src/test.ts'])
+            .pipe(sourcemaps.init({debug: sourcemapsDebug}))
+            .pipe(ts(tsTestProject))
+            .js
+            .pipe(concat('specs.js'))
+            .pipe(wrap(fs.readFileSync('./utils/wrap-tests.js').toString().replace('/*{%= body %}*/', '%= body %')))
+            .pipe(sourcemaps.write('.', {debug: sourcemapsDebug}))
+            .pipe(gulp.dest('./build/tests'));
+
+    });
+
+    //TODO BUNDLE
 
     /**
      * Minifies build and bundle
      */
-    gulp.task('uglify', ['sourcemap'], function() {
+    gulp.task('uglify', ['typescript'], function() {
 
-        var uglify = require('gulp-uglify'),
-            rename = require('gulp-rename');
-
-        return gulp.src(['./build/rc-sdk.js', './build/rc-sdk-bundle.js'])
+        return gulp
+            .src(['./build/ringcentral.js', './build/ringcentral-bundle.js'])
             .pipe(sourcemaps.init({loadMaps: true, debug: sourcemapsDebug}))
 
             .pipe(uglify())
@@ -75,12 +105,11 @@
     /**
      * Propagates version number to package.json and bower.json
      */
-    gulp.task('version', ['webpack'], function(cb) {
+    gulp.task('version', ['typescript'], function(cb) {
 
-        var fs = require('fs'),
-            pkg = require('./package.json'),
+        var pkg = require('./package.json'),
             bower = require('./bower.json'),
-            version = require('./build/rc-sdk').version;
+            version = require('./build/ringcentral').SDK.version;
 
         pkg.version = version;
         bower.version = version;
@@ -95,37 +124,23 @@
     });
 
     /**
+     * Quick Task
+     */
+    gulp.task('quick', ['typescript', 'tests', 'version']);
+
+    /**
      * Default Task
      */
-    gulp.task('default', ['uglify', 'version']);
+    gulp.task('default', ['quick', 'uglify']);
 
     /**
      * Watch Task
      *
-     * (!) This will not run version and sourcemap, the one must run full build before commit
+     * (!) This will not run version and uglify, the one must run full build before commit
      */
-    gulp.task('watch', ['webpack'], function() {
+    gulp.task('watch', ['quick'], function() {
 
-        var webpack = require('gulp-webpack-build');
-
-        gulp.watch('./src/**/*.ts').on('change', function(event) {
-
-            gutil.log('File', gutil.colors.magenta(event.path), 'was', event.type);
-
-            if (event.type === 'changed') {
-
-                gulp.src(event.path, {base: path.resolve('./build')})
-                    .pipe(webpack.closest('webpack.config.js'))
-                    .pipe(webpack.init(webpackConfigure))
-                    .pipe(webpack.watch(function(err, stats) {
-                        gulp.src(this.path, {base: this.base})
-                            .pipe(webpack.proxy(err, stats))
-                            .pipe(webpack.format(webpackFormat))
-                            .pipe(gulp.dest('./build'));
-                    }));
-
-            }
-        });
+        gulp.watch(['./src/**/*.ts', './utils/**/*.js'], ['quick']);
 
     });
 

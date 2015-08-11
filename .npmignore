@@ -6,6 +6,5 @@ index.html
 server.js
 test-utils
 typings
-tsconfig.json*
+tsconfig.json
 tsd.json
-webpack.config.js
