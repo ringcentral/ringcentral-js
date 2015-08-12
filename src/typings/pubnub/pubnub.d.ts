@@ -51,5 +51,5 @@ declare module PUBNUB {
 }
 
 declare module 'pubnub' {
-    var PUBNUB:typeof PUBNUB;
+    export var PUBNUB:PUBNUB.PUBNUB;
 }

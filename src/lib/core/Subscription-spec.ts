@@ -8,6 +8,16 @@ var rcsdk = mocha.rcsdk;
 
 describe('RCSDK.core.Subscription', function() {
 
+    function getSubscription(){
+
+        var subscription = rcsdk.getSubscription();
+
+        subscription.constructor['pollInterval'] = 1;
+
+        return subscription;
+
+    }
+
     mock.registerHooks(this);
 
     describe('subscribe', function() {
@@ -16,7 +26,7 @@ describe('RCSDK.core.Subscription', function() {
 
             mock.subscribeGeneric(60);
 
-            var subscription = rcsdk.getSubscription();
+            var subscription = getSubscription();
 
             subscription.on(subscription.events.renewSuccess, function() {
                 subscription.destroy(); // prevent next renewals
@@ -42,7 +52,7 @@ describe('RCSDK.core.Subscription', function() {
 
         it('fires a notification event when the notify method is called and passes the message object', function(done) {
 
-            var subscription = rcsdk.getSubscription();
+            var subscription = getSubscription();
 
             subscription.on(subscription.events.notification, function(event) {
                 expect(event).to.deep.equal({foo: 'bar'});
@@ -59,7 +69,7 @@ describe('RCSDK.core.Subscription', function() {
 
         it('fails when no subscription', function(done) {
 
-            var subscription = rcsdk.getSubscription();
+            var subscription = getSubscription();
 
             subscription
                 .renew()
@@ -75,7 +85,7 @@ describe('RCSDK.core.Subscription', function() {
 
         it('fails when no eventFilters', function(done) {
 
-            var subscription = rcsdk.getSubscription();
+            var subscription = getSubscription();
 
             subscription.subscription = {id: 'foo'};
 
@@ -97,7 +107,7 @@ describe('RCSDK.core.Subscription', function() {
 
         it('fails when no eventFilters', function(done) {
 
-            var subscription = rcsdk.getSubscription();
+            var subscription = getSubscription();
 
             subscription
                 .subscribe()
@@ -115,7 +125,7 @@ describe('RCSDK.core.Subscription', function() {
 
             var event = 'foo';
 
-            var subscription = rcsdk.getSubscription();
+            var subscription = getSubscription();
 
             mock.subscribeGeneric();
 
@@ -150,7 +160,7 @@ describe('RCSDK.core.Subscription', function() {
                 }
             });
 
-            var subscription = rcsdk.getSubscription();
+            var subscription = getSubscription();
 
             subscription
                 .subscribe({
@@ -175,7 +185,7 @@ describe('RCSDK.core.Subscription', function() {
 
         it('provides access to PUBNUB.crypto_obj which has proper interface', function() {
 
-            var subscription = rcsdk.getSubscription();
+            var subscription = getSubscription();
 
             expect(subscription.getPubnub().crypto_obj).to.be.an('object');
             expect(subscription.getPubnub().crypto_obj.encrypt).to.be.a('function');
@@ -189,7 +199,7 @@ describe('RCSDK.core.Subscription', function() {
                              'BsUHmPMkMWTOLDzVr6eRk+2Gcj2Wft7ZKrCD+FCXlKYIoa98tUD2xvoYnRwxiE2QaNywl8UtjaqpTk1+WDImBrt' +
                              '6uabB1WICY/qE0It3DqQ6vdUWISoTfjb+vT5h9kfZxWYUP4ykN2UtUW1biqCjj1Rb6GWGnTx6jPqF77ud0XgV1r' +
                              'k/Q6heSFZWV/GP23/iytDPK1HGJoJqXPx7ErQU=',
-                subscription = rcsdk.getSubscription();
+                subscription = getSubscription();
 
             subscription.subscription = {
                 deliveryMode: {
@@ -217,7 +227,7 @@ describe('RCSDK.core.Subscription', function() {
 
         it('unsubscribes', function(done) {
 
-            var subscription = rcsdk.getSubscription(),
+            var subscription = getSubscription(),
                 destroySpy = spy(function() {});
 
             mock.subscribeGeneric();
