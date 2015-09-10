@@ -10,9 +10,11 @@ import r = require('./http/Response');
 export class Subscription extends observable.Observable<Subscription> {
 
     static renewHandicapMs = 60 * 1000;
+    static pollInterval = 10 * 1000;
 
     public subscription;
     public timeout;
+    public expireTime:number;
     public eventFilters:string[];
     public pubnub:PUBNUB.PubnubInstance;
 
@@ -237,19 +239,21 @@ export class Subscription extends observable.Observable<Subscription> {
 
     protected setTimeout() {
 
-        var timeToExpiration = (this.subscription.expiresIn * 1000) - Subscription.renewHandicapMs;
+        this.utils.poll((next)=>{
 
-        this.timeout = setTimeout(() => {
+            if (Date.now() < this.expireTime) {
+                return next();
+            }
 
-            this.renew({});
+            this.renew();
 
-        }, timeToExpiration);
+        }, Subscription.pollInterval, this.timeout);
 
     }
 
     protected clearTimeout() {
 
-        clearTimeout(this.timeout);
+        this.utils.stopPolling(this.timeout);
 
     }
 
@@ -257,6 +261,7 @@ export class Subscription extends observable.Observable<Subscription> {
 
         this.clearTimeout();
         this.subscription = subscription;
+        this.expireTime = Date.now() + (this.subscription.expiresIn * 1000) - Subscription.renewHandicapMs;
         this.setTimeout();
         return this;
 
