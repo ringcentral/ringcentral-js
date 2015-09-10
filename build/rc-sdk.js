@@ -195,7 +195,7 @@ module.exports = RCSDK;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -615,7 +615,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -1054,7 +1054,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -1314,7 +1314,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -1371,7 +1371,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -1767,7 +1767,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -1974,7 +1974,7 @@ exports.Headers = Headers;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -2094,7 +2094,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -2266,17 +2266,20 @@ var Subscription = (function (_super) {
     };
     Subscription.prototype.setTimeout = function () {
         var _this = this;
-        var timeToExpiration = (this.subscription.expiresIn * 1000) - Subscription.renewHandicapMs;
-        this.timeout = setTimeout(function () {
-            _this.renew({});
-        }, timeToExpiration);
+        this.utils.poll(function (next) {
+            if (Date.now() < _this.expireTime) {
+                return next();
+            }
+            _this.renew();
+        }, Subscription.pollInterval, this.timeout);
     };
     Subscription.prototype.clearTimeout = function () {
-        clearTimeout(this.timeout);
+        this.utils.stopPolling(this.timeout);
     };
     Subscription.prototype.updateSubscription = function (subscription) {
         this.clearTimeout();
         this.subscription = subscription;
+        this.expireTime = Date.now() + (this.subscription.expiresIn * 1000) - Subscription.renewHandicapMs;
         this.setTimeout();
         return this;
     };
@@ -2338,6 +2341,7 @@ var Subscription = (function (_super) {
         return this;
     };
     Subscription.renewHandicapMs = 60 * 1000;
+    Subscription.pollInterval = 10 * 1000;
     return Subscription;
 })(observable.Observable);
 exports.Subscription = Subscription;
@@ -2433,7 +2437,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -2464,7 +2468,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -2508,7 +2512,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -2754,7 +2758,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -2825,7 +2829,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -2902,7 +2906,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3139,7 +3143,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3177,7 +3181,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3208,7 +3212,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3284,7 +3288,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3318,7 +3322,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3377,7 +3381,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3408,7 +3412,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3483,7 +3487,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3532,7 +3536,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3700,7 +3704,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3788,7 +3792,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3844,7 +3848,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3909,7 +3913,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -3943,7 +3947,7 @@ exports.$get = $get;
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
