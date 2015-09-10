@@ -34,7 +34,9 @@
 <script src="http://requirejs.org/docs/release/2.1.15/comments/require.js" type="text/javascript"></script>
 <script type="text/javascript">
 
-    require.config({
+    //window.fetch = null;
+
+    requirejs.config({
         paths: {
             'ringcentral': '../build/ringcentral',
             'pubnub': 'https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub',
@@ -45,27 +47,25 @@
 
     require(['ringcentral', 'shim', 'fetch'], function(SDK, shim) {
 
-        var sdk = new SDK({server: RC.server.sandbox});
+        var sdk = new SDK({server: SDK.server.sandbox});
 
-        sdk.getPlatform()
-                .forceAuthentication()
-                .get('')
-                .then(function(ajax) {
+//        sdk.platform().auth().forceAuthentication();
 
-                    document.getElementById('report').innerHTML = [
-                        'RingCentral version: ' + RC.version,
-                        'API version: ' + ajax.getJson().versionString,
-                        'PUBNUB version: ' + sdk.getPubnubFactory().getPubnub().get_version(),
-                        'Promise native: ' + (Promise.toString().trim() == 'function Promise() { [native code] }'),
-                        'Fetch native: ' + (fetch.toString().trim() == 'function fetch() { [native code] }'),
-                        'Root scope is not poisoned: ' + (window.RingCentral == undefined)
-                    ].join('<br>');
+        sdk.platform().get('', {skipAuthCheck: true}).then(function(apiResponse) {
 
-                })
-                .catch(function(e) {
-                    alert(e.message);
-                    console.error(e.stack);
-                });
+            document.getElementById('report').innerHTML = [
+                'RingCentral version: ' + SDK.version,
+                'API version: ' + apiResponse.json().versionString,
+                'PUBNUB version: ' + SDK.core.Externals.PUBNUB.get_version(),
+                'Promise native: ' + (Promise.toString().trim() == 'function Promise() { [native code] }'),
+                'Fetch native: ' + (SDK.core.Externals.fetch.toString().trim() == 'function fetch() { [native code] }'),
+                'Root scope is not poisoned: ' + (window.RingCentral == undefined)
+            ].join('<br>');
+
+        }).catch(function(e) {
+            alert(e.message + '\n\n' + e.stack);
+            console.error(e.message + '\n\n' + e.stack);
+        });
 
     });
 

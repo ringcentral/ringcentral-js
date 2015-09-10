@@ -88,18 +88,18 @@
 
     function app() {
 
-        var rcsdk = new RingCentral({
-                    server: localStorage.getItem('ringcentral-demo-server') || RingCentral.server.sandbox,
+        var rcsdk = new RingCentral.SDK({
+                    server: localStorage.getItem('ringcentral-demo-server') || RingCentral.SDK.server.sandbox,
                     appKey: localStorage.getItem('ringcentral-demo-appKey'),
                     appSecret: localStorage.getItem('ringcentral-demo-appSecret')
                 }),
-                platform = rcsdk.getPlatform();
+                platform = rcsdk.platform();
 
-        isTokenValid.style.display = platform.isAccessTokenValid() ? '' : 'none';
+        isTokenValid.style.display = platform.auth().accessTokenValid() ? '' : 'none';
 
-        appKeyField.value = platform.getAppCredentials().appKey;
-        appSecretField.value = platform.getAppCredentials().appSecret;
-        serverField.value = platform.getServer();
+        appKeyField.value = platform._appKey;
+        appSecretField.value = platform._appSecret;
+        serverField.value = platform._server;
 
     }
 

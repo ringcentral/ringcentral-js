@@ -3,91 +3,44 @@
     /** @type {gulp.Gulp} */
     var gulp = require('gulp'),
         gutil = require('gulp-util'),
-        add = require('gulp-add'),
-        concat = require('gulp-concat'),
-        merge = require('merge2'),
         rename = require('gulp-rename'),
         sourcemaps = require('gulp-sourcemaps'),
-        ts = require('gulp-typescript'),
         uglify = require('gulp-uglify'),
-        wrap = require('gulp-wrap-js'),
-        path = require('path'),
         fs = require('fs'),
-        sourcemapsDebug = true,
-        tsProject = ts.createProject('tsconfig.json', {sortOutput: true, noExternalResolve: true}), //, declarationFiles: true
-        tsTestProject = ts.createProject({sortOutput: true});
+        exec = require('child_process').exec,
+        sourcemapsDebug = true;
 
-    /**
-     * Compiles SDK
-     */
-    gulp.task('typescript', function() {
+    function execute(cmd){
 
-        var result = gulp
-            .src(['./src/**/!(*-spec|test).ts'])
-            .pipe(sourcemaps.init({debug: sourcemapsDebug}))
-            .pipe(ts(tsProject));
+        return function(cmd, cb) {
 
+            exec(cmd, {cwd: __dirname}, function(e, stdout, stderr) {
 
-        return merge([
-            result.dts
-                .pipe(gulp.dest('.')),
-            result.js
-                .pipe(concat('ringcentral.js'))
-                .pipe(sourcemaps.write('.', {debug: sourcemapsDebug}))
-                .pipe(gulp.dest('./build')),
-            result.js
-                .pipe(add({
-                    './bower_components/es6-promise/promise.js': fs.readFileSync('./bower_components/es6-promise/promise.js').toString(),
-                    './bower_components/fetch/fetch.js': fs.readFileSync('./bower_components/fetch/fetch.js').toString(),
-                    './bower_components/pubnub/web/pubnub.js': fs.readFileSync('./bower_components/pubnub/web/pubnub.js').toString()
-                }))
-                .pipe(concat('ringcentral-bundle.js'))
-                .pipe(sourcemaps.write('.', {debug: sourcemapsDebug}))
-                .pipe(gulp.dest('./build'))
-        ]);
+                if (e === null) {
+                    gutil.log(stdout);
+                    return cb();
+                }
 
-    });
+                gutil.log(gutil.colors.red('External Command Error'));
+                gutil.log(stdout);
+                gutil.log(e.stack || e);
+                gutil.log(stderr);
 
-    /**
-     * Adds NodeJS module to definition
-     */
-    gulp.task('definition', ['typescript'], function() {
+                cb(e);
+            });
 
-        var definition = fs.readFileSync('./build/ringcentral.d.ts').toString();
+        }.bind(null, cmd)
 
-        definition += [
-            'declare module "ringcentral" {',
-            '    export = RingCentral;',
-            '}'
-        ].join('\n');
+    }
 
-        fs.writeFileSync('./build/ringcentral.d.ts', definition);
+    gulp.task('bower', execute('npm run bower'));
 
-    });
-
-    /**
-     * Compiles SDK Tests
-     */
-    gulp.task('tests', ['typescript', 'definition'], function() {
-
-        return gulp
-            .src(['./src/**/*-spec.ts', './src/test.ts'])
-            .pipe(sourcemaps.init({debug: sourcemapsDebug}))
-            .pipe(ts(tsTestProject))
-            .js
-            .pipe(concat('specs.js'))
-            .pipe(wrap(fs.readFileSync('./utils/wrap-tests.js').toString().replace('/*{%= body %}*/', '%= body %')))
-            .pipe(sourcemaps.write('.', {debug: sourcemapsDebug}))
-            .pipe(gulp.dest('./build/tests'));
-
-    });
-
-    //TODO BUNDLE
+    gulp.task('webpack', ['bower'], execute('npm run webpack'));
 
     /**
      * Minifies build and bundle
      */
-    gulp.task('uglify', ['typescript'], function() {
+    gulp.task('uglify', ['webpack'], function() {
 
         return gulp
             .src(['./build/ringcentral.js', './build/ringcentral-bundle.js'])
@@ -105,11 +58,11 @@
     /**
      * Propagates version number to package.json and bower.json
      */
-    gulp.task('version', ['typescript'], function(cb) {
+    gulp.task('version', ['webpack'], function(cb) {
 
         var pkg = require('./package.json'),
             bower = require('./bower.json'),
-            version = require('./build/ringcentral').SDK.version;
+            version = require('./build/ringcentral').version;
 
         pkg.version = version;
         bower.version = version;
@@ -126,22 +79,11 @@
     /**
      * Quick Task
      */
-    gulp.task('quick', ['typescript', 'tests', 'version']);
+    gulp.task('quick', ['webpack', 'version']);
 
     /**
      * Default Task
      */
     gulp.task('default', ['quick', 'uglify']);
-
-    /**
-     * Watch Task
-     *
-     * (!) This will not run version and uglify, the one must run full build before commit
-     */
-    gulp.task('watch', ['quick'], function() {
-
-        gulp.watch(['./src/**/*.ts', './utils/**/*.js'], ['quick']);
-
-    });
 
 })();

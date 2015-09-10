@@ -12,18 +12,12 @@ In the directory where a local copy of the SDK is placed:
 $ npm install
 ```
 
-## 3. Install Bower
+## 3. Install Bower Dependencies
 
 Bower is needed to run Karma tests.
 
 ```
-$ npm install -g bower
-```
-
-## 4. Install Bower dependencies
-
-```
-$ bower install
+$ npm run bower
 ```
 
 # Building with GulpJS
@@ -31,11 +25,11 @@ $ bower install
 Build schema:
 
 ```
-        ┏━━━━━ webpack ━━━━┳━ sourcemap ━━┓
-        ┃                  ┃              ┃
- clean ━╋━ webpack-bundle ━┛              ┣━ default
-        ┃                                 ┃
-        ┗━ tsc ━ wrap ━ jshint ━ version ━┛
+        ┏━━━━━ webpack ━━━━┳━ version ━ uglify ━━┓
+        ┃                  ┃                     ┃
+ clean ━╋━ webpack-bundle ━┛                     ┣━ default
+        ┃                                        ┃
+        ┗━ version ━┛
 ```
 
 ## Regular build
@@ -44,28 +38,24 @@ Build schema:
 $ npm run build
 ```
 
-## Watch
-
-```
-$ npm run watch
-```
-
-or `watch-all` will include Webpack watchers.
-
-***
-
 # Tests
+
+```
+$ npm test
+```
 
 ## Mocha (console)
 
 ```
-$ npm test
+$ npm run mocha
+$ npm run mocha-compilers
 ```
 
 ## Karma (browser)
 
 ```
 $ npm run karma [-- --no-single-run --auto-watch --log-level warn --browsers Chrome]
+$ npm run karma-webpack [-- --no-single-run --auto-watch --log-level warn --browsers Chrome]
 ```
 
 or use short-hands: `$ npm run karma-chrome` and `$ npm run karma-watch`.

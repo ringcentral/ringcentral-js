@@ -1,1902 +1,453 @@
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var core;
-        (function (core) {
-            var Cache = (function () {
-                function Cache(storage, prefix) {
-                    this.setPrefix(prefix);
-                    this._storage = storage;
-                }
-                Cache.prototype.setPrefix = function (prefix) {
-                    this._prefix = prefix || 'rc-';
-                    return this;
-                };
-                Cache.prototype.setItem = function (key, data) {
-                    this._storage[this._prefixKey(key)] = JSON.stringify(data);
-                    return this;
-                };
-                Cache.prototype.removeItem = function (key) {
-                    delete this._storage[this._prefixKey(key)];
-                    return this;
-                };
-                Cache.prototype.getItem = function (key) {
-                    var item = this._storage[this._prefixKey(key)];
-                    if (!item)
-                        return null;
-                    return JSON.parse(item);
-                };
-                Cache.prototype.clean = function () {
-                    for (var key in this._storage) {
-                        if (!this._storage.hasOwnProperty(key))
-                            continue;
-                        if (key.indexOf(this._prefix) === 0) {
-                            delete this._storage[key];
-                        }
-                    }
-                    return this;
-                };
-                Cache.prototype._prefixKey = function (key) {
-                    return this._prefix + key;
-                };
-                return Cache;
-            })();
-            core.Cache = Cache;
-        })(core = sdk.core || (sdk.core = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var core;
-        (function (core) {
-            /**
-             * TODO Fix public vars
-             */
-            var Log = (function () {
-                function Log(console) {
-                    if (!console) {
-                        console = {
-                            log: function () { },
-                            warn: function () { },
-                            info: function () { },
-                            error: function () { }
-                        };
-                    }
-                    this._console = console;
-                    this.logDebug = false;
-                    this.logInfo = false;
-                    this.logWarnings = false;
-                    this.logErrors = false;
-                    this.addTimestamps = false;
-                }
-                Log.prototype.disableAll = function () {
-                    this.logDebug = false;
-                    this.logInfo = false;
-                    this.logWarnings = false;
-                    this.logErrors = false;
-                };
-                Log.prototype.enableAll = function () {
-                    this.logDebug = true;
-                    this.logInfo = true;
-                    this.logWarnings = true;
-                    this.logErrors = true;
-                };
-                Log.prototype.debug = function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i - 0] = arguments[_i];
-                    }
-                    if (this.logDebug)
-                        this._console.log.apply(this._console, this._parseArguments(arguments));
-                };
-                Log.prototype.info = function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i - 0] = arguments[_i];
-                    }
-                    if (this.logInfo)
-                        this._console.info.apply(this._console, this._parseArguments(arguments));
-                };
-                Log.prototype.warn = function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i - 0] = arguments[_i];
-                    }
-                    if (this.logWarnings)
-                        this._console.warn.apply(this._console, this._parseArguments(arguments));
-                };
-                Log.prototype.error = function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i - 0] = arguments[_i];
-                    }
-                    if (this.logErrors)
-                        this._console.error.apply(this._console, this._parseArguments(arguments));
-                };
-                Log.prototype.stack = function () {
-                    var e = new Error();
-                    if (e.hasOwnProperty('stack')) {
-                        return e.stack.replace('Error\n', 'Stack Trace\n');
-                    }
-                };
-                Log.prototype._parseArguments = function (args) {
-                    args = core.utils.argumentsToArray(args);
-                    if (this.addTimestamps)
-                        args.unshift(new Date().toLocaleString(), '-');
-                    return args;
-                };
-                return Log;
-            })();
-            core.Log = Log;
-            core.log = new Log();
-        })(core = sdk.core || (sdk.core = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var core;
-        (function (core) {
-            var utils;
-            (function (utils) {
-                var hasOwn = Object.prototype.hasOwnProperty, toString = Object.prototype.toString, rdigit = /\d/, class2type = {};
-                // Populate the class2type map
-                'Boolean Number String Function Array Date RegExp Object'.split(' ').forEach(function (name) {
-                    class2type["[object " + name + "]"] = name.toLowerCase();
-                });
-                /**
-                 * Ported from jQuery.fn.extend
-                 * Optional first parameter makes deep copy
-                 */
-                function extend(targetObject, sourceObject) {
-                    var args = [];
-                    for (var _i = 2; _i < arguments.length; _i++) {
-                        args[_i - 2] = arguments[_i];
-                    }
-                    var options, name, src, copy, copyIsArray, clone, target = arguments[0] || {}, i = 1, length = arguments.length, deep = false;
-                    // Handle a deep copy situation
-                    if (typeof target === "boolean") {
-                        deep = target;
-                        // skip the boolean and the target
-                        target = arguments[i] || {};
-                        i++;
-                    }
-                    // Handle case when target is a string or something (possible in deep copy)
-                    if (typeof target !== "object" && !isFunction(target)) {
-                        target = {};
-                    }
-                    for (; i < length; i++) {
-                        // Only deal with non-null/undefined values
-                        if ((options = arguments[i]) !== null) {
-                            // Extend the base object
-                            for (name in options) {
-                                src = target[name];
-                                copy = options[name];
-                                // Prevent never-ending loop
-                                if (target === copy) {
-                                    continue;
-                                }
-                                // Recurse if we're merging plain objects or arrays
-                                if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
-                                    if (copyIsArray) {
-                                        copyIsArray = false;
-                                        clone = src && isArray(src) ? src : [];
-                                    }
-                                    else {
-                                        clone = src && isPlainObject(src) ? src : {};
-                                    }
-                                    // Never move original objects, clone them
-                                    target[name] = extend(deep, clone, copy);
-                                }
-                                else if (copy !== undefined) {
-                                    target[name] = copy;
-                                }
-                            }
-                        }
-                    }
-                    // Return the modified object
-                    return target;
-                }
-                utils.extend = extend;
-                function forEach(object, cb) {
-                    for (var i in object) {
-                        if (!object.hasOwnProperty(i))
-                            continue;
-                        var res = cb(object[i], i);
-                        if (res === false)
-                            break;
-                    }
-                }
-                utils.forEach = forEach;
-                /**
-                 * TODO Replace with something better
-                 * @see https://github.com/joyent/node/blob/master/lib/querystring.js
-                 * @param {object} parameters
-                 * @returns {string}
-                 */
-                function queryStringify(parameters) {
-                    var array = [];
-                    forEach(parameters, function (v, i) {
-                        if (isArray(v)) {
-                            v.forEach(function (vv) {
-                                array.push(encodeURIComponent(i) + '=' + encodeURIComponent(vv));
-                            });
-                        }
-                        else {
-                            array.push(encodeURIComponent(i) + '=' + encodeURIComponent(v));
-                        }
-                    });
-                    return array.join('&');
-                }
-                utils.queryStringify = queryStringify;
-                /**
-                 * TODO Replace with something better
-                 * @see https://github.com/joyent/node/blob/master/lib/querystring.js
-                 * @param {string} queryString
-                 * @returns {object}
-                 */
-                function parseQueryString(queryString) {
-                    var argsParsed = {}, self = this;
-                    queryString.split('&').forEach(function (arg) {
-                        arg = decodeURIComponent(arg);
-                        if (arg.indexOf('=') == -1) {
-                            argsParsed[arg.trim()] = true;
-                        }
-                        else {
-                            var pair = arg.split('='), key = pair[0].trim(), value = pair[1].trim();
-                            if (key in argsParsed) {
-                                if (key in argsParsed && !self.isArray(argsParsed[key]))
-                                    argsParsed[key] = [argsParsed[key]];
-                                argsParsed[key].push(value);
-                            }
-                            else {
-                                argsParsed[key] = value;
-                            }
-                        }
-                    });
-                    return argsParsed;
-                }
-                utils.parseQueryString = parseQueryString;
-                /**
-                 * Returns true if the passed value is valid email address.
-                 * Checks multiple comma separated emails according to RFC 2822 if parameter `multiple` is `true`
-                 */
-                function isEmail(v, multiple) {
-                    if (!!multiple) {
-                        //this Regexp is also suitable for multiple emails (comma separated)
-                        return /^(?:[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?[ ,;]*)+$/i.test(v);
-                    }
-                    else {
-                        return /^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i.test(v);
-                    }
-                }
-                utils.isEmail = isEmail;
-                function isPhoneNumber(v) {
-                    return (/\+?1[0-9]{3}[0-9a-z]{7}/im.test(v.toString().split(/[^0-9a-z\+]/im).join('')));
-                }
-                utils.isPhoneNumber = isPhoneNumber;
-                /**
-                 * @param args
-                 * @returns {Array}
-                 */
-                function argumentsToArray(args) {
-                    return Array.prototype.slice.call(args || [], 0);
-                }
-                utils.argumentsToArray = argumentsToArray;
-                function isDate(obj) {
-                    return type(obj) === "date";
-                }
-                utils.isDate = isDate;
-                function isFunction(obj) {
-                    return type(obj) === "function";
-                }
-                utils.isFunction = isFunction;
-                function isArray(obj) {
-                    return Array.isArray ? Array.isArray(obj) : type(obj) === "array";
-                }
-                utils.isArray = isArray;
-                // A crude way of determining if an object is a window
-                function isWindow(obj) {
-                    return obj && typeof obj === "object" && "setInterval" in obj;
-                }
-                utils.isWindow = isWindow;
-                function isNan(obj) {
-                    return obj === null || !rdigit.test(obj) || isNaN(obj);
-                }
-                utils.isNan = isNan;
-                function type(obj) {
-                    return obj === null
-                        ? String(obj)
-                        : class2type[toString.call(obj)] || "object";
-                }
-                utils.type = type;
-                function isPlainObject(obj) {
-                    // Must be an Object.
-                    // Because of IE, we also have to check the presence of the constructor property.
-                    // Make sure that DOM nodes and window objects don't pass through, as well
-                    if (!obj || type(obj) !== "object" || obj.nodeType || isWindow(obj)) {
-                        return false;
-                    }
-                    // Not own constructor property must be Object
-                    if (obj.constructor && !hasOwn.call(obj, "constructor") && !hasOwn.call(obj.constructor.prototype, "isPrototypeOf")) {
-                        return false;
-                    }
-                    // Own properties are enumerated firstly, so to speed up,
-                    // if last one is own, then all properties are own.
-                    var key;
-                    for (key in obj) { }
-                    return key === undefined || hasOwn.call(obj, key);
-                }
-                utils.isPlainObject = isPlainObject;
-                function getProperty(obj, property) {
-                    return property
-                        .split(/[.[\]]/)
-                        .reduce(function (res, part) {
-                        if (!res)
-                            return undefined;
-                        return part ? res[part] : res;
-                    }, obj);
-                }
-                utils.getProperty = getProperty;
-                function poll(fn, interval, timeout) {
-                    stopPolling(timeout);
-                    interval = interval || 1000;
-                    var next = function (delay) {
-                        delay = delay || interval;
-                        interval = delay;
-                        return setTimeout(function () {
-                            fn(next, delay);
-                        }, delay);
-                    };
-                    return next();
-                }
-                utils.poll = poll;
-                function stopPolling(timeout) {
-                    if (timeout)
-                        clearTimeout(timeout);
-                }
-                utils.stopPolling = stopPolling;
-                function parseString(s) {
-                    return s ? s.toString() : '';
-                }
-                utils.parseString = parseString;
-                function parseNumber(n) {
-                    if (!n)
-                        return 0;
-                    n = parseFloat(n);
-                    return isNan(n) ? 0 : n;
-                }
-                utils.parseNumber = parseNumber;
-                function isNodeJS() {
-                    return (typeof process !== 'undefined');
-                }
-                utils.isNodeJS = isNodeJS;
-                function isBrowser() {
-                    return (typeof window !== 'undefined');
-                }
-                utils.isBrowser = isBrowser;
-            })(utils = core.utils || (core.utils = {}));
-        })(core = sdk.core || (sdk.core = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="./Log.ts" />
-/// <reference path="./Utils.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var core;
-        (function (core) {
-            /**
-             * @see https://github.com/Microsoft/TypeScript/issues/275
-             */
-            var Observable = (function () {
-                function Observable() {
-                    if (!(this instanceof Observable))
-                        throw new Error('Observable(): New operator was omitted');
-                    this.off();
-                }
-                Observable.prototype.hasListeners = function (event) {
-                    return (event in this._listeners);
-                };
-                Observable.prototype.on = function (events, callback) {
-                    var _this = this;
-                    if (typeof events == 'string')
-                        events = [events];
-                    if (!events)
-                        throw new Error('No events to subscribe to');
-                    if (typeof callback !== 'function')
-                        throw new Error('Callback must be a function');
-                    events.forEach(function (event) {
-                        if (!_this.hasListeners(event))
-                            _this._listeners[event] = [];
-                        _this._listeners[event].push(callback);
-                    });
-                    return this;
-                };
-                Observable.prototype.emit = function (event) {
-                    var _this = this;
-                    var args = [];
-                    for (var _i = 1; _i < arguments.length; _i++) {
-                        args[_i - 1] = arguments[_i];
-                    }
-                    var result = null;
-                    if (!this.hasListeners(event))
-                        return null;
-                    this._listeners[event].some(function (callback) {
-                        result = callback.apply(_this, args);
-                        return (result === false);
-                    });
-                    return result;
-                };
-                Observable.prototype.off = function (event, callback) {
-                    var _this = this;
-                    if (!event) {
-                        this._listeners = {};
-                    }
-                    else {
-                        if (!callback) {
-                            delete this._listeners[event];
-                        }
-                        else {
-                            if (!this.hasListeners(event))
-                                return this;
-                            this._listeners[event].forEach(function (cb, i) {
-                                if (cb === callback)
-                                    delete _this._listeners[event][i];
-                            });
-                        }
-                    }
-                    return this;
-                };
-                Observable.prototype.destroy = function () {
-                    this.off();
-                    core.log.debug('Observable.destroy(): Listeners were destroyed');
-                    return this;
-                };
-                return Observable;
-            })();
-            core.Observable = Observable;
-        })(core = sdk.core || (sdk.core = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="./Observable.ts" />
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var core;
-        (function (core) {
-            var PageVisibility = (function (_super) {
-                __extends(PageVisibility, _super);
-                function PageVisibility() {
-                    var _this = this;
-                    _super.call(this);
-                    this.events = {
-                        change: 'change'
-                    };
-                    var hidden = "hidden", onchange = function (evt) {
-                        evt = evt || window.event;
-                        var v = 'visible', h = 'hidden', evtMap = {
-                            focus: v, focusin: v, pageshow: v, blur: h, focusout: h, pagehide: h
-                        };
-                        _this._visible = (evt.type in evtMap) ? evtMap[evt.type] == v : !document[hidden];
-                        _this.emit(_this.events.change, _this._visible);
-                    };
-                    this._visible = true;
-                    if (typeof document == 'undefined' || typeof window == 'undefined')
-                        return;
-                    // Standards:
-                    if (hidden in document)
-                        document.addEventListener("visibilitychange", onchange);
-                    else if ((hidden = "mozHidden") in document)
-                        document.addEventListener("mozvisibilitychange", onchange);
-                    else if ((hidden = "webkitHidden") in document)
-                        document.addEventListener("webkitvisibilitychange", onchange);
-                    else if ((hidden = "msHidden") in document)
-                        document.addEventListener("msvisibilitychange", onchange);
-                    else if ('onfocusin' in document)
-                        document.onfocusin = document.onfocusout = onchange;
-                    else
-                        window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onchange;
-                }
-                PageVisibility.prototype.visible = function () {
-                    return this._visible;
-                };
-                return PageVisibility;
-            })(core.Observable);
-            core.PageVisibility = PageVisibility;
-        })(core = sdk.core || (sdk.core = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../externals.d.ts" />
-/// <reference path="../core/Observable.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var mocks;
-        (function (mocks) {
-            var Mock = (function () {
-                function Mock(method, path, json, status, statusText, delay) {
-                    this._method = method.toUpperCase();
-                    this._path = path;
-                    this._json = json || {};
-                    this._delay = delay || 10;
-                    this._status = status || 200;
-                    this._statusText = statusText || 'OK';
-                }
-                Mock.prototype.path = function () {
-                    return this._path;
-                };
-                Mock.prototype.method = function () {
-                    return this._method;
-                };
-                Mock.prototype.test = function (request) {
-                    return request.url.indexOf(this._path) > -1 &&
-                        request.method.toUpperCase() == this._method;
-                };
-                Mock.prototype.getResponse = function (request) {
-                    var _this = this;
-                    return new sdk.externals._Promise(function (resolve, reject) {
-                        setTimeout(function () {
-                            resolve(_this.createResponse(_this._json));
-                        }, _this._delay);
-                    });
-                };
-                Mock.prototype.createResponse = function (json, init) {
-                    init = init || {};
-                    init.status = init.status || this._status;
-                    init.statusText = init.statusText || this._statusText;
-                    var str = JSON.stringify(json), res = sdk.http.Client.createResponse(str, init);
-                    res.headers.set(sdk.http.ApiResponse.contentType, sdk.http.ApiResponse.jsonContentType);
-                    return res;
-                };
-                return Mock;
-            })();
-            mocks.Mock = Mock;
-        })(mocks = sdk.mocks || (sdk.mocks = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="./Mock.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var mocks;
-        (function (mocks) {
-            var Registry = (function () {
-                function Registry() {
-                    this._mocks = [];
-                }
-                Registry.prototype.add = function (mock) {
-                    this._mocks.push(mock);
-                    return this;
-                };
-                Registry.prototype.clear = function () {
-                    this._mocks = [];
-                    return this;
-                };
-                Registry.prototype.find = function (request) {
-                    //console.log('Registry is looking for', request);
-                    var mock = this._mocks.shift();
-                    if (!mock)
-                        throw new Error('No mock in registry for request ' + request.method + ' ' + request.url);
-                    if (!mock.test(request))
-                        throw new Error('Wrong request ' + request.method + ' ' + request.url +
-                            ' for expected mock ' + mock.method() + ' ' + mock.path());
-                    return mock;
-                };
-                Registry.prototype.apiCall = function (method, path, response, status, statusText) {
-                    this.add(new mocks.Mock(method, path, response, status, statusText));
-                    return this;
-                };
-                Registry.prototype.authentication = function () {
-                    this.apiCall('POST', '/restapi/oauth/token', {
-                        'access_token': 'ACCESS_TOKEN',
-                        'token_type': 'bearer',
-                        'expires_in': 3600,
-                        'refresh_token': 'REFRESH_TOKEN',
-                        'refresh_token_expires_in': 60480,
-                        'scope': 'SMS RCM Foo Boo',
-                        'expireTime': new Date().getTime() + 3600000
-                    });
-                    return this;
-                };
-                Registry.prototype.logout = function () {
-                    this.apiCall('POST', '/restapi/oauth/revoke', {});
-                    return this;
-                };
-                Registry.prototype.presenceLoad = function (id) {
-                    this.apiCall('GET', '/restapi/v1.0/account/~/extension/' + id + '/presence', {
-                        "uri": "https://platform.ringcentral.com/restapi/v1.0/account/123/extension/" + id + "/presence",
-                        "extension": {
-                            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/123/extension/" + id,
-                            "id": id,
-                            "extensionNumber": "101"
-                        },
-                        "activeCalls": [],
-                        "presenceStatus": "Available",
-                        "telephonyStatus": "Ringing",
-                        "userStatus": "Available",
-                        "dndStatus": "TakeAllCalls",
-                        "extensionId": id
-                    });
-                    return this;
-                };
-                Registry.prototype.subscribeGeneric = function (expiresIn) {
-                    expiresIn = expiresIn || 15 * 60 * 60;
-                    var date = new Date();
-                    this.apiCall('POST', '/restapi/v1.0/subscription', {
-                        'eventFilters': [
-                            '/restapi/v1.0/account/~/extension/~/presence'
-                        ],
-                        'expirationTime': new Date(date.getTime() + (expiresIn * 1000)).toISOString(),
-                        'expiresIn': expiresIn,
-                        'deliveryMode': {
-                            'transportType': 'PubNub',
-                            'encryption': false,
-                            'address': '123_foo',
-                            'subscriberKey': 'sub-c-foo',
-                            'secretKey': 'sec-c-bar'
-                        },
-                        'id': 'foo-bar-baz',
-                        'creationTime': date.toISOString(),
-                        'status': 'Active',
-                        'uri': 'https://platform.ringcentral.com/restapi/v1.0/subscription/foo-bar-baz'
-                    });
-                    return this;
-                };
-                Registry.prototype.subscribeOnPresence = function (id, detailed) {
-                    id = id || '1';
-                    var date = new Date();
-                    this.apiCall('POST', '/restapi/v1.0/subscription', {
-                        'eventFilters': ['/restapi/v1.0/account/~/extension/' + id + '/presence' + (detailed ? '?detailedTelephonyState=true' : '')],
-                        'expirationTime': new Date(date.getTime() + (15 * 60 * 60 * 1000)).toISOString(),
-                        'deliveryMode': {
-                            'transportType': 'PubNub',
-                            'encryption': true,
-                            'address': '123_foo',
-                            'subscriberKey': 'sub-c-foo',
-                            'secretKey': 'sec-c-bar',
-                            'encryptionAlgorithm': 'AES',
-                            'encryptionKey': 'VQwb6EVNcQPBhE/JgFZ2zw=='
-                        },
-                        'creationTime': date.toISOString(),
-                        'id': 'foo-bar-baz',
-                        'status': 'Active',
-                        'uri': 'https://platform.ringcentral.com/restapi/v1.0/subscription/foo-bar-baz'
-                    });
-                    return this;
-                };
-                Registry.prototype.tokenRefresh = function (failure) {
-                    if (!failure) {
-                        this.apiCall('POST', '/restapi/oauth/token', {
-                            'access_token': 'ACCESS_TOKEN_FROM_REFRESH',
-                            'token_type': 'bearer',
-                            'expires_in': 3600,
-                            'refresh_token': 'REFRESH_TOKEN_FROM_REFRESH',
-                            'refresh_token_expires_in': 60480,
-                            'scope': 'SMS RCM Foo Boo'
-                        });
-                    }
-                    else {
-                        this.apiCall('POST', '/restapi/oauth/token', {
-                            'message': 'Wrong token',
-                            'error_description': 'Wrong token',
-                            'description': 'Wrong token'
-                        }, 400);
-                    }
-                    return this;
-                };
-                return Registry;
-            })();
-            mocks.Registry = Registry;
-        })(mocks = sdk.mocks || (sdk.mocks = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../externals.d.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var externals;
-        (function (externals) {
-            externals._Promise;
-            externals._fetch;
-            externals._Response;
-            externals._Request;
-            externals._Headers;
-            externals._PUBNUB;
-            function get() {
-                var root = Function('return this')();
-                if (!externals._PUBNUB)
-                    externals._PUBNUB = root.PUBNUB;
-                if (!externals._Promise)
-                    externals._Promise = root.Promise;
-                if (!externals._fetch)
-                    externals._fetch = root.fetch;
-                if (!externals._Headers)
-                    externals._Headers = root.Headers;
-                if (!externals._Request)
-                    externals._Request = root.Request;
-                if (!externals._Response)
-                    externals._Response = root.Response;
-                return externals;
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["SDK"] = factory();
+	else
+		root["RingCentral"] = root["RingCentral"] || {}, root["RingCentral"]["SDK"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "/build/";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(1);
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _coreUtils = __webpack_require__(2);
+
+var Utils = _interopRequireWildcard(_coreUtils);
+
+var _coreCache = __webpack_require__(11);
+
+var _coreCache2 = _interopRequireDefault(_coreCache);
+
+var _coreExternals = __webpack_require__(3);
+
+var Externals = _interopRequireWildcard(_coreExternals);
+
+var _coreObservable = __webpack_require__(12);
+
+var _coreObservable2 = _interopRequireDefault(_coreObservable);
+
+var _httpClient = __webpack_require__(13);
+
+var _httpClient2 = _interopRequireDefault(_httpClient);
+
+var _httpApiResponse = __webpack_require__(15);
+
+var _httpApiResponse2 = _interopRequireDefault(_httpApiResponse);
+
+var _httpUtils = __webpack_require__(14);
+
+var HttpUtils = _interopRequireWildcard(_httpUtils);
+
+var _mocksClientMock = __webpack_require__(16);
+
+var _mocksClientMock2 = _interopRequireDefault(_mocksClientMock);
+
+var _mocksMock = __webpack_require__(18);
+
+var _mocksMock2 = _interopRequireDefault(_mocksMock);
+
+var _mocksRegistry = __webpack_require__(17);
+
+var _mocksRegistry2 = _interopRequireDefault(_mocksRegistry);
+
+var _platformPlatform = __webpack_require__(19);
+
+var _platformPlatform2 = _interopRequireDefault(_platformPlatform);
+
+var _platformAuth = __webpack_require__(21);
+
+var _platformAuth2 = _interopRequireDefault(_platformAuth);
+
+var _platformQueue = __webpack_require__(20);
+
+var _platformQueue2 = _interopRequireDefault(_platformQueue);
+
+var _pubnubPubnubFactory = __webpack_require__(22);
+
+var _pubnubPubnubFactory2 = _interopRequireDefault(_pubnubPubnubFactory);
+
+var _subscriptionSubscription = __webpack_require__(24);
+
+var _subscriptionSubscription2 = _interopRequireDefault(_subscriptionSubscription);
+
+__webpack_require__(25);
+
+var SDK = (function () {
+    _createClass(SDK, null, [{
+        key: 'version',
+        value: '2.0.0',
+        enumerable: true
+    }, {
+        key: 'server',
+        value: {
+            sandbox: 'https://platform.devtest.ringcentral.com',
+            production: 'https://platform.ringcentral.com'
+        },
+
+        /**
+         * @constructor
+         * @param {object} [options]
+         * @param {string} [options.server]
+         * @param {string} [options.cachePrefix]
+         * @param {string} [options.appSecret]
+         * @param {string} [options.appKey]
+         * @param {string} [options.appName]
+         * @param {string} [options.appVersion]
+         * @param {string} [options.pubnubFactory]
+         * @param {string} [options.client]
+         */
+        enumerable: true
+    }]);
+
+    function SDK(options) {
+        _classCallCheck(this, SDK);
+
+        options = options || {};
+
+        this._cache = new _coreCache2['default'](Externals.localStorage, options.cachePrefix);
+
+        this._client = options.client || new _httpClient2['default']();
+
+        this._platform = new _platformPlatform2['default'](this._client, this._cache, options.server, options.appKey, options.appSecret);
+
+        this._pubnubFactory = options.pubnubFactory || Externals.PUBNUB;
+    }
+
+    /**
+     * @return {Platform}
+     */
+
+    SDK.prototype.platform = function platform() {
+        return this._platform;
+    };
+
+    /**
+     * @return {Subscription}
+     */
+
+    SDK.prototype.createSubscription = function createSubscription() {
+        return new _subscriptionSubscription2['default'](this._pubnubFactory, this._platform, this._cache);
+    };
+
+    /**
+     * @return {Cache}
+     */
+
+    SDK.prototype.cache = function cache() {
+        return this._cache;
+    };
+
+    _createClass(SDK, null, [{
+        key: 'core',
+        value: {
+            Cache: _coreCache2['default'],
+            Observable: _coreObservable2['default'],
+            Utils: Utils,
+            Externals: Externals
+        },
+        enumerable: true
+    }, {
+        key: 'http',
+        value: {
+            Client: _httpClient2['default'],
+            ApiResponse: _httpApiResponse2['default'],
+            Utils: HttpUtils
+        },
+        enumerable: true
+    }, {
+        key: 'platform',
+        value: {
+            Auth: _platformAuth2['default'],
+            Platform: _platformPlatform2['default'],
+            Queue: _platformQueue2['default']
+        },
+        enumerable: true
+    }, {
+        key: 'subscription',
+        value: {
+            Subscription: _subscriptionSubscription2['default']
+        },
+        enumerable: true
+    }, {
+        key: 'mocks',
+        value: {
+            Client: _mocksClientMock2['default'],
+            Registry: _mocksRegistry2['default'],
+            Mock: _mocksMock2['default']
+        },
+        enumerable: true
+    }, {
+        key: 'pubnub',
+        value: {
+            PubnubMockFactory: _pubnubPubnubFactory2['default']
+        },
+        enumerable: true
+    }]);
+
+    return SDK;
+})();
+
+exports['default'] = SDK;
+module.exports = exports['default'];
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+exports.queryStringify = queryStringify;
+exports.parseQueryString = parseQueryString;
+exports.isFunction = isFunction;
+exports.isArray = isArray;
+exports.poll = poll;
+exports.stopPolling = stopPolling;
+exports.isNodeJS = isNodeJS;
+exports.isBrowser = isBrowser;
+exports.delay = delay;
+
+var _ExternalsJs = __webpack_require__(3);
+
+/**
+ * TODO Replace with something better
+ * @see https://github.com/joyent/node/blob/master/lib/querystring.js
+ * @param {object} parameters
+ * @returns {string}
+ */
+
+function queryStringify(parameters) {
+
+    var array = [];
+
+    parameters = parameters || {};
+
+    Object.keys(parameters).forEach(function (k) {
+
+        var v = parameters[k];
+
+        if (isArray(v)) {
+            v.forEach(function (vv) {
+                array.push(encodeURIComponent(k) + '=' + encodeURIComponent(vv));
+            });
+        } else {
+            array.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
+        }
+    });
+
+    return array.join('&');
+}
+
+/**
+ * TODO Replace with something better
+ * @see https://github.com/joyent/node/blob/master/lib/querystring.js
+ * @param {string} queryString
+ * @returns {object}
+ */
+
+function parseQueryString(queryString) {
+
+    var argsParsed = {};
+
+    queryString.split('&').forEach(function (arg) {
+
+        arg = decodeURIComponent(arg);
+
+        if (arg.indexOf('=') == -1) {
+
+            argsParsed[arg.trim()] = true;
+        } else {
+
+            var pair = arg.split('='),
+                key = pair[0].trim(),
+                value = pair[1].trim();
+
+            if (key in argsParsed) {
+                if (key in argsParsed && !isArray(argsParsed[key])) argsParsed[key] = [argsParsed[key]];
+                argsParsed[key].push(value);
+            } else {
+                argsParsed[key] = value;
             }
-            externals.get = get;
-        })(externals = sdk.externals || (sdk.externals = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../externals.d.ts" />
-/// <reference path="../core/Utils.ts" />
-/// <reference path="../core/Observable.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var http;
-        (function (http) {
-            /**
-             * @TODO Bring back tests
-             */
-            var ApiResponse = (function () {
-                function ApiResponse(request, response, responseText) {
-                    this._text = responseText;
-                    this._request = request;
-                    this._response = response;
-                    this._json = null;
-                    this._multipartTransactions = null;
-                }
-                ApiResponse.prototype.response = function () {
-                    return this._response;
-                };
-                ApiResponse.prototype.request = function () {
-                    return this._request;
-                };
-                ApiResponse.prototype.ok = function () {
-                    return this._response && this._response.ok;
-                };
-                ApiResponse.prototype.text = function () {
-                    return this._text;
-                };
-                ApiResponse.prototype.json = function () {
-                    if (!this._isJson())
-                        throw new Error('Response is not JSON');
-                    if (!this._json) {
-                        this._json = this._text ? JSON.parse(this._text) : null;
-                    }
-                    return this._json;
-                };
-                ApiResponse.prototype.error = function (skipOKCheck) {
-                    if (this.ok() && !skipOKCheck)
-                        return null;
-                    var message = (this._response && this._response.status ? this._response.status + ' ' : '') +
-                        (this._response && this._response.statusText ? this._response.statusText : '');
-                    try {
-                        var json = this.json();
-                        if (json.message)
-                            message = json.message;
-                        if (json.error_description)
-                            message = json.error_description;
-                        if (json.description)
-                            message = json.description;
-                    }
-                    catch (ex) { }
-                    return message;
-                };
-                ApiResponse.prototype.multipart = function () {
-                    if (!this._isMultipart())
-                        throw new Error('Response is not multipart');
-                    if (null === this._multipartTransactions) {
-                        // Step 1. Split multipart response
-                        if (!this._text)
-                            throw new Error('No response body');
-                        var boundary = this._response.headers.get('Content-Type').match(/boundary=([^;]+)/i)[1];
-                        if (!boundary)
-                            throw new Error('Cannot find boundary');
-                        var parts = this._text.toString().split(ApiResponse.boundarySeparator + boundary);
-                        if (parts[0].trim() === '')
-                            parts.shift();
-                        if (parts[parts.length - 1].trim() == ApiResponse.boundarySeparator)
-                            parts.pop();
-                        if (parts.length < 1)
-                            throw new Error('No parts in body');
-                        // Step 2. Parse status info
-                        var statusInfo = ApiResponse.create(parts.shift(), this._response.status, this._response.statusText);
-                        // Step 3. Parse all other parts
-                        this._multipartTransactions = parts.map(function (part, i) {
-                            var status = statusInfo.json().response[i].status;
-                            return ApiResponse.create(part, status);
-                        });
-                    }
-                    return this._multipartTransactions;
-                };
-                /**
-                 * Short-hand method to get only JSON content of responses
-                 */
-                ApiResponse.prototype.multipartJson = function () {
-                    return this.multipart().map(function (res) {
-                        return res.json();
-                    });
-                };
-                ApiResponse.prototype._isContentType = function (contentType) {
-                    return this._getContentType().indexOf(contentType) > -1;
-                };
-                ApiResponse.prototype._getContentType = function () {
-                    return this._response.headers.get(ApiResponse.contentType) || '';
-                };
-                ApiResponse.prototype._isMultipart = function () {
-                    return this._isContentType(ApiResponse.multipartContentType);
-                };
-                ApiResponse.prototype._isUrlEncoded = function () {
-                    return this._isContentType(ApiResponse.urlencodedContentType);
-                };
-                ApiResponse.prototype._isJson = function () {
-                    return this._isContentType(ApiResponse.jsonContentType);
-                };
-                /**
-                 * Method is used to create Transaction objects from string parts of multipart/mixed response
-                 * @param text
-                 * @param status
-                 * @param statusText
-                 * @return {ApiResponse}
-                 */
-                ApiResponse.create = function (text, status, statusText) {
-                    status = status || 200;
-                    statusText = statusText || 'OK';
-                    text = text.replace(/\r/g, '');
-                    var headers = new sdk.externals._Headers(), headersAndBody = text.split(ApiResponse.bodySeparator), headersText = (headersAndBody.length > 1) ? headersAndBody.shift() : '';
-                    text = headersAndBody.join(ApiResponse.bodySeparator);
-                    (headersText || '')
-                        .split('\n')
-                        .forEach(function (header) {
-                        var split = header.trim().split(ApiResponse.headerSeparator), key = split.shift().trim(), value = split.join(ApiResponse.headerSeparator).trim();
-                        if (key)
-                            headers.append(key, value);
-                    });
-                    return new ApiResponse(null, http.Client.createResponse(text, {
-                        headers: headers,
-                        status: status,
-                        statusText: statusText
-                    }), text);
-                };
-                ApiResponse.contentType = 'Content-Type';
-                ApiResponse.jsonContentType = 'application/json';
-                ApiResponse.multipartContentType = 'multipart/mixed';
-                ApiResponse.urlencodedContentType = 'application/x-www-form-urlencoded';
-                ApiResponse.headerSeparator = ':';
-                ApiResponse.bodySeparator = '\n\n';
-                ApiResponse.boundarySeparator = '--';
-                return ApiResponse;
-            })();
-            http.ApiResponse = ApiResponse;
-        })(http = sdk.http || (sdk.http = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../externals.d.ts" />
-/// <reference path="../core/Utils.ts" />
-/// <reference path="../core/Observable.ts" />
-/// <reference path="../mocks/Registry.ts" />
-/// <reference path="../externals/Externals.ts" />
-/// <reference path="./ApiResponse.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var http;
-        (function (http) {
-            var allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
-            var Client = (function (_super) {
-                __extends(Client, _super);
-                function Client() {
-                    _super.apply(this, arguments);
-                    this.events = {
-                        beforeRequest: 'beforeRequest',
-                        requestSuccess: 'requestSuccess',
-                        requestError: 'requestError' // means that request failed completely
-                    };
-                }
-                Client.prototype.sendRequest = function (request) {
-                    var _this = this;
-                    var res = new http.ApiResponse(request); //FIXME Potential leak
-                    return new sdk.externals._Promise(function (resolve) {
-                        //TODO Stop request if listeners return false
-                        _this.emit(_this.events.beforeRequest, res);
-                        resolve(_this._loadResponse(request));
-                    })
-                        .then(function (response) {
-                        res['_response'] = Client.cloneResponse(response);
-                        return response.text();
-                    })
-                        .then(function (text) {
-                        res['_text'] = text;
-                        if (!res.ok())
-                            throw Client.makeError(new Error('Response has unsuccessful status'), res);
-                        _this.emit(_this.events.requestSuccess, res);
-                        return res;
-                    })
-                        .catch(function (e) {
-                        if (!e.apiResponse) {
-                            // we don't pass response since most likely it's parsing caused an error
-                            e = Client.makeError(e, res);
-                        }
-                        _this.emit(_this.events.requestError, e);
-                        throw e;
-                    });
-                };
-                Client.prototype._loadResponse = function (request) {
-                    return sdk.externals._fetch.call(null, request);
-                };
-                /**
-                 * Wraps the JS Error object with transaction information
-                 * @param {Error} e
-                 * @param {ApiResponse} apiResponse
-                 * @return {IApiError}
-                 */
-                Client.makeError = function (e, apiResponse) {
-                    var error = e;
-                    // Wrap only if regular error
-                    if (!error.hasOwnProperty('apiResponse') && !error.hasOwnProperty('originalMessage')) {
-                        error.apiResponse = apiResponse;
-                        error.originalMessage = error.message;
-                        error.message = (apiResponse && apiResponse.error(true)) || error.originalMessage;
-                    }
-                    return error;
-                };
-                /**
-                 * TODO Wait for
-                 *   - https://github.com/github/fetch/issues/185
-                 *   - https://github.com/bitinn/node-fetch/issues/34
-                 * @param {Response} response
-                 * @return {Response}
-                 */
-                Client.cloneResponse = function (response) {
-                    if (sdk.core.utils.isFunction(response.clone))
-                        return response.clone();
-                    var body = '';
-                    if (response.hasOwnProperty('_bodyInit'))
-                        body = response['_bodyInit'];
-                    if (response.hasOwnProperty('_bodyText'))
-                        body = response['_bodyText'];
-                    if (response.hasOwnProperty('_bodyBlob'))
-                        body = response['_bodyBlob'].slice();
-                    if (response.hasOwnProperty('_bodyFormData'))
-                        body = response['_bodyFormData'];
-                    if (response.hasOwnProperty('_raw'))
-                        body = response['_raw'].join('');
-                    var clone = new sdk.externals._Response(body, response);
-                    if (response.hasOwnProperty('body'))
-                        clone['body'] = response['body']; // accessing non-standard properties
-                    return clone;
-                };
-                /**
-                 * Creates a response
-                 * @param stringBody
-                 * @param init
-                 * @return {Response}
-                 */
-                Client.createResponse = function (stringBody, init) {
-                    init = init || {};
-                    return new sdk.externals._Response(stringBody, init);
-                };
-                Client.createRequest = function (input, init) {
-                    init = init || {};
-                    var body = init.body;
-                    // Assign request with empty body, Github's fetch throws errors if it cannot recognize the body type
-                    var req = new sdk.externals._Request(input, sdk.core.utils.extend({}, init, { body: null }));
-                    if (!req.url)
-                        throw new Error('Url is not defined');
-                    if (!req.method)
-                        req.method = 'GET';
-                    if (req.method && allowedMethods.indexOf(req.method) < 0)
-                        throw new Error('Method has wrong value: ' + req.method);
-                    if (!req.headers.has('Accept'))
-                        req.headers.set('Accept', 'application/json');
-                    // Serialize body
-                    if (sdk.core.utils.isPlainObject(init.body) || !init.body) {
-                        if (!req.headers.has('Content-Type'))
-                            req.headers.set('Content-Type', 'application/json');
-                        var contentType = req.headers.get('Content-Type');
-                        if (contentType.indexOf('application/json') > -1) {
-                            body = JSON.stringify(init.body);
-                        }
-                        else if (contentType.indexOf('application/x-www-form-urlencoded') > -1) {
-                            body = sdk.core.utils.queryStringify(init.body);
-                        }
-                    }
-                    req.credentials = 'include';
-                    req.mode = 'cors';
-                    if (init.query) {
-                        req.url = req.url + (req.url.indexOf('?') > -1 ? '&' : '?') + sdk.core.utils.queryStringify(init.query);
-                    }
-                    // Create another request with encoded body
-                    req = new sdk.externals._Request(req.url, sdk.core.utils.extend(req, { body: body }));
-                    // Keep the original body accessible directly (for mocks)
-                    req.body = init.body;
-                    return req;
-                };
-                return Client;
-            })(sdk.core.Observable);
-            http.Client = Client;
-        })(http = sdk.http || (sdk.http = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../externals.d.ts" />
-/// <reference path="../core/Utils.ts" />
-/// <reference path="../core/Utils.ts" />
-/// <reference path="../externals/Externals.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var platform;
-        (function (platform) {
-            var Queue = (function () {
-                function Queue(cache, cacheId) {
-                    this._cache = cache;
-                    this._cacheId = cacheId;
-                    this.setPollInterval(250);
-                    this.setReleaseTimeout(5000); // If queue was not released then force it to do so after some timeout
-                }
-                Queue.prototype.isPaused = function () {
-                    var storage = this._cache, cacheId = this._cacheId, time = storage.getItem(cacheId);
-                    return !!time && Date.now() - parseInt(time) < this._releaseTimeout;
-                };
-                Queue.prototype.pause = function () {
-                    this._cache.setItem(this._cacheId, Date.now());
-                    return this;
-                };
-                Queue.prototype.resume = function () {
-                    this._cache.removeItem(this._cacheId);
-                    return this;
-                };
-                Queue.prototype.poll = function () {
-                    var _this = this;
-                    if (this._promise)
-                        return this._promise;
-                    this._promise = new sdk.externals._Promise(function (resolve, reject) {
-                        sdk.core.utils.poll(function (next) {
-                            if (_this.isPaused())
-                                return next();
-                            _this._promise = null;
-                            _this.resume(); // this is actually not needed but why not
-                            resolve(null);
-                        }, _this._pollInterval);
-                    });
-                    return this._promise;
-                };
-                Queue.prototype.releaseTimeout = function () {
-                    return this._releaseTimeout;
-                };
-                Queue.prototype.pollInterval = function () {
-                    return this._pollInterval;
-                };
-                Queue.prototype.setReleaseTimeout = function (releaseTimeout) {
-                    this._releaseTimeout = releaseTimeout;
-                    return this;
-                };
-                Queue.prototype.setPollInterval = function (pollInterval) {
-                    this._pollInterval = pollInterval;
-                    return this;
-                };
-                return Queue;
-            })();
-            platform.Queue = Queue;
-        })(platform = sdk.platform || (sdk.platform = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../externals.d.ts" />
-/// <reference path="../core/Utils.ts" />
-/// <reference path="../core/Observable.ts" />
-/// <reference path="../core/Cache.ts" />
-/// <reference path="../core/Log" />
-/// <reference path="../http/Client.ts" />
-/// <reference path="../http/ApiResponse.ts" />
-/// <reference path="../externals/Externals.ts" />
-/// <reference path="./Queue.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var platform;
-        (function (platform) {
-            var Platform = (function (_super) {
-                __extends(Platform, _super);
-                function Platform(client, cache, server, appKey, appSecret) {
-                    _super.call(this);
-                    this._refreshDelayMs = 100;
-                    this._clearCacheOnRefreshError = true;
-                    this._cacheId = 'platform';
-                    this.events = {
-                        accessViolation: 'accessViolation',
-                        logoutSuccess: 'logoutSuccess',
-                        logoutError: 'logoutError',
-                        authorizeSuccess: 'authorizeSuccess',
-                        authorizeError: 'authorizeError',
-                        refreshSuccess: 'refreshSuccess',
-                        refreshError: 'refreshError'
-                    };
-                    this._server = server;
-                    this._appKey = appKey;
-                    this._appSecret = appSecret;
-                    this._cache = cache;
-                    this._client = client;
-                    this._queue = new platform.Queue(this._cache, this._cacheId + '-refresh');
-                    this._auth = new platform.Auth(this._cache, this._cacheId);
-                }
-                Platform.prototype.auth = function () {
-                    return this._auth;
-                };
-                Platform.prototype.createUrl = function (path, options) {
-                    path = path || '';
-                    options = options || {};
-                    var builtUrl = '', hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
-                    if (options.addServer && !hasHttp)
-                        builtUrl += this._server;
-                    if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp)
-                        builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
-                    builtUrl += path;
-                    if (options.addMethod || options.addToken)
-                        builtUrl += (path.indexOf('?') > -1 ? '&' : '?');
-                    if (options.addMethod)
-                        builtUrl += '_method=' + options.addMethod;
-                    if (options.addToken)
-                        builtUrl += (options.addMethod ? '&' : '') + 'access_token=' + this._auth.accessToken();
-                    return builtUrl;
-                };
-                Platform.prototype.authUrl = function (options) {
-                    options = options || {};
-                    return this.createUrl(Platform._authorizeEndpoint + '?' + sdk.core.utils.queryStringify({
-                        'response_type': 'code',
-                        'redirect_uri': options.redirectUri || '',
-                        'client_id': this._appKey,
-                        'state': options.state || '',
-                        'brand_id': options.brandId || '',
-                        'display': options.display || '',
-                        'prompt': options.prompt || ''
-                    }), { addServer: true });
-                };
-                Platform.prototype.parseAuthRedirectUrl = function (url) {
-                    var qs = sdk.core.utils.parseQueryString(url.split('?').reverse()[0]), error = qs.error_description || qs.error;
-                    if (error) {
-                        var e = new Error(error);
-                        e.error = qs.error;
-                        throw e;
-                    }
-                    return qs;
-                };
-                Platform.prototype.loggedIn = function () {
-                    return this._ensureAuthentication()
-                        .then(function () {
-                        return true;
-                    })
-                        .catch(function () {
-                        return false;
-                    });
-                };
-                Platform.prototype.login = function (options) {
-                    var _this = this;
-                    options = options || {};
-                    options.remember = options.remember || false;
-                    var body = {
-                        "access_token_ttl": Platform._accessTokenTtl,
-                        "refresh_token_ttl": options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
-                    };
-                    if (!options.code) {
-                        body.grant_type = 'password';
-                        body.username = options.username;
-                        body.password = options.password;
-                        body.extension = options.extension || '';
-                    }
-                    else if (options.code) {
-                        body.grant_type = 'authorization_code';
-                        body.code = options.code;
-                        body.redirect_uri = options.redirectUri;
-                    }
-                    if (options.endpointId)
-                        body.endpoint_id = options.endpointId;
-                    return this._tokenRequest(Platform._tokenEndpoint, body).then(function (res) {
-                        _this._auth
-                            .setData(res.json())
-                            .setRemember(options.remember);
-                        _this.emit(_this.events.authorizeSuccess, res);
-                        return res;
-                    }).catch(function (e) {
-                        _this._cache.clean();
-                        _this.emit(_this.events.authorizeError, e);
-                        throw e;
-                    });
-                };
-                Platform.prototype.refresh = function () {
-                    var _this = this;
-                    var refresh = new sdk.externals._Promise(function (resolve, reject) {
-                        if (_this._queue.isPaused()) {
-                            return resolve(_this._refreshPolling());
-                        }
-                        _this._queue.pause();
-                        // Make sure all existing AJAX calls had a chance to reach the server
-                        setTimeout(function () {
-                            sdk.core.log.debug('Platform.refresh(): Performing token refresh (access token', _this._auth.accessToken(), ', refresh token', _this._auth.refreshToken(), ')');
-                            // Perform sanity checks
-                            if (!_this._auth.refreshToken())
-                                return reject(new Error('Refresh token is missing'));
-                            if (!_this._auth.refreshTokenValid())
-                                return reject(new Error('Refresh token has expired'));
-                            if (!_this._queue.isPaused())
-                                return reject(new Error('Queue was resumed before refresh call'));
-                            resolve(_this._tokenRequest(Platform._tokenEndpoint, {
-                                "grant_type": "refresh_token",
-                                "refresh_token": _this._auth.refreshToken(),
-                                "access_token_ttl": Platform._accessTokenTtl,
-                                "refresh_token_ttl": _this._auth.remember() ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
-                            }));
-                        }, _this._refreshDelayMs);
-                    });
-                    return refresh.then(function (res) {
-                        // This means refresh has happened elsewhere and we are here because of timeout
-                        if (res && res.json && res.json()) {
-                            var json = res.json();
-                            sdk.core.log.info('Platform.refresh(): Token was refreshed', res);
-                            if (!json.refresh_token || !json.access_token) {
-                                throw sdk.http.Client.makeError(new Error('Malformed OAuth response'), res);
-                            }
-                            _this._auth.setData(json);
-                            _this._queue.resume();
-                        }
-                        _this.emit(_this.events.refreshSuccess, res);
-                        return res;
-                    }).catch(function (e) {
-                        e = sdk.http.Client.makeError(e);
-                        if (_this._clearCacheOnRefreshError) {
-                            _this._cache.clean();
-                        }
-                        _this.emit(_this.events.accessViolation, e);
-                        _this.emit(_this.events.refreshError, e);
-                        throw e;
-                    });
-                };
-                /**
-                 * @returns {Promise}
-                 */
-                Platform.prototype.logout = function () {
-                    var _this = this;
-                    this._queue.pause();
-                    return this._tokenRequest(Platform._revokeEndpoint, {
-                        token: this._auth.accessToken()
-                    }).then(function (res) {
-                        _this._queue.resume();
-                        _this._cache.clean();
-                        _this.emit(_this.events.logoutSuccess, res);
-                        return res;
-                    }).catch(function (e) {
-                        _this._queue.resume();
-                        _this.emit(_this.events.accessViolation, e);
-                        _this.emit(_this.events.logoutError, e);
-                        throw e;
-                    });
-                };
-                Platform.prototype.inflateRequest = function (request, options) {
-                    var _this = this;
-                    options = options || {};
-                    if (options.skipAuthCheck)
-                        return sdk.externals._Promise.resolve(request);
-                    return this
-                        ._ensureAuthentication()
-                        .then(function () {
-                        request.headers.set('Authorization', _this._authHeader());
-                        request.url = _this.createUrl(request.url, { addServer: true });
-                        //TODO Add User-Agent here
-                        return request;
-                    });
-                };
-                Platform.prototype.sendRequest = function (request, options) {
-                    var _this = this;
-                    return this
-                        .inflateRequest(request, options)
-                        .then(function (req) {
-                        return _this._client.sendRequest(req);
-                    })
-                        .catch(function (e) {
-                        // Guard is for errors that come from polling
-                        if (!e.apiResponse || !e.apiResponse.response() || (e.apiResponse.response().status != 401))
-                            throw e;
-                        _this._auth.cancelAccessToken();
-                        return _this.sendRequest(request, options);
-                    });
-                };
-                /**
-                 * General purpose function to send anything to server
-                 */
-                Platform.prototype.send = function (url, options) {
-                    try {
-                        //FIXME https://github.com/bitinn/node-fetch/issues/43
-                        url = this.createUrl(url, { addServer: true });
-                        return this.sendRequest(sdk.http.Client.createRequest(url, options), options);
-                    }
-                    catch (e) {
-                        return sdk.externals._Promise.reject(e);
-                    }
-                };
-                Platform.prototype.get = function (url, options) {
-                    options = options || {};
-                    options.method = 'GET';
-                    return this.send(url, options);
-                };
-                Platform.prototype.post = function (url, options) {
-                    options = options || {};
-                    options.method = 'POST';
-                    return this.send(url, options);
-                };
-                Platform.prototype.put = function (url, options) {
-                    options = options || {};
-                    options.method = 'PUT';
-                    return this.send(url, options);
-                };
-                Platform.prototype['delete'] = function (url, options) {
-                    options = options || {};
-                    options.method = 'DELETE';
-                    return this.send(url, options);
-                };
-                Platform.prototype._tokenRequest = function (path, body) {
-                    return this.send(path, {
-                        skipAuthCheck: true,
-                        body: body,
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Basic ' + this._apiKey(),
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        }
-                    });
-                };
-                Platform.prototype._ensureAuthentication = function () {
-                    if (this._isAccessTokenValid())
-                        return sdk.externals._Promise.resolve(null);
-                    return this.refresh();
-                };
-                Platform.prototype._isAccessTokenValid = function () {
-                    return (this._auth.accessTokenValid() && !this._queue.isPaused());
-                };
-                Platform.prototype._refreshPolling = function () {
-                    var _this = this;
-                    sdk.core.log.warn('Platform.refresh(): Refresh is already in progress, polling started');
-                    return this._queue.poll().then(function () {
-                        if (!_this._isAccessTokenValid()) {
-                            throw new Error('Automatic authentification timeout');
-                        }
-                        return null;
-                    });
-                };
-                Platform.prototype._apiKey = function () {
-                    var apiKey = this._appKey + ':' + this._appSecret;
-                    return (typeof btoa == 'function') ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
-                };
-                Platform.prototype._authHeader = function () {
-                    var token = this._auth.accessToken();
-                    return this._auth.tokenType() + (token ? ' ' + token : '');
-                };
-                Platform._urlPrefix = '/restapi';
-                Platform._apiVersion = 'v1.0';
-                Platform._accessTokenTtl = null; // Platform server by default sets it to 60 * 60 = 1 hour
-                Platform._refreshTokenTtl = 10 * 60 * 60; // 10 hours
-                Platform._refreshTokenTtlRemember = 7 * 24 * 60 * 60; // 1 week
-                Platform._tokenEndpoint = '/restapi/oauth/token';
-                Platform._revokeEndpoint = '/restapi/oauth/revoke';
-                Platform._authorizeEndpoint = '/restapi/oauth/authorize';
-                return Platform;
-            })(sdk.core.Observable);
-            platform.Platform = Platform;
-        })(platform = sdk.platform || (sdk.platform = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../externals.d.ts" />
-/// <reference path="../core/Utils.ts" />
-/// <reference path="../core/Log.ts" />
-/// <reference path="../platform/Platform.ts" />
-/// <reference path="../http/ApiResponse.ts" />
-/// <reference path="../externals/Externals.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var subscription;
-        (function (subscription_1) {
-            var Subscription = (function (_super) {
-                __extends(Subscription, _super);
-                function Subscription(pubnubFactory, platform) {
-                    _super.call(this);
-                    this._renewHandicapMs = 2 * 60 * 1000;
-                    this.events = {
-                        notification: 'notification',
-                        removeSuccess: 'removeSuccess',
-                        removeError: 'removeError',
-                        renewSuccess: 'renewSuccess',
-                        renewError: 'renewError',
-                        subscribeSuccess: 'subscribeSuccess',
-                        subscribeError: 'subscribeError'
-                    };
-                    this._pubnubFactory = pubnubFactory;
-                    this._platform = platform;
-                    this._pubnub = null;
-                    this._eventFilters = [];
-                    this._timeout = null;
-                    this._subscription = null;
-                }
-                Subscription.prototype.alive = function () {
-                    return this._subscription &&
-                        this._subscription.id &&
-                        this._subscription.deliveryMode &&
-                        this._subscription.deliveryMode.subscriberKey &&
-                        this._subscription.deliveryMode.address;
-                };
-                Subscription.prototype.setSubscription = function (subscription) {
-                    this._clearTimeout();
-                    this._subscription = subscription;
-                    if (!this._pubnub)
-                        this._subscribeAtPubnub();
-                    this._setTimeout();
-                    return this;
-                };
-                Subscription.prototype.subscription = function () {
-                    return this._subscription;
-                };
-                /**
-                 * Creates or updates subscription if there is an active one
-                 * @param {{events?:string[]}} [options] New array of events
-                 * @returns {Promise}
-                 */
-                Subscription.prototype.register = function (options) {
-                    if (this.alive()) {
-                        return this.renew(options);
-                    }
-                    else {
-                        return this.subscribe(options);
-                    }
-                };
-                Subscription.prototype.addEvents = function (events) {
-                    this._eventFilters = this._eventFilters.concat(events);
-                    return this;
-                };
-                Subscription.prototype.setEvents = function (events) {
-                    this._eventFilters = events;
-                    return this;
-                };
-                Subscription.prototype.subscribe = function (options) {
-                    var _this = this;
-                    options = options || {};
-                    if (options.events)
-                        this.setEvents(options.events);
-                    this._clearTimeout();
-                    return new sdk.externals._Promise(function (resolve, reject) {
-                        if (!_this._eventFilters || !_this._eventFilters.length)
-                            throw new Error('Events are undefined');
-                        resolve(_this._platform.post('/restapi/v1.0/subscription', {
-                            body: {
-                                eventFilters: _this._getFullEventFilters(),
-                                deliveryMode: {
-                                    transportType: 'PubNub'
-                                }
-                            }
-                        }));
-                    }).then(function (ajax) {
-                        _this.setSubscription(ajax.json())
-                            .emit(_this.events.subscribeSuccess, ajax);
-                        return ajax;
-                    }).catch(function (e) {
-                        e = sdk.http.Client.makeError(e);
-                        _this.reset()
-                            .emit(_this.events.subscribeError, e);
-                        throw e;
-                    });
-                };
-                Subscription.prototype.renew = function (options) {
-                    var _this = this;
-                    options = options || {};
-                    if (options.events)
-                        this.setEvents(options.events);
-                    this._clearTimeout();
-                    return new sdk.externals._Promise(function (resolve, reject) {
-                        if (!_this.alive())
-                            throw new Error('Subscription is not alive');
-                        if (!_this._eventFilters || !_this._eventFilters.length)
-                            throw new Error('Events are undefined');
-                        return _this._platform.put('/restapi/v1.0/subscription/' + _this._subscription.id, {
-                            body: {
-                                eventFilters: _this._getFullEventFilters()
-                            }
-                        });
-                    })
-                        .then(function (ajax) {
-                        _this.setSubscription(ajax.json())
-                            .emit(_this.events.renewSuccess, ajax.json());
-                        return ajax;
-                    })
-                        .catch(function (e) {
-                        e = sdk.http.Client.makeError(e);
-                        _this.reset()
-                            .emit(_this.events.renewError, e);
-                        throw e;
-                    });
-                };
-                Subscription.prototype.remove = function () {
-                    var _this = this;
-                    return new sdk.externals._Promise(function (resolve, reject) {
-                        if (!_this._subscription || !_this._subscription.id)
-                            throw new Error('Subscription ID is required');
-                        resolve(_this._platform.delete('/restapi/v1.0/subscription/' + _this._subscription.id));
-                    }).then(function (ajax) {
-                        _this.reset()
-                            .emit(_this.events.removeSuccess, ajax);
-                        return ajax;
-                    }).catch(function (e) {
-                        e = sdk.http.Client.makeError(e);
-                        _this.emit(_this.events.removeError, e);
-                        throw e;
-                    });
-                };
-                /**
-                 * Remove subscription and disconnect from PUBNUB
-                 * This method resets subscription at client side but backend is not notified
-                 */
-                Subscription.prototype.reset = function () {
-                    this._clearTimeout();
-                    if (this.alive() && this._pubnub)
-                        this._pubnub.unsubscribe({ channel: this._subscription.deliveryMode.address });
-                    this._subscription = null;
-                    return this;
-                };
-                Subscription.prototype.destroy = function () {
-                    this.reset();
-                    sdk.core.log.info('RC.subscription.Subscription: Destroyed');
-                    return _super.prototype.destroy.call(this);
-                };
-                Subscription.prototype._getFullEventFilters = function () {
-                    var _this = this;
-                    return this._eventFilters.map(function (event) {
-                        return _this._platform.createUrl(event);
-                    });
-                };
-                Subscription.prototype._setTimeout = function () {
-                    var _this = this;
-                    this._clearTimeout();
-                    if (!this.alive())
-                        throw new Error('Subscription is not alive');
-                    var timeToExpiration = (this._subscription.expiresIn * 1000) - this._renewHandicapMs;
-                    this._timeout = setTimeout(function () {
-                        _this.renew({});
-                    }, timeToExpiration);
-                    return this;
-                };
-                Subscription.prototype._clearTimeout = function () {
-                    clearTimeout(this._timeout);
-                    return this;
-                };
-                Subscription.prototype._decrypt = function (message) {
-                    if (!this.alive())
-                        throw new Error('Subscription is not alive');
-                    if (this._subscription.deliveryMode.encryptionKey) {
-                        var PUBNUB = this._pubnubFactory.getPubnub();
-                        message = PUBNUB.crypto_obj.decrypt(message, this._subscription.deliveryMode.encryptionKey, {
-                            encryptKey: false,
-                            keyEncoding: 'base64',
-                            keyLength: 128,
-                            mode: 'ecb'
-                        });
-                    }
-                    return message;
-                };
-                Subscription.prototype._notify = function (message) {
-                    this.emit(this.events.notification, this._decrypt(message));
-                    return this;
-                };
-                Subscription.prototype._subscribeAtPubnub = function () {
-                    var _this = this;
-                    if (!this.alive())
-                        throw new Error('Subscription is not alive');
-                    var PUBNUB = this._pubnubFactory.getPubnub();
-                    this._pubnub = PUBNUB.init({
-                        ssl: true,
-                        subscribe_key: this._subscription.deliveryMode.subscriberKey
-                    });
-                    this._pubnub.ready();
-                    this._pubnub.subscribe({
-                        channel: this._subscription.deliveryMode.address,
-                        message: function (message, env, channel) {
-                            sdk.core.log.info('RC.core.Subscription: Incoming message', message);
-                            _this._notify(message);
-                        },
-                        connect: function () {
-                            sdk.core.log.info('RC.core.Subscription: PUBNUB connected');
-                        }
-                    });
-                    return this;
-                };
-                return Subscription;
-            })(sdk.core.Observable);
-            subscription_1.Subscription = Subscription;
-        })(subscription = sdk.subscription || (sdk.subscription = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../externals.d.ts" />
-/// <reference path="../core/Observable.ts" />
-/// <reference path="../externals/Externals.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var pubnub;
-        (function (pubnub) {
-            var PubnubMock = (function (_super) {
-                __extends(PubnubMock, _super);
-                function PubnubMock(options) {
-                    _super.call(this);
-                    this.options = options;
-                    this.crypto_obj = sdk.externals._PUBNUB.crypto_obj;
-                }
-                PubnubMock.prototype.ready = function () { };
-                PubnubMock.prototype.subscribe = function (options) {
-                    this.on('message-' + options.channel, options.message);
-                };
-                PubnubMock.prototype.unsubscribe = function (options) {
-                    this.off('message-' + options.channel);
-                };
-                PubnubMock.prototype.receiveMessage = function (msg, channel) {
-                    this.emit('message-' + channel, msg, 'env', channel);
-                };
-                return PubnubMock;
-            })(sdk.core.Observable);
-            pubnub.PubnubMock = PubnubMock;
-            var PubnubMockFactory = (function () {
-                function PubnubMockFactory() {
-                    this.crypto_obj = sdk.externals._PUBNUB.crypto_obj;
-                }
-                PubnubMockFactory.prototype.init = function (options) {
-                    return new PubnubMock(options);
-                };
-                return PubnubMockFactory;
-            })();
-            pubnub.PubnubMockFactory = PubnubMockFactory;
-        })(pubnub = sdk.pubnub || (sdk.pubnub = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../pubnub/PubnubMock.ts" />
-/// <reference path="../externals/Externals.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var pubnub;
-        (function (pubnub) {
-            var PubnubFactory = (function () {
-                function PubnubFactory(flag) {
-                    this._useMock = false;
-                    this._useMock = !!flag;
-                    this._mock = new pubnub.PubnubMockFactory();
-                }
-                PubnubFactory.prototype.getPubnub = function () {
-                    return this._useMock ? this._mock : sdk.externals._PUBNUB;
-                };
-                return PubnubFactory;
-            })();
-            pubnub.PubnubFactory = PubnubFactory;
-        })(pubnub = sdk.pubnub || (sdk.pubnub = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="./externals.d.ts" />
-/// <reference path="./core/Cache.ts" />
-/// <reference path="./core/Log.ts" />
-/// <reference path="./core/Observable.ts" />
-/// <reference path="./core/PageVisibility.ts" />
-/// <reference path="./core/Utils.ts" />
-/// <reference path="./http/Client.ts" />
-/// <reference path="./platform/Platform.ts" />
-/// <reference path="./platform/Queue.ts" />
-/// <reference path="./subscription/Subscription.ts" />
-/// <reference path="./pubnub/PubnubFactory.ts" />
-/// <reference path="./externals/Externals.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var SDK = (function () {
-            function SDK(options) {
-                options = options || {};
-                sdk.externals.get();
-                this._mockRegistry = new sdk.mocks.Registry();
-                this._cache = new sdk.core.Cache(typeof localStorage !== 'undefined' ? localStorage : {}, options.cachePrefix);
-                this._client = options.useHttpMock ? new sdk.http.ClientMock(this._mockRegistry) : new sdk.http.Client();
-                this._platform = new sdk.platform.Platform(this._client, this._cache, options.server, options.appKey, options.appSecret);
-                this._pubnubFactory = new sdk.pubnub.PubnubFactory(options.usePubnubMock);
-                //TODO Link Platform events with Subscriptions and the rest
-            }
-            SDK.prototype.platform = function () {
-                return this._platform;
-            };
-            SDK.prototype.cache = function () {
-                return this._cache;
-            };
-            SDK.prototype.createSubscription = function () {
-                return new sdk.subscription.Subscription(this._pubnubFactory, this._platform);
-            };
-            SDK.prototype.createPageVisibility = function () {
-                return new sdk.core.PageVisibility();
-            };
-            SDK.prototype.createObservable = function () {
-                return new sdk.core.Observable();
-            };
-            SDK.prototype.log = function () {
-                return sdk.core.log;
-            };
-            SDK.prototype.utils = function () {
-                return sdk.core.utils;
-            };
-            SDK.prototype.mockRegistry = function () { return this._mockRegistry; };
-            SDK.version = '2.0.0';
-            SDK.server = {
-                sandbox: 'https://platform.devtest.ringcentral.com',
-                production: 'https://platform.ringcentral.com'
-            };
-            return SDK;
-        })();
-        sdk.SDK = SDK;
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-var e = RingCentral.sdk.externals.get();
-if (typeof define === 'function' && define.amd) {
-    define(['pubnub'], function (PUBNUB) {
-        e._PUBNUB = PUBNUB;
-        return RingCentral.sdk;
+        }
+    });
+
+    return argsParsed;
+}
+
+/**
+ * @param obj
+ * @return {boolean}
+ */
+
+function isFunction(obj) {
+    return typeof obj === "function";
+}
+
+/**
+ * @param obj
+ * @return {boolean}
+ */
+
+function isArray(obj) {
+    return Array.isArray ? Array.isArray(obj) : typeof obj === "array";
+}
+
+/**
+ * @param fn
+ * @param interval
+ * @param timeout
+ */
+
+function poll(fn, interval, timeout) {
+    //NodeJS.Timer|number
+
+    module.exports.stopPolling(timeout);
+
+    interval = interval || 1000;
+
+    var next = function next(delay) {
+
+        delay = delay || interval;
+
+        interval = delay;
+
+        return setTimeout(function () {
+
+            fn(next, delay);
+        }, delay);
+    };
+
+    return next();
+}
+
+function stopPolling(timeout) {
+    if (timeout) clearTimeout(timeout);
+}
+
+function isNodeJS() {
+    return typeof process !== 'undefined';
+}
+
+function isBrowser() {
+    return typeof window !== 'undefined';
+}
+
+function delay(timeout) {
+    return new _ExternalsJs.Promise(function (resolve, reject) {
+        setTimeout(function () {
+            resolve(null);
+        }, timeout);
     });
 }
-else if (typeof module === 'object' && module.exports) {
-    e._PUBNUB = require('pubnub');
-    e._Promise = typeof (Promise) !== 'undefined' ? Promise : require('es6-promise').Promise;
-    e._fetch = require('node-fetch');
-    e._Request = e._fetch['Request'];
-    e._Response = e._fetch['Response'];
-    e._Headers = e._fetch['Headers'];
-    module.exports = RingCentral.sdk;
-}
-else {
-}
-/// <reference path="../externals.d.ts" />
-/// <reference path="../core/Utils.ts" />
-/// <reference path="../core/Observable.ts" />
-/// <reference path="../mocks/Registry.ts" />
-/// <reference path="../externals/Externals.ts" />
-/// <reference path="./ApiResponse.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var http;
-        (function (http) {
-            var ClientMock = (function (_super) {
-                __extends(ClientMock, _super);
-                function ClientMock(registry) {
-                    _super.call(this);
-                    this._registry = registry;
-                }
-                ClientMock.prototype._loadResponse = function (request) {
-                    var _this = this;
-                    return new sdk.externals._Promise(function (resolve) {
-                        sdk.core.log.debug('API REQUEST', request.method, request.url);
-                        var mock = _this._registry.find(request);
-                        resolve(mock.getResponse(request));
-                    });
-                };
-                return ClientMock;
-            })(http.Client);
-            http.ClientMock = ClientMock;
-        })(http = sdk.http || (sdk.http = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
-/// <reference path="../externals.d.ts" />
-/// <reference path="../core/Utils.ts" />
-/// <reference path="../core/Observable.ts" />
-/// <reference path="../core/Cache.ts" />
-/// <reference path="../core/Log" />
-/// <reference path="../http/Client.ts" />
-/// <reference path="../http/ApiResponse.ts" />
-/// <reference path="../externals/Externals.ts" />
-/// <reference path="./Queue.ts" />
-var RingCentral;
-(function (RingCentral) {
-    var sdk;
-    (function (sdk) {
-        var platform;
-        (function (platform) {
-            var Auth = (function () {
-                function Auth(cache, cacheId) {
-                    this._cache = cache;
-                    this._cacheId = cacheId;
-                }
-                Auth.prototype.accessToken = function () {
-                    return this.data().access_token;
-                };
-                Auth.prototype.refreshToken = function () {
-                    return this.data().refresh_token;
-                };
-                Auth.prototype.tokenType = function () {
-                    return this.data().token_type;
-                };
-                Auth.prototype.data = function () {
-                    return this._cache.getItem(this._cacheId) || {
-                        token_type: '',
-                        access_token: '',
-                        expires_in: 0,
-                        refresh_token: '',
-                        refresh_token_expires_in: 0
-                    };
-                };
-                Auth.prototype.setData = function (authData) {
-                    var oldAuthData = this.data();
-                    authData = sdk.core.utils.extend({}, oldAuthData, authData);
-                    authData.expire_time = Date.now() + (authData.expires_in * 1000);
-                    authData.refresh_token_expire_time = Date.now() + (authData.refresh_token_expires_in * 1000);
-                    sdk.core.log.info('Auth.setData(): Tokens were updated, new:', authData, ', old:', oldAuthData);
-                    this._cache.setItem(this._cacheId, authData);
-                    return this;
-                };
-                /**
-                 * Check if there is a valid (not expired) access token
-                 */
-                Auth.prototype.accessTokenValid = function () {
-                    var authData = this.data();
-                    return (authData.token_type === Auth.forcedTokenType || (authData.expire_time - Auth.refreshHandicapMs > Date.now()));
-                };
-                /**
-                 * Check if there is a valid (not expired) access token
-                 */
-                Auth.prototype.refreshTokenValid = function () {
-                    return (this.data().refresh_token_expire_time > Date.now());
-                };
-                Auth.prototype.cancelAccessToken = function () {
-                    return this.setData({
-                        access_token: '',
-                        expires_in: 0
-                    });
-                };
-                /**
-                 * This method sets a special authentication mode used in Service Web
-                 * @return {Platform}
-                 */
-                Auth.prototype.forceAuthentication = function () {
-                    this.setData({
-                        token_type: Auth.forcedTokenType,
-                        access_token: '',
-                        expires_in: 0,
-                        refresh_token: '',
-                        refresh_token_expires_in: 0
-                    });
-                    return this;
-                };
-                Auth.prototype.setRemember = function (remember) {
-                    return this.setData({ remember: remember });
-                };
-                Auth.prototype.remember = function () {
-                    return !!this.data().remember;
-                };
-                Auth.refreshHandicapMs = 60 * 1000; // 1 minute
-                Auth.forcedTokenType = 'forced';
-                return Auth;
-            })();
-            platform.Auth = Auth;
-        })(platform = sdk.platform || (sdk.platform = {}));
-    })(sdk = RingCentral.sdk || (RingCentral.sdk = {}));
-})(RingCentral || (RingCentral = {}));
 
-/*!
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _es6Promise = __webpack_require__(4);
+
+var _es6Promise2 = _interopRequireDefault(_es6Promise);
+
+var _nodeFetch = __webpack_require__(9);
+
+var _nodeFetch2 = _interopRequireDefault(_nodeFetch);
+
+var _pubnub = __webpack_require__(10);
+
+var _pubnub2 = _interopRequireDefault(_pubnub);
+
+var Promise = _es6Promise2['default'] && _es6Promise2['default'].Promise || window.Promise;
+
+exports.Promise = Promise;
+var fetch = _nodeFetch2['default'] || window.fetch;
+exports.fetch = fetch;
+var Request = fetch.Request || window.Request;
+exports.Request = Request;
+var Response = fetch.Response || window.Response;
+exports.Response = Response;
+var Headers = fetch.Headers || window.Headers;
+
+exports.Headers = Headers;
+var PUBNUB = _pubnub2['default'] || window.PUBNUB;
+
+exports.PUBNUB = PUBNUB;
+var localStorage = typeof window !== 'undefined' && typeof window.localStorage !== 'undefined' ? window.localStorage : {};
+exports.localStorage = localStorage;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+var require;var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(setImmediate, global, module) {/*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
@@ -2029,7 +580,7 @@ var RingCentral;
     function lib$es6$promise$asap$$attemptVertex() {
       try {
         var r = require;
-        var vertx = r('vertx');
+        var vertx = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"vertx\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
         lib$es6$promise$asap$$vertxNext = vertx.runOnLoop || vertx.runOnContext;
         return lib$es6$promise$asap$$useVertxTimer();
       } catch(e) {
@@ -2045,7 +596,7 @@ var RingCentral;
       lib$es6$promise$asap$$scheduleFlush = lib$es6$promise$asap$$useMutationObserver();
     } else if (lib$es6$promise$asap$$isWorker) {
       lib$es6$promise$asap$$scheduleFlush = lib$es6$promise$asap$$useMessageChannel();
-    } else if (lib$es6$promise$asap$$browserWindow === undefined && typeof require === 'function') {
+    } else if (lib$es6$promise$asap$$browserWindow === undefined && "function" === 'function') {
       lib$es6$promise$asap$$scheduleFlush = lib$es6$promise$asap$$attemptVertex();
     } else {
       lib$es6$promise$asap$$scheduleFlush = lib$es6$promise$asap$$useSetTimeout();
@@ -2853,8 +1404,8 @@ var RingCentral;
     };
 
     /* global define:true module:true window: true */
-    if (typeof define === 'function' && define['amd']) {
-      define(function() { return lib$es6$promise$umd$$ES6Promise; });
+    if ("function" === 'function' && __webpack_require__(8)['amd']) {
+      !(__WEBPACK_AMD_DEFINE_RESULT__ = function() { return lib$es6$promise$umd$$ES6Promise; }.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
     } else if (typeof module !== 'undefined' && module['exports']) {
       module['exports'] = lib$es6$promise$umd$$ES6Promise;
     } else if (typeof this !== 'undefined') {
@@ -2864,6 +1415,214 @@ var RingCentral;
     lib$es6$promise$polyfill$$default();
 }).call(this);
 
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).setImmediate, (function() { return this; }()), __webpack_require__(7)(module)))
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(6).nextTick;
+var apply = Function.prototype.apply;
+var slice = Array.prototype.slice;
+var immediateIds = {};
+var nextImmediateId = 0;
+
+// DOM APIs, for completeness
+
+exports.setTimeout = function() {
+  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+};
+exports.setInterval = function() {
+  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+};
+exports.clearTimeout =
+exports.clearInterval = function(timeout) { timeout.close(); };
+
+function Timeout(id, clearFn) {
+  this._id = id;
+  this._clearFn = clearFn;
+}
+Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+Timeout.prototype.close = function() {
+  this._clearFn.call(window, this._id);
+};
+
+// Does not start the time, just sets up the members needed.
+exports.enroll = function(item, msecs) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = msecs;
+};
+
+exports.unenroll = function(item) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = -1;
+};
+
+exports._unrefActive = exports.active = function(item) {
+  clearTimeout(item._idleTimeoutId);
+
+  var msecs = item._idleTimeout;
+  if (msecs >= 0) {
+    item._idleTimeoutId = setTimeout(function onTimeout() {
+      if (item._onTimeout)
+        item._onTimeout();
+    }, msecs);
+  }
+};
+
+// That's not how node.js implements it but the exposed api is the same.
+exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
+  var id = nextImmediateId++;
+  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+
+  immediateIds[id] = true;
+
+  nextTick(function onNextTick() {
+    if (immediateIds[id]) {
+      // fn.call() is faster so we optimize for the common use-case
+      // @see http://jsperf.com/call-apply-segu
+      if (args) {
+        fn.apply(null, args);
+      } else {
+        fn.call(null);
+      }
+      // Prevent ids from leaking
+      exports.clearImmediate(id);
+    }
+  });
+
+  return id;
+};
+
+exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
+  delete immediateIds[id];
+};
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).setImmediate, __webpack_require__(5).clearImmediate))
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		module.children = [];
+		module.webpackPolyfill = 1;
+	}
+	return module;
+}
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+module.exports = function() { throw new Error("define cannot be used indirect"); };
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
 
 (function() {
   'use strict';
@@ -3215,7 +1974,12 @@ var RingCentral;
   self.fetch.polyfill = true
 })();
 
-// Version: 3.7.13
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(module) {// Version: 3.7.14
 /* =-====================================================================-= */
 /* =-====================================================================-= */
 /* =-=========================     JSON     =============================-= */
@@ -3379,7 +2143,7 @@ var NOW             = 1
 ,   PARAMSBIT       = '&'
 ,   PRESENCE_HB_THRESHOLD = 5
 ,   PRESENCE_HB_DEFAULT  = 30
-,   SDK_VER         = '3.7.13'
+,   SDK_VER         = '3.7.14'
 ,   REPL            = /{([\w\-]+)}/g;
 
 /**
@@ -3651,8 +2415,8 @@ function PN_API(setup) {
     ,   KEEPALIVE     = (+setup['keepalive']   || DEF_KEEPALIVE)   * SECOND
     ,   TIME_CHECK    = setup['timecheck']     || 0
     ,   NOLEAVE       = setup['noleave']       || 0
-    ,   PUBLISH_KEY   = setup['publish_key']   || 'demo'
-    ,   SUBSCRIBE_KEY = setup['subscribe_key'] || 'demo'
+    ,   PUBLISH_KEY   = setup['publish_key']
+    ,   SUBSCRIBE_KEY = setup['subscribe_key']
     ,   AUTH_KEY      = setup['auth_key']      || ''
     ,   SECRET_KEY    = setup['secret_key']    || ''
     ,   hmac_SHA256   = setup['hmac_SHA256']
@@ -3692,7 +2456,10 @@ function PN_API(setup) {
     ,   CIPHER_KEY    = setup['cipher_key']
     ,   UUID          = setup['uuid'] || ( !setup['unique_uuid'] && db && db['get'](SUBSCRIBE_KEY+'uuid') || '')
     ,   USE_INSTANCEID = setup['instance_id'] || false
-    ,   INSTANCEID     = ''
+    ,   INSTANCEID    = ''
+    ,   shutdown      = setup['shutdown']
+    ,   use_send_beacon = (typeof setup['use_send_beacon'] != 'undefined')?setup['use_send_beacon']:true
+    ,   sendBeacon    = (use_send_beacon)?setup['sendBeacon']:null
     ,   _poll_timer
     ,   _poll_timer2;
 
@@ -3934,10 +2701,16 @@ function PN_API(setup) {
             ,   origin = nextorigin(ORIGIN)
             ,   callback = callback || function(){}
             ,   err      = error    || function(){}
+            ,   url
             ,   jsonp  = jsonp_cb();
+
+
 
             // Prevent Leaving a Presence Channel
             if (channel.indexOf(PRESENCE_SUFFIX) > 0) return true;
+
+
+
 
             if (COMPATIBLE_35) {
                 if (!SSL)         return false;
@@ -3950,21 +2723,35 @@ function PN_API(setup) {
 
             if (USE_INSTANCEID) data['instanceid'] = INSTANCEID;
 
+            url = [
+                    origin, 'v2', 'presence', 'sub_key',
+                    SUBSCRIBE_KEY, 'channel', encode(channel), 'leave'
+                ];
+
+            params = _get_url_params(data);
+
+
+            if (sendBeacon) {
+                url_string = build_url(url, params);
+                if (sendBeacon(url_string)) {
+                    callback && callback({"status": 200, "action": "leave", "message": "OK", "service": "Presence"});
+                    return true;
+                }
+            }
+
+
             xdr({
                 blocking : blocking || SSL,
                 timeout  : 2000,
                 callback : jsonp,
-                data     : _get_url_params(data),
+                data     : params,
                 success  : function(response) {
                     _invoke_callback(response, callback, err);
                 },
                 fail     : function(response) {
                     _invoke_error(response, err);
                 },
-                url      : [
-                    origin, 'v2', 'presence', 'sub_key',
-                    SUBSCRIBE_KEY, 'channel', encode(channel), 'leave'
-                ]
+                url      : url
             });
             return true;
         },
@@ -4201,6 +2988,7 @@ function PN_API(setup) {
             ,   start            = args['start']
             ,   end              = args['end']
             ,   include_token    = args['include_token']
+            ,   string_msg_token = args['string_message_token'] || false
             ,   params           = {}
             ,   jsonp            = jsonp_cb();
 
@@ -4224,6 +3012,7 @@ function PN_API(setup) {
             if (start) params['start']                 = start;
             if (end)   params['end']                   = end;
             if (include_token) params['include_token'] = 'true';
+            if (string_msg_token) params['string_message_token'] = 'true';
 
             // Send Message
             xdr({
@@ -5294,6 +4083,11 @@ function PN_API(setup) {
         'stop_timers': function () {
             clearTimeout(_poll_timer);
             clearTimeout(_poll_timer2);
+            clearTimeout(PRESENCE_HB_TIMEOUT);
+        },
+        'shutdown': function () {
+            SELF['stop_timers']();
+            shutdown && shutdown();
         },
 
         // Expose PUBNUB Functions
@@ -5492,7 +4286,7 @@ window['PUBNUB'] || (function() {
 var SWF             = 'https://pubnub.a.ssl.fastly.net/pubnub.swf'
 ,   ASYNC           = 'async'
 ,   UA              = navigator.userAgent
-,   PNSDK           = 'PubNub-JS-' + 'Web' + '/' + '3.7.13'
+,   PNSDK           = 'PubNub-JS-' + 'Web' + '/' + '3.7.14'
 ,   XORIGN          = UA.indexOf('MSIE 6') == -1;
 
 /**
@@ -5847,6 +4641,13 @@ function _is_online() {
     catch (e) { return true }
 }
 
+
+function sendBeacon(url) {
+    if (!('sendBeacon' in navigator)) return false;
+
+    return navigator['sendBeacon'](url);
+}
+
 /* =-====================================================================-= */
 /* =-====================================================================-= */
 /* =-=========================     PUBNUB     ===========================-= */
@@ -5873,6 +4674,7 @@ var PDIV          = $('pubnub') || 0
     setup['jsonp_cb']   = jsonp_cb;
     setup['hmac_SHA256']= get_hmac_SHA256;
     setup['crypto_obj'] = crypto_obj();
+    setup['sendBeacon'] = sendBeacon;
     setup['params']     = { 'pnsdk' : PNSDK }
 
     var SELF = function(setup) {
@@ -6165,4 +4967,3292 @@ CryptoJS.mode.ECB = (function () {
 
     return ECB;
 }());// Moved to hmac-sha-256.js
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)(module)))
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var Cache = (function () {
+    _createClass(Cache, null, [{
+        key: 'defaultPrefix',
+        value: 'rc-',
+        enumerable: true
+    }]);
+
+    function Cache(storage, prefix) {
+        _classCallCheck(this, Cache);
+
+        this.setPrefix(prefix);
+        this._storage = storage;
+    }
+
+    Cache.prototype.setPrefix = function setPrefix(prefix) {
+        this._prefix = prefix || Cache.defaultPrefix;
+        return this;
+    };
+
+    Cache.prototype.setItem = function setItem(key, data) {
+        this._storage[this._prefixKey(key)] = JSON.stringify(data);
+        return this;
+    };
+
+    Cache.prototype.removeItem = function removeItem(key) {
+        delete this._storage[this._prefixKey(key)];
+        return this;
+    };
+
+    Cache.prototype.getItem = function getItem(key) {
+        var item = this._storage[this._prefixKey(key)];
+        if (!item) return null;
+        return JSON.parse(item);
+    };
+
+    Cache.prototype.clean = function clean() {
+
+        for (var key in this._storage) {
+
+            if (!this._storage.hasOwnProperty(key)) continue;
+
+            if (key.indexOf(this._prefix) === 0) {
+                delete this._storage[key];
+            }
+        }
+
+        return this;
+    };
+
+    Cache.prototype._prefixKey = function _prefixKey(key) {
+        return this._prefix + key;
+    };
+
+    return Cache;
+})();
+
+exports['default'] = Cache;
+module.exports = exports['default'];
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+'use strict';
+
+exports.__esModule = true;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var Observable = (function () {
+    function Observable() {
+        _classCallCheck(this, Observable);
+
+        this.off();
+    }
+
+    Observable.prototype.hasListeners = function hasListeners(event) {
+        return event in this._listeners;
+    };
+
+    Observable.prototype.on = function on(events, callback) {
+        var _this = this;
+
+        if (typeof events == 'string') events = [events];
+        if (!events) throw new Error('No events to subscribe to');
+        if (typeof callback !== 'function') throw new Error('Callback must be a function');
+
+        events.forEach(function (event) {
+
+            if (!_this.hasListeners(event)) _this._listeners[event] = [];
+
+            _this._listeners[event].push(callback);
+        });
+
+        return this;
+    };
+
+    Observable.prototype.emit = function emit(event) {
+        var _this2 = this;
+
+        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+            args[_key - 1] = arguments[_key];
+        }
+
+        var result = null;
+
+        if (!this.hasListeners(event)) return null;
+
+        this._listeners[event].some(function (callback) {
+
+            result = callback.apply(_this2, args);
+            return result === false;
+        });
+
+        return result;
+    };
+
+    Observable.prototype.off = function off(event, callback) {
+        var _this3 = this;
+
+        if (!event) {
+
+            this._listeners = {};
+        } else {
+
+            if (!callback) {
+
+                delete this._listeners[event];
+            } else {
+
+                if (!this.hasListeners(event)) return this;
+
+                this._listeners[event].forEach(function (cb, i) {
+
+                    if (cb === callback) delete _this3._listeners[event][i];
+                });
+            }
+        }
+
+        return this;
+    };
+
+    return Observable;
+})();
+
+exports['default'] = Observable;
+module.exports = exports['default'];
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _coreExternals = __webpack_require__(3);
+
+var _coreUtils = __webpack_require__(2);
+
+var _Utils = __webpack_require__(14);
+
+var _coreObservable = __webpack_require__(12);
+
+var _coreObservable2 = _interopRequireDefault(_coreObservable);
+
+var _ApiResponse = __webpack_require__(15);
+
+var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
+
+var Client = (function (_Observable) {
+    _inherits(Client, _Observable);
+
+    function Client() {
+        _classCallCheck(this, Client);
+
+        _Observable.apply(this, arguments);
+
+        this.events = {
+            beforeRequest: 'beforeRequest',
+            requestSuccess: 'requestSuccess',
+            requestError: 'requestError'
+        };
+    }
+
+    /**
+     * @name IApiError
+     * @property {string} stack
+     * @property {string} originalMessage
+     * @property {ApiResponse} apiResponse
+     */
+
+    /**
+     * @param {Request} request
+     * @return {Promise<ApiResponse>}
+     */
+
+    Client.prototype.sendRequest = function sendRequest(request) {
+        var apiResponse;
+        return regeneratorRuntime.async(function sendRequest$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    apiResponse = new _ApiResponse2['default'](request);
+                    context$2$0.prev = 1;
+
+                    //TODO Stop request if listeners return false
+                    this.emit(this.events.beforeRequest, apiResponse);
+
+                    context$2$0.next = 5;
+                    return regeneratorRuntime.awrap(this._loadResponse(request));
+
+                case 5:
+                    apiResponse._response = context$2$0.sent;
+
+                    if (!(apiResponse._isMultipart() || apiResponse._isJson())) {
+                        context$2$0.next = 10;
+                        break;
+                    }
+
+                    context$2$0.next = 9;
+                    return regeneratorRuntime.awrap(apiResponse.response().text());
+
+                case 9:
+                    apiResponse._text = context$2$0.sent;
+
+                case 10:
+                    if (apiResponse.ok()) {
+                        context$2$0.next = 12;
+                        break;
+                    }
+
+                    throw new Error('Response has unsuccessful status');
+
+                case 12:
+
+                    this.emit(this.events.requestSuccess, apiResponse);
+
+                    return context$2$0.abrupt('return', apiResponse);
+
+                case 16:
+                    context$2$0.prev = 16;
+                    context$2$0.t0 = context$2$0['catch'](1);
+
+                    if (!context$2$0.t0.apiResponse) context$2$0.t0 = this.makeError(context$2$0.t0, apiResponse);
+
+                    this.emit(this.events.requestError, context$2$0.t0);
+
+                    throw context$2$0.t0;
+
+                case 21:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[1, 16]]);
+    };
+
+    /**
+     * @param {Request} request
+     * @return {Promise<Response>}
+     * @private
+     */
+
+    Client.prototype._loadResponse = function _loadResponse(request) {
+        return regeneratorRuntime.async(function _loadResponse$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.next = 2;
+                    return regeneratorRuntime.awrap(_coreExternals.fetch.call(null, request));
+
+                case 2:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 3:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    /**
+     * Wraps the JS Error object with transaction information
+     * @param {Error|IApiError} e
+     * @param {ApiResponse} apiResponse
+     * @return {IApiError}
+     */
+
+    Client.prototype.makeError = function makeError(e, apiResponse) {
+
+        // Wrap only if regular error
+        if (!e.hasOwnProperty('apiResponse') && !e.hasOwnProperty('originalMessage')) {
+
+            e.apiResponse = apiResponse;
+            e.originalMessage = e.message;
+            e.message = apiResponse && apiResponse.error(true) || e.originalMessage;
+        }
+
+        return e;
+    };
+
+    /**
+     *
+     * @param {object} init
+     * @param {object} [init.url]
+     * @param {object} [init.body]
+     * @param {string} [init.method]
+     * @param {object} [init.query]
+     * @param {object} [init.headers]
+     * @return {Request}
+     */
+
+    Client.prototype.createRequest = function createRequest(init) {
+
+        init = init || {};
+        init.headers = init.headers || {};
+
+        // Sanity checks
+        if (!init.url) throw new Error('Url is not defined');
+        if (!init.method) init.method = 'GET';
+        if (init.method && Client._allowedMethods.indexOf(init.method) < 0) throw new Error('Method has wrong value: ' + init.method);
+
+        // Defaults
+        init.credentials = init.credentials || 'include';
+        init.mode = init.mode || 'cors';
+
+        // Append Query String
+        if (init.query) {
+            init.url = init.url + (init.url.indexOf('?') > -1 ? '&' : '?') + _coreUtils.queryStringify(init.query);
+        }
+
+        if (!_Utils.findHeaderName('Accept', init.headers)) {
+            init.headers['Accept'] = _ApiResponse2['default']._jsonContentType;
+        }
+
+        // Serialize body
+        //TODO Check that body is a plain object
+        if (typeof init.body !== 'string' || !init.body) {
+
+            var contentTypeHeaderName = _Utils.findHeaderName(_ApiResponse2['default']._contentType, init.headers);
+
+            if (!contentTypeHeaderName) {
+                contentTypeHeaderName = _ApiResponse2['default']._contentType;
+                init.headers[contentTypeHeaderName] = _ApiResponse2['default']._jsonContentType;
+            }
+
+            var contentType = init.headers[contentTypeHeaderName];
+
+            // Assign a new encoded body
+            if (contentType.indexOf(_ApiResponse2['default']._jsonContentType) > -1) {
+                init.body = JSON.stringify(init.body);
+            } else if (contentType.indexOf(_ApiResponse2['default']._urlencodedContentType) > -1) {
+                init.body = _coreUtils.queryStringify(init.body);
+            }
+        }
+
+        // Create a request with encoded body
+        var req = new _coreExternals.Request(init.url, init);
+
+        // Keep the original body accessible directly (for mocks)
+        req.originalBody = init.body;
+
+        return req;
+    };
+
+    _createClass(Client, null, [{
+        key: '_allowedMethods',
+        value: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+        enumerable: true
+    }]);
+
+    return Client;
+})(_coreObservable2['default']);
+
+exports['default'] = Client;
+module.exports = exports['default'];
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+exports.createResponse = createResponse;
+exports.findHeaderName = findHeaderName;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+var _coreExternals = __webpack_require__(3);
+
+var _coreUtils = __webpack_require__(2);
+
+var utils = _interopRequireWildcard(_coreUtils);
+
+/**
+ * Creates a response
+ * @param stringBody
+ * @param init
+ * @return {Response}
+ */
+
+function createResponse(stringBody, init) {
+
+    init = init || {};
+
+    var response = new _coreExternals.Response(stringBody, init);
+
+    //TODO Wait for https://github.com/bitinn/node-fetch/issues/38
+    if (utils.isNodeJS()) {
+
+        response._text = stringBody;
+        response._decode = function () {
+            return this._text;
+        };
+    }
+
+    return response;
+}
+
+function findHeaderName(name, headers) {
+    name = name.toLowerCase();
+    return Object.keys(headers).reduce(function (res, key) {
+        if (res) return res;
+        if (name == key.toLowerCase()) return key;
+        return res;
+    }, null);
+}
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _coreExternals = __webpack_require__(3);
+
+var _Utils = __webpack_require__(14);
+
+var utils = _interopRequireWildcard(_Utils);
+
+var ApiResponse = (function () {
+    _createClass(ApiResponse, null, [{
+        key: '_contentType',
+        value: 'Content-Type',
+        enumerable: true
+    }, {
+        key: '_jsonContentType',
+        value: 'application/json',
+        enumerable: true
+    }, {
+        key: '_multipartContentType',
+        value: 'multipart/mixed',
+        enumerable: true
+    }, {
+        key: '_urlencodedContentType',
+        value: 'application/x-www-form-urlencoded',
+        enumerable: true
+    }, {
+        key: '_headerSeparator',
+        value: ':',
+        enumerable: true
+    }, {
+        key: '_bodySeparator',
+        value: '\n\n',
+        enumerable: true
+    }, {
+        key: '_boundarySeparator',
+        value: '--',
+
+        /**
+         * @param {Request} request
+         * @param {Response} response
+         * @param {string} responseText
+         */
+        enumerable: true
+    }]);
+
+    function ApiResponse(request, response, responseText) {
+        _classCallCheck(this, ApiResponse);
+
+        /** @type {Request} */
+        this._request = request;
+
+        /** @type {Response} */
+        this._response = response;
+
+        this._text = responseText;
+        this._json = null;
+        this._multipart = [];
+    }
+
+    /**
+     * @return {Response}
+     */
+
+    ApiResponse.prototype.response = function response() {
+        return this._response;
+    };
+
+    /**
+     * @return {Request}
+     */
+
+    ApiResponse.prototype.request = function request() {
+        return this._request;
+    };
+
+    /**
+     * @return {boolean}
+     */
+
+    ApiResponse.prototype.ok = function ok() {
+        return this._response && this._response.ok;
+    };
+
+    /**
+     * @return {string}
+     */
+
+    ApiResponse.prototype.text = function text() {
+        if (!this._isJson() && !this._isMultipart()) throw new Error('Response is not text');
+        return this._text;
+    };
+
+    /**
+     * @return {object}
+     */
+
+    ApiResponse.prototype.json = function json() {
+        if (!this._isJson()) throw new Error('Response is not JSON');
+        if (!this._json) {
+            this._json = this._text ? JSON.parse(this._text) : null;
+        }
+        return this._json;
+    };
+
+    /**
+     * @param [skipOKCheck]
+     * @return {string}
+     */
+
+    ApiResponse.prototype.error = function error(skipOKCheck) {
+
+        if (this.ok() && !skipOKCheck) return null;
+
+        var message = (this._response && this._response.status ? this._response.status + ' ' : '') + (this._response && this._response.statusText ? this._response.statusText : '');
+
+        try {
+
+            if (this.json().message) message = this.json().message;
+            if (this.json().error_description) message = this.json().error_description;
+            if (this.json().description) message = this.json().description;
+        } catch (e) {}
+
+        return message;
+    };
+
+    /**
+     * @return {ApiResponse[]}
+     */
+
+    ApiResponse.prototype.multipart = function multipart() {
+
+        if (!this._isMultipart()) throw new Error('Response is not multipart');
+
+        if (!this._multipart.length) {
+
+            // Step 1. Split multipart response
+
+            var text = this.text();
+
+            if (!text) throw new Error('No response body');
+
+            var boundary = this._getContentType().match(/boundary=([^;]+)/i)[1];
+
+            if (!boundary) throw new Error('Cannot find boundary');
+
+            var parts = text.toString().split(ApiResponse._boundarySeparator + boundary);
+
+            if (parts[0].trim() === '') parts.shift();
+            if (parts[parts.length - 1].trim() == ApiResponse._boundarySeparator) parts.pop();
+
+            if (parts.length < 1) throw new Error('No parts in body');
+
+            // Step 2. Parse status info
+
+            var statusInfo = ApiResponse.create(parts.shift(), this._response.status, this._response.statusText).json();
+
+            // Step 3. Parse all other parts
+
+            this._multipart = parts.map(function (part, i) {
+
+                var status = statusInfo.response[i].status;
+
+                return ApiResponse.create(part, status);
+            });
+        }
+
+        return this._multipart;
+    };
+
+    ApiResponse.prototype._isContentType = function _isContentType(contentType) {
+        return this._getContentType().indexOf(contentType) > -1;
+    };
+
+    ApiResponse.prototype._getContentType = function _getContentType() {
+        return this._response.headers.get(ApiResponse._contentType) || '';
+    };
+
+    ApiResponse.prototype._isMultipart = function _isMultipart() {
+        return this._isContentType(ApiResponse._multipartContentType);
+    };
+
+    ApiResponse.prototype._isUrlEncoded = function _isUrlEncoded() {
+        return this._isContentType(ApiResponse._urlencodedContentType);
+    };
+
+    ApiResponse.prototype._isJson = function _isJson() {
+        return this._isContentType(ApiResponse._jsonContentType);
+    };
+
+    /**
+     * Method is used to create ApiResponse object from string parts of multipart/mixed response
+     * @param {string} [text]
+     * @param {number} [status]
+     * @param {string} [statusText]
+     * @return {ApiResponse}
+     */
+
+    ApiResponse.create = function create(text, status, statusText) {
+
+        text = text || '';
+        status = status || 200;
+        statusText = statusText || 'OK';
+
+        text = text.replace(/\r/g, '');
+
+        var headers = new _coreExternals.Headers(),
+            headersAndBody = text.split(ApiResponse._bodySeparator),
+            headersText = headersAndBody.length > 1 ? headersAndBody.shift() : '';
+
+        text = headersAndBody.join(ApiResponse._bodySeparator);
+
+        (headersText || '').split('\n').forEach(function (header) {
+
+            var split = header.trim().split(ApiResponse._headerSeparator),
+                key = split.shift().trim(),
+                value = split.join(ApiResponse._headerSeparator).trim();
+
+            if (key) headers.append(key, value);
+        });
+
+        return new ApiResponse(null, utils.createResponse(text, {
+            headers: headers,
+            status: status,
+            statusText: statusText
+        }), text);
+    };
+
+    return ApiResponse;
+})();
+
+exports['default'] = ApiResponse;
+module.exports = exports['default'];
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _Registry = __webpack_require__(17);
+
+var _Registry2 = _interopRequireDefault(_Registry);
+
+var _httpClient = __webpack_require__(13);
+
+var _httpClient2 = _interopRequireDefault(_httpClient);
+
+var Client = (function (_HttpClient) {
+    _inherits(Client, _HttpClient);
+
+    function Client() {
+        _classCallCheck(this, Client);
+
+        _HttpClient.call(this);
+        this._registry = new _Registry2['default']();
+    }
+
+    Client.prototype.registry = function registry() {
+        return this._registry;
+    };
+
+    Client.prototype._loadResponse = function _loadResponse(request) {
+        var mock;
+        return regeneratorRuntime.async(function _loadResponse$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    mock = this._registry.find(request);
+                    context$2$0.next = 3;
+                    return regeneratorRuntime.awrap(mock.getResponse(request));
+
+                case 3:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 4:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    return Client;
+})(_httpClient2['default']);
+
+exports['default'] = Client;
+module.exports = exports['default'];
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _Mock = __webpack_require__(18);
+
+var _Mock2 = _interopRequireDefault(_Mock);
+
+var Registry = (function () {
+    function Registry() {
+        _classCallCheck(this, Registry);
+
+        this._mocks = [];
+    }
+
+    Registry.prototype.add = function add(mock) {
+        this._mocks.push(mock);
+        return this;
+    };
+
+    Registry.prototype.clear = function clear() {
+        this._mocks = [];
+        return this;
+    };
+
+    Registry.prototype.find = function find(request) {
+
+        //console.log('Registry is looking for', request);
+
+        var mock = this._mocks.shift();
+
+        if (!mock) throw new Error('No mock in registry for request ' + request.method + ' ' + request.url);
+
+        if (!mock.test(request)) throw new Error('Wrong request ' + request.method + ' ' + request.url + ' for expected mock ' + mock.method() + ' ' + mock.path());
+
+        return mock;
+    };
+
+    Registry.prototype.apiCall = function apiCall(method, path, response, status, statusText) {
+
+        this.add(new _Mock2['default'](method, path, response, status, statusText));
+
+        return this;
+    };
+
+    Registry.prototype.authentication = function authentication() {
+
+        this.apiCall('POST', '/restapi/oauth/token', {
+            'access_token': 'ACCESS_TOKEN',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'refresh_token': 'REFRESH_TOKEN',
+            'refresh_token_expires_in': 60480,
+            'scope': 'SMS RCM Foo Boo',
+            'expireTime': new Date().getTime() + 3600000
+        });
+
+        return this;
+    };
+
+    Registry.prototype.logout = function logout() {
+
+        this.apiCall('POST', '/restapi/oauth/revoke', {});
+
+        return this;
+    };
+
+    Registry.prototype.presenceLoad = function presenceLoad(id) {
+
+        this.apiCall('GET', '/restapi/v1.0/account/~/extension/' + id + '/presence', {
+            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/123/extension/" + id + "/presence",
+            "extension": {
+                "uri": "https://platform.ringcentral.com/restapi/v1.0/account/123/extension/" + id,
+                "id": id,
+                "extensionNumber": "101"
+            },
+            "activeCalls": [],
+            "presenceStatus": "Available",
+            "telephonyStatus": "Ringing",
+            "userStatus": "Available",
+            "dndStatus": "TakeAllCalls",
+            "extensionId": id
+        });
+
+        return this;
+    };
+
+    Registry.prototype.subscribeGeneric = function subscribeGeneric(expiresIn) {
+
+        expiresIn = expiresIn || 15 * 60 * 60;
+
+        var date = new Date();
+
+        this.apiCall('POST', '/restapi/v1.0/subscription', {
+            'eventFilters': ['/restapi/v1.0/account/~/extension/~/presence'],
+            'expirationTime': new Date(date.getTime() + expiresIn * 1000).toISOString(),
+            'expiresIn': expiresIn,
+            'deliveryMode': {
+                'transportType': 'PubNub',
+                'encryption': false,
+                'address': '123_foo',
+                'subscriberKey': 'sub-c-foo',
+                'secretKey': 'sec-c-bar'
+            },
+            'id': 'foo-bar-baz',
+            'creationTime': date.toISOString(),
+            'status': 'Active',
+            'uri': 'https://platform.ringcentral.com/restapi/v1.0/subscription/foo-bar-baz'
+        });
+
+        return this;
+    };
+
+    Registry.prototype.subscribeOnPresence = function subscribeOnPresence(id, detailed) {
+
+        id = id || '1';
+
+        var date = new Date();
+
+        this.apiCall('POST', '/restapi/v1.0/subscription', {
+            'eventFilters': ['/restapi/v1.0/account/~/extension/' + id + '/presence' + (detailed ? '?detailedTelephonyState=true' : '')],
+            'expirationTime': new Date(date.getTime() + 15 * 60 * 60 * 1000).toISOString(),
+            'deliveryMode': {
+                'transportType': 'PubNub',
+                'encryption': true,
+                'address': '123_foo',
+                'subscriberKey': 'sub-c-foo',
+                'secretKey': 'sec-c-bar',
+                'encryptionAlgorithm': 'AES',
+                'encryptionKey': 'VQwb6EVNcQPBhE/JgFZ2zw=='
+            },
+            'creationTime': date.toISOString(),
+            'id': 'foo-bar-baz',
+            'status': 'Active',
+            'uri': 'https://platform.ringcentral.com/restapi/v1.0/subscription/foo-bar-baz'
+        });
+
+        return this;
+    };
+
+    Registry.prototype.tokenRefresh = function tokenRefresh(failure) {
+
+        if (!failure) {
+
+            this.apiCall('POST', '/restapi/oauth/token', {
+                'access_token': 'ACCESS_TOKEN_FROM_REFRESH',
+                'token_type': 'bearer',
+                'expires_in': 3600,
+                'refresh_token': 'REFRESH_TOKEN_FROM_REFRESH',
+                'refresh_token_expires_in': 60480,
+                'scope': 'SMS RCM Foo Boo'
+            });
+        } else {
+
+            this.apiCall('POST', '/restapi/oauth/token', {
+                'message': 'Wrong token',
+                'error_description': 'Wrong token',
+                'description': 'Wrong token'
+            }, 400);
+        }
+
+        return this;
+    };
+
+    return Registry;
+})();
+
+exports['default'] = Registry;
+module.exports = exports['default'];
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _httpApiResponse = __webpack_require__(15);
+
+var _httpApiResponse2 = _interopRequireDefault(_httpApiResponse);
+
+var _coreUtils = __webpack_require__(2);
+
+var _httpUtils = __webpack_require__(14);
+
+var Mock = (function () {
+    function Mock(method, path, json, status, statusText, delay) {
+        _classCallCheck(this, Mock);
+
+        this._method = method.toUpperCase();
+        this._path = path;
+        this._json = json || {};
+        this._delay = delay || 10;
+        this._status = status || 200;
+        this._statusText = statusText || 'OK';
+    }
+
+    Mock.prototype.path = function path() {
+        return this._path;
+    };
+
+    Mock.prototype.method = function method() {
+        return this._method;
+    };
+
+    Mock.prototype.test = function test(request) {
+
+        return request.url.indexOf(this._path) > -1 && request.method.toUpperCase() == this._method;
+    };
+
+    Mock.prototype.getResponse = function getResponse(request) {
+        return regeneratorRuntime.async(function getResponse$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.next = 2;
+                    return regeneratorRuntime.awrap(_coreUtils.delay(this._delay));
+
+                case 2:
+                    return context$2$0.abrupt('return', this.createResponse(this._json));
+
+                case 3:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    Mock.prototype.createResponse = function createResponse(json, init) {
+
+        init = init || {};
+
+        init.status = init.status || this._status;
+        init.statusText = init.statusText || this._statusText;
+
+        var str = JSON.stringify(json),
+            res = _httpUtils.createResponse(str, init);
+
+        res.headers.set(_httpApiResponse2['default']._contentType, _httpApiResponse2['default']._jsonContentType);
+
+        return res;
+    };
+
+    return Mock;
+})();
+
+exports['default'] = Mock;
+module.exports = exports['default'];
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _coreObservable = __webpack_require__(12);
+
+var _coreObservable2 = _interopRequireDefault(_coreObservable);
+
+var _Queue = __webpack_require__(20);
+
+var _Queue2 = _interopRequireDefault(_Queue);
+
+var _Auth = __webpack_require__(21);
+
+var _Auth2 = _interopRequireDefault(_Auth);
+
+var _coreExternals = __webpack_require__(3);
+
+var _coreUtils = __webpack_require__(2);
+
+var Platform = (function (_Observable) {
+    _inherits(Platform, _Observable);
+
+    _createClass(Platform, null, [{
+        key: '_urlPrefix',
+        value: '/restapi',
+        enumerable: true
+    }, {
+        key: '_apiVersion',
+        value: 'v1.0',
+        enumerable: true
+    }, {
+        key: '_accessTokenTtl',
+        value: null,
+        // Platform server by default sets it to 60 * 60 = 1 hour
+        enumerable: true
+    }, {
+        key: '_refreshTokenTtl',
+        value: 10 * 60 * 60,
+        // 10 hours
+        enumerable: true
+    }, {
+        key: '_refreshTokenTtlRemember',
+        value: 7 * 24 * 60 * 60,
+        // 1 week
+        enumerable: true
+    }, {
+        key: '_tokenEndpoint',
+        value: '/restapi/oauth/token',
+        enumerable: true
+    }, {
+        key: '_revokeEndpoint',
+        value: '/restapi/oauth/revoke',
+        enumerable: true
+    }, {
+        key: '_authorizeEndpoint',
+        value: '/restapi/oauth/authorize',
+        enumerable: true
+    }, {
+        key: '_refreshDelayMs',
+        value: 100,
+        enumerable: true
+    }, {
+        key: '_cacheId',
+        value: 'platform',
+        enumerable: true
+    }, {
+        key: '_clearCacheOnRefreshError',
+        value: true,
+        enumerable: true
+    }]);
+
+    function Platform(client, cache, server, appKey, appSecret) {
+        _classCallCheck(this, Platform);
+
+        _Observable.call(this);
+
+        this.events = {
+            beforeLogin: 'beforeLogin',
+            loginSuccess: 'loginSuccess',
+            loginError: 'loginError',
+            beforeRefresh: 'beforeRefresh',
+            refreshSuccess: 'refreshSuccess',
+            refreshError: 'refreshError',
+            beforeLogout: 'beforeLogout',
+            logoutSuccess: 'logoutSuccess',
+            logoutError: 'logoutError'
+        };
+        this._server = server;
+        this._appKey = appKey;
+        this._appSecret = appSecret;
+
+        /** @type {Cache} */
+        this._cache = cache;
+
+        /** @type {Client} */
+        this._client = client;
+
+        this._queue = new _Queue2['default'](this._cache, Platform._cacheId + '-refresh');
+
+        this._auth = new _Auth2['default'](this._cache, Platform._cacheId);
+    }
+
+    /**
+     * @return {Auth}
+     */
+
+    Platform.prototype.auth = function auth() {
+        return this._auth;
+    };
+
+    /**
+     * @return {Client}
+     */
+
+    Platform.prototype.client = function client() {
+        return this._client;
+    };
+
+    /**
+     * @param {string} path
+     * @param {object} [options]
+     * @param {boolean} [options.addServer]
+     * @param {string} [options.addMethod]
+     * @param {boolean} [options.addToken]
+     * @return {string}
+     */
+
+    Platform.prototype.createUrl = function createUrl(path, options) {
+
+        path = path || '';
+        options = options || {};
+
+        var builtUrl = '',
+            hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
+
+        if (options.addServer && !hasHttp) builtUrl += this._server;
+
+        if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp) builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
+
+        builtUrl += path;
+
+        if (options.addMethod || options.addToken) builtUrl += path.indexOf('?') > -1 ? '&' : '?';
+
+        if (options.addMethod) builtUrl += '_method=' + options.addMethod;
+        if (options.addToken) builtUrl += (options.addMethod ? '&' : '') + 'access_token=' + this._auth.accessToken();
+
+        return builtUrl;
+    };
+
+    /**
+     * @param {string} options.redirectUri
+     * @param {string} options.state
+     * @param {string} options.brandId
+     * @param {string} options.display
+     * @param {string} options.prompt
+     * @return {string}
+     */
+
+    Platform.prototype.authUrl = function authUrl(options) {
+
+        options = options || {};
+
+        return this.createUrl(Platform._authorizeEndpoint + '?' + _coreUtils.queryStringify({
+            'response_type': 'code',
+            'redirect_uri': options.redirectUri || '',
+            'client_id': this._appKey,
+            'state': options.state || '',
+            'brand_id': options.brandId || '',
+            'display': options.display || '',
+            'prompt': options.prompt || ''
+        }), { addServer: true });
+    };
+
+    /**
+     * @param {string} url
+     * @return {Object}
+     */
+
+    Platform.prototype.parseAuthRedirectUrl = function parseAuthRedirectUrl(url) {
+
+        var qs = _coreUtils.parseQueryString(url.split('?').reverse()[0]),
+            error = qs.error_description || qs.error;
+
+        if (error) {
+            var e = new Error(error);
+            e.error = qs.error;
+            throw e;
+        }
+
+        return qs;
+    };
+
+    /**
+     * @return {Promise<boolean>}
+     */
+
+    Platform.prototype.loggedIn = function loggedIn() {
+        return regeneratorRuntime.async(function loggedIn$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+                    context$2$0.next = 3;
+                    return regeneratorRuntime.awrap(this._ensureAuthentication());
+
+                case 3:
+                    return context$2$0.abrupt('return', true);
+
+                case 6:
+                    context$2$0.prev = 6;
+                    context$2$0.t0 = context$2$0['catch'](0);
+                    return context$2$0.abrupt('return', false);
+
+                case 9:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 6]]);
+    };
+
+    /**
+     * @param {string} options.username
+     * @param {string} options.password
+     * @param {string} options.extension
+     * @param {string} options.code
+     * @param {string} options.redirectUri
+     * @param {string} options.endpointId
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.login = function login(options) {
+        var body, apiResponse, json;
+        return regeneratorRuntime.async(function login$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+
+                    options = options || {};
+
+                    options.remember = options.remember || false;
+
+                    this.emit(this.events.beforeLogin);
+
+                    body = {
+                        "access_token_ttl": Platform._accessTokenTtl,
+                        "refresh_token_ttl": options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
+                    };
+
+                    if (!options.code) {
+
+                        body.grant_type = 'password';
+                        body.username = options.username;
+                        body.password = options.password;
+                        body.extension = options.extension || '';
+                    } else if (options.code) {
+
+                        body.grant_type = 'authorization_code';
+                        body.code = options.code;
+                        body.redirect_uri = options.redirectUri;
+                        //body.client_id = this.getCredentials().key; // not needed
+                    }
+
+                    if (options.endpointId) body.endpoint_id = options.endpointId;
+
+                    context$2$0.next = 9;
+                    return regeneratorRuntime.awrap(this._tokenRequest(Platform._tokenEndpoint, body));
+
+                case 9:
+                    apiResponse = context$2$0.sent;
+                    json = apiResponse.json();
+
+                    this._auth.setData(json).setRemember(options.remember);
+
+                    this.emit(this.events.loginSuccess, apiResponse);
+
+                    return context$2$0.abrupt('return', apiResponse);
+
+                case 16:
+                    context$2$0.prev = 16;
+                    context$2$0.t0 = context$2$0['catch'](0);
+
+                    this._cache.clean();
+
+                    this.emit(this.events.loginError, context$2$0.t0);
+
+                    throw context$2$0.t0;
+
+                case 21:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 16]]);
+    };
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.refresh = function refresh() {
+        var res, json;
+        return regeneratorRuntime.async(function refresh$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+
+                    this.emit(this.events.beforeRefresh);
+
+                    if (!this._queue.isPaused()) {
+                        context$2$0.next = 9;
+                        break;
+                    }
+
+                    context$2$0.next = 5;
+                    return regeneratorRuntime.awrap(this._queue.poll());
+
+                case 5:
+                    if (this._isAccessTokenValid()) {
+                        context$2$0.next = 7;
+                        break;
+                    }
+
+                    throw new Error('Automatic authentification timeout');
+
+                case 7:
+
+                    this.emit(this.events.refreshSuccess, null);
+
+                    return context$2$0.abrupt('return', null);
+
+                case 9:
+
+                    this._queue.pause();
+
+                    // Make sure all existing AJAX calls had a chance to reach the server
+                    context$2$0.next = 12;
+                    return regeneratorRuntime.awrap(_coreUtils.delay(Platform._refreshDelayMs));
+
+                case 12:
+                    if (this._auth.refreshToken()) {
+                        context$2$0.next = 14;
+                        break;
+                    }
+
+                    throw new Error('Refresh token is missing');
+
+                case 14:
+                    if (this._auth.refreshTokenValid()) {
+                        context$2$0.next = 16;
+                        break;
+                    }
+
+                    throw new Error('Refresh token has expired');
+
+                case 16:
+                    if (this._queue.isPaused()) {
+                        context$2$0.next = 18;
+                        break;
+                    }
+
+                    throw new Error('Queue was resumed before refresh call');
+
+                case 18:
+                    context$2$0.next = 20;
+                    return regeneratorRuntime.awrap(this._tokenRequest(Platform._tokenEndpoint, {
+                        "grant_type": "refresh_token",
+                        "refresh_token": this._auth.refreshToken(),
+                        "access_token_ttl": Platform._accessTokenTtl,
+                        "refresh_token_ttl": this._auth.remember() ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
+                    }));
+
+                case 20:
+                    res = context$2$0.sent;
+                    json = res.json();
+
+                    if (json.access_token) {
+                        context$2$0.next = 24;
+                        break;
+                    }
+
+                    throw this._client.makeError(new Error('Malformed OAuth response'), res);
+
+                case 24:
+
+                    this._auth.setData(json);
+                    this._queue.resume();
+
+                    this.emit(this.events.refreshSuccess, res);
+
+                    return context$2$0.abrupt('return', res);
+
+                case 30:
+                    context$2$0.prev = 30;
+                    context$2$0.t0 = context$2$0['catch'](0);
+
+                    context$2$0.t0 = this._client.makeError(context$2$0.t0);
+
+                    if (Platform._clearCacheOnRefreshError) {
+                        this._cache.clean();
+                    }
+
+                    this.emit(this.events.refreshError, context$2$0.t0);
+
+                    throw context$2$0.t0;
+
+                case 36:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 30]]);
+    };
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.logout = function logout() {
+        var res;
+        return regeneratorRuntime.async(function logout$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+
+                    this.emit(this.events.beforeLogout);
+
+                    this._queue.pause();
+
+                    context$2$0.next = 5;
+                    return regeneratorRuntime.awrap(this._tokenRequest(Platform._revokeEndpoint, {
+                        token: this._auth.accessToken()
+                    }));
+
+                case 5:
+                    res = context$2$0.sent;
+
+                    this._queue.resume();
+                    this._cache.clean();
+
+                    this.emit(this.events.logoutSuccess, res);
+
+                    return context$2$0.abrupt('return', res);
+
+                case 12:
+                    context$2$0.prev = 12;
+                    context$2$0.t0 = context$2$0['catch'](0);
+
+                    this._queue.resume();
+
+                    this.emit(this.events.logoutError, context$2$0.t0);
+
+                    throw context$2$0.t0;
+
+                case 17:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 12]]);
+    };
+
+    /**
+     * @param {Request} request
+     * @param {object} [options]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<Request>}
+     */
+
+    Platform.prototype.inflateRequest = function inflateRequest(request, options) {
+        return regeneratorRuntime.async(function inflateRequest$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+
+                    options = options || {};
+
+                    if (!options.skipAuthCheck) {
+                        context$2$0.next = 3;
+                        break;
+                    }
+
+                    return context$2$0.abrupt('return', request);
+
+                case 3:
+                    context$2$0.next = 5;
+                    return regeneratorRuntime.awrap(this._ensureAuthentication());
+
+                case 5:
+
+                    request.headers.set('Authorization', this._authHeader());
+                    //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
+
+                    //TODO Add User-Agent here
+
+                    return context$2$0.abrupt('return', request);
+
+                case 7:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    /**
+     * @param {Request} request
+     * @param {object} [options]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.sendRequest = function sendRequest(request, options) {
+        return regeneratorRuntime.async(function sendRequest$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+                    context$2$0.next = 3;
+                    return regeneratorRuntime.awrap(this.inflateRequest(request, options));
+
+                case 3:
+                    request = context$2$0.sent;
+                    context$2$0.next = 6;
+                    return regeneratorRuntime.awrap(this._client.sendRequest(request));
+
+                case 6:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 9:
+                    context$2$0.prev = 9;
+                    context$2$0.t0 = context$2$0['catch'](0);
+
+                    if (!(!context$2$0.t0.apiResponse || !context$2$0.t0.apiResponse.response() || context$2$0.t0.apiResponse.response().status != 401)) {
+                        context$2$0.next = 13;
+                        break;
+                    }
+
+                    throw context$2$0.t0;
+
+                case 13:
+
+                    this._auth.cancelAccessToken();
+
+                    context$2$0.next = 16;
+                    return regeneratorRuntime.awrap(this.sendRequest(request, options));
+
+                case 16:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 17:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 9]]);
+    };
+
+    /**
+     * General purpose function to send anything to server
+     * @param {object} [options.body]
+     * @param {string} [options.url]
+     * @param {string} [options.method]
+     * @param {object} [options.query]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.send = function send() {
+        var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+        return regeneratorRuntime.async(function send$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+
+                    //FIXME https://github.com/bitinn/node-fetch/issues/43
+                    options.url = this.createUrl(options.url, { addServer: true });
+
+                    context$2$0.next = 3;
+                    return regeneratorRuntime.awrap(this.sendRequest(this._client.createRequest(options), options));
+
+                case 3:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 4:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    /**
+     * @param {string} url
+     * @param {object} query
+     * @param {object} [options]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.get = function get(url, query, options) {
+        return regeneratorRuntime.async(function get$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    options = options || {};
+                    options.method = 'GET';
+                    options.url = url;
+                    options.query = query;
+                    context$2$0.next = 6;
+                    return regeneratorRuntime.awrap(this.send(options));
+
+                case 6:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 7:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    /**
+     * @param {string} url
+     * @param {object} body
+     * @param {object} query
+     * @param {object} [options]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.post = function post(url, body, query, options) {
+        return regeneratorRuntime.async(function post$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    options = options || {};
+                    options.method = 'POST';
+                    options.url = url;
+                    options.query = query;
+                    options.body = body;
+                    context$2$0.next = 7;
+                    return regeneratorRuntime.awrap(this.send(options));
+
+                case 7:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 8:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    /**
+     * @param {string} url
+     * @param {object} body
+     * @param {object} query
+     * @param {object} [options]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.put = function put(url, body, query, options) {
+        return regeneratorRuntime.async(function put$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    options = options || {};
+                    options.method = 'PUT';
+                    options.url = url;
+                    options.query = query;
+                    options.body = body;
+                    context$2$0.next = 7;
+                    return regeneratorRuntime.awrap(this.send(options));
+
+                case 7:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 8:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    /**
+     * @param {string} url
+     * @param {string} query
+     * @param {object} [options]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype['delete'] = function _delete(url, query, options) {
+        return regeneratorRuntime.async(function _delete$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    options = options || {};
+                    options.method = 'DELETE';
+                    options.url = url;
+                    options.query = query;
+                    context$2$0.next = 6;
+                    return regeneratorRuntime.awrap(this.send(options));
+
+                case 6:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 7:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    Platform.prototype._tokenRequest = function _tokenRequest(path, body) {
+        return regeneratorRuntime.async(function _tokenRequest$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.next = 2;
+                    return regeneratorRuntime.awrap(this.send({
+                        url: path,
+                        skipAuthCheck: true,
+                        body: body,
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Basic ' + this._apiKey(),
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    }));
+
+                case 2:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 3:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    Platform.prototype._ensureAuthentication = function _ensureAuthentication() {
+        return regeneratorRuntime.async(function _ensureAuthentication$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    if (!this._isAccessTokenValid()) {
+                        context$2$0.next = 2;
+                        break;
+                    }
+
+                    return context$2$0.abrupt('return', null);
+
+                case 2:
+                    context$2$0.next = 4;
+                    return regeneratorRuntime.awrap(this.refresh());
+
+                case 4:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 5:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    Platform.prototype._isAccessTokenValid = function _isAccessTokenValid() {
+
+        return this._auth.accessTokenValid() && !this._queue.isPaused();
+    };
+
+    Platform.prototype._apiKey = function _apiKey() {
+        var apiKey = this._appKey + ':' + this._appSecret;
+        return typeof btoa == 'function' ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
+    };
+
+    Platform.prototype._authHeader = function _authHeader() {
+        var token = this._auth.accessToken();
+        return this._auth.tokenType() + (token ? ' ' + token : '');
+    };
+
+    return Platform;
+})(_coreObservable2['default']);
+
+exports['default'] = Platform;
+module.exports = exports['default'];
+
+// Perform sanity checks
+
+/** @type {ApiResponse} */
+
+// Guard is for errors that come from polling
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _coreExternals = __webpack_require__(3);
+
+var _coreUtils = __webpack_require__(2);
+
+var Queue = (function () {
+    _createClass(Queue, null, [{
+        key: '_pollInterval',
+        value: 250,
+        enumerable: true
+    }, {
+        key: '_releaseTimeout',
+        value: 5000,
+        enumerable: true
+    }]);
+
+    function Queue(cache, cacheId) {
+        _classCallCheck(this, Queue);
+
+        this._cache = cache;
+        this._cacheId = cacheId;
+        this._promise = null;
+    }
+
+    Queue.prototype.isPaused = function isPaused() {
+
+        var storage = this._cache,
+            cacheId = this._cacheId,
+            time = storage.getItem(cacheId);
+
+        return !!time && Date.now() - parseInt(time) < Queue._releaseTimeout;
+    };
+
+    Queue.prototype.pause = function pause() {
+        this._cache.setItem(this._cacheId, Date.now());
+        return this;
+    };
+
+    Queue.prototype.resume = function resume() {
+        this._cache.removeItem(this._cacheId);
+        return this;
+    };
+
+    Queue.prototype.poll = function poll() {
+        var _this = this;
+
+        if (this._promise) return this._promise;
+
+        this._promise = new _coreExternals.Promise(function (resolve, reject) {
+
+            _coreUtils.poll(function (next) {
+
+                if (_this.isPaused()) return next();
+
+                _this._promise = null;
+
+                _this.resume(); // this is actually not needed but why not
+
+                resolve(null);
+            }, Queue._pollInterval);
+        });
+
+        return this._promise;
+    };
+
+    return Queue;
+})();
+
+exports['default'] = Queue;
+module.exports = exports['default'];
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var Auth = (function () {
+    _createClass(Auth, null, [{
+        key: 'refreshHandicapMs',
+        value: 60 * 1000,
+        // 1 minute
+        enumerable: true
+    }, {
+        key: 'forcedTokenType',
+        value: 'forced',
+        enumerable: true
+    }]);
+
+    function Auth(cache, cacheId) {
+        _classCallCheck(this, Auth);
+
+        /** @type {Cache} */
+        this._cache = cache;
+        this._cacheId = cacheId;
+    }
+
+    //export interface IAuthData {
+    //    remember?:boolean;
+    //    token_type?:string;
+    //    access_token?:string;
+    //    expires_in?:number; // actually it's string
+    //    expire_time?:number;
+    //    refresh_token?:string;
+    //    refresh_token_expires_in?:number; // actually it's string
+    //    refresh_token_expire_time?:number;
+    //    scope?:string;
+    //}
+
+    Auth.prototype.accessToken = function accessToken() {
+        return this.data().access_token;
+    };
+
+    Auth.prototype.refreshToken = function refreshToken() {
+        return this.data().refresh_token;
+    };
+
+    Auth.prototype.tokenType = function tokenType() {
+        return this.data().token_type;
+    };
+
+    /**
+     * @return {{token_type: string, access_token: string, expires_in: number, refresh_token: string, refresh_token_expires_in: number}}
+     */
+
+    Auth.prototype.data = function data() {
+
+        return this._cache.getItem(this._cacheId) || {
+            token_type: '',
+            access_token: '',
+            expires_in: 0,
+            refresh_token: '',
+            refresh_token_expires_in: 0
+        };
+    };
+
+    /**
+     * @param {object} newData
+     * @return {Auth}
+     */
+
+    Auth.prototype.setData = function setData(newData) {
+
+        newData = newData || {};
+
+        var data = this.data();
+
+        Object.keys(newData).forEach(function (key) {
+            data[key] = newData[key];
+        });
+
+        data.expire_time = Date.now() + data.expires_in * 1000;
+        data.refresh_token_expire_time = Date.now() + data.refresh_token_expires_in * 1000;
+
+        this._cache.setItem(this._cacheId, data);
+
+        return this;
+    };
+
+    /**
+     * Check if there is a valid (not expired) access token
+     * @return {boolean}
+     */
+
+    Auth.prototype.accessTokenValid = function accessTokenValid() {
+
+        var authData = this.data();
+        return authData.token_type === Auth.forcedTokenType || authData.expire_time - Auth.refreshHandicapMs > Date.now();
+    };
+
+    /**
+     * Check if there is a valid (not expired) access token
+     * @return {boolean}
+     */
+
+    Auth.prototype.refreshTokenValid = function refreshTokenValid() {
+
+        return this.data().refresh_token_expire_time > Date.now();
+    };
+
+    /**
+     * @return {Auth}
+     */
+
+    Auth.prototype.cancelAccessToken = function cancelAccessToken() {
+
+        return this.setData({
+            access_token: '',
+            expires_in: 0
+        });
+    };
+
+    /**
+     * This method sets a special authentication mode used in Service Web
+     * @return {Auth}
+     */
+
+    Auth.prototype.forceAuthentication = function forceAuthentication() {
+
+        this.setData({
+            token_type: Auth.forcedTokenType,
+            access_token: '',
+            expires_in: 0,
+            refresh_token: '',
+            refresh_token_expires_in: 0
+        });
+
+        return this;
+    };
+
+    /**
+     * @param remember
+     * @return {Auth}
+     */
+
+    Auth.prototype.setRemember = function setRemember(remember) {
+
+        return this.setData({ remember: remember });
+    };
+
+    /**
+     * @return {boolean}
+     */
+
+    Auth.prototype.remember = function remember() {
+
+        return !!this.data().remember;
+    };
+
+    return Auth;
+})();
+
+exports['default'] = Auth;
+module.exports = exports['default'];
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _PubnubMockJs = __webpack_require__(23);
+
+var _PubnubMockJs2 = _interopRequireDefault(_PubnubMockJs);
+
+var _coreExternals = __webpack_require__(3);
+
+var PubnubMockFactory = (function () {
+    function PubnubMockFactory() {
+        _classCallCheck(this, PubnubMockFactory);
+
+        this.crypto_obj = _coreExternals.PUBNUB.crypto_obj;
+    }
+
+    PubnubMockFactory.prototype.init = function init(options) {
+        return new _PubnubMockJs2['default'](options);
+    };
+
+    return PubnubMockFactory;
+})();
+
+exports['default'] = PubnubMockFactory;
+module.exports = exports['default'];
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _coreObservable = __webpack_require__(12);
+
+var _coreObservable2 = _interopRequireDefault(_coreObservable);
+
+var _coreExternals = __webpack_require__(3);
+
+var PubnubMock = (function (_Observable) {
+    _inherits(PubnubMock, _Observable);
+
+    function PubnubMock(options) {
+        _classCallCheck(this, PubnubMock);
+
+        _Observable.call(this);
+        this.options = options;
+        this.crypto_obj = _coreExternals.PUBNUB.crypto_obj;
+    }
+
+    PubnubMock.prototype.ready = function ready() {};
+
+    PubnubMock.prototype.subscribe = function subscribe(options) {
+        this.on('message-' + options.channel, options.message);
+    };
+
+    PubnubMock.prototype.unsubscribe = function unsubscribe(options) {
+        this.off('message-' + options.channel);
+    };
+
+    PubnubMock.prototype.receiveMessage = function receiveMessage(msg, channel) {
+        this.emit('message-' + channel, msg, 'env', channel);
+    };
+
+    return PubnubMock;
+})(_coreObservable2['default']);
+
+exports['default'] = PubnubMock;
+module.exports = exports['default'];
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _coreObservable = __webpack_require__(12);
+
+var _coreObservable2 = _interopRequireDefault(_coreObservable);
+
+var _httpClient = __webpack_require__(13);
+
+var _httpClient2 = _interopRequireDefault(_httpClient);
+
+var _coreUtils = __webpack_require__(2);
+
+var Subscription = (function (_Observable) {
+    _inherits(Subscription, _Observable);
+
+    _createClass(Subscription, null, [{
+        key: '_renewHandicapMs',
+        value: 2 * 60 * 1000,
+        enumerable: true
+    }, {
+        key: '_pollInterval',
+        value: 10 * 1000,
+        enumerable: true
+    }]);
+
+    function Subscription(pubnubFactory, platform, cache) {
+        _classCallCheck(this, Subscription);
+
+        _Observable.call(this);
+
+        this.events = {
+            notification: 'notification',
+            removeSuccess: 'removeSuccess',
+            removeError: 'removeError',
+            renewSuccess: 'renewSuccess',
+            renewError: 'renewError',
+            subscribeSuccess: 'subscribeSuccess',
+            subscribeError: 'subscribeError'
+        };
+        this._pubnubFactory = pubnubFactory;
+        this._platform = platform;
+        this._cache = cache;
+        this._pubnub = null;
+        this._timeout = null;
+        this._subscription = {};
+    }
+
+    //export interface ISubscription {
+    //    id?:string;
+    //    uri?: string;
+    //    eventFilters?:string[];
+    //    expirationTime?:string; // 2014-03-12T19:54:35.613Z
+    //    expiresIn?:number;
+    //    deliveryMode?: {
+    //        transportType?:string;
+    //        encryption?:boolean;
+    //        address?:string;
+    //        subscriberKey?:string;
+    //        encryptionKey?:string;
+    //        secretKey?:string;
+    //    };
+    //    creationTime?:string; // 2014-03-12T19:54:35.613Z
+    //    status?:string; // Active
+    //}
+
+    /**
+     * @return {boolean}
+     */
+
+    Subscription.prototype.alive = function alive() {
+
+        return !!(this._subscription.id && this._subscription.deliveryMode && this._subscription.deliveryMode.subscriberKey && this._subscription.deliveryMode.address && Date.now() < this.expirationTime());
+    };
+
+    Subscription.prototype.expirationTime = function expirationTime() {
+        return new Date(this._subscription.expirationTime || 0).getTime() - Subscription._renewHandicapMs;
+    };
+
+    Subscription.prototype.setSubscription = function setSubscription(subscription) {
+
+        subscription = subscription || {};
+
+        this._clearTimeout();
+
+        this._subscription = subscription;
+
+        if (!this._pubnub) this._subscribeAtPubnub();
+
+        this._setTimeout();
+
+        return this;
+    };
+
+    Subscription.prototype.subscription = function subscription() {
+        return this._subscription;
+    };
+
+    /**
+     * Creates or updates subscription if there is an active one
+     * @param {{events?:string[]}} [options] New array of events
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Subscription.prototype.register = function register(options) {
+        return regeneratorRuntime.async(function register$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    if (!this.alive()) {
+                        context$2$0.next = 6;
+                        break;
+                    }
+
+                    context$2$0.next = 3;
+                    return regeneratorRuntime.awrap(this.renew(options));
+
+                case 3:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 6:
+                    context$2$0.next = 8;
+                    return regeneratorRuntime.awrap(this.subscribe(options));
+
+                case 8:
+                    return context$2$0.abrupt('return', context$2$0.sent);
+
+                case 9:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this);
+    };
+
+    Subscription.prototype.eventFilters = function eventFilters() {
+        return this._subscription.eventFilters || [];
+    };
+
+    /**
+     * @param {string[]} events
+     * @return {Subscription}
+     */
+
+    Subscription.prototype.addEventFilters = function addEventFilters(events) {
+        this.setEventFilters(this.eventFilters().concat(events));
+        return this;
+    };
+
+    /**
+     * @param {string[]} events
+     * @return {Subscription}
+     */
+
+    Subscription.prototype.setEventFilters = function setEventFilters(events) {
+        this._subscription.eventFilters = events;
+        return this;
+    };
+
+    /**
+     * @param {{events?:string[]}} [options] New array of events
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Subscription.prototype.subscribe = function subscribe(options) {
+        var response, json;
+        return regeneratorRuntime.async(function subscribe$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+
+                    options = options || {};
+
+                    if (options.events) this.setEventFilters(options.events);
+
+                    this._clearTimeout();
+
+                    if (this.eventFilters().length) {
+                        context$2$0.next = 6;
+                        break;
+                    }
+
+                    throw new Error('Events are undefined');
+
+                case 6:
+                    context$2$0.next = 8;
+                    return regeneratorRuntime.awrap(this._platform.post('/restapi/v1.0/subscription', {
+                        eventFilters: this._getFullEventFilters(),
+                        deliveryMode: {
+                            transportType: 'PubNub'
+                        }
+                    }));
+
+                case 8:
+                    response = context$2$0.sent;
+                    json = response.json();
+
+                    this.setSubscription(json).emit(this.events.subscribeSuccess, response);
+
+                    return context$2$0.abrupt('return', response);
+
+                case 14:
+                    context$2$0.prev = 14;
+                    context$2$0.t0 = context$2$0['catch'](0);
+
+                    context$2$0.t0 = this._platform.client().makeError(context$2$0.t0);
+
+                    this.reset().emit(this.events.subscribeError, context$2$0.t0);
+
+                    throw context$2$0.t0;
+
+                case 19:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 14]]);
+    };
+
+    /**
+     * @param {{events?:string[]}} [options] New array of events
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Subscription.prototype.renew = function renew(options) {
+        var response, json;
+        return regeneratorRuntime.async(function renew$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+
+                    options = options || {};
+
+                    if (options.events) this.setEventFilters(options.events);
+
+                    this._clearTimeout();
+
+                    if (this.alive()) {
+                        context$2$0.next = 6;
+                        break;
+                    }
+
+                    throw new Error('Subscription is not alive');
+
+                case 6:
+                    if (this.eventFilters().length) {
+                        context$2$0.next = 8;
+                        break;
+                    }
+
+                    throw new Error('Events are undefined');
+
+                case 8:
+                    context$2$0.next = 10;
+                    return regeneratorRuntime.awrap(this._platform.put('/restapi/v1.0/subscription/' + this._subscription.id, {
+                        eventFilters: this._getFullEventFilters()
+                    }));
+
+                case 10:
+                    response = context$2$0.sent;
+                    json = response.json();
+
+                    this.setSubscription(json).emit(this.events.renewSuccess, response);
+
+                    return context$2$0.abrupt('return', response);
+
+                case 16:
+                    context$2$0.prev = 16;
+                    context$2$0.t0 = context$2$0['catch'](0);
+
+                    context$2$0.t0 = this._platform.client().makeError(context$2$0.t0);
+
+                    this.reset().emit(this.events.renewError, context$2$0.t0);
+
+                    throw context$2$0.t0;
+
+                case 21:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 16]]);
+    };
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Subscription.prototype.remove = function remove() {
+        var response;
+        return regeneratorRuntime.async(function remove$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+
+                    if (this.alive()) {
+                        context$2$0.next = 3;
+                        break;
+                    }
+
+                    throw new Error('Subscription is not alive');
+
+                case 3:
+                    context$2$0.next = 5;
+                    return regeneratorRuntime.awrap(this._platform['delete']('/restapi/v1.0/subscription/' + this._subscription.id));
+
+                case 5:
+                    response = context$2$0.sent;
+
+                    this.reset().emit(this.events.removeSuccess, response);
+
+                    return context$2$0.abrupt('return', response);
+
+                case 10:
+                    context$2$0.prev = 10;
+                    context$2$0.t0 = context$2$0['catch'](0);
+
+                    context$2$0.t0 = this._platform.client().makeError(context$2$0.t0);
+
+                    this.emit(this.events.removeError, context$2$0.t0);
+
+                    throw context$2$0.t0;
+
+                case 15:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 10]]);
+    };
+
+    /**
+     * Remove subscription and disconnect from PUBNUB
+     * This method resets subscription at client side but backend is not notified
+     */
+
+    Subscription.prototype.reset = function reset() {
+        this._clearTimeout();
+        if (this.alive() && this._pubnub) this._pubnub.unsubscribe({ channel: this._subscription.deliveryMode.address });
+        this._subscription = {};
+        return this;
+    };
+
+    /**
+     *
+     * @param {string} cacheKey
+     * @param {string[]} events
+     * @return {Subscription}
+     */
+
+    Subscription.prototype.restoreFromCache = function restoreFromCache(cacheKey, events) {
+        var _this = this;
+
+        this.on([this.events.subscribeSuccess, this.events.renewSuccess], function () {
+
+            _this._cache.setItem(cacheKey, _this.subscription());
+        });
+
+        this.on(this.events.renewError, function () {
+
+            _this.reset().setEventFilters(events).register();
+        });
+
+        var cachedSubscriptionData = this._cache.getItem(cacheKey);
+
+        if (cachedSubscriptionData) {
+            try {
+                this.setSubscription(cachedSubscriptionData);
+            } catch (e) {}
+        } else {
+            this.setEventFilters(events);
+        }
+
+        return this;
+    };
+
+    Subscription.prototype._getFullEventFilters = function _getFullEventFilters() {
+        var _this2 = this;
+
+        return this.eventFilters().map(function (event) {
+            return _this2._platform.createUrl(event);
+        });
+    };
+
+    Subscription.prototype._setTimeout = function _setTimeout() {
+        var _this3 = this;
+
+        this._clearTimeout();
+
+        if (!this.alive()) throw new Error('Subscription is not alive');
+
+        _coreUtils.poll(function (next) {
+
+            if (_this3.alive()) return next();
+
+            _this3.renew();
+        }, Subscription._pollInterval, this._timeout);
+
+        return this;
+    };
+
+    Subscription.prototype._clearTimeout = function _clearTimeout() {
+
+        _coreUtils.stopPolling(this._timeout);
+
+        return this;
+    };
+
+    Subscription.prototype._decrypt = function _decrypt(message) {
+
+        if (!this.alive()) throw new Error('Subscription is not alive');
+
+        if (this._subscription.deliveryMode.encryptionKey) {
+
+            var PUBNUB = this._pubnubFactory;
+
+            message = PUBNUB.crypto_obj.decrypt(message, this._subscription.deliveryMode.encryptionKey, {
+                encryptKey: false,
+                keyEncoding: 'base64',
+                keyLength: 128,
+                mode: 'ecb'
+            });
+        }
+
+        return message;
+    };
+
+    Subscription.prototype._notify = function _notify(message) {
+
+        this.emit(this.events.notification, this._decrypt(message));
+
+        return this;
+    };
+
+    Subscription.prototype._subscribeAtPubnub = function _subscribeAtPubnub() {
+
+        if (!this.alive()) throw new Error('Subscription is not alive');
+
+        var PUBNUB = this._pubnubFactory;
+
+        this._pubnub = PUBNUB.init({
+            ssl: true,
+            subscribe_key: this._subscription.deliveryMode.subscriberKey
+        });
+
+        this._pubnub.ready();
+
+        this._pubnub.subscribe({
+            channel: this._subscription.deliveryMode.address,
+            message: this._notify.bind(this),
+            connect: function connect() {}
+        });
+
+        return this;
+    };
+
+    return Subscription;
+})(_coreObservable2['default']);
+
+exports['default'] = Subscription;
+module.exports = exports['default'];
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+/* WEBPACK VAR INJECTION */(function(global) {/**
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * https://raw.github.com/facebook/regenerator/master/LICENSE file. An
+ * additional grant of patent rights can be found in the PATENTS file in
+ * the same directory.
+ */
+
+!(function(global) {
+  "use strict";
+
+  var hasOwn = Object.prototype.hasOwnProperty;
+  var undefined; // More compressible than void 0.
+  var iteratorSymbol =
+    typeof Symbol === "function" && Symbol.iterator || "@@iterator";
+
+  var inModule = typeof module === "object";
+  var runtime = global.regeneratorRuntime;
+  if (runtime) {
+    if (inModule) {
+      // If regeneratorRuntime is defined globally and we're in a module,
+      // make the exports object identical to regeneratorRuntime.
+      module.exports = runtime;
+    }
+    // Don't bother evaluating the rest of this file if the runtime was
+    // already defined globally.
+    return;
+  }
+
+  // Define the runtime globally (as expected by generated code) as either
+  // module.exports (if we're in a module) or a new, empty object.
+  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided, then outerFn.prototype instanceof Generator.
+    var generator = Object.create((outerFn || Generator).prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+    return generator;
+  }
+  runtime.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype;
+  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
+  GeneratorFunctionPrototype.constructor = GeneratorFunction;
+  GeneratorFunction.displayName = "GeneratorFunction";
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      prototype[method] = function(arg) {
+        return this._invoke(method, arg);
+      };
+    });
+  }
+
+  runtime.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  runtime.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `value instanceof AwaitArgument` to determine if the yielded value is
+  // meant to be awaited. Some may consider the name of this method too
+  // cutesy, but they are curmudgeons.
+  runtime.awrap = function(arg) {
+    return new AwaitArgument(arg);
+  };
+
+  function AwaitArgument(arg) {
+    this.arg = arg;
+  }
+
+  function AsyncIterator(generator) {
+    // This invoke function is written in a style that assumes some
+    // calling function (or Promise) will handle exceptions.
+    function invoke(method, arg) {
+      var result = generator[method](arg);
+      var value = result.value;
+      return value instanceof AwaitArgument
+        ? Promise.resolve(value.arg).then(invokeNext, invokeThrow)
+        : Promise.resolve(value).then(function(unwrapped) {
+            // When a yielded Promise is resolved, its final value becomes
+            // the .value of the Promise<{value,done}> result for the
+            // current iteration. If the Promise is rejected, however, the
+            // result for this iteration will be rejected with the same
+            // reason. Note that rejections of yielded Promises are not
+            // thrown back into the generator function, as is the case
+            // when an awaited Promise is rejected. This difference in
+            // behavior between yield and await is important, because it
+            // allows the consumer to decide what to do with the yielded
+            // rejection (swallow it and continue, manually .throw it back
+            // into the generator, abandon iteration, whatever). With
+            // await, by contrast, there is no opportunity to examine the
+            // rejection reason outside the generator function, so the
+            // only option is to throw it from the await expression, and
+            // let the generator function handle the exception.
+            result.value = unwrapped;
+            return result;
+          });
+    }
+
+    if (typeof process === "object" && process.domain) {
+      invoke = process.domain.bind(invoke);
+    }
+
+    var invokeNext = invoke.bind(generator, "next");
+    var invokeThrow = invoke.bind(generator, "throw");
+    var invokeReturn = invoke.bind(generator, "return");
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return invoke(method, arg);
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : new Promise(function (resolve) {
+          resolve(callInvokeWithMethodAndArg());
+        });
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    this._invoke = enqueue;
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList)
+    );
+
+    return runtime.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per 25.3.3.3.3 of the spec:
+        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+        return doneResult();
+      }
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          if (method === "return" ||
+              (method === "throw" && delegate.iterator[method] === undefined)) {
+            // A return or throw (when the delegate iterator has no throw
+            // method) always terminates the yield* loop.
+            context.delegate = null;
+
+            // If the delegate iterator has a return method, give it a
+            // chance to clean up.
+            var returnMethod = delegate.iterator["return"];
+            if (returnMethod) {
+              var record = tryCatch(returnMethod, delegate.iterator, arg);
+              if (record.type === "throw") {
+                // If the return method threw an exception, let that
+                // exception prevail over the original return or throw.
+                method = "throw";
+                arg = record.arg;
+                continue;
+              }
+            }
+
+            if (method === "return") {
+              // Continue with the outer return, now that the delegate
+              // iterator has been terminated.
+              continue;
+            }
+          }
+
+          var record = tryCatch(
+            delegate.iterator[method],
+            delegate.iterator,
+            arg
+          );
+
+          if (record.type === "throw") {
+            context.delegate = null;
+
+            // Like returning generator.throw(uncaught), but without the
+            // overhead of an extra function call.
+            method = "throw";
+            arg = record.arg;
+            continue;
+          }
+
+          // Delegate generator ran and handled its own exceptions so
+          // regardless of what the method was, we continue as if it is
+          // "next" with an undefined arg.
+          method = "next";
+          arg = undefined;
+
+          var info = record.arg;
+          if (info.done) {
+            context[delegate.resultName] = info.value;
+            context.next = delegate.nextLoc;
+          } else {
+            state = GenStateSuspendedYield;
+            return info;
+          }
+
+          context.delegate = null;
+        }
+
+        if (method === "next") {
+          if (state === GenStateSuspendedYield) {
+            context.sent = arg;
+          } else {
+            context.sent = undefined;
+          }
+
+        } else if (method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw arg;
+          }
+
+          if (context.dispatchException(arg)) {
+            // If the dispatched exception was caught by a catch block,
+            // then let that catch block handle the exception normally.
+            method = "next";
+            arg = undefined;
+          }
+
+        } else if (method === "return") {
+          context.abrupt("return", arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          var info = {
+            value: record.arg,
+            done: context.done
+          };
+
+          if (record.arg === ContinueSentinel) {
+            if (context.delegate && method === "next") {
+              // Deliberately forget the last sent value so that we don't
+              // accidentally pass it on to the delegate.
+              arg = undefined;
+            }
+          } else {
+            return info;
+          }
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(arg) call above.
+          method = "throw";
+          arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  Gp[iteratorSymbol] = function() {
+    return this;
+  };
+
+  Gp.toString = function() {
+    return "[object Generator]";
+  };
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  runtime.keys = function(object) {
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    // Return an iterator with no values.
+    return { next: doneResult };
+  }
+  runtime.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      this.sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+        return !!caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.next = finallyEntry.finallyLoc;
+      } else {
+        this.complete(record);
+      }
+
+      return ContinueSentinel;
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = record.arg;
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      return ContinueSentinel;
+    }
+  };
+})(
+  // Among the various tricks for obtaining a reference to the global
+  // object, this seems to be the most reliable technique that does not
+  // use indirect eval (which violates Content Security Policy).
+  typeof global === "object" ? global :
+  typeof window === "object" ? window :
+  typeof self === "object" ? self : this
+);
+
+/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ }
+/******/ ])
+});
+;
 //# sourceMappingURL=ringcentral-bundle.js.map

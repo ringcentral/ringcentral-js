@@ -13,12 +13,12 @@ module.exports = function(config) {
         ],
 
         files: [
-            {pattern: require.resolve('karma-chai-plugins/function-bind-polyfill'), included: true},
-            {pattern: './bower_components/pubnub/web/*.*', included: true},
-            {pattern: './bower_components/es6-promise/promise.js', included: true},
-            {pattern: './bower_components/fetch/fetch.js', included: true},
-            {pattern: './build/ringcentral.js', included: true},
-            {pattern: './build/tests/specs.js', included: true}
+            require.resolve('karma-chai-plugins/function-bind-polyfill'),
+            './bower_components/pubnub/web/pubnub.js',
+            './bower_components/es6-promise/promise.js',
+            './bower_components/fetch/fetch.js',
+            './build/ringcentral.js',
+            './build/tests/ringcentral-tests.js'
         ],
 
         exclude: [],

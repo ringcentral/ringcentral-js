@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+- '0.12'
+- '0.11'
+- iojs
+deploy:
+  provider: npm
+  email: kirill.konshin@gmail.com
+  api_key:
+    secure: wEPdEMw5ZYN1GvFJ50ySov+K8rDHC9w2QCqMKu202ipTU60G44/ktEP/PU5ZLN3BUCpvXeHMx+DbMhwb7S4RxdMP4CkMnju2vaIt94K7WRNHa7kcNgJFm3jUpkg1rkqqfVvcKykHeMKMMUaJNzQUm9nPSTtJex8s7tk3+SQ6bDmsQPmNt4c5r5ihIjxvkjuxgQLk48CRXT98EU9KsZf57Ri93whKbrGAJ9lo4Oq+2oFhXil8fDl3XdRyAZbLaDz5wHq4diDUkKvVnsDzDlW0rkCcYJMDrJUuUnuvD59MYlUv2QWXPzeuEe7m4eLk48AuoK+t9PqjlwLAlJdjU2ZtqaeGIY6KAWkfzpi3QlBPk0XXpUs5Jr6vlCQU8ed4xr+wAZIWQfuPx+v205JlScY3td7I2eZ5nOD8//NJ1RxVnitTm4x7vZnKku+56jCf9kHq/EB+ndMD0rSU5/pyhUYFxCmShdLNp1IV7qcwDud+SejQ3eWQ23eyf9n8e5d+QOvOCoCjENMfQVCt+oOPFGztBnd839VbYXvP1OSk2JpgQ2O1muxRCKVv+hid6d38lnMAXRJWcFIpdNy7bxpySebPIt8w3kxYNGrJm09CrCvBd0pjwNg+HagjT9olz9balAPSGpzZexg2F4C1UgoxSec0/aoKir+91MsqnkLc0E0Q8fE=
+  on:
+    tags: true
+    repo: ringcentral/ringcentral-js

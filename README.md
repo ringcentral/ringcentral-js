@@ -42,7 +42,7 @@ Pick the option that works best for you:
 
     ```sh
     bower install ringcentral --save
-    ```Bower
+    ```
     
 - Donwload everything manually *(not recommended)*:
     - [ZIP file with source code](https://github.com/ringcentral/ringcentral-js/archive/master.zip)
@@ -139,7 +139,7 @@ Make sure that polyfills are loaded before or together with SDK.
 
 3. Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
     
-    ```json
+    ```js
     {
         resolve: {
             alias: {
@@ -173,11 +173,11 @@ window.Response = whatever;
 Also you can manually define SDK internal variables:
 
 ```js
-RingCentral.sdk.externals._Promise = {Promise: $q.Promise, resolve: q.resolve, reject: q.reject, all: q.all};
-RingCentral.sdk.externals._fetch = whatever;
-RingCentral.sdk.externals._Headers = whatever;
-RingCentral.sdk.externals._Request = whatever;
-RingCentral.sdk.externals._Response = whatever;
+RingCentral.SDK.core.Externals.Promise = {Promise: $q.Promise, resolve: q.resolve, reject: q.reject, all: q.all};
+RingCentral.SDK.core.Externals.fetch = whatever;
+RingCentral.SDK.core.Externals.Headers = whatever;
+RingCentral.SDK.core.Externals.Request = whatever;
+RingCentral.SDK.core.Externals.Response = whatever;
 ```
 
 But taking into account the nature of polyfills, it's better to keep them global as described before.
@@ -212,7 +212,7 @@ then configure it. Before you can do anything using the Platform singleton, you 
 relations team).
 
 ```js
-var rcsdk = new RingCentral.sdk.SDK({
+var rcsdk = new RingCentral.SDK({
     server: 'https://platform.devtest.ringcentral.com', // SANDBOX
     //server: 'https://platform.ringcentral.com', // PRODUCTION
     appKey: 'yourAppKey',
@@ -225,7 +225,7 @@ This instance will be used later on to perform calls to API.
 ## Get the Platform Singleton
 
 ```js
-var platform = rcsdk.getPlatform();
+var platform = rcsdk.platform();
 ```
 
 Now that you have your platform singleton and SDK has been configured with the correct server URL and API key, your
@@ -237,8 +237,8 @@ Login is accomplished by calling the `platform.authorize()` method of the Platfo
 (optional), and password as parameters. A `Promise` instance is returned, resolved with an AJAX `Response` object.
 
 ```js
-rcsdk.getPlatform()
-    .authorize({
+rcsdk.platform()
+    .login({
         username: '18001234567', // phone number in full format
         extension: '', // leave blank if direct number is used
         password: 'yourpassword'
@@ -270,11 +270,11 @@ a good UX in your login form UI.
 
 ### Checking Authentication State
 
-To check in your Application if the user is authenticated, you can call the `isAuthorized` method of the platform
+To check in your Application if the user is authenticated, you can call the `loggedIn` method of the platform
 singleton:
 
 ```js
-rcsdk.getPlatform().isAuthorized().then(function(){ ... }).catch(function(e){ ... });
+rcsdk.platform().loggedIn().then(function(status){ ... });
 ```
 
 The SDK takes care of the token lifecycle. It will refresh tokens for you automatically. It will also automatically
@@ -282,27 +282,27 @@ pause and queue all new API requests while the token is being refreshed in order
 between SDK instances in different tabs. Paused / queued API requests will then be automatically processed once the
 token has been refreshed. All apropriate events will be emitted during this process.
 
-If you just need to check whether the user has a valid token, you can call the `isTokenValid` method:
+If you just need to check whether the user has a valid token, you can call the `accessTokenValid` method:
 
 ```js
-rcsdk.getPlatform().isTokenValid(); // returns boolean
+rcsdk.platform().auth().accessTokenValid(); // returns boolean
 ```
 
 ## Performing API calls
 
-To perform an authenticated API call, you should use the `apiCall` method of the platform singleton:
+To perform an authenticated API call, you should use the one of the methods of the platform singleton:
 
 ```js
-rcsdk.getPlatform()
-    .apiCall('/account/~/extension/~', {
-        method: 'GET', // GET | POST | PUT | DELETE
-        headers: {},
-        query: {},
-        body: 'POSTDATA',
+rcsdk.platform()
+    .send('/account/~/extension/~', {
+        method: 'PUT',
+        query: {...},
+        headers: {...},
+        body: {...}
     })
-    .then(function(response){
+    .then(function(apiResponse){
     
-        alert(response.getJson().name);
+        alert(apiResponse.json().name);
         
     })
     .catch(function(e){
@@ -310,35 +310,23 @@ rcsdk.getPlatform()
         alert(e.message);
         
         // please note that ajax property may not be accessible if error occurred before AJAX send
-        if ('response' in e && 'request' in e) {
+        if (e.apiResponse && e.apiResponse()) {
         
-            var response = e.response, // or e.ajax for backward compatibility
-                request = e.request;
+            var request = e.apiResponse().request();
             
-            alert('Ajax error ' + e.message + ' for URL' + request.url + ' ' + response.getError());
+            alert('Ajax error ' + e.message + ' for URL' + request.url + ' ' + e.apiResponse().error());
             
         }
         
     });
+
+// Shorthand methods
+
+rcsdk.platform().get('/account/~/extension/~', {query: {...}}).then(...);
+rcsdk.platform().post('/account/~/extension/~', {body: {...}, query: {...}}).then(...);
+rcsdk.platform().put('/account/~/extension/~', {body: {...}, query: {...}}).then(...);
+rcsdk.platform().delete('/account/~/extension/~', {query: {...}}).then(function(...);
 ```
-
-You can also use short-hand methods:
-
-```js
-rcsdk.getPlatform().get('/account/~/extension/~', {...options...}).then(function(response){ ... });
-rcsdk.getPlatform().post('/account/~/extension/~', {...options...}).then(function(response){ ... });
-rcsdk.getPlatform().put('/account/~/extension/~', {...options...}).then(function(response){ ... });
-rcsdk.getPlatform().delete('/account/~/extension/~', {...options...}).then(function(response){ ... });
-```
-
-Take a look on [sms example](#sms) to see how POST request can be sent.
-
-### Important note for users of versions prior to **1.2.0**:
-
-AjaxOptions now has `body` and `query` properties instead of `post` and `get` respectively. You can continue to use old
-`post` and `get` properties, backwards compatibility is maintained, but they both were deprecated since **1.2.0**.
-
-If application send both `body` and `post` or `query` and `get` at the same time then `post` and `get` will be ignored.
 
 ### Sending things other than JSON
 
@@ -356,28 +344,26 @@ Important notes:
 Logging the user out is trivial - just call the `logout` method on the platform singleton:
 
 ```js
-platform.logout().then(...).catch(...);
+rcsdk.platform().logout().then(...).catch(...);
 ```
 
 ## Events
 
 The platform provides the following events:
 
-- `accessViolation` - emitted when the application attempts to make an API call when there is no valid access token or
-the refresh process has failed, which may occur when the user switches tabs in the browser.
+- `loginSuccess`
+- `loginError`
 - `logoutSuccess`
 - `logoutError`
-- `authorizeSuccess`
-- `authorizeError`
 - `refreshSuccess`
-- `refreshError`
+- `refreshError` &mdash; application may listen to this error and show login page
 
 To listen on platform events, you should call the `on` method of the platform singleton:
 
 ```js
-var platform = rcsdk.getPlatform();
+var platform = rcsdk.platform();
 
-platform.on(platform.events.accessViolation, function(e){
+platform.on(platform.events.refreshError, function(e){
     // do something
 });
 ```
@@ -391,7 +377,7 @@ Subscriptions are a convenient way to receive updates on server-side events, suc
 Subscriptions are created by calling the `getSubscription` method of the RingCentral instance created earlier on.
 
 ```js
-var subscription = rcsdk.getSubscription();
+var subscription = rcsdk.createSubscription();
 
 subscription.on(subscription.events.notification, function(msg) {
     console.log(msg, msg.body);
@@ -403,59 +389,97 @@ subscription.register({
 ```
 
 Once a subscription has been created, the SDK takes care of renewing it automatically. To cancel a subscription, you can
-call the subscription instance's `destroy` method:
+call the subscription instance's `reset` and `off` methods:
 
 ```js
-subscription.destroy();
+subscription.reset().off();
 ```
 
-You can add more events to the same subscription at any time, by calling the subscription's `addEvents` method:
+You can add more events to the same subscription at any time, by calling the subscription methods:
 
 ```js
-subscription.addEvents(['/account/~/extension/222/presence']).register();
-subscription.setEvents(['/account/~/extension/222/presence']).register();
+subscription.setEventFilters(['/account/~/extension/111/presence']).register();
+subscription.addEventFilters(['/account/~/extension/222/presence']).register();
 ```
 
-## Subscriptions Lifecycle
+### Subscriptions Lifecycle
 
-The number of active subscriptions is limited per account (about 20). This means that the application should dispose of
+The number of active subscriptions is limited per account (about 20). This means that the application should dispose
 unused subscriptions in the following situations:
 
 - the user navigates away from the page or particular view
 - the `Platform` instance emits `logoutSuccess` or `accessViolation` events
 - a subscription becomes unused by the application, based upon the application's business logic
 
-**Keep track of the amount of used subscriptions. It might be a good idea to have a central storage for them.**
-
-Following is an Angular-specific example, showing controller code that listens to subscriptions:
+One of very useful techniques is to always store subscription data in cache:
 
 ```js
-var platform = rcsdk.getPlatform();
+var cacheKey = 'some-custom-key';
+var subscription = rcsdk.createSubscription();
+var cachedSubscriptionData = rcsdk.cache().getItem(cacheKey);
 
-function destroy() {
-
-    // In order to release a subscription, you need to remove it at the server
-    // A simple token check will not lead to a refresh process, as opposed to platform.isAuthorized()
-    if (platform.isTokenValid()) subscription.remove();
-
-    // Detach event listeners
-    subscription.destroy();
-
+if (cachedSubscriptionData) {
+    try { // if subscription is already expired an error will be thrown so we need to capture it
+        subscription.setSubscription(cachedSubscriptionData); // use the cache
+    } catch (e) {
+        console.error('Cannot set subscription data', e);
+    }
+} else {
+    subscription.setEventFilters(['/account/~/extension/~/presence']); // explicitly set required events
 }
 
-// listener has to be SYNCHRONOUS for that, manually send a synchronous request if you need this
-window.addEventListener('beforeunload', destroy);
+subscription.on([subscription.events.subscribeSuccess, subscription.events.renewSuccess], function() {
+    rcsdk.cache().setItem(cacheKey, subscription.subscription());
+});
 
-platform.on([platform.events.accessViolation], destroy);
+subscription.register();
+```
 
-// This occurs when user navigates away from the controller
-$scope.$on('$destroy', function() {
+With this technique subscription remove request on window/tab closing is no longer needed.
+ 
+In any case if application logic dictates that subscription is not used anymore by any of it's instances, subscription
+can be removed from the server to make sure application stays within limits.
 
-    window.removeEventListener('beforeunload', destroy);
-    platform.off([platform.events.accessViolation, platform.events.beforeLogout], destroy);
-    
-    destroy();
-    
+### Stale Subscriptions
+
+There is a known bug when user awakes the computer: subscription tries to renew itself but fails because the
+expiration time has passed (JS was halted while computer was sleeping).
+
+Recommendation is to listen to `subscription.events.renewError` event and when it occurs reset and re-subscribe:
+
+```js
+subscription.on(subscription.events.renewError, function() {
+    subscription
+        .reset()
+        .setEventFilters('...')
+        .register();
+});
+```
+
+This has to be done in all tabs, application must handle potential race conditions.
+
+### Shorthand
+
+The above mentioned things are put together into `restoreFromCache()` method:
+
+```js
+var subscription = rcsdk.createSubscription()
+                        .restoreFromCache('cache-key', ['/account/~/extension/~/presence']);
+```
+
+### Subscription Multiplexor
+
+The best practice is to have only one subscription object with multiple event filters of different types (messages,
+presence, etc.) instead of having separate subscription for each individual event filter.
+
+In the notification event handler application may have a bunch of if's that will execute appropriate action based on
+`event` property of the incoming message:
+
+```js
+subscription.on(subscription.events.notification, function(msg) {
+    if (msg.event.indexOf('/presence') > -1) { ... }
+    elseif (msg.event.indexOf('/message-store') > -1) { ... }
+    else { ... }
 });
 ```
 
@@ -474,9 +498,7 @@ The sequence of RingOut is as follows:
 Please refer to the following example:
 
 ```js
-var platform = rcsdk.getPlatform(),
-    Utils = rcsdk.getUtils(),
-    Log = rcsdk.getLog(),
+var platform = rcsdk.platform(),
     timeout = null, // reference to timeout object
     ringout = {}; // this is the status object (lowercase)
 
@@ -485,7 +507,7 @@ var platform = rcsdk.getPlatform(),
  */
 function handleError(e) {
 
-    Log.error(e);
+    console.error(e);
     alert(e.message);
 
 }
@@ -496,10 +518,10 @@ function create(unsavedRingout) {
         .post('/account/~/extension/~/ringout', {body: unsavedRingout})
         .then(function(response) {
     
-            Utils.extend(ringout, response.getJson());
-            Log.info('First status:', ringout.status.callStatus);
-            timeout = Utils.poll(update, 500, timeout);
-    
+            ringout = response.json();
+            console.info('First status:', ringout.status.callStatus);
+            update();
+            
         })
         .catch(handleError);
 
@@ -509,20 +531,26 @@ function create(unsavedRingout) {
  * @param {function(number?)} next - callback that will be used to continue polling
  * @param {number} delay - last used delay
  */
-function update(next, delay) {
+function update() {
 
-    if (ringout.status && ringout.status.callStatus !== 'InProgress') return;
+    clearTimeout(timeout);
 
-    platform
-        .get(ringout.uri)
-        .then(function(response) {
+    setTimeout(function() {
     
-            Utils.extend(ringout, response.getJson());
-            Log.info('Current status:', ringout.status.callStatus);
-            timeout = next(delay);
+        if (ringout.status && ringout.status.callStatus !== 'InProgress') return;
     
-        })
-        .catch(handleError);
+        platform
+            .get(ringout.uri)
+            .then(function(response) {
+        
+                ringout = response.json();
+                console.info('Current status:', ringout.status.callStatus);
+                update();
+        
+            })
+            .catch(handleError);
+            
+    }, 500);
 
 }
 
@@ -531,7 +559,7 @@ function update(next, delay) {
  */
 function hangUp() {
 
-    Utils.stopPolling(timeout);
+    clearTimeout(timeout);
 
     if (ringout.status && ringout.status.callStatus !== 'InProgress') {
 
@@ -562,28 +590,6 @@ create({
 });
 ```
 
-## A deeper look at the `Utils.poll()` and `Utils.stopPolling()` methods
-
-```js
-// first, define polling function:
-function pollFn(next, delay) {
-    if (condition) next(); // uses previous delay, condition can be anything required to keep polling
-    // or next(100); -- simply sets a new delay
-    // or next(delay * 2); -- this will make delay bigger after every cycle
-    // if next() is not called, then next cycle will not happen
-}
-
-// then start polling
-// pollFn -- (required) is function that will be called to track status
-// 500 -- (optional) is a number of milliseconds is to delay the next poll
-// previousTimeout -- (optional) can be supplied to automatically cancel any previous timeouts
-// newTimeout will be returned
-var newTimeout = Utils.poll(pollFn, 500, previousTimeout);
-
-// call this at any time to stop polling
-Utils.stopPolling(newTimeout);
-```
-
 ***
 
 # Call Management Using JavaScript
@@ -599,27 +605,27 @@ A call management integration usually consists of the following tasks:
 
 ## Track the telephony status
 
-First, you need to load the initial Presence status:
+First, you need to load the initial Presence status (you can use Underscore or Lodash to simplify things):
 
 ```js
 var accountPresence = {};
 
-rcsdk.getPlatform()
+rcsdk.platform()
     .get('/account/~/extension/~/presence?detailedTelephonyState=true').then(function(response) {
-        rcsdk.getUtils().extend(accountPresence, response.getJson());
+        _.extend(accountPresence, response.json());
     })
     .catch(function(e) {
         alert('Load Presence Error: ' + e.message);
     });
 ```
 
-In the meantime, you can also set up Subscriptions:
+In the meantime, you can also set up Subscriptions (you can use Underscore or Lodash to simplify things):
 
 ```js
-var subscription = rcsdk.getSubscription().addEvents(['/account/~/extension/~/presence?detailedTelephonyState=true']);
+var subscription = rcsdk.createSubscription().addEvents(['/account/~/extension/~/presence?detailedTelephonyState=true']);
 
 subscription.on(subscription.events.notification, function(msg) {
-    rcsdk.getUtils().extend(accountPresence, msg);
+    _.extend(accountPresence, msg);
 });
 
 subscription.register().then(function(response) {
@@ -634,10 +640,10 @@ return subscription;
 ## View the list of active calls
 
 ```js
-rcsdk.getPlatform()
+rcsdk.platform()
     .get('/account/~/extension/~/active-calls', {query: {page: 1, perPage: 10}})
     .then(function(response) {
-        activeCalls = response.getJson().records;
+        activeCalls = response.json().records;
     })
     .catch(function(e) {
         alert('Active Calls Error: ' + e.message);
@@ -647,10 +653,10 @@ rcsdk.getPlatform()
 ## View the list of recent calls
 
 ```js
-rcsdk.getPlatform()
+rcsdk.platform()
     .get('/account/~/extension/~/call-log', {query: {page: 1, perPage: 10}})
     .then(function(response) {
-        calls = response.getJson().records;
+        calls = response.json().records;
     })
     .catch(function(e) {
         alert('Recent Calls Error: ' + e.message);
@@ -665,7 +671,7 @@ By default, the load request returns calls that were made during the last week. 
 In order to send an SMS using the API, simply make a POST request to `/account/~/extension/~/sms`:
 
 ```js
-rcsdk.getPlatform()
+rcsdk.platform()
     .post('/account/~/extension/~/sms', {
         body: {
             from: {phoneNumber:'+12223334444'}, // Your sms-enabled phone number
@@ -676,63 +682,12 @@ rcsdk.getPlatform()
         }
     })
     .then(function(response) {
-        alert('Success: ' + response.getJson().id);
+        alert('Success: ' + response.json().id);
     })
     .catch(function(e) {
         alert('Error: ' + e.message);
     });
 ```
-
-# SMS
-
-In order to send a Fax using the API, simply make a POST request to `/account/~/extension/~/fax`. SDK provides a
-convenience functionality to simplify the building of FaxOut requests. Due to difference in available technologies
-between Browser and NodeJS your code should be aware of that. 
-
-```js
-var request = rcsdk.getMultipartRequest();
-
-request
-    .setBody({
-        to: [{phoneNumber: '12223334455'}],
-        faxResolution": 'Low'
-    });
-
-// Browser
-
-request
-    .addAttachment(document.querySelector('#file-upload'))
-    .addAttachment({contentType: 'text/plain', content: 'Hello, World'})
-    .addAttachment({contentType: 'text/plain', content: 'Hello, World', fileName: 'foo.txt'});
-
-// NodeJS
-
-request
-    .addAttachment({
-        contentType: 'application/octet-stream', 
-        content: fs.readFileSync('path-to-file').toString('base64'), 
-        fileName: 'foo.txt'
-    })
-    .addAttachment({contentType: 'text/plain', content: 'Hello, World'})
-    .addAttachment({contentType: 'text/plain', content: new Buffer('whatever')})
-    .addAttachment({contentType: 'text/plain', content: 'Hello, World', fileName: 'foo.txt'});
-
-// Cross-environment
-
-rcsdk.getPlatform()
-    .post('/account/~/extension/~/fax', request.getOptions())
-    .then(function(ajax) {
-        alert('Success!');
-    })
-    .catch(function(e) {
-        alert('Error: ' + e.message);
-    });
-```
-
-Optional configuration parameters for attachments `contentType` and `fileName` may be omitted. Defaults are `text/plain`
-and `file.txt` respectively.
-
-***
 
 # Fax
 
@@ -744,9 +699,11 @@ fax. Other parts should have `filename` defined in order to be correctly present
 Modern browsers have `FormData` class which could be used for sending faxes.
 
 ```js
-var body = {to: {phoneNumber: '123'}, faxResolution: 'High'}; // see all available options on Developer Portal
-
-var formData = new FormData();
+var body = {
+        to: {phoneNumber: '123'}, // see all available options on Developer Portal 
+        faxResolution: 'High'
+    }, 
+    formData = new FormData();
 
 // This is the mandatory part, the name and type should always be as follows
 formData.append('json', new File([JSON.stringify(body)]), 'request.json', {type: 'application/json'});
@@ -763,7 +720,7 @@ for (var i = 0, file; file = fileField.files[i]; ++i) {
 formData.append('attachment', new File(['some plain text']), 'text.txt', {type: 'application/octet-stream'});
 
 // Send the fax
-rcsdk.getPlatform().post('/account/~/extension/~/fax', {body: formData});
+rcsdk.platform().post('/account/~/extension/~/fax', {body: formData});
 ```
 
 Further reading:
@@ -784,15 +741,15 @@ npm install form-data
 Then you can build your fax, but keep in mind that FormData API in NodeJS is slightly different from the browser:
 
 ```js
-var body = {to: {phoneNumber: '123'}, faxResolution: 'High'}; // see all available options on Developer Portal
-
-var FormData = require('form-data');
-
-var formData = new FormData();
+var FormData = require('form-data'),
+    body = {
+        to: {phoneNumber: '123'}, // see all available options on Developer Portal 
+        faxResolution: 'High'
+    }, 
+    formData = new FormData();
 
 // This is the mandatory part, the name and type should always be as follows
 formData.append('json', new Buffer(JSON.stringify(body)), {filename: 'request.json', contentType: 'application/json'});
-
 
 // To send a plain text
 formData.append('attachment', new Buffer('some plain text'), 'text.txt', {type: 'application/octet-stream'});
@@ -801,7 +758,7 @@ formData.append('attachment', new Buffer('some plain text'), 'text.txt', {type: 
 formData.append('attachment', require('fs').createReadStream('/foo/bar.jpg'));
 
 // Send the fax
-rcsdk.getPlatform().post('/account/~/extension/~/fax', {body: formData});
+rcsdk.platform().post('/account/~/extension/~/fax', {body: formData});
 ```
 
 Further reading:
@@ -812,9 +769,9 @@ Further reading:
 
 # Page Visibility
 
-This class is a wrapper for the [Page Visibility API](http://www.w3.org/TR/page-visibility/), which hides vendor
-prefixes and provides a short and simple way to observe visibility changes.
- 
+You can use any of the libraties that work with the [Page Visibility API](http://www.w3.org/TR/page-visibility/),
+such as [visibility.js](https://github.com/ai/visibilityjs).
+
 This allows tracking the visibility of the page/tab/window/frame so that the application can react accordingly.
 Following are some actions that the application may wish to take whenever it becomes visible:
     
@@ -825,49 +782,16 @@ Following are some actions that the application may wish to take whenever it bec
 Another usage is to reduce the number of Call Log or Messages reloads when the application is not visible. The SDK does
 not require that any such optimizations be implemented in the application, but it is considered good practice.
 
-Using the page visibility wrapper is very straightforward - just register an observer function for the
-`visibility.events.change` event:
-
-```js
-var visibility = rcsdk.getPageVisibility();
-
-visibility.on(visibility.events.change, function (visible) {
-    if (visible) ...
-});
-```
-
-See also [Core Module: Checking Authentication State](#checking-authentication-state).
-
-## Alternatives
-
-You can use any of the libraties that work with the [Page Visibility API](http://www.w3.org/TR/page-visibility/),
-such as [visibility.js](https://github.com/ai/visibilityjs).
-
 ***
 
-# Tracking Ajax Requests
+# Tracking Network Requests & Responses
 
-You can set up tracking for all Ajax requests (for instance, to log them somewhere) by obtaining an Ajax observer object
+You can set up tracking for all network requests (for instance, to log them somewhere) by obtaining a `Client` object
 and registering observers on its various events:
 
 ```js
-var client = rcsdk.getClient();
-client.on(observer.events.beforeRequest, function(ajax) {});
-client.on(observer.events.requestSuccess, function(ajax) {});
-client.on(observer.events.requestError, function(e) {});
+var client = rcsdk.platform().client();
+client.on(client.events.beforeRequest, function(apiResponse) {}); // apiResponse does not have response at this point
+client.on(client.events.requestSuccess, function(apiResponse) {});
+client.on(client.events.requestError, function(apiError) {});
 ```
-
-Observer functions are passed a reference of the `Ajax` for which the event has occurred. Every `Ajax` object offers a
-number of accessor methods and properties:
-
-- `getRequest()` &mdash; request that was given to transport *(if any)*
-    - `url`
-    - `headers`
-- `getResponse()` &mdash; raw text response from server *(if any)*
-    - `status`
-    - `statusText`
-    - `headers`
-- `getJson()` &mdash; JSON-parsed response
-- `getText()` &mdash; Textual representation of response
-- `getResponses()` &mdash; An array of underlying `Ajax` objects for `Content-Type: multipart/mixed` responses
-- `getResponsesAjax()` &mdash; An array of underlying parsed JSONs of `Ajax` objects for `Content-Type: multipart/mixed` responses
