@@ -14,15 +14,13 @@
 <div class="container">
 
     <h1>
-        <a href="../.." id="logo"></a>
+        <a href="index.html" id="logo"></a>
     </h1>
 
     <hr>
 
-    <h4>Build</h4>
-    <p id="report-build"></p>
-    <h4>Raw</h4>
-    <p id="report-raw"></p>
+    <h4>RingCentral JS SDK Properties</h4>
+    <p id="report"></p>
 
     <hr>
 
@@ -34,22 +32,40 @@
 </div>
 
 <script src="http://requirejs.org/docs/release/2.1.15/comments/require.js" type="text/javascript"></script>
-<script src="../test-utils/requirejs-config.js" type="text/javascript"></script>
 <script type="text/javascript">
 
-    require(['../build/rc-sdk', '../lib/RCSDK'], function(Build, Raw) {
+    require.config({
+        paths: {
+            'ringcentral': '../build/ringcentral',
+            'pubnub': 'https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub',
+            'fetch': 'https://cdnjs.cloudflare.com/ajax/libs/fetch/0.9.0/fetch',
+            'shim': 'https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.33.0/es6-shim'
+        }
+    });
 
-        document.getElementById('report-build').innerHTML = [
-            'RCSDK version: ' + Raw.version,
-            'Root scope is not poisoned: ' + (window.RCSDK == undefined)
-        ].join('<br>');
+    require(['ringcentral', 'shim', 'fetch'], function(SDK, shim) {
 
-        document.getElementById('report-raw').innerHTML = [
-            'RCSDK version: ' + Build.version,
-            'Root scope is not poisoned: ' + (window.RCSDK == undefined),
-            '',
-            'Different classes: ' + (Build !== Raw)
-        ].join('<br>');
+        var sdk = new SDK({server: RC.server.sandbox});
+
+        sdk.getPlatform()
+                .forceAuthentication()
+                .get('')
+                .then(function(ajax) {
+
+                    document.getElementById('report').innerHTML = [
+                        'RingCentral version: ' + RC.version,
+                        'API version: ' + ajax.getJson().versionString,
+                        'PUBNUB version: ' + sdk.getPubnubFactory().getPubnub().get_version(),
+                        'Promise native: ' + (Promise.toString().trim() == 'function Promise() { [native code] }'),
+                        'Fetch native: ' + (fetch.toString().trim() == 'function fetch() { [native code] }'),
+                        'Root scope is not poisoned: ' + (window.RingCentral == undefined)
+                    ].join('<br>');
+
+                })
+                .catch(function(e) {
+                    alert(e.message);
+                    console.error(e.stack);
+                });
 
     });
 

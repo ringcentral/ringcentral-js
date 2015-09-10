@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "out": "./build/ringcentral.js",
+    "sourceMap": true,
+    "declaration": true
+  },
+    "files": [
+      "./src/SDK.ts"
+    ]
+}

@@ -4,13 +4,19 @@
     <title>Backbone &mdash; RingCentral&trade; Platform</title>
     <script type="text/javascript" src="http://underscorejs.org/underscore.js"></script>
     <script type="text/javascript" src="http://backbonejs.org/backbone.js"></script>
-    <script src="../build/rc-sdk-bundle.js" type="text/javascript"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.9.0/fetch.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.33.0/es6-shim.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub.js"></script>
+    <script src="../build/ringcentral.js" type="text/javascript"></script>
 
     <script type="text/javascript">
 
         window.addEventListener('load', function() {
 
-            var rcsdk = new RCSDK(),
+            var appKey = localStorage.getItem('ringcentral-demo-appKey'),
+                    appSecret = localStorage.getItem('ringcentral-demo-appSecret'),
+                    server = localStorage.getItem('ringcentral-demo-server'),
+                    rcsdk = new RingCentral.sdk.SDK({server: server, appKey: appKey, appSecret: appSecret}),
                     platform = rcsdk.getPlatform();
 
             //////////
@@ -20,9 +26,7 @@
              */
             Backbone.ajax = function(request) {
 
-                return platform.apiCall({
-                    async: request.async,
-                    url: request.url,
+                return platform.apiCall(request.url, {
                     method: request.type,
                     get: request.type === 'GET' ? request.data : null,
                     post: request.type !== 'GET' ? request.data : null,
@@ -49,7 +53,7 @@
                  * @returns {object}
                  */
                 parse: function(ajax) {
-                    return ('response' in ajax && 'data' in ajax && 'headers' in ajax) ? ajax.data : ajax;
+                    return ('getJson' in ajax) ? ajax.getJson() : ajax;
                 },
                 url: function() {
                     return (this.urlRoot || (this.collection && this.collection.url) || '/') +
@@ -64,7 +68,7 @@
                  * @returns {array}
                  */
                 parse: function(ajax) {
-                    return ajax.data.records;
+                    return ajax.getJson().records;
                 }
             });
 
@@ -163,10 +167,6 @@
                 e.preventDefault();
                 platform.logout();
             });
-
-            platform = rcsdk.getPlatform();
-            platform.apiKey = localStorage.getItem('rscdk-demo-apiKey');
-            platform.server = localStorage.getItem('rscdk-demo-server');
 
             platform.on(platform.events.logoutSuccess, function() {
                 showLogin();

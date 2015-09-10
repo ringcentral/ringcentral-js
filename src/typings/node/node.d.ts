@@ -1188,7 +1188,7 @@ declare module "stream" {
     // Note: Duplex extends both Readable and Writable.
     export class Duplex extends Readable implements NodeJS.ReadWriteStream {
         writable: boolean;
-        //constructor(opts?: DuplexOptions);
+        constructor(opts?: DuplexOptions);
         _write(data: Buffer, encoding: string, callback: Function): void;
         _write(data: string, encoding: string, callback: Function): void;
         write(buffer: Buffer, cb?: Function): boolean;

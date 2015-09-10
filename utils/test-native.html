@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RingCentral JS SDK Tests</title>
+    <link rel="stylesheet" href="../bower_components/mocha/mocha.css">
+</head>
+<body>
+
+<div id="mocha"></div>
+
+<!-- Test Env -->
+<script type="text/javascript" src="../bower_components/mocha/mocha.js"></script>
+<script type="text/javascript" src="../bower_components/chai/chai.js"></script>
+<script type="text/javascript" src="../bower_components/sinonjs/sinon.js"></script>
+<script type="text/javascript" src="../bower_components/sinon-chai/lib/sinon-chai.js"></script>
+<script type="text/javascript">
+    mocha.setup('bdd');
+</script>
+
+<!-- SDK -->
+<script type="text/javascript" src="../bower_components/pubnub/web/pubnub.js"></script>
+<script type="text/javascript" src="../build/ringcentral.js"></script>
+
+<!-- Tests -->
+<script type="text/javascript" src="../build/tests/specs.js"></script>
+<script type="text/javascript">
+    mocha.run();
+</script>
+
+</body>
+</html>

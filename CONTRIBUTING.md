@@ -84,7 +84,7 @@ $ npm run istanbul
 
 **Attention** Repository follows the [GitFlow branching model](http://nvie.com/posts/a-successful-git-branching-model).
 
-## Always write a plain vanilla JavaScript
+## Always write a plain vanilla TypeScript or JavaScript
 
 The SDK will be used in a variety of different third-party applications, which means it has to be written with the
 lowest amount of dependencies. Please do not include anything external if there is no proper justification.
@@ -95,16 +95,10 @@ The SDK can be used in a Browser and NodeJS environment with no changes, so this
 to the code base.
 
 1. Every file must begin and end with a special Amdefine-RequireJS hybrid wrapping function
-2. All ```define()``` statements must be written in CommonJS-compliant way, see
-    [RequireJS Sugar section](http://requirejs.org/docs/whyamd.html#sugar)
-3. During the build, first and last lines of code will be stripped so
-    1. Code inside that wrapper function must be a valid CommonJS module
-    2. No other code exists outside of the wrapper function
-    3. Code must declare ```module.exports``` object, not simply return statement
-5. NPM dependencies like CryptoJS and PUBNUB must be included in RequireJS config with appropriate paths matching NPM
+2. NPM dependencies like CryptoJS and PUBNUB must be included in RequireJS config with appropriate paths matching NPM
     IDs ("crypto-js" for instance)
-6. Pure prototype-based inheritance only
-7. **Properly defined JSDOC is a strict requirement**
+3. Pure prototype-based inheritance only
+4. **Properly defined JSDOC is a strict requirement**
 
 ## Model Constructors
 
@@ -253,14 +247,3 @@ $ RCSDK_API_KEY=YOUR_API_KEY (...) RCSDK_AGS_DBNAME=database npm run test-api
 # Authentication Flow
 
 ![API Call Flow](http://habrastorage.org/files/308/78c/4d9/30878c4d9ee94a9d96fdefcaee5779ae.png)
-
-# Tool Belt
-
-1. [RequireJS](https://github.com/jrburke/requirejs) - RequireJS
-2. [AMDClean](https://github.com/gfranko/amdclean)
-3. [PUBNUB](http://pubnub.com)
-4. CryptoJS
-    1. [NPM version](https://npmjs.org/package/crypto-js) for backend
-    2. [Bower version](https://github.com/sytelus/cryptojs) for frontend
-5. [JSSip](http://jssip.net)
-6. [TSD](http://definitelytyped.org/tsd)
