@@ -41,7 +41,7 @@ Pick the option that works best for you:
 
     ```sh
     bower install rcsdk --save
-    ```Bower
+    ```
     
 - Download the bundle version, which includes PUBNUB and ES6 Promise (choose which works best for you):
     - [ZIP file with source code](https://github.com/ringcentral/js-sdk/archive/master.zip) or
@@ -130,7 +130,7 @@ require(['rcsdk'], function(RCSDK) {
 
 3. Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
     
-    ```json
+    ```js
     {
         externals: {
             'xhr2': 'XMLHttpRequest',
