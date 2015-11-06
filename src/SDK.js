@@ -2,6 +2,7 @@ import * as Utils from './core/Utils';
 import Cache from './core/Cache';
 import * as Externals from './core/Externals';
 import Observable from './core/Observable';
+import Queue from './core/Queue';
 
 import Client from './http/Client';
 import ApiResponse from './http/ApiResponse';
@@ -13,11 +14,11 @@ import Registry from './mocks/Registry';
 
 import Platform from './platform/Platform';
 import Auth from './platform/Auth';
-import Queue from './platform/Queue';
 
 import PubnubMockFactory from './pubnub/PubnubFactory';
 
 import Subscription from './subscription/Subscription';
+import CachedSubscription from './subscription/CachedSubscription';
 
 require("regenerator/runtime");
 
@@ -67,7 +68,14 @@ export default class SDK {
      * @return {Subscription}
      */
     createSubscription() {
-        return new Subscription(this._pubnubFactory, this._platform, this._cache);
+        return new Subscription(this._pubnubFactory, this._platform);
+    }
+
+    /**
+     * @return {CachedSubscription}
+     */
+    createCachedSubscription(cacheKey) {
+        return new CachedSubscription(this._pubnubFactory, this._platform, this._cache, cacheKey);
     }
 
     /**
@@ -81,7 +89,8 @@ export default class SDK {
         Cache: Cache,
         Observable: Observable,
         Utils: Utils,
-        Externals: Externals
+        Externals: Externals,
+        Queue: Queue
     };
 
     static http = {
@@ -92,8 +101,7 @@ export default class SDK {
 
     static platform = {
         Auth: Auth,
-        Platform: Platform,
-        Queue: Queue
+        Platform: Platform
     };
 
     static subscription = {

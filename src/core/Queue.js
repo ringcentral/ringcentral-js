@@ -1,5 +1,5 @@
 import {Promise} from '../core/Externals';
-import {poll, stopPolling} from '../core/Utils';
+import {poll, stopPolling} from './Utils';
 
 export default class Queue {
 
@@ -16,9 +16,7 @@ export default class Queue {
 
     isPaused() {
 
-        var storage = this._cache,
-            cacheId = this._cacheId,
-            time = storage.getItem(cacheId);
+        var time = this._cache.getItem(this._cacheId);
 
         return !!time && Date.now() - parseInt(time) < Queue._releaseTimeout;
     }

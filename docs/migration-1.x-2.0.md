@@ -4,8 +4,10 @@ Key differences:
 
 - Helpers were moved to separate repository: [RingCentral JS Helpers](https://github.com/ringcentral/ringcentral-js-helpers).
 - Root JS name has changed from `RCSDK` to `RingCentral.SDK`
+- New naming convention: `getSomething()` methods are now simply `something()`
+- `Auth` class inside `Platform`
 - `AjaxObserver` functionality been moved to `Client`
-- New network request/response objects `ApiResponse` interface:
+- New `ApiResponse` interface that wraps network Requests/Responses:
     - `apiResponse.json()` instead of `ajax.json`
     - `apiResponse.multipart()` instead of `ajax.responses`
     - `apiResponse.request()` and `ajax.response()` to access to DOM Request and DOM Response accordingly

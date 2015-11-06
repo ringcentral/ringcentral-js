@@ -16,9 +16,8 @@ describe('RingCentral.subscription.Subscription', function() {
                 getRegistry().subscribeGeneric(expiresIn);
 
                 return subscription
-                    .register({
-                        events: ['foo', 'bar']
-                    })
+                    .setEventFilters(['foo', 'bar'])
+                    .register()
                     .then((res)=> {
                         expect(res.json().expiresIn).to.equal(expiresIn);
                     });
@@ -29,9 +28,7 @@ describe('RingCentral.subscription.Subscription', function() {
 
     });
 
-    describe.skip('destroy', function() {});
-
-    describe('notify method', function() {
+    describe('notify', function() {
 
         it('fires a notification event when the notify method is called and passes the message object', function() {
 
@@ -145,9 +142,8 @@ describe('RingCentral.subscription.Subscription', function() {
                 getRegistry().subscribeGeneric();
 
                 return subscription
-                    .subscribe({
-                        events: [event]
-                    })
+                    .setEventFilters([event])
+                    .subscribe()
                     .then(function() {
                         expect(subscription.subscription().eventFilters.length).to.equal(1);
                     });
@@ -166,9 +162,8 @@ describe('RingCentral.subscription.Subscription', function() {
                     .apiCall('POST', '/restapi/v1.0/subscription', {'message': 'Subscription failed'}, 400, 'Bad Request');
 
                 return subscription
-                    .subscribe({
-                        events: ['foo']
-                    })
+                    .setEventFilters(['foo'])
+                    .subscribe()
                     .then(function() {
                         throw new Error('This should never be reached');
                     })
@@ -185,25 +180,23 @@ describe('RingCentral.subscription.Subscription', function() {
 
     });
 
-    describe('decrypt method', function() {
+    describe('decrypt', function() {
 
         it('decrypts AES-encrypted messages when the subscription has an encryption key', function() {
 
-            var subscription = getSdk().createSubscription(),
+            var subscription = getSdk().createSubscription().setSubscription({
+                    id: 'foo',
+                    expirationTime: new Date(Date.now() + expiresIn).toISOString(),
+                    deliveryMode: {
+                        encryptionKey: 'e0bMTqmumPfFUbwzppkSbA==',
+                        subscriberKey: 'foo',
+                        address: 'foo'
+                    }
+                }),
                 aesMessage = 'gkw8EU4G1SDVa2/hrlv6+0ViIxB7N1i1z5MU/Hu2xkIKzH6yQzhr3vIc27IAN558kTOkacqE5DkLpRdnN1orwtI' +
                              'BsUHmPMkMWTOLDzVr6eRk+2Gcj2Wft7ZKrCD+FCXlKYIoa98tUD2xvoYnRwxiE2QaNywl8UtjaqpTk1+WDImBrt' +
                              '6uabB1WICY/qE0It3DqQ6vdUWISoTfjb+vT5h9kfZxWYUP4ykN2UtUW1biqCjj1Rb6GWGnTx6jPqF77ud0XgV1r' +
                              'k/Q6heSFZWV/GP23/iytDPK1HGJoJqXPx7ErQU=';
-
-            subscription['_subscription'] = {
-                id: 'foo',
-                expirationTime: new Date(Date.now() + expiresIn).toISOString(),
-                deliveryMode: {
-                    encryptionKey: 'e0bMTqmumPfFUbwzppkSbA==',
-                    subscriberKey: 'foo',
-                    address: 'foo'
-                }
-            };
 
             expect(subscription['_decrypt'](aesMessage)).to.deep.equal({
                 "timestamp": "2014-03-12T20:47:54.712+0000",
@@ -216,6 +209,15 @@ describe('RingCentral.subscription.Subscription', function() {
             });
 
         });
+
+    });
+
+    describe('restoreFromCache', function() {
+
+        it.skip('sets appropriate event filters if subscription is not alive', function() {});
+        it.skip('sets appropriate event filters if subscription is never existed', function() {});
+        it.skip('renews subscription if cache data is OK', function() {});
+        it.skip('re-subscribes with default event filters when renew fails', function() {});
 
     });
 

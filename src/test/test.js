@@ -1,13 +1,11 @@
-import * as _mocha from 'mocha';
-import * as _chai from 'chai';
-import * as _sinon from 'sinon';
-import * as _sinonChai from 'sinon-chai';
+import _mocha from 'mocha';
+import _chai from 'chai';
+import _sinon from 'sinon';
+import _sinonChai from 'sinon-chai';
 import SDK from '../SDK';
 
-export var mocha = _mocha;
 export var chai = _chai || window.chai;
 export var sinon = _sinon || window.sinon;
-export var sinonChai = _sinonChai;
 export var expect = chai.expect;
 export var spy = sinon.spy;
 
@@ -16,8 +14,8 @@ var pubnub = new SDK.pubnub.PubnubMockFactory();
 
 // Alter default settings
 SDK.platform.Platform._refreshDelayMs = 1;
-SDK.platform.Queue._pollInterval = 1;
-SDK.platform.Queue._releaseTimeout = 50;
+SDK.core.Queue._pollInterval = 1;
+SDK.core.Queue._releaseTimeout = 50;
 SDK.subscription.Subscription._pollInterval = 1;
 
 export function getRegistry() {

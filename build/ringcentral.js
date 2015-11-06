@@ -89,41 +89,41 @@ var _coreObservable = __webpack_require__(8);
 
 var _coreObservable2 = _interopRequireDefault(_coreObservable);
 
-var _httpClient = __webpack_require__(9);
+var _coreQueue = __webpack_require__(9);
+
+var _coreQueue2 = _interopRequireDefault(_coreQueue);
+
+var _httpClient = __webpack_require__(10);
 
 var _httpClient2 = _interopRequireDefault(_httpClient);
 
-var _httpApiResponse = __webpack_require__(11);
+var _httpApiResponse = __webpack_require__(12);
 
 var _httpApiResponse2 = _interopRequireDefault(_httpApiResponse);
 
-var _httpUtils = __webpack_require__(10);
+var _httpUtils = __webpack_require__(11);
 
 var HttpUtils = _interopRequireWildcard(_httpUtils);
 
-var _mocksClientMock = __webpack_require__(12);
+var _mocksClientMock = __webpack_require__(13);
 
 var _mocksClientMock2 = _interopRequireDefault(_mocksClientMock);
 
-var _mocksMock = __webpack_require__(14);
+var _mocksMock = __webpack_require__(15);
 
 var _mocksMock2 = _interopRequireDefault(_mocksMock);
 
-var _mocksRegistry = __webpack_require__(13);
+var _mocksRegistry = __webpack_require__(14);
 
 var _mocksRegistry2 = _interopRequireDefault(_mocksRegistry);
 
-var _platformPlatform = __webpack_require__(15);
+var _platformPlatform = __webpack_require__(16);
 
 var _platformPlatform2 = _interopRequireDefault(_platformPlatform);
 
 var _platformAuth = __webpack_require__(17);
 
 var _platformAuth2 = _interopRequireDefault(_platformAuth);
-
-var _platformQueue = __webpack_require__(16);
-
-var _platformQueue2 = _interopRequireDefault(_platformQueue);
 
 var _pubnubPubnubFactory = __webpack_require__(18);
 
@@ -133,7 +133,11 @@ var _subscriptionSubscription = __webpack_require__(20);
 
 var _subscriptionSubscription2 = _interopRequireDefault(_subscriptionSubscription);
 
-__webpack_require__(21);
+var _subscriptionCachedSubscription = __webpack_require__(21);
+
+var _subscriptionCachedSubscription2 = _interopRequireDefault(_subscriptionCachedSubscription);
+
+__webpack_require__(22);
 
 var SDK = (function () {
     _createClass(SDK, null, [{
@@ -189,7 +193,15 @@ var SDK = (function () {
      */
 
     SDK.prototype.createSubscription = function createSubscription() {
-        return new _subscriptionSubscription2['default'](this._pubnubFactory, this._platform, this._cache);
+        return new _subscriptionSubscription2['default'](this._pubnubFactory, this._platform);
+    };
+
+    /**
+     * @return {CachedSubscription}
+     */
+
+    SDK.prototype.createCachedSubscription = function createCachedSubscription(cacheKey) {
+        return new _subscriptionCachedSubscription2['default'](this._pubnubFactory, this._platform, this._cache, cacheKey);
     };
 
     /**
@@ -206,7 +218,8 @@ var SDK = (function () {
             Cache: _coreCache2['default'],
             Observable: _coreObservable2['default'],
             Utils: Utils,
-            Externals: Externals
+            Externals: Externals,
+            Queue: _coreQueue2['default']
         },
         enumerable: true
     }, {
@@ -221,8 +234,7 @@ var SDK = (function () {
         key: 'platform',
         value: {
             Auth: _platformAuth2['default'],
-            Platform: _platformPlatform2['default'],
-            Queue: _platformQueue2['default']
+            Platform: _platformPlatform2['default']
         },
         enumerable: true
     }, {
@@ -425,22 +437,24 @@ var _pubnub = __webpack_require__(6);
 
 var _pubnub2 = _interopRequireDefault(_pubnub);
 
-var Promise = _es6Promise2['default'] && _es6Promise2['default'].Promise || window.Promise;
+var root = new Function('return this')();
+
+var Promise = _es6Promise2['default'] && _es6Promise2['default'].Promise || root.Promise;
 
 exports.Promise = Promise;
-var fetch = _nodeFetch2['default'] || window.fetch;
+var fetch = root.fetch || _nodeFetch2['default'];
 exports.fetch = fetch;
-var Request = fetch.Request || window.Request;
+var Request = root.Request || fetch.Request;
 exports.Request = Request;
-var Response = fetch.Response || window.Response;
+var Response = root.Response || fetch.Response;
 exports.Response = Response;
-var Headers = fetch.Headers || window.Headers;
+var Headers = root.Headers || fetch.Headers;
 
 exports.Headers = Headers;
-var PUBNUB = _pubnub2['default'] || window.PUBNUB;
+var PUBNUB = root.PUBNUB || _pubnub2['default'];
 
 exports.PUBNUB = PUBNUB;
-var localStorage = typeof window !== 'undefined' && typeof window.localStorage !== 'undefined' ? window.localStorage : {};
+var localStorage = typeof root.localStorage !== 'undefined' ? root.localStorage : {};
 exports.localStorage = localStorage;
 
 /***/ },
@@ -631,6 +645,86 @@ exports.__esModule = true;
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _coreExternals = __webpack_require__(3);
+
+var _Utils = __webpack_require__(2);
+
+var Queue = (function () {
+    _createClass(Queue, null, [{
+        key: '_pollInterval',
+        value: 250,
+        enumerable: true
+    }, {
+        key: '_releaseTimeout',
+        value: 5000,
+        enumerable: true
+    }]);
+
+    function Queue(cache, cacheId) {
+        _classCallCheck(this, Queue);
+
+        this._cache = cache;
+        this._cacheId = cacheId;
+        this._promise = null;
+    }
+
+    Queue.prototype.isPaused = function isPaused() {
+
+        var time = this._cache.getItem(this._cacheId);
+
+        return !!time && Date.now() - parseInt(time) < Queue._releaseTimeout;
+    };
+
+    Queue.prototype.pause = function pause() {
+        this._cache.setItem(this._cacheId, Date.now());
+        return this;
+    };
+
+    Queue.prototype.resume = function resume() {
+        this._cache.removeItem(this._cacheId);
+        return this;
+    };
+
+    Queue.prototype.poll = function poll() {
+        var _this = this;
+
+        if (this._promise) return this._promise;
+
+        this._promise = new _coreExternals.Promise(function (resolve, reject) {
+
+            _Utils.poll(function (next) {
+
+                if (_this.isPaused()) return next();
+
+                _this._promise = null;
+
+                _this.resume(); // this is actually not needed but why not
+
+                resolve(null);
+            }, Queue._pollInterval);
+        });
+
+        return this._promise;
+    };
+
+    return Queue;
+})();
+
+exports['default'] = Queue;
+module.exports = exports['default'];
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
@@ -641,13 +735,13 @@ var _coreExternals = __webpack_require__(3);
 
 var _coreUtils = __webpack_require__(2);
 
-var _Utils = __webpack_require__(10);
+var _Utils = __webpack_require__(11);
 
 var _coreObservable = __webpack_require__(8);
 
 var _coreObservable2 = _interopRequireDefault(_coreObservable);
 
-var _ApiResponse = __webpack_require__(11);
+var _ApiResponse = __webpack_require__(12);
 
 var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
 
@@ -857,7 +951,7 @@ exports['default'] = Client;
 module.exports = exports['default'];
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -909,7 +1003,7 @@ function findHeaderName(name, headers) {
 }
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -924,7 +1018,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var _coreExternals = __webpack_require__(3);
 
-var _Utils = __webpack_require__(10);
+var _Utils = __webpack_require__(11);
 
 var utils = _interopRequireWildcard(_Utils);
 
@@ -1154,7 +1248,7 @@ exports['default'] = ApiResponse;
 module.exports = exports['default'];
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -1167,11 +1261,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var _Registry = __webpack_require__(13);
+var _Registry = __webpack_require__(14);
 
 var _Registry2 = _interopRequireDefault(_Registry);
 
-var _httpClient = __webpack_require__(9);
+var _httpClient = __webpack_require__(10);
 
 var _httpClient2 = _interopRequireDefault(_httpClient);
 
@@ -1215,7 +1309,7 @@ exports['default'] = Client;
 module.exports = exports['default'];
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -1226,7 +1320,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-var _Mock = __webpack_require__(14);
+var _Mock = __webpack_require__(15);
 
 var _Mock2 = _interopRequireDefault(_Mock);
 
@@ -1393,7 +1487,7 @@ exports['default'] = Registry;
 module.exports = exports['default'];
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -1404,13 +1498,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-var _httpApiResponse = __webpack_require__(11);
+var _httpApiResponse = __webpack_require__(12);
 
 var _httpApiResponse2 = _interopRequireDefault(_httpApiResponse);
 
 var _coreUtils = __webpack_require__(2);
 
-var _httpUtils = __webpack_require__(10);
+var _httpUtils = __webpack_require__(11);
 
 var Mock = (function () {
     function Mock(method, path, json, status, statusText, delay) {
@@ -1476,7 +1570,7 @@ exports['default'] = Mock;
 module.exports = exports['default'];
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -1495,9 +1589,9 @@ var _coreObservable = __webpack_require__(8);
 
 var _coreObservable2 = _interopRequireDefault(_coreObservable);
 
-var _Queue = __webpack_require__(16);
+var _coreQueue = __webpack_require__(9);
 
-var _Queue2 = _interopRequireDefault(_Queue);
+var _coreQueue2 = _interopRequireDefault(_coreQueue);
 
 var _Auth = __webpack_require__(17);
 
@@ -1585,7 +1679,7 @@ var Platform = (function (_Observable) {
         /** @type {Client} */
         this._client = client;
 
-        this._queue = new _Queue2['default'](this._cache, Platform._cacheId + '-refresh');
+        this._queue = new _coreQueue2['default'](this._cache, Platform._cacheId + '-refresh');
 
         this._auth = new _Auth2['default'](this._cache, Platform._cacheId);
     }
@@ -2039,8 +2133,8 @@ var Platform = (function (_Observable) {
 
     /**
      * General purpose function to send anything to server
+     * @param {string} options.url
      * @param {object} [options.body]
-     * @param {string} [options.url]
      * @param {string} [options.method]
      * @param {object} [options.query]
      * @param {object} [options.headers]
@@ -2072,7 +2166,7 @@ var Platform = (function (_Observable) {
 
     /**
      * @param {string} url
-     * @param {object} query
+     * @param {object} [query]
      * @param {object} [options]
      * @param {object} [options.headers]
      * @param {boolean} [options.skipAuthCheck]
@@ -2103,7 +2197,7 @@ var Platform = (function (_Observable) {
     /**
      * @param {string} url
      * @param {object} body
-     * @param {object} query
+     * @param {object} [query]
      * @param {object} [options]
      * @param {object} [options.headers]
      * @param {boolean} [options.skipAuthCheck]
@@ -2134,8 +2228,8 @@ var Platform = (function (_Observable) {
 
     /**
      * @param {string} url
-     * @param {object} body
-     * @param {object} query
+     * @param {object} [body]
+     * @param {object} [query]
      * @param {object} [options]
      * @param {object} [options.headers]
      * @param {boolean} [options.skipAuthCheck]
@@ -2166,7 +2260,7 @@ var Platform = (function (_Observable) {
 
     /**
      * @param {string} url
-     * @param {string} query
+     * @param {string} [query]
      * @param {object} [options]
      * @param {object} [options.headers]
      * @param {boolean} [options.skipAuthCheck]
@@ -2271,88 +2365,6 @@ module.exports = exports['default'];
 /** @type {ApiResponse} */
 
 // Guard is for errors that come from polling
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-'use strict';
-
-exports.__esModule = true;
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var _coreExternals = __webpack_require__(3);
-
-var _coreUtils = __webpack_require__(2);
-
-var Queue = (function () {
-    _createClass(Queue, null, [{
-        key: '_pollInterval',
-        value: 250,
-        enumerable: true
-    }, {
-        key: '_releaseTimeout',
-        value: 5000,
-        enumerable: true
-    }]);
-
-    function Queue(cache, cacheId) {
-        _classCallCheck(this, Queue);
-
-        this._cache = cache;
-        this._cacheId = cacheId;
-        this._promise = null;
-    }
-
-    Queue.prototype.isPaused = function isPaused() {
-
-        var storage = this._cache,
-            cacheId = this._cacheId,
-            time = storage.getItem(cacheId);
-
-        return !!time && Date.now() - parseInt(time) < Queue._releaseTimeout;
-    };
-
-    Queue.prototype.pause = function pause() {
-        this._cache.setItem(this._cacheId, Date.now());
-        return this;
-    };
-
-    Queue.prototype.resume = function resume() {
-        this._cache.removeItem(this._cacheId);
-        return this;
-    };
-
-    Queue.prototype.poll = function poll() {
-        var _this = this;
-
-        if (this._promise) return this._promise;
-
-        this._promise = new _coreExternals.Promise(function (resolve, reject) {
-
-            _coreUtils.poll(function (next) {
-
-                if (_this.isPaused()) return next();
-
-                _this._promise = null;
-
-                _this.resume(); // this is actually not needed but why not
-
-                resolve(null);
-            }, Queue._pollInterval);
-        });
-
-        return this._promise;
-    };
-
-    return Queue;
-})();
-
-exports['default'] = Queue;
-module.exports = exports['default'];
 
 /***/ },
 /* 17 */
@@ -2630,7 +2642,7 @@ var _coreObservable = __webpack_require__(8);
 
 var _coreObservable2 = _interopRequireDefault(_coreObservable);
 
-var _httpClient = __webpack_require__(9);
+var _httpClient = __webpack_require__(10);
 
 var _httpClient2 = _interopRequireDefault(_httpClient);
 
@@ -2649,7 +2661,7 @@ var Subscription = (function (_Observable) {
         enumerable: true
     }]);
 
-    function Subscription(pubnubFactory, platform, cache) {
+    function Subscription(pubnubFactory, platform) {
         _classCallCheck(this, Subscription);
 
         _Observable.call(this);
@@ -2665,7 +2677,6 @@ var Subscription = (function (_Observable) {
         };
         this._pubnubFactory = pubnubFactory;
         this._platform = platform;
-        this._cache = cache;
         this._pubnub = null;
         this._timeout = null;
         this._subscription = {};
@@ -2689,13 +2700,18 @@ var Subscription = (function (_Observable) {
     //    status?:string; // Active
     //}
 
+    Subscription.prototype.subscribed = function subscribed() {
+
+        return !!(this._subscription.id && this._subscription.deliveryMode && this._subscription.deliveryMode.subscriberKey && this._subscription.deliveryMode.address);
+    };
+
     /**
      * @return {boolean}
      */
 
     Subscription.prototype.alive = function alive() {
 
-        return !!(this._subscription.id && this._subscription.deliveryMode && this._subscription.deliveryMode.subscriberKey && this._subscription.deliveryMode.address && Date.now() < this.expirationTime());
+        return this.subscribed() && Date.now() < this.expirationTime();
     };
 
     Subscription.prototype.expirationTime = function expirationTime() {
@@ -2723,11 +2739,10 @@ var Subscription = (function (_Observable) {
 
     /**
      * Creates or updates subscription if there is an active one
-     * @param {{events?:string[]}} [options] New array of events
      * @returns {Promise<ApiResponse>}
      */
 
-    Subscription.prototype.register = function register(options) {
+    Subscription.prototype.register = function register() {
         return regeneratorRuntime.async(function register$(context$2$0) {
             while (1) switch (context$2$0.prev = context$2$0.next) {
                 case 0:
@@ -2737,14 +2752,14 @@ var Subscription = (function (_Observable) {
                     }
 
                     context$2$0.next = 3;
-                    return regeneratorRuntime.awrap(this.renew(options));
+                    return regeneratorRuntime.awrap(this.renew());
 
                 case 3:
                     return context$2$0.abrupt('return', context$2$0.sent);
 
                 case 6:
                     context$2$0.next = 8;
-                    return regeneratorRuntime.awrap(this.subscribe(options));
+                    return regeneratorRuntime.awrap(this.subscribe());
 
                 case 8:
                     return context$2$0.abrupt('return', context$2$0.sent);
@@ -2781,23 +2796,80 @@ var Subscription = (function (_Observable) {
     };
 
     /**
-     * @param {{events?:string[]}} [options] New array of events
      * @returns {Promise<ApiResponse>}
      */
 
-    Subscription.prototype.subscribe = function subscribe(options) {
+    Subscription.prototype.subscribe = function subscribe() {
         var response, json;
         return regeneratorRuntime.async(function subscribe$(context$2$0) {
             while (1) switch (context$2$0.prev = context$2$0.next) {
                 case 0:
                     context$2$0.prev = 0;
 
-                    options = options || {};
+                    this._clearTimeout();
 
-                    if (options.events) this.setEventFilters(options.events);
+                    if (this.eventFilters().length) {
+                        context$2$0.next = 4;
+                        break;
+                    }
+
+                    throw new Error('Events are undefined');
+
+                case 4:
+                    context$2$0.next = 6;
+                    return regeneratorRuntime.awrap(this._platform.post('/restapi/v1.0/subscription', {
+                        eventFilters: this._getFullEventFilters(),
+                        deliveryMode: {
+                            transportType: 'PubNub'
+                        }
+                    }));
+
+                case 6:
+                    response = context$2$0.sent;
+                    json = response.json();
+
+                    this.setSubscription(json).emit(this.events.subscribeSuccess, response);
+
+                    return context$2$0.abrupt('return', response);
+
+                case 12:
+                    context$2$0.prev = 12;
+                    context$2$0.t0 = context$2$0['catch'](0);
+
+                    context$2$0.t0 = this._platform.client().makeError(context$2$0.t0);
+
+                    this.reset().emit(this.events.subscribeError, context$2$0.t0);
+
+                    throw context$2$0.t0;
+
+                case 17:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 12]]);
+    };
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Subscription.prototype.renew = function renew() {
+        var response, json;
+        return regeneratorRuntime.async(function renew$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
 
                     this._clearTimeout();
 
+                    if (this.alive()) {
+                        context$2$0.next = 4;
+                        break;
+                    }
+
+                    throw new Error('Subscription is not alive');
+
+                case 4:
                     if (this.eventFilters().length) {
                         context$2$0.next = 6;
                         break;
@@ -2807,18 +2879,15 @@ var Subscription = (function (_Observable) {
 
                 case 6:
                     context$2$0.next = 8;
-                    return regeneratorRuntime.awrap(this._platform.post('/restapi/v1.0/subscription', {
-                        eventFilters: this._getFullEventFilters(),
-                        deliveryMode: {
-                            transportType: 'PubNub'
-                        }
+                    return regeneratorRuntime.awrap(this._platform.put('/restapi/v1.0/subscription/' + this._subscription.id, {
+                        eventFilters: this._getFullEventFilters()
                     }));
 
                 case 8:
                     response = context$2$0.sent;
                     json = response.json();
 
-                    this.setSubscription(json).emit(this.events.subscribeSuccess, response);
+                    this.setSubscription(json).emit(this.events.renewSuccess, response);
 
                     return context$2$0.abrupt('return', response);
 
@@ -2828,7 +2897,7 @@ var Subscription = (function (_Observable) {
 
                     context$2$0.t0 = this._platform.client().makeError(context$2$0.t0);
 
-                    this.reset().emit(this.events.subscribeError, context$2$0.t0);
+                    this.reset().emit(this.events.renewError, context$2$0.t0);
 
                     throw context$2$0.t0;
 
@@ -2837,70 +2906,6 @@ var Subscription = (function (_Observable) {
                     return context$2$0.stop();
             }
         }, null, this, [[0, 14]]);
-    };
-
-    /**
-     * @param {{events?:string[]}} [options] New array of events
-     * @returns {Promise<ApiResponse>}
-     */
-
-    Subscription.prototype.renew = function renew(options) {
-        var response, json;
-        return regeneratorRuntime.async(function renew$(context$2$0) {
-            while (1) switch (context$2$0.prev = context$2$0.next) {
-                case 0:
-                    context$2$0.prev = 0;
-
-                    options = options || {};
-
-                    if (options.events) this.setEventFilters(options.events);
-
-                    this._clearTimeout();
-
-                    if (this.alive()) {
-                        context$2$0.next = 6;
-                        break;
-                    }
-
-                    throw new Error('Subscription is not alive');
-
-                case 6:
-                    if (this.eventFilters().length) {
-                        context$2$0.next = 8;
-                        break;
-                    }
-
-                    throw new Error('Events are undefined');
-
-                case 8:
-                    context$2$0.next = 10;
-                    return regeneratorRuntime.awrap(this._platform.put('/restapi/v1.0/subscription/' + this._subscription.id, {
-                        eventFilters: this._getFullEventFilters()
-                    }));
-
-                case 10:
-                    response = context$2$0.sent;
-                    json = response.json();
-
-                    this.setSubscription(json).emit(this.events.renewSuccess, response);
-
-                    return context$2$0.abrupt('return', response);
-
-                case 16:
-                    context$2$0.prev = 16;
-                    context$2$0.t0 = context$2$0['catch'](0);
-
-                    context$2$0.t0 = this._platform.client().makeError(context$2$0.t0);
-
-                    this.reset().emit(this.events.renewError, context$2$0.t0);
-
-                    throw context$2$0.t0;
-
-                case 21:
-                case 'end':
-                    return context$2$0.stop();
-            }
-        }, null, this, [[0, 16]]);
     };
 
     /**
@@ -2914,12 +2919,12 @@ var Subscription = (function (_Observable) {
                 case 0:
                     context$2$0.prev = 0;
 
-                    if (this.alive()) {
+                    if (this.subscribed()) {
                         context$2$0.next = 3;
                         break;
                     }
 
-                    throw new Error('Subscription is not alive');
+                    throw new Error('No subscription');
 
                 case 3:
                     context$2$0.next = 5;
@@ -2950,60 +2955,36 @@ var Subscription = (function (_Observable) {
     };
 
     /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Subscription.prototype.resubscribe = function resubscribe() {
+
+        return this.reset().setEventFilters(this.eventFilters()).subscribe();
+    };
+
+    /**
      * Remove subscription and disconnect from PUBNUB
      * This method resets subscription at client side but backend is not notified
      */
 
     Subscription.prototype.reset = function reset() {
         this._clearTimeout();
-        if (this.alive() && this._pubnub) this._pubnub.unsubscribe({ channel: this._subscription.deliveryMode.address });
+        if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({ channel: this._subscription.deliveryMode.address });
         this._subscription = {};
         return this;
     };
 
-    /**
-     *
-     * @param {string} cacheKey
-     * @param {string[]} events
-     * @return {Subscription}
-     */
-
-    Subscription.prototype.restoreFromCache = function restoreFromCache(cacheKey, events) {
+    Subscription.prototype._getFullEventFilters = function _getFullEventFilters() {
         var _this = this;
 
-        this.on([this.events.subscribeSuccess, this.events.renewSuccess], function () {
-
-            _this._cache.setItem(cacheKey, _this.subscription());
-        });
-
-        this.on(this.events.renewError, function () {
-
-            _this.reset().setEventFilters(events).register();
-        });
-
-        var cachedSubscriptionData = this._cache.getItem(cacheKey);
-
-        if (cachedSubscriptionData) {
-            try {
-                this.setSubscription(cachedSubscriptionData);
-            } catch (e) {}
-        } else {
-            this.setEventFilters(events);
-        }
-
-        return this;
-    };
-
-    Subscription.prototype._getFullEventFilters = function _getFullEventFilters() {
-        var _this2 = this;
-
         return this.eventFilters().map(function (event) {
-            return _this2._platform.createUrl(event);
+            return _this._platform.createUrl(event);
         });
     };
 
     Subscription.prototype._setTimeout = function _setTimeout() {
-        var _this3 = this;
+        var _this2 = this;
 
         this._clearTimeout();
 
@@ -3011,9 +2992,9 @@ var Subscription = (function (_Observable) {
 
         _coreUtils.poll(function (next) {
 
-            if (_this3.alive()) return next();
+            if (_this2.alive()) return next();
 
-            _this3.renew();
+            _this2.renew();
         }, Subscription._pollInterval, this._timeout);
 
         return this;
@@ -3028,7 +3009,7 @@ var Subscription = (function (_Observable) {
 
     Subscription.prototype._decrypt = function _decrypt(message) {
 
-        if (!this.alive()) throw new Error('Subscription is not alive');
+        if (!this.subscribed()) throw new Error('No subscription');
 
         if (this._subscription.deliveryMode.encryptionKey) {
 
@@ -3082,6 +3063,180 @@ module.exports = exports['default'];
 
 /***/ },
 /* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _Subscription2 = __webpack_require__(20);
+
+var _Subscription3 = _interopRequireDefault(_Subscription2);
+
+var _coreQueue = __webpack_require__(9);
+
+var _coreQueue2 = _interopRequireDefault(_coreQueue);
+
+var CachedSubscription = (function (_Subscription) {
+    _inherits(CachedSubscription, _Subscription);
+
+    function CachedSubscription(pubnubFactory, platform, cache, cacheKey) {
+        var _this = this;
+
+        _classCallCheck(this, CachedSubscription);
+
+        _Subscription.call(this, pubnubFactory, platform);
+
+        this._cache = cache;
+        this._cacheKey = cacheKey;
+        this._renewQueue = new _coreQueue2['default'](this._cache, cacheKey + '-renew');
+        this._resubscribeQueue = new _coreQueue2['default'](this._cache, cacheKey + '-resubscribe');
+
+        this.events = _extends({}, this.events, {
+            queuedRenewSuccess: 'queuedRenewSuccess',
+            queuedRenewError: 'queuedRenewError',
+            queuedResubscribeSuccess: 'queuedResubscribeSuccess',
+            queuedResubscribeError: 'queuedResubscribeError'
+        });
+
+        this.on(this.events.renewError, function () {
+            _this.resubscribe();
+        });
+
+        this.on([this.events.subscribeSuccess, this.events.renewSuccess], function () {
+            _this._cache.setItem(_this._cacheKey, _this.subscription());
+        });
+
+        this.on(this.events.removeSuccess, function () {
+            _this._cache.removeItem(_this._cacheKey);
+        });
+    }
+
+    /**
+     * TODO Combine with Platform.refresh and move elsewhere
+     * @param actionCb
+     * @param queue
+     * @param successEvent
+     * @param errorEvent
+     * @param errorMessage
+     * @return {*}
+     * @private
+     */
+
+    CachedSubscription.prototype._queue = function _queue(actionCb, queue, successEvent, errorEvent, errorMessage) {
+        var res;
+        return regeneratorRuntime.async(function _queue$(context$2$0) {
+            while (1) switch (context$2$0.prev = context$2$0.next) {
+                case 0:
+                    context$2$0.prev = 0;
+
+                    if (!queue.isPaused()) {
+                        context$2$0.next = 8;
+                        break;
+                    }
+
+                    context$2$0.next = 4;
+                    return regeneratorRuntime.awrap(queue.poll());
+
+                case 4:
+                    if (this.alive()) {
+                        context$2$0.next = 6;
+                        break;
+                    }
+
+                    throw new Error(errorMessage);
+
+                case 6:
+
+                    this.emit(successEvent, null);
+
+                    return context$2$0.abrupt('return', null);
+
+                case 8:
+
+                    queue.pause();
+
+                    context$2$0.next = 11;
+                    return regeneratorRuntime.awrap(actionCb.call(this));
+
+                case 11:
+                    res = context$2$0.sent;
+
+                    queue.resume();
+
+                    this.emit(successEvent, res);
+
+                    return context$2$0.abrupt('return', res);
+
+                case 17:
+                    context$2$0.prev = 17;
+                    context$2$0.t0 = context$2$0['catch'](0);
+
+                    this.emit(errorEvent, context$2$0.t0);
+
+                    throw context$2$0.t0;
+
+                case 21:
+                case 'end':
+                    return context$2$0.stop();
+            }
+        }, null, this, [[0, 17]]);
+    };
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+    CachedSubscription.prototype.renew = function renew() {
+
+        return this._queue(_Subscription.prototype.renew, this._renewQueue, this.events.queuedRenewSuccess, this.events.queuedRenewError, 'Subscription is not alive after renew timeout');
+    };
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+    CachedSubscription.prototype.resubscribe = function resubscribe() {
+
+        return this._queue(_Subscription.prototype.resubscribe, this._resubscribeQueue, this.events.queuedResubscribeSuccess, this.events.queuedResubscribeError, 'Subscription is not alive after resubscribe timeout');
+    };
+
+    /**
+     * @param {string[]} events
+     * @return {CachedSubscription}
+     */
+
+    CachedSubscription.prototype.restore = function restore(events) {
+
+        var cachedSubscriptionData = this._cache.getItem(this._cacheKey);
+
+        if (cachedSubscriptionData) {
+            try {
+                this.setSubscription(cachedSubscriptionData);
+            } catch (e) {}
+        } else {
+            this.setEventFilters(events);
+        }
+
+        return this;
+    };
+
+    return CachedSubscription;
+})(_Subscription3['default']);
+
+exports['default'] = CachedSubscription;
+module.exports = exports['default'];
+
+/***/ },
+/* 22 */
 /***/ function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**

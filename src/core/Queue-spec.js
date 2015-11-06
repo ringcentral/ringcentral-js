@@ -1,13 +1,13 @@
 import {expect, getSdk, getMock, getRegistry} from '../test/test';
 import SDK from '../SDK';
 
-describe('RingCentral.platform.Queue', function() {
+describe('RingCentral.core.Queue', function() {
 
-    var pollInterval = SDK.platform.Queue._pollInterval,
-        releaseTimeout = SDK.platform.Queue._releaseTimeout;
+    var pollInterval = SDK.core.Queue._pollInterval,
+        releaseTimeout = SDK.core.Queue._releaseTimeout;
 
     function getQueue() {
-        return new SDK.platform.Queue(new SDK.core.Cache({}), 'foo');
+        return new SDK.core.Queue(new SDK.core.Cache({}), 'foo');
     }
 
     describe('poll', function() {

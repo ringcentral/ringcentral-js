@@ -31,8 +31,8 @@
                 document.getElementById('extension').style.display = 'block';
 
                 var subscription1 = rcsdk
-                        .createSubscription()
-                        .restoreFromCache('subscription', ['/account/~/extension/~/presence']);
+                        .createCachedSubscription('subscription')
+                        .restore(['/account/~/extension/~/presence']);
 
                 console.log('Cached subscription data', subscription1.subscription(), 'alive', subscription1.alive());
 

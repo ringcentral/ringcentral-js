@@ -1,6 +1,6 @@
 import Observable from '../core/Observable';
 import Client from '../http/Client';
-import {poll, stopPolling} from '../core/Utils';
+import {poll, stopPolling, delay} from '../core/Utils';
 
 export default class Subscription extends Observable {
 
@@ -17,16 +17,24 @@ export default class Subscription extends Observable {
         subscribeError: 'subscribeError'
     };
 
-    constructor(pubnubFactory, platform, cache) {
+    constructor(pubnubFactory, platform) {
 
         super();
 
         this._pubnubFactory = pubnubFactory;
         this._platform = platform;
-        this._cache = cache;
         this._pubnub = null;
         this._timeout = null;
         this._subscription = {};
+
+    }
+
+    subscribed(){
+
+        return !!(this._subscription.id &&
+                  this._subscription.deliveryMode &&
+                  this._subscription.deliveryMode.subscriberKey &&
+                  this._subscription.deliveryMode.address);
 
     }
 
@@ -35,11 +43,7 @@ export default class Subscription extends Observable {
      */
     alive() {
 
-        return !!(this._subscription.id &&
-                  this._subscription.deliveryMode &&
-                  this._subscription.deliveryMode.subscriberKey &&
-                  this._subscription.deliveryMode.address &&
-                  Date.now() < this.expirationTime());
+        return this.subscribed() && Date.now() < this.expirationTime();
 
     }
 
@@ -69,15 +73,14 @@ export default class Subscription extends Observable {
 
     /**
      * Creates or updates subscription if there is an active one
-     * @param {{events?:string[]}} [options] New array of events
      * @returns {Promise<ApiResponse>}
      */
-    async register(options) {
+    async register() {
 
         if (this.alive()) {
-            return await this.renew(options);
+            return await this.renew();
         } else {
-            return await this.subscribe(options);
+            return await this.subscribe();
         }
 
     }
@@ -105,16 +108,11 @@ export default class Subscription extends Observable {
     }
 
     /**
-     * @param {{events?:string[]}} [options] New array of events
      * @returns {Promise<ApiResponse>}
      */
-    async subscribe(options) {
+    async subscribe() {
 
         try {
-
-            options = options || {};
-
-            if (options.events) this.setEventFilters(options.events);
 
             this._clearTimeout();
 
@@ -148,16 +146,11 @@ export default class Subscription extends Observable {
     }
 
     /**
-     * @param {{events?:string[]}} [options] New array of events
      * @returns {Promise<ApiResponse>}
      */
-    async renew(options) {
+    async renew() {
 
         try {
-
-            options = options || {};
-
-            if (options.events) this.setEventFilters(options.events);
 
             this._clearTimeout();
 
@@ -196,7 +189,7 @@ export default class Subscription extends Observable {
 
         try {
 
-            if (!this.alive()) throw new Error('Subscription is not alive');
+            if (!this.subscribed()) throw new Error('No subscription');
 
             var response = await this._platform.delete('/restapi/v1.0/subscription/' + this._subscription.id);
 
@@ -218,50 +211,23 @@ export default class Subscription extends Observable {
     }
 
     /**
+     * @returns {Promise<ApiResponse>}
+     */
+    resubscribe() {
+
+        return this.reset().setEventFilters(this.eventFilters()).subscribe();
+
+    }
+
+    /**
      * Remove subscription and disconnect from PUBNUB
      * This method resets subscription at client side but backend is not notified
      */
     reset() {
         this._clearTimeout();
-        if (this.alive() && this._pubnub) this._pubnub.unsubscribe({channel: this._subscription.deliveryMode.address});
+        if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({channel: this._subscription.deliveryMode.address});
         this._subscription = {};
         return this;
-    }
-
-    /**
-     *
-     * @param {string} cacheKey
-     * @param {string[]} events
-     * @return {Subscription}
-     */
-    restoreFromCache(cacheKey, events) {
-
-        this.on([this.events.subscribeSuccess, this.events.renewSuccess], () => {
-
-            this._cache.setItem(cacheKey, this.subscription());
-
-        });
-
-        this.on(this.events.renewError, () => {
-
-            this.reset()
-                .setEventFilters(events)
-                .register();
-
-        });
-
-        var cachedSubscriptionData = this._cache.getItem(cacheKey);
-
-        if (cachedSubscriptionData) {
-            try {
-                this.setSubscription(cachedSubscriptionData);
-            } catch (e) {}
-        } else {
-            this.setEventFilters(events);
-        }
-
-        return this;
-
     }
 
     _getFullEventFilters() {
@@ -300,7 +266,7 @@ export default class Subscription extends Observable {
 
     _decrypt(message:any) {
 
-        if (!this.alive()) throw new Error('Subscription is not alive');
+        if (!this.subscribed()) throw new Error('No subscription');
 
         if (this._subscription.deliveryMode.encryptionKey) {
 

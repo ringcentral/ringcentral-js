@@ -1,15 +1,17 @@
 # Table of contents
 
-1. [Key Benefits](#key-benefits)
-2. [Installation](#installation)
-3. [Migration from previous releases](#migration-from-previous-releases)
-4. [Core Module](#core-module)
-5. [Performing a RingOut](#performing-a-ringout)
-6. [Call Management Using JavaScript](#call-management-using-javascript)
-7. [SMS](#sms)
-8. [Fax](#fax)
-9. [Page Visibility](#page-visibility)
-10. [Tracking Ajax Requests](#tracking-ajax-requests)
+- [Key Benefits](#key-benefits)
+- [Installation](#installation)
+- [Migration from previous releases](#migration-from-previous-releases)
+- [Getting Started](#getting-started)
+- [API Calls](#api-calls)
+- [Server-side Subscriptions](#server-side-subscriptions)
+- [Making telephony calls](#making-telephony-calls)
+- [Call management using JavaScript](#call-management-using-javascript)
+- [SMS](#sms)
+- [Fax](#fax)
+- [Page visibility](#page-visibility)
+- [Tracking network Requests And Responses](#tracking-network-requests-and-responses)
 
 ***
 
@@ -19,8 +21,9 @@
 - Re-issues non-authorized requests
 - Decrypts PUBNUB notification messages
 - Parses multipart API responses
-- Creates Request bodies for FaxOut
-- Compatible with latest WhatWG `fetch()` spec (DOM Requests & DOM Responses)
+- Restores subscriptions from cache
+- Automatically re-subscribes in case of subscription renewal errors
+- Compatible with latest WhatWG `fetch()` spec (DOM Requests and Responses)
 
 ***
 
@@ -28,13 +31,13 @@
 
 SDK can be used in 3 environments:
 
-1. [Browser](#1-set-things-up-in-browser)
-2. [NodeJS](#1-set-things-up-in-nodejs)
-3. [Browserify or Webpack](#3-set-things-up-for-browserify-or-webpack)
+1. [Browser](#set-things-up-in-browser)
+2. [NodeJS](#set-things-up-in-nodejs)
+3. [Browserify or Webpack](#set-things-up-for-browserify-or-webpack)
 
-## 1. Set things up in Browser
+## Set things up in Browser
 
-### 1.1. Get the code
+### Get the code
 
 Pick the option that works best for you:
 
@@ -50,7 +53,7 @@ Pick the option that works best for you:
     - [ES6 Promise](https://github.com/jakearchibald/es6-promise), direct download: [es6-promise.js](https://raw.githubusercontent.com/jakearchibald/es6-promise/master/dist/es6-promise.js)
     - [PUBNUB](https://github.com/pubnub/javascript), direct download: [pubnub.js](https://raw.githubusercontent.com/pubnub/javascript/master/web/pubnub.js)
 
-## 1.2.a. Add scripts to HTML page
+### Add scripts to HTML page (if you are not using any module loaders)
 
 Add the following to your HTML:
 
@@ -61,7 +64,7 @@ Add the following to your HTML:
 <script type="text/javascript" src="path-to-scripts/ringcentral/build/ringcentral.js"></script><!-- or ringcentral.min.js -->
 <script type="text/javascript">
 
-    var sdk = new RingCentral.sdk.SDK(...);
+    var sdk = new RingCentral.SDK(...);
 
 </script>
 ```
@@ -72,7 +75,7 @@ Add the following to your HTML:
 <script type="text/javascript" src="path-to-scripts/ringcentral/build/ringcentral-bundle.js"></script><!-- or ringcentral-bundle.min.js -->
 <script type="text/javascript">
 
-    var sdk = new RingCentral.sdk.SDK(...);
+    var sdk = new RingCentral.SDK(...);
 
 </script>
 ```
@@ -80,7 +83,7 @@ Add the following to your HTML:
 Keep in mind that this is for quick start only and for production you should add each dependency separately to have
 full control over the process.
 
-## 1.2.b. Set things up in Browser (if you use RequireJS in your project)
+### If you use RequireJS in your project
 
 ```js
 // Add this to your RequireJS configuration file
@@ -107,7 +110,7 @@ require(['ringcentral', 'es6-promise', 'fetch'], function(SDK, Promise) {
 
 Make sure that polyfills are loaded before or together with SDK.
 
-## 2. Set things up in NodeJS
+## Set things up in NodeJS
 
 1. Install the NPM package:
 
@@ -121,7 +124,7 @@ Make sure that polyfills are loaded before or together with SDK.
     var RingCentral = require('ringcentral');
     ```
 
-## 3. Set things up for Browserify or Webpack (experimental)
+## Set things up for Browserify or Webpack
 
 **!!! This is experimental !!!**
 
@@ -155,15 +158,15 @@ To reduce the size of your Webpack bundle it's better to use browser version of 
 are installed via NPM along with the SDK). You can get them via Bower or directly download the the source.
 More information can be found in [installation for browser](#1-set-things-up-in-browser).
 
-## 4. Polyfills for old browsers
+## Polyfills for old browsers
 
 You can use any of your favourite `fetch()` and `Promise` polyfills. SDK tries to get them from global scope every
 time new instance is created.
 
-In case SDK will not detect globals automatically you can set them as follows:
+In rare case when SDK will not detect globals automatically you can set them as follows:
 
 ```js
-window.Promise = {Promise: $q.Promise, resolve: q.resolve, reject: q.reject, all: q.all};
+window.Promise = whatever;
 window.fetch = whatever;
 window.Headers = whatever;
 window.Request = whatever;
@@ -173,7 +176,7 @@ window.Response = whatever;
 Also you can manually define SDK internal variables:
 
 ```js
-RingCentral.SDK.core.Externals.Promise = {Promise: $q.Promise, resolve: q.resolve, reject: q.reject, all: q.all};
+RingCentral.SDK.core.Externals.Promise = whatever;
 RingCentral.SDK.core.Externals.fetch = whatever;
 RingCentral.SDK.core.Externals.Headers = whatever;
 RingCentral.SDK.core.Externals.Request = whatever;
@@ -200,7 +203,7 @@ Full list of migration instructions:
 
 ***
 
-# Core Module
+# Getting Started
 
 ## Instantiate the RingCentral object
 
@@ -222,7 +225,7 @@ var rcsdk = new RingCentral.SDK({
 
 This instance will be used later on to perform calls to API.
 
-## Get the Platform Singleton
+## Get the Platform singleton
 
 ```js
 var platform = rcsdk.platform();
@@ -251,7 +254,7 @@ rcsdk.platform()
     });
 ```
 
-### Handling Login Success
+## Handling login success
 
 Because the login process is asynchronous, you need to call the promise's `then` method and pass your success handler as
 the continuation function.
@@ -260,7 +263,7 @@ This function will be called once login has succeeded, which allows the applicat
 the user interface, and then perform the next actions using the API to load account details for the user's account
 and such.
 
-### Handling Login Failure
+## Handling login failure
 
 Login can, of course, fail - a user can enter the incorrect password or mistype their user name.
 
@@ -268,7 +271,7 @@ To handle cases where login fails, you can provide an error handler function in 
 To keep this example simple, a simple JavaScript alert is being used. In a real application, you will want to provide
 a good UX in your login form UI.
 
-### Checking Authentication State
+## Checking login state
 
 To check in your Application if the user is authenticated, you can call the `loggedIn` method of the platform
 singleton:
@@ -287,57 +290,6 @@ If you just need to check whether the user has a valid token, you can call the `
 ```js
 rcsdk.platform().auth().accessTokenValid(); // returns boolean
 ```
-
-## Performing API calls
-
-To perform an authenticated API call, you should use the one of the methods of the platform singleton:
-
-```js
-rcsdk.platform()
-    .send('/account/~/extension/~', {
-        method: 'PUT',
-        query: {...},
-        headers: {...},
-        body: {...}
-    })
-    .then(function(apiResponse){
-    
-        alert(apiResponse.json().name);
-        
-    })
-    .catch(function(e){
-    
-        alert(e.message);
-        
-        // please note that ajax property may not be accessible if error occurred before AJAX send
-        if (e.apiResponse && e.apiResponse()) {
-        
-            var request = e.apiResponse().request();
-            
-            alert('Ajax error ' + e.message + ' for URL' + request.url + ' ' + e.apiResponse().error());
-            
-        }
-        
-    });
-
-// Shorthand methods
-
-rcsdk.platform().get('/account/~/extension/~', {query: {...}}).then(...);
-rcsdk.platform().post('/account/~/extension/~', {body: {...}, query: {...}}).then(...);
-rcsdk.platform().put('/account/~/extension/~', {body: {...}, query: {...}}).then(...);
-rcsdk.platform().delete('/account/~/extension/~', {query: {...}}).then(function(...);
-```
-
-### Sending things other than JSON
-
-You can set `headers['Content-Type']` property of AJAX options to `false` in order to let XHR library to figure out
-appropriate `Content-Type` header automatically.
-
-Important notes:
-
-- Automatic guessing of `Content-Type` is unreliable, if you know `Content-Type` then set it explicitly
-- NodeJS cannot set `multipart/mixed` header with appropriate boundary automatically when sending `Buffer` object
-    so your application must take care of that
 
 ## Logout
 
@@ -370,7 +322,58 @@ platform.on(platform.events.refreshError, function(e){
 
 The `on` method accepts an event type as its first argument and a handler function as its second argument.
 
-## Subscriptions
+## Cache
+
+In the NodeJS it might be useful to replace simple built-in storage with something persistent:
+
+```js
+RingCentral.SDK.core.Externals.localStorage = Anything;
+```
+
+# API calls
+
+To perform an authenticated API call, you should use the one of the methods of the platform singleton:
+
+```js
+rcsdk.platform()
+    .send({
+        method: 'PUT',
+        url: '/account/~/extension/~',
+        query: {...},
+        headers: {...},
+        body: {...}
+    })
+    .then(function(apiResponse){
+    
+        alert(apiResponse.json().name);
+        
+    })
+    .catch(function(e){
+    
+        alert(e.message);
+        
+        // please note that ajax property may not be accessible if error occurred before AJAX send
+        if (e.apiResponse && e.apiResponse()) {
+        
+            var request = e.apiResponse().request();
+            
+            alert('Ajax error ' + e.message + ' for URL' + request.url + ' ' + e.apiResponse().error());
+            
+        }
+        
+    });
+
+// Shorthand methods
+
+rcsdk.platform().get('/account/~/extension/~', {...query}).then(...);
+rcsdk.platform().post('/account/~/extension/~', {...body}, {...query}).then(...);
+rcsdk.platform().put('/account/~/extension/~', {...body}, {...query}).then(...);
+rcsdk.platform().delete('/account/~/extension/~', {...query}).then(function(...);
+```
+
+If your `Promise` library supports global error handler it might be useful to log Requests and Responses there.
+
+# Server-side Subscriptions
 
 Subscriptions are a convenient way to receive updates on server-side events, such as new messages or presence changes.
 
@@ -383,35 +386,53 @@ subscription.on(subscription.events.notification, function(msg) {
     console.log(msg, msg.body);
 });
 
-subscription.register({
-    events: ['/account/~/extension/~/presence'], // a list of server-side events
-}).then(...);
+subscription
+    .setEventFilters(['/account/~/extension/~/presence']) // a list of server-side events
+    .register()
+    .then(...);
 ```
+
+## Removing Subscriptions from server
 
 Once a subscription has been created, the SDK takes care of renewing it automatically. To cancel a subscription, you can
-call the subscription instance's `reset` and `off` methods:
+call the subscription instance's `remove()` method:
 
 ```js
-subscription.reset().off();
+subscription.remove().then(...);
 ```
 
-You can add more events to the same subscription at any time, by calling the subscription methods:
+## Updating Subsctiptions
+
+You can add more or replace event filters in the existing subscription at any time, by calling the subscription methods
+and then calling the `register()` method to update it on the server:
 
 ```js
 subscription.setEventFilters(['/account/~/extension/111/presence']).register();
 subscription.addEventFilters(['/account/~/extension/222/presence']).register();
 ```
 
-### Subscriptions Lifecycle
+## Subscription reset
+
+To revert subscription instance to it's prestine state you can use its `reset()` and `off()` methods, this will close
+PUBNUB channel, remove all timers, subscription data and all bindings:
+
+```js
+subscription.reset().off();
+```
+
+## Subscriptions lifecycle
 
 The number of active subscriptions is limited per account (about 20). This means that the application should dispose
 unused subscriptions in the following situations:
 
-- the user navigates away from the page or particular view
-- the `Platform` instance emits `logoutSuccess` or `accessViolation` events
-- a subscription becomes unused by the application, based upon the application's business logic
+- Application should `reset()` subscriptions (on the server they are dead already):
+    - the `Platform` instance emits `logoutSuccess` or `accessViolation` events so the app should `reset()` all subscriptions
+- Application should `remove()` subscriptions or remove no longer needed event filters from them:
+    - the user navigates away from the page or particular view
+    - a subscription becomes unused by the application, based upon the application's business logic
 
-One of very useful techniques is to always store subscription data in cache:
+One of very useful techniques to limit the number of active subscriptions is to store subscription data in cache and
+share this data across Subscription instances in multiple tabs:
 
 ```js
 var cacheKey = 'some-custom-key';
@@ -440,7 +461,7 @@ With this technique subscription remove request on window/tab closing is no long
 In any case if application logic dictates that subscription is not used anymore by any of it's instances, subscription
 can be removed from the server to make sure application stays within limits.
 
-### Stale Subscriptions
+## Stale Subscriptions
 
 There is a known bug when user awakes the computer: subscription tries to renew itself but fails because the
 expiration time has passed (JS was halted while computer was sleeping).
@@ -458,16 +479,7 @@ subscription.on(subscription.events.renewError, function() {
 
 This has to be done in all tabs, application must handle potential race conditions.
 
-### Shorthand
-
-The above mentioned things are put together into `restoreFromCache()` method:
-
-```js
-var subscription = rcsdk.createSubscription()
-                        .restoreFromCache('cache-key', ['/account/~/extension/~/presence']);
-```
-
-### Subscription Multiplexor
+## Multiple event filters in one Subscription
 
 The best practice is to have only one subscription object with multiple event filters of different types (messages,
 presence, etc.) instead of having separate subscription for each individual event filter.
@@ -483,9 +495,29 @@ subscription.on(subscription.events.notification, function(msg) {
 });
 ```
 
+## Shorthand
+
+The above mentioned things are put together into `CachedSubscription` class and its `restore(cacheKey)` method:
+
+```js
+var subscription = rcsdk.createCachedSubscription('cache-key').restore(['/account/~/extension/~/presence']);
+                        
+// use it as usual
+subscription.register();
+```
+
+`CachedSubscription` class has 4 extra events which you can use for more granular control:
+
+- `queuedRenewSuccess`
+- `queuedRenewError`
+- `queuedResubscribeSuccess`
+- `queuedResubscribeError`
+
 ***
 
-# Performing a RingOut
+# Making telephony calls
+
+In RingCentral terminology making telephony calls is named as RingOut.
 
 This example demonstrates a way to create a flexible RingOut tracking procedure. This is the most complex example with
 maximum fine-tuning - it could be simplified to suit the business requirements.
@@ -592,7 +624,7 @@ create({
 
 ***
 
-# Call Management Using JavaScript
+# Call management using JavaScript
 
 If you are integrating with a CRM or ERP system, use of the JavaScript SDK is highly recommended. Following is an
 example of a call management integration that includes monitoring of incoming calls and performing of RingOuts. 
@@ -767,7 +799,7 @@ Further reading:
 
 ***
 
-# Page Visibility
+# Page visibility
 
 You can use any of the libraties that work with the [Page Visibility API](http://www.w3.org/TR/page-visibility/),
 such as [visibility.js](https://github.com/ai/visibilityjs).
@@ -784,7 +816,7 @@ not require that any such optimizations be implemented in the application, but i
 
 ***
 
-# Tracking Network Requests & Responses
+# Tracking network Requests And Responses
 
 You can set up tracking for all network requests (for instance, to log them somewhere) by obtaining a `Client` object
 and registering observers on its various events:

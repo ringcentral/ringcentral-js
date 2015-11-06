@@ -1,5 +1,5 @@
 import Observable from '../core/Observable';
-import Queue from './Queue';
+import Queue from '../core/Queue';
 import Auth from './Auth';
 import {Promise} from '../core/Externals';
 import {queryStringify, parseQueryString, delay} from '../core/Utils';
@@ -372,8 +372,8 @@ export default class Platform extends Observable {
 
     /**
      * General purpose function to send anything to server
+     * @param {string} options.url
      * @param {object} [options.body]
-     * @param {string} [options.url]
      * @param {string} [options.method]
      * @param {object} [options.query]
      * @param {object} [options.headers]
@@ -391,7 +391,7 @@ export default class Platform extends Observable {
 
     /**
      * @param {string} url
-     * @param {object} query
+     * @param {object} [query]
      * @param {object} [options]
      * @param {object} [options.headers]
      * @param {boolean} [options.skipAuthCheck]
@@ -408,7 +408,7 @@ export default class Platform extends Observable {
     /**
      * @param {string} url
      * @param {object} body
-     * @param {object} query
+     * @param {object} [query]
      * @param {object} [options]
      * @param {object} [options.headers]
      * @param {boolean} [options.skipAuthCheck]
@@ -425,8 +425,8 @@ export default class Platform extends Observable {
 
     /**
      * @param {string} url
-     * @param {object} body
-     * @param {object} query
+     * @param {object} [body]
+     * @param {object} [query]
      * @param {object} [options]
      * @param {object} [options.headers]
      * @param {boolean} [options.skipAuthCheck]
@@ -443,7 +443,7 @@ export default class Platform extends Observable {
 
     /**
      * @param {string} url
-     * @param {string} query
+     * @param {string} [query]
      * @param {object} [options]
      * @param {object} [options.headers]
      * @param {boolean} [options.skipAuthCheck]
