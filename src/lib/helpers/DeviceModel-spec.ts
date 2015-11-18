@@ -16,7 +16,7 @@ describe('RCSDK.helpers.dictionaries.DeviceModel', function() {
 
         it('provides artificial IDs', function() {
 
-            expect(DeviceModel.getId({
+            expect(DeviceModel.getId(<any>{
                 sku: '23',
                 name: 'Polycom IP 321 Basic IP phone',
                 deviceClass: 'Desk Phone'

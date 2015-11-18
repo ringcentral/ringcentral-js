@@ -1,7 +1,6 @@
 /// <reference path="../../typings/externals.d.ts" />
 
-declare
-var require:(name:string)=>any;
+declare var require:(name:string)=>any;
 
 import promise = require('es6-promise');
 
