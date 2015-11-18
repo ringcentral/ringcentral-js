@@ -4,6 +4,7 @@
     var gulp = require('gulp'),
         gutil = require('gulp-util'),
         sourcemaps = require('gulp-sourcemaps'),
+        replace = require('gulp-replace'),
         path = require('path'),
         sourcemapsDebug = false,
         webpackConfigure = {
@@ -73,9 +74,20 @@
     });
 
     /**
+     * Propagates version from lib/RCSDK.js to package.json and bower.json
+     */
+    gulp.task('version', ['webpack'], function() {
+
+        return gulp.src(['./bower.json', './package.json'])
+            .pipe(replace(/"version": "[^"]+?"/ig, '"version": "' + require('./build/rc-sdk').version + '"'))
+            .pipe(gulp.dest('.'));
+
+    });
+
+    /**
      * Default Task
      */
-    gulp.task('default', ['uglify']);
+    gulp.task('default', ['uglify', 'version']);
 
     /**
      * Watch Task

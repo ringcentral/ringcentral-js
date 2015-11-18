@@ -62,37 +62,37 @@ module.exports = __webpack_require__(1);
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../typings/externals.d.ts" />
-var pubnubMock = __webpack_require__(5);
-var xhrMock = __webpack_require__(8);
-var xhrResponse = __webpack_require__(9);
-var ajaxObserver = __webpack_require__(10);
-var cache = __webpack_require__(11);
-var context = __webpack_require__(12);
-var helper = __webpack_require__(3);
-var list = __webpack_require__(13);
-var log = __webpack_require__(7);
-var observable = __webpack_require__(6);
-var pageVisibility = __webpack_require__(14);
-var platform = __webpack_require__(15);
-var subscription = __webpack_require__(19);
+var pubnubMock = __webpack_require__(2);
+var xhrMock = __webpack_require__(6);
+var xhrResponse = __webpack_require__(7);
+var ajaxObserver = __webpack_require__(8);
+var cache = __webpack_require__(9);
+var context = __webpack_require__(10);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var log = __webpack_require__(5);
+var observable = __webpack_require__(3);
+var pageVisibility = __webpack_require__(13);
+var platform = __webpack_require__(14);
+var subscription = __webpack_require__(18);
 var utils = __webpack_require__(4);
-var validator = __webpack_require__(20);
-var accountHelper = __webpack_require__(21);
-var blockedNumberHelper = __webpack_require__(22);
-var callHelper = __webpack_require__(23);
-var contactHelper = __webpack_require__(26);
-var contactGroupHelper = __webpack_require__(27);
-var conferencingHelper = __webpack_require__(2);
+var validator = __webpack_require__(19);
+var accountHelper = __webpack_require__(20);
+var blockedNumberHelper = __webpack_require__(21);
+var callHelper = __webpack_require__(22);
+var contactHelper = __webpack_require__(25);
+var contactGroupHelper = __webpack_require__(26);
+var conferencingHelper = __webpack_require__(27);
 var countryHelper = __webpack_require__(28);
 var deviceHelper = __webpack_require__(29);
 var deviceModelHelper = __webpack_require__(30);
-var extensionHelper = __webpack_require__(25);
+var extensionHelper = __webpack_require__(24);
 var forwardingNumberHelper = __webpack_require__(31);
 var languageHelper = __webpack_require__(32);
 var locationHelper = __webpack_require__(33);
 var messageHelper = __webpack_require__(35);
 var phoneNumberHelper = __webpack_require__(36);
-var presenceHelper = __webpack_require__(24);
+var presenceHelper = __webpack_require__(23);
 var ringoutHelper = __webpack_require__(37);
 var serviceHelper = __webpack_require__(38);
 var shippingMethodHelper = __webpack_require__(39);
@@ -148,7 +148,7 @@ var RCSDK = (function () {
     RCSDK.prototype.getPresenceHelper = function () { return presenceHelper.$get(this.getContext()); };
     RCSDK.prototype.getRingoutHelper = function () { return ringoutHelper.$get(this.getContext()); };
     RCSDK.prototype.getServiceHelper = function () { return serviceHelper.$get(this.getContext()); };
-    RCSDK.version = '1.3.0';
+    RCSDK.version = '1.3.2';
     RCSDK.url = {
         sandbox: 'https://platform.devtest.ringcentral.com',
         production: 'https://platform.ringcentral.com'
@@ -157,7 +157,7 @@ var RCSDK = (function () {
         localStorage: (typeof (localStorage) !== 'undefined'
             ? localStorage
             : __webpack_require__(43)),
-        Promise: typeof (Promise) !== 'undefined' ? Promise : promise.Promise,
+        Promise: typeof (Promise) !== 'undefined' ? Promise : (promise.Promise || promise),
         PUBNUB: pubnub,
         XHR: function () {
             try {
@@ -194,29 +194,46 @@ module.exports = RCSDK;
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../typings/externals.d.ts" />
+/// <reference path="../../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var Conferencing = (function (_super) {
-    __extends(Conferencing, _super);
-    function Conferencing() {
-        _super.apply(this, arguments);
+var observable = __webpack_require__(3);
+var PubnubMock = (function (_super) {
+    __extends(PubnubMock, _super);
+    function PubnubMock(context, options) {
+        this.options = options;
+        this.crypto_obj = context.getPubnubReal().crypto_obj;
+        _super.call(this, context);
     }
-    Conferencing.prototype.createUrl = function () {
-        return '/account/~/extension/~/conferencing';
+    PubnubMock.prototype.ready = function () { };
+    PubnubMock.prototype.subscribe = function (options) {
+        this.on('message-' + options.channel, options.message);
     };
-    return Conferencing;
-})(helper.Helper);
-exports.Conferencing = Conferencing;
+    PubnubMock.prototype.unsubscribe = function (options) {
+        this.off('message-' + options.channel);
+    };
+    PubnubMock.prototype.receiveMessage = function (msg, channel) {
+        this.emit('message-' + channel, msg, 'env', channel);
+    };
+    return PubnubMock;
+})(observable.Observable);
+exports.PubnubMock = PubnubMock;
+var PubnubFactory = (function () {
+    function PubnubFactory(context) {
+        this.context = context;
+        this.crypto_obj = context.getPubnubReal().crypto_obj;
+    }
+    PubnubFactory.prototype.init = function (options) {
+        return new PubnubMock(this.context, options);
+    };
+    return PubnubFactory;
+})();
+exports.PubnubFactory = PubnubFactory;
 function $get(context) {
-    return context.createSingleton('Conferencing', function () {
-        return new Conferencing(context);
-    });
+    return new PubnubFactory(context);
 }
 exports.$get = $get;
 
@@ -227,156 +244,163 @@ exports.$get = $get;
 
 /// <reference path="../../typings/externals.d.ts" />
 var utils = __webpack_require__(4);
-var Helper = (function () {
-    function Helper(context) {
-        this.defaultProperty = 'id';
+var log = __webpack_require__(5);
+/**
+ * @see https://github.com/Microsoft/TypeScript/issues/275
+ */
+var Observable = (function () {
+    function Observable(context) {
+        if (!(this instanceof Observable))
+            throw new Error('Observable(): New operator was omitted');
+        Object.defineProperty(this, 'listeners', { value: {}, enumerable: false, writable: true });
+        Object.defineProperty(this, 'oneTimeEvents', { value: {}, enumerable: false, writable: true });
+        Object.defineProperty(this, 'oneTimeArguments', { value: {}, enumerable: false, writable: true });
         this.context = context;
         this.utils = utils.$get(context);
+        this.log = log.$get(context);
     }
-    Helper.prototype.getContext = function () {
-        return this.context;
-    };
-    Helper.prototype.createUrl = function (options, id) {
-        return '';
-    };
-    Helper.prototype.getId = function (object) {
-        return object && object[this.defaultProperty];
-    };
-    Helper.prototype.isNew = function (object) {
-        return !this.getId(object) || !this.getUri(object);
-    };
-    Helper.prototype.resetAsNew = function (object) {
-        if (object) {
-            delete object.id;
-            delete object.uri;
-        }
-        return object;
-    };
-    Helper.prototype.getUri = function (object) {
-        return object && object.uri;
-    };
-    Helper.prototype.parseMultipartResponse = function (ajax) {
-        if (ajax.isMultipart()) {
-            // ajax.data has full array, leave only successful
-            return ajax.data.filter(function (result) {
-                return (!result.error);
-            }).map(function (result) {
-                return result.data;
-            });
-        }
-        else {
-            return [ajax.data];
-        }
+    Observable.prototype.hasListeners = function (event) {
+        return (event in this.listeners);
     };
     /**
-     * Options have higher priority, if object.url and options.url were provided, options.url will be returned
-     * If no URL was provided, default will be returned
+     * @deprecated
+     * @param {string} event
      */
-    Helper.prototype.loadRequest = function (object, options) {
-        return this.utils.extend(options || {}, {
-            url: (options && options.url) || (object && this.getUri(object)) || this.createUrl(),
-            method: (options && options.method) || 'GET'
-        });
+    Observable.prototype.registerOneTimeEvent = function (event) {
+        this.oneTimeEvents[event] = false;
+        this.oneTimeArguments[event] = [];
     };
-    /**
-     * Options have higher priority, if object.url and options.url were provided, options.url will be returned
-     * If no URL was provided, default will be returned
-     */
-    Helper.prototype.saveRequest = function (object, options) {
-        if (!object && !(options && (options.post || options.body)))
-            throw new Error('No Object');
-        return this.utils.extend(options || {}, {
-            method: (options && options.method) || (this.isNew(object) ? 'POST' : 'PUT'),
-            url: (options && options.url) || this.getUri(object) || this.createUrl(),
-            body: (options && (options.body || options.post)) || object
-        });
-    };
-    /**
-     * Options have higher priority, if object.url and options.url were provided, options.url will be returned
-     * If no URL was provided exception will be thrown
-     */
-    Helper.prototype.deleteRequest = function (object, options) {
-        options = options || {};
-        if (!this.getUri(object) && !(options && options.url))
-            throw new Error('Object has to be not new or URL must be provided');
-        return this.utils.extend(options || {}, {
-            method: (options && options.method) || 'DELETE',
-            url: (options && options.url) || this.getUri(object)
-        });
-    };
-    /**
-     * If no url was provided, default SYNC url will be returned
-     */
-    Helper.prototype.syncRequest = function (options) {
-        options = options || {};
-        options.url = options.url || this.createUrl({ sync: true });
-        options.query = options.query || options.get || {};
-        if (!!options.query.syncToken) {
-            options.query = {
-                syncType: 'ISync',
-                syncToken: options.get.syncToken
-            };
-        }
-        else {
-            options.query.syncType = 'FSync';
-        }
-        return options;
-    };
-    Helper.prototype.nextPageExists = function (data) {
-        return (data && data.navigation && ('nextPage' in data.navigation));
-    };
-    /**
-     * array - an array to be indexed
-     * getIdFn - must return an ID for each array item
-     * gather - if true, then each index will have an array of items, that has same ID, otherwise the first indexed
-     * item wins
-     */
-    Helper.prototype.index = function (array, getIdFn, gather) {
-        getIdFn = getIdFn || this.getId.bind(this);
-        array = array || [];
-        return array.reduce(function (index, item) {
-            var id = getIdFn(item);
-            if (!id || (index[id] && !gather))
-                return index;
-            if (gather) {
-                if (!index[id])
-                    index[id] = [];
-                index[id].push(item);
-            }
-            else {
-                index[id] = item;
-            }
-            return index;
-        }, {});
-    };
-    /**
-     * Returns a shallow copy of merged _target_ array plus _supplement_ array
-     * mergeItems
-     * - if true, properties of _supplement_ item will be applied to _target_ item,
-     * - otherwise _target_ item will be replaced
-     */
-    Helper.prototype.merge = function (target, supplement, getIdFn, mergeItems) {
+    Observable.prototype.on = function (events, callback) {
         var _this = this;
-        getIdFn = getIdFn || this.getId.bind(this);
-        target = target || [];
-        supplement = supplement || [];
-        var supplementIndex = this.index(supplement, getIdFn), updatedIDs = [], result = target.map(function (item) {
-            var id = getIdFn(item), newItem = supplementIndex[id];
-            if (newItem)
-                updatedIDs.push(id);
-            return newItem ? (mergeItems ? _this.utils.extend(item, newItem) : newItem) : item;
+        if (typeof events == 'string')
+            events = [events];
+        if (!events)
+            throw new Error('No events to subscribe to');
+        if (typeof callback !== 'function')
+            throw new Error('Callback must be a function');
+        var self = this;
+        events.forEach(function (event) {
+            if (!self.hasListeners(event))
+                self.listeners[event] = [];
+            self.listeners[event].push(callback);
+            if (self.isOneTimeEventFired(event)) {
+                _this.log.debug('Observable.on(%s): One-time event has been fired already, executing callback', event);
+                callback.apply(self, self.getOneTimeEventArgumens(event));
+            }
         });
-        supplement.forEach(function (item) {
-            if (updatedIDs.indexOf(getIdFn(item)) == -1)
-                result.push(item);
+        return this;
+    };
+    Observable.prototype.emit = function (event) {
+        var _this = this;
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        if (this.isOneTimeEventFired(event)) {
+            this.log.debug('Observable.emit(%s): One-time event has been fired already', event);
+            return null;
+        }
+        var result = null;
+        if (this.isOneTimeEvent(event)) {
+            this.setOneTimeEventFired(event);
+            this.setOneTimeEventArgumens(event, args);
+        }
+        if (!this.hasListeners(event))
+            return null;
+        this.listeners[event].some(function (callback) {
+            result = callback.apply(_this, args);
+            return (result === false);
         });
         return result;
     };
-    return Helper;
+    Observable.prototype.off = function (event, callback) {
+        var _this = this;
+        if (!event) {
+            this.listeners = {};
+            this.oneTimeEvents = {};
+            this.oneTimeArguments = {};
+        }
+        else {
+            if (!callback) {
+                delete this.listeners[event];
+            }
+            else {
+                if (!this.hasListeners(event))
+                    return this;
+                this.listeners[event].forEach(function (cb, i) {
+                    if (cb === callback)
+                        delete _this.listeners[event][i];
+                });
+            }
+        }
+        return this;
+    };
+    /**
+     * @deprecated
+     * @param event
+     * @returns {boolean}
+     */
+    Observable.prototype.isOneTimeEvent = function (event) {
+        return (event in this.oneTimeEvents);
+    };
+    /**
+     * @deprecated
+     * @param {string} event
+     * @returns {boolean}
+     */
+    Observable.prototype.isOneTimeEventFired = function (event) {
+        if (!this.isOneTimeEvent(event))
+            return false;
+        return (this.oneTimeEvents[event]);
+    };
+    /**
+     * @deprecated
+     * @param event
+     */
+    Observable.prototype.setOneTimeEventFired = function (event) {
+        this.oneTimeEvents[event] = true;
+    };
+    /**
+     * @deprecated
+     * @param {string} event
+     * @param args
+     */
+    Observable.prototype.setOneTimeEventArgumens = function (event, args) {
+        this.oneTimeArguments[event] = args;
+    };
+    /**
+     * @deprecated
+     * @param {string} event
+     * @returns {any}
+     */
+    Observable.prototype.getOneTimeEventArgumens = function (event) {
+        return this.oneTimeArguments[event];
+    };
+    /**
+     * @deprecated
+     * @returns {T}
+     */
+    Observable.prototype.offAll = function () {
+        return this.off();
+    };
+    Observable.prototype.destroy = function () {
+        this.off();
+        this.log.debug('Observable.destroy(): Listeners were destroyed');
+        return this;
+    };
+    Observable.prototype.emitAndCallback = function (event, args, callback) {
+        args = this.utils.argumentsToArray(args);
+        if (event)
+            this.emit.apply(this, [event].concat(args));
+        if (callback)
+            callback.apply(this, args);
+        return this;
+    };
+    return Observable;
 })();
-exports.Helper = Helper;
+exports.Observable = Observable;
 function $get(context) {
-    return new Helper(context);
+    return new Observable(context);
 }
 exports.$get = $get;
 
@@ -614,222 +638,6 @@ exports.$get = $get;
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-/// <reference path="../../../typings/externals.d.ts" />
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-var observable = __webpack_require__(6);
-var PubnubMock = (function (_super) {
-    __extends(PubnubMock, _super);
-    function PubnubMock(context, options) {
-        this.options = options;
-        this.crypto_obj = context.getPubnubReal().crypto_obj;
-        _super.call(this, context);
-    }
-    PubnubMock.prototype.ready = function () { };
-    PubnubMock.prototype.subscribe = function (options) {
-        this.on('message-' + options.channel, options.message);
-    };
-    PubnubMock.prototype.unsubscribe = function (options) {
-        this.off('message-' + options.channel);
-    };
-    PubnubMock.prototype.receiveMessage = function (msg, channel) {
-        this.emit('message-' + channel, msg, 'env', channel);
-    };
-    return PubnubMock;
-})(observable.Observable);
-exports.PubnubMock = PubnubMock;
-var PubnubFactory = (function () {
-    function PubnubFactory(context) {
-        this.context = context;
-        this.crypto_obj = context.getPubnubReal().crypto_obj;
-    }
-    PubnubFactory.prototype.init = function (options) {
-        return new PubnubMock(this.context, options);
-    };
-    return PubnubFactory;
-})();
-exports.PubnubFactory = PubnubFactory;
-function $get(context) {
-    return new PubnubFactory(context);
-}
-exports.$get = $get;
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-/// <reference path="../../typings/externals.d.ts" />
-var utils = __webpack_require__(4);
-var log = __webpack_require__(7);
-/**
- * @see https://github.com/Microsoft/TypeScript/issues/275
- */
-var Observable = (function () {
-    function Observable(context) {
-        if (!(this instanceof Observable))
-            throw new Error('Observable(): New operator was omitted');
-        Object.defineProperty(this, 'listeners', { value: {}, enumerable: false, writable: true });
-        Object.defineProperty(this, 'oneTimeEvents', { value: {}, enumerable: false, writable: true });
-        Object.defineProperty(this, 'oneTimeArguments', { value: {}, enumerable: false, writable: true });
-        this.context = context;
-        this.utils = utils.$get(context);
-        this.log = log.$get(context);
-    }
-    Observable.prototype.hasListeners = function (event) {
-        return (event in this.listeners);
-    };
-    /**
-     * @deprecated
-     * @param {string} event
-     */
-    Observable.prototype.registerOneTimeEvent = function (event) {
-        this.oneTimeEvents[event] = false;
-        this.oneTimeArguments[event] = [];
-    };
-    Observable.prototype.on = function (events, callback) {
-        var _this = this;
-        if (typeof events == 'string')
-            events = [events];
-        if (!events)
-            throw new Error('No events to subscribe to');
-        if (typeof callback !== 'function')
-            throw new Error('Callback must be a function');
-        var self = this;
-        events.forEach(function (event) {
-            if (!self.hasListeners(event))
-                self.listeners[event] = [];
-            self.listeners[event].push(callback);
-            if (self.isOneTimeEventFired(event)) {
-                _this.log.debug('Observable.on(%s): One-time event has been fired already, executing callback', event);
-                callback.apply(self, self.getOneTimeEventArgumens(event));
-            }
-        });
-        return this;
-    };
-    Observable.prototype.emit = function (event) {
-        var _this = this;
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
-        if (this.isOneTimeEventFired(event)) {
-            this.log.debug('Observable.emit(%s): One-time event has been fired already', event);
-            return null;
-        }
-        var result = null;
-        if (this.isOneTimeEvent(event)) {
-            this.setOneTimeEventFired(event);
-            this.setOneTimeEventArgumens(event, args);
-        }
-        if (!this.hasListeners(event))
-            return null;
-        this.listeners[event].some(function (callback) {
-            result = callback.apply(_this, args);
-            return (result === false);
-        });
-        return result;
-    };
-    Observable.prototype.off = function (event, callback) {
-        var _this = this;
-        if (!event) {
-            this.listeners = {};
-            this.oneTimeEvents = {};
-            this.oneTimeArguments = {};
-        }
-        else {
-            if (!callback) {
-                delete this.listeners[event];
-            }
-            else {
-                if (!this.hasListeners(event))
-                    return this;
-                this.listeners[event].forEach(function (cb, i) {
-                    if (cb === callback)
-                        delete _this.listeners[event][i];
-                });
-            }
-        }
-        return this;
-    };
-    /**
-     * @deprecated
-     * @param event
-     * @returns {boolean}
-     */
-    Observable.prototype.isOneTimeEvent = function (event) {
-        return (event in this.oneTimeEvents);
-    };
-    /**
-     * @deprecated
-     * @param {string} event
-     * @returns {boolean}
-     */
-    Observable.prototype.isOneTimeEventFired = function (event) {
-        if (!this.isOneTimeEvent(event))
-            return false;
-        return (this.oneTimeEvents[event]);
-    };
-    /**
-     * @deprecated
-     * @param event
-     */
-    Observable.prototype.setOneTimeEventFired = function (event) {
-        this.oneTimeEvents[event] = true;
-    };
-    /**
-     * @deprecated
-     * @param {string} event
-     * @param args
-     */
-    Observable.prototype.setOneTimeEventArgumens = function (event, args) {
-        this.oneTimeArguments[event] = args;
-    };
-    /**
-     * @deprecated
-     * @param {string} event
-     * @returns {any}
-     */
-    Observable.prototype.getOneTimeEventArgumens = function (event) {
-        return this.oneTimeArguments[event];
-    };
-    /**
-     * @deprecated
-     * @returns {T}
-     */
-    Observable.prototype.offAll = function () {
-        return this.off();
-    };
-    Observable.prototype.destroy = function () {
-        this.off();
-        this.log.debug('Observable.destroy(): Listeners were destroyed');
-        return this;
-    };
-    Observable.prototype.emitAndCallback = function (event, args, callback) {
-        args = this.utils.argumentsToArray(args);
-        if (event)
-            this.emit.apply(this, [event].concat(args));
-        if (callback)
-            callback.apply(this, args);
-        return this;
-    };
-    return Observable;
-})();
-exports.Observable = Observable;
-function $get(context) {
-    return new Observable(context);
-}
-exports.$get = $get;
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
 /// <reference path="../../typings/externals.d.ts" />
 var utils = __webpack_require__(4);
 var Log = (function () {
@@ -913,12 +721,12 @@ exports.$get = $get;
 
 
 /***/ },
-/* 8 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 var utils = __webpack_require__(4);
-var log = __webpack_require__(7);
-var xhrResponse = __webpack_require__(9); //FIXME Circular
+var log = __webpack_require__(5);
+var xhrResponse = __webpack_require__(7); //FIXME Circular
 var XhrMock = (function () {
     function XhrMock(context) {
         // Service
@@ -1016,7 +824,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 9 */
+/* 7 */
 /***/ function(module, exports) {
 
 var XhrResponse = (function () {
@@ -1050,17 +858,16 @@ exports.$get = $get;
 
 
 /***/ },
-/* 10 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var observable = __webpack_require__(6);
+var observable = __webpack_require__(3);
 var AjaxObserver = (function (_super) {
     __extends(AjaxObserver, _super);
     function AjaxObserver() {
@@ -1083,7 +890,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 11 */
+/* 9 */
 /***/ function(module, exports) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1137,7 +944,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 12 */
+/* 10 */
 /***/ function(module, exports) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1192,7 +999,167 @@ exports.$get = $get;
 
 
 /***/ },
-/* 13 */
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+/// <reference path="../../typings/externals.d.ts" />
+var utils = __webpack_require__(4);
+var Helper = (function () {
+    function Helper(context) {
+        this.defaultProperty = 'id';
+        this.context = context;
+        this.utils = utils.$get(context);
+    }
+    Helper.prototype.getContext = function () {
+        return this.context;
+    };
+    Helper.prototype.createUrl = function (options, id) {
+        return '';
+    };
+    Helper.prototype.getId = function (object) {
+        return object && object[this.defaultProperty];
+    };
+    Helper.prototype.isNew = function (object) {
+        return !this.getId(object) || !this.getUri(object);
+    };
+    Helper.prototype.resetAsNew = function (object) {
+        if (object) {
+            delete object.id;
+            delete object.uri;
+        }
+        return object;
+    };
+    Helper.prototype.getUri = function (object) {
+        return object && object.uri;
+    };
+    Helper.prototype.parseMultipartResponse = function (ajax) {
+        if (ajax.isMultipart()) {
+            // ajax.data has full array, leave only successful
+            return ajax.data.filter(function (result) {
+                return (!result.error);
+            }).map(function (result) {
+                return result.data;
+            });
+        }
+        else {
+            return [ajax.data];
+        }
+    };
+    /**
+     * Options have higher priority, if object.url and options.url were provided, options.url will be returned
+     * If no URL was provided, default will be returned
+     */
+    Helper.prototype.loadRequest = function (object, options) {
+        return this.utils.extend(options || {}, {
+            url: (options && options.url) || (object && this.getUri(object)) || this.createUrl(),
+            method: (options && options.method) || 'GET'
+        });
+    };
+    /**
+     * Options have higher priority, if object.url and options.url were provided, options.url will be returned
+     * If no URL was provided, default will be returned
+     */
+    Helper.prototype.saveRequest = function (object, options) {
+        if (!object && !(options && (options.post || options.body)))
+            throw new Error('No Object');
+        return this.utils.extend(options || {}, {
+            method: (options && options.method) || (this.isNew(object) ? 'POST' : 'PUT'),
+            url: (options && options.url) || this.getUri(object) || this.createUrl(),
+            body: (options && (options.body || options.post)) || object
+        });
+    };
+    /**
+     * Options have higher priority, if object.url and options.url were provided, options.url will be returned
+     * If no URL was provided exception will be thrown
+     */
+    Helper.prototype.deleteRequest = function (object, options) {
+        options = options || {};
+        if (!this.getUri(object) && !(options && options.url))
+            throw new Error('Object has to be not new or URL must be provided');
+        return this.utils.extend(options || {}, {
+            method: (options && options.method) || 'DELETE',
+            url: (options && options.url) || this.getUri(object)
+        });
+    };
+    /**
+     * If no url was provided, default SYNC url will be returned
+     */
+    Helper.prototype.syncRequest = function (options) {
+        options = options || {};
+        options.url = options.url || this.createUrl({ sync: true });
+        options.query = options.query || options.get || {};
+        if (!!options.query.syncToken) {
+            options.query = {
+                syncType: 'ISync',
+                syncToken: options.get.syncToken
+            };
+        }
+        else {
+            options.query.syncType = 'FSync';
+        }
+        return options;
+    };
+    Helper.prototype.nextPageExists = function (data) {
+        return (data && data.navigation && ('nextPage' in data.navigation));
+    };
+    /**
+     * array - an array to be indexed
+     * getIdFn - must return an ID for each array item
+     * gather - if true, then each index will have an array of items, that has same ID, otherwise the first indexed
+     * item wins
+     */
+    Helper.prototype.index = function (array, getIdFn, gather) {
+        getIdFn = getIdFn || this.getId.bind(this);
+        array = array || [];
+        return array.reduce(function (index, item) {
+            var id = getIdFn(item);
+            if (!id || (index[id] && !gather))
+                return index;
+            if (gather) {
+                if (!index[id])
+                    index[id] = [];
+                index[id].push(item);
+            }
+            else {
+                index[id] = item;
+            }
+            return index;
+        }, {});
+    };
+    /**
+     * Returns a shallow copy of merged _target_ array plus _supplement_ array
+     * mergeItems
+     * - if true, properties of _supplement_ item will be applied to _target_ item,
+     * - otherwise _target_ item will be replaced
+     */
+    Helper.prototype.merge = function (target, supplement, getIdFn, mergeItems) {
+        var _this = this;
+        getIdFn = getIdFn || this.getId.bind(this);
+        target = target || [];
+        supplement = supplement || [];
+        var supplementIndex = this.index(supplement, getIdFn), updatedIDs = [], result = target.map(function (item) {
+            var id = getIdFn(item), newItem = supplementIndex[id];
+            if (newItem)
+                updatedIDs.push(id);
+            return newItem ? (mergeItems ? _this.utils.extend(item, newItem) : newItem) : item;
+        });
+        supplement.forEach(function (item) {
+            if (updatedIDs.indexOf(getIdFn(item)) == -1)
+                result.push(item);
+        });
+        return result;
+    };
+    return Helper;
+})();
+exports.Helper = Helper;
+function $get(context) {
+    return new Helper(context);
+}
+exports.$get = $get;
+
+
+/***/ },
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -1310,17 +1277,16 @@ exports.$get = $get;
 
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var observable = __webpack_require__(6);
+var observable = __webpack_require__(3);
 var PageVisibility = (function (_super) {
     __extends(PageVisibility, _super);
     function PageVisibility(context) {
@@ -1367,19 +1333,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var observable = __webpack_require__(6);
-var cache = __webpack_require__(11);
-var request = __webpack_require__(16);
+var observable = __webpack_require__(3);
+var cache = __webpack_require__(9);
+var request = __webpack_require__(15);
 var Platform = (function (_super) {
     __extends(Platform, _super);
     function Platform(context) {
@@ -1763,19 +1728,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 16 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var h = __webpack_require__(17);
-var ajaxObserver = __webpack_require__(10);
-var r = __webpack_require__(18);
+var h = __webpack_require__(16);
+var ajaxObserver = __webpack_require__(8);
+var r = __webpack_require__(17);
 /**
  * TODO @see https://github.com/github/fetch/blob/master/fetch.js
  */
@@ -1910,7 +1874,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 17 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
@@ -1970,18 +1934,17 @@ exports.Headers = Headers;
 
 
 /***/ },
-/* 18 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var h = __webpack_require__(17);
-var log = __webpack_require__(7);
+var h = __webpack_require__(16);
+var log = __webpack_require__(5);
 var Response = (function (_super) {
     __extends(Response, _super);
     function Response(context, status, statusText, body, headers) {
@@ -2090,18 +2053,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 19 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var observable = __webpack_require__(6);
-var platform = __webpack_require__(15);
+var observable = __webpack_require__(3);
+var platform = __webpack_require__(14);
 var Subscription = (function (_super) {
     __extends(Subscription, _super);
     function Subscription(context) {
@@ -2352,7 +2314,7 @@ exports.$get = $get;
 
 
 /***/ },
-/* 20 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
@@ -2433,17 +2395,16 @@ exports.$get = $get;
 
 
 /***/ },
-/* 21 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
+var helper = __webpack_require__(11);
 var Account = (function (_super) {
     __extends(Account, _super);
     function Account() {
@@ -2464,18 +2425,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 22 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var validator = __webpack_require__(20);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
 var BlockedNumber = (function (_super) {
     __extends(BlockedNumber, _super);
     function BlockedNumber(context) {
@@ -2508,20 +2468,19 @@ exports.$get = $get;
 
 
 /***/ },
-/* 23 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var list = __webpack_require__(13);
-var presence = __webpack_require__(24);
-var contact = __webpack_require__(26);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var presence = __webpack_require__(23);
+var contact = __webpack_require__(25);
 var Call = (function (_super) {
     __extends(Call, _super);
     function Call(context) {
@@ -2754,19 +2713,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 24 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var subscription = __webpack_require__(19);
-var extension = __webpack_require__(25);
+var helper = __webpack_require__(11);
+var subscription = __webpack_require__(18);
+var extension = __webpack_require__(24);
 var Presence = (function (_super) {
     __extends(Presence, _super);
     function Presence(context) {
@@ -2825,18 +2783,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 25 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var list = __webpack_require__(13);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var Extension = (function (_super) {
     __extends(Extension, _super);
     function Extension(context) {
@@ -2902,19 +2859,18 @@ exports.$get = $get;
 
 
 /***/ },
-/* 26 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var validator = __webpack_require__(20);
-var list = __webpack_require__(13);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
+var list = __webpack_require__(12);
 var Contact = (function (_super) {
     __extends(Contact, _super);
     function Contact(context) {
@@ -3139,18 +3095,17 @@ exports.$get = $get;
 
 
 /***/ },
-/* 27 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 /// <reference path="../../typings/externals.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var validator = __webpack_require__(20);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
 var ContactGroup = (function (_super) {
     __extends(ContactGroup, _super);
     function ContactGroup(context) {
@@ -3177,6 +3132,36 @@ exports.$get = $get;
 
 
 /***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+/// <reference path="../../typings/externals.d.ts" />
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var helper = __webpack_require__(11);
+var Conferencing = (function (_super) {
+    __extends(Conferencing, _super);
+    function Conferencing() {
+        _super.apply(this, arguments);
+    }
+    Conferencing.prototype.createUrl = function () {
+        return '/account/~/extension/~/conferencing';
+    };
+    return Conferencing;
+})(helper.Helper);
+exports.Conferencing = Conferencing;
+function $get(context) {
+    return context.createSingleton('Conferencing', function () {
+        return new Conferencing(context);
+    });
+}
+exports.$get = $get;
+
+
+/***/ },
 /* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -3184,10 +3169,9 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
+var helper = __webpack_require__(11);
 var Country = (function (_super) {
     __extends(Country, _super);
     function Country() {
@@ -3215,12 +3199,11 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var validator = __webpack_require__(20);
-var extension = __webpack_require__(25);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
+var extension = __webpack_require__(24);
 var deviceModel = __webpack_require__(30);
 var Device = (function (_super) {
     __extends(Device, _super);
@@ -3291,10 +3274,9 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
+var helper = __webpack_require__(11);
 var DeviceModel = (function (_super) {
     __extends(DeviceModel, _super);
     function DeviceModel() {
@@ -3325,11 +3307,10 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var list = __webpack_require__(13);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var ForwardingNumber = (function (_super) {
     __extends(ForwardingNumber, _super);
     function ForwardingNumber(context) {
@@ -3384,10 +3365,9 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
+var helper = __webpack_require__(11);
 var Language = (function (_super) {
     __extends(Language, _super);
     function Language() {
@@ -3415,11 +3395,10 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var list = __webpack_require__(13);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var state = __webpack_require__(34);
 var Location = (function (_super) {
     __extends(Location, _super);
@@ -3490,11 +3469,10 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var list = __webpack_require__(13);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
 var country = __webpack_require__(28);
 var State = (function (_super) {
     __extends(State, _super);
@@ -3539,15 +3517,14 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var list = __webpack_require__(13);
-var validator = __webpack_require__(20);
-var subscription = __webpack_require__(19);
-var platform = __webpack_require__(15);
-var contact = __webpack_require__(26);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var validator = __webpack_require__(19);
+var subscription = __webpack_require__(18);
+var platform = __webpack_require__(14);
+var contact = __webpack_require__(25);
 var Message = (function (_super) {
     __extends(Message, _super);
     function Message(context) {
@@ -3707,12 +3684,11 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var list = __webpack_require__(13);
-var extension = __webpack_require__(25);
+var helper = __webpack_require__(11);
+var list = __webpack_require__(12);
+var extension = __webpack_require__(24);
 var PhoneNumber = (function (_super) {
     __extends(PhoneNumber, _super);
     function PhoneNumber(context) {
@@ -3795,11 +3771,10 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
-var validator = __webpack_require__(20);
+var helper = __webpack_require__(11);
+var validator = __webpack_require__(19);
 var Ringout = (function (_super) {
     __extends(Ringout, _super);
     function Ringout(context) {
@@ -3851,10 +3826,9 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
+var helper = __webpack_require__(11);
 var Service = (function (_super) {
     __extends(Service, _super);
     function Service() {
@@ -3916,10 +3890,9 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
+var helper = __webpack_require__(11);
 var ShippingMethod = (function (_super) {
     __extends(ShippingMethod, _super);
     function ShippingMethod() {
@@ -3950,10 +3923,9 @@ exports.$get = $get;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var helper = __webpack_require__(3);
+var helper = __webpack_require__(11);
 var Timezone = (function (_super) {
     __extends(Timezone, _super);
     function Timezone() {

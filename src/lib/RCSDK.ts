@@ -48,7 +48,7 @@ import pubnub = require('pubnub');
 
 class RCSDK {
 
-    public static version = '1.3.0';
+    public static version = '1.3.2';
 
     public static url = {
         sandbox: 'https://platform.devtest.ringcentral.com',
@@ -59,7 +59,7 @@ class RCSDK {
         localStorage: (typeof(localStorage) !== 'undefined'
             ? localStorage
             : require('dom-' + 'storage')), // Node only
-        Promise: typeof(Promise) !== 'undefined' ? Promise : promise.Promise,
+        Promise: typeof(Promise) !== 'undefined' ? Promise : (promise.Promise || promise),
         PUBNUB: pubnub,
         XHR: () => {
             try { return new XMLHttpRequest(); } catch (e) {}

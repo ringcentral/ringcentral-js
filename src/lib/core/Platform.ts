@@ -1,9 +1,7 @@
 /// <reference path="../../typings/externals.d.ts" />
 
-declare
-class Buffer {
+declare class Buffer {
     constructor(str:string, encoding?:string);
-
     toString(encoding:string):string;
 }
 
@@ -152,14 +150,14 @@ export class Platform extends observable.Observable<Platform> {
         options = options || <any>{};
 
         return this.apiUrl('/restapi/oauth/authorize?' + this.utils.queryStringify({
-            'response_type': 'code',
-            'redirect_uri': options.redirectUri || '',
-            'client_id': this.getCredentials().key,
-            'state': options.state || '',
-            'brand_id': options.brandId || '',
-            'display': options.display || '',
-            'prompt': options.prompt || ''
-        }), {addServer: true})
+                'response_type': 'code',
+                'redirect_uri': options.redirectUri || '',
+                'client_id': this.getCredentials().key,
+                'state': options.state || '',
+                'brand_id': options.brandId || '',
+                'display': options.display || '',
+                'prompt': options.prompt || ''
+            }), {addServer: true})
 
     }
 
