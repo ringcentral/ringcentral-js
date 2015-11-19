@@ -24,7 +24,7 @@ require("regenerator/runtime");
 
 export default class SDK {
 
-    static version = '2.0.0';
+    static version = '2.0.1';
 
     static server = {
         sandbox: 'https://platform.devtest.ringcentral.com',

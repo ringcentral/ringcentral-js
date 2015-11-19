@@ -142,7 +142,7 @@ __webpack_require__(26);
 var SDK = (function () {
     _createClass(SDK, null, [{
         key: 'version',
-        value: '2.0.0',
+        value: '2.0.1',
         enumerable: true
     }, {
         key: 'server',
@@ -1993,7 +1993,7 @@ module.exports = function() { throw new Error("define cannot be used indirect");
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(module) {// Version: 3.7.14
+/* WEBPACK VAR INJECTION */(function(module) {// Version: 3.7.16
 /* =-====================================================================-= */
 /* =-====================================================================-= */
 /* =-=========================     JSON     =============================-= */
@@ -2144,6 +2144,13 @@ module.exports = function() { throw new Error("define cannot be used indirect");
         JSON['parse'] = function (text) {return eval('('+text+')')};
     }
 }());
+/* =-====================================================================-= */
+/* =-====================================================================-= */
+/* =-=========================     UTIL     =============================-= */
+/* =-====================================================================-= */
+/* =-====================================================================-= */
+
+window['PUBNUB'] || (function() {
 var NOW             = 1
 ,   READY           = false
 ,   READY_BUFFER    = []
@@ -2157,7 +2164,7 @@ var NOW             = 1
 ,   PARAMSBIT       = '&'
 ,   PRESENCE_HB_THRESHOLD = 5
 ,   PRESENCE_HB_DEFAULT  = 30
-,   SDK_VER         = '3.7.14'
+,   SDK_VER         = '3.7.16'
 ,   REPL            = /{([\w\-]+)}/g;
 
 /**
@@ -2716,14 +2723,11 @@ function PN_API(setup) {
             ,   callback = callback || function(){}
             ,   err      = error    || function(){}
             ,   url
+            ,   params
             ,   jsonp  = jsonp_cb();
-
-
 
             // Prevent Leaving a Presence Channel
             if (channel.indexOf(PRESENCE_SUFFIX) > 0) return true;
-
-
 
 
             if (COMPATIBLE_35) {
@@ -2773,6 +2777,8 @@ function PN_API(setup) {
 
             var data   = { 'uuid' : UUID, 'auth' : auth_key || AUTH_KEY }
             ,   origin = nextorigin(ORIGIN)
+            ,   url
+            ,   params
             ,   callback = callback || function(){}
             ,   err      = error    || function(){}
             ,   jsonp  = jsonp_cb();
@@ -2793,21 +2799,33 @@ function PN_API(setup) {
 
             if (USE_INSTANCEID) data['instanceid'] = INSTANCEID;
 
+            url = [
+                    origin, 'v2', 'presence', 'sub_key',
+                    SUBSCRIBE_KEY, 'channel', encode(','), 'leave'
+            ];
+
+            params = _get_url_params(data);
+
+            if (sendBeacon) {
+                url_string = build_url(url, params);
+                if (sendBeacon(url_string)) {
+                    callback && callback({"status": 200, "action": "leave", "message": "OK", "service": "Presence"});
+                    return true;
+                }
+            }
+
             xdr({
                 blocking : blocking || SSL,
                 timeout  : 5000,
                 callback : jsonp,
-                data     : _get_url_params(data),
+                data     : params,
                 success  : function(response) {
                     _invoke_callback(response, callback, err);
                 },
                 fail     : function(response) {
                     _invoke_error(response, err);
                 },
-                url      : [
-                    origin, 'v2', 'presence', 'sub_key',
-                    SUBSCRIBE_KEY, 'channel', encode(','), 'leave'
-                ]
+                url      : url
             });
             return true;
         },
@@ -3040,11 +3058,21 @@ function PN_API(setup) {
                     var messages = response[0];
                     var decrypted_messages = [];
                     for (var a = 0; a < messages.length; a++) {
-                        var new_message = decrypt(messages[a],cipher_key);
-                        try {
-                            decrypted_messages['push'](JSON['parse'](new_message));
-                        } catch (e) {
-                            decrypted_messages['push']((new_message));
+                        if (include_token) {
+                            var new_message = decrypt(messages[a]['message'],cipher_key);
+                            var timetoken = messages[a]['timetoken'];
+                            try {
+                                decrypted_messages['push']({"message" : JSON['parse'](new_message), "timetoken" : timetoken});
+                            } catch (e) {
+                                decrypted_messages['push'](({"message" : new_message, "timetoken" : timetoken}));
+                            }
+                        } else {
+                            var new_message = decrypt(messages[a],cipher_key);
+                            try {
+                                decrypted_messages['push'](JSON['parse'](new_message));
+                            } catch (e) {
+                                decrypted_messages['push']((new_message));
+                            }     
                         }
                     }
                     callback([decrypted_messages, response[1], response[2]]);
@@ -3223,9 +3251,18 @@ function PN_API(setup) {
             ,   err           = args['error']       || function(){};
 
             TIMETOKEN   = 0;
-            //SUB_RESTORE = 1;    REVISIT !!!!
+            SUB_RESTORE = 1;   // REVISIT !!!!
 
             if (channel) {
+
+                // Prepare LeaveChannel(s)
+                var leave_c = map( (
+                    channel.join ? channel.join(',') : ''+channel
+                ).split(','), function(channel) {
+                    if (!CHANNELS[channel]) return;
+                    return channel;
+                } ).join(',');
+
                 // Prepare Channel(s)
                 channel = map( (
                     channel.join ? channel.join(',') : ''+channel
@@ -3235,21 +3272,29 @@ function PN_API(setup) {
                 } ).join(',');
 
                 // Iterate over Channels
-                each( channel.split(','), function(ch) {
-                    var CB_CALLED = true;
+                each(channel.split(','), function(ch) {
                     if (!ch) return;
                     CHANNELS[ch] = 0;
                     if (ch in STATE) delete STATE[ch];
-                    if (READY) {
-                        CB_CALLED = SELF['LEAVE']( ch, 0 , auth_key, callback, err);
-                    }
-                    if (!CB_CALLED) callback({action : "leave"});
-
-                    
                 } );
+
+                var CB_CALLED = true;
+                if (READY) {
+                    CB_CALLED = SELF['LEAVE'](leave_c, 0 , auth_key, callback, err);
+                }
+                if (!CB_CALLED) callback({action : "leave"});
             }
 
             if (channel_group) {
+
+                // Prepare channel group(s)
+                var leave_gc = map( (
+                    channel_group.join ? channel_group.join(',') : ''+channel_group
+                ).split(','), function(channel_group) {
+                    if (!CHANNEL_GROUPS[channel_group]) return;
+                    return channel_group;
+                } ).join(',');
+
                 // Prepare channel group(s)
                 channel_group = map( (
                     channel_group.join ? channel_group.join(',') : ''+channel_group
@@ -3260,16 +3305,16 @@ function PN_API(setup) {
 
                 // Iterate over channel groups
                 each( channel_group.split(','), function(chg) {
-                    var CB_CALLED = true;
                     if (!chg) return;
                     CHANNEL_GROUPS[chg] = 0;
                     if (chg in STATE) delete STATE[chg];
-                    if (READY) {
-                        CB_CALLED = SELF['LEAVE_GROUP']( chg, 0 , auth_key, callback, err);
-                    }
-                    if (!CB_CALLED) callback({action : "leave"});
-
                 } );
+
+                var CB_CALLED = true;
+                if (READY) {
+                    CB_CALLED = SELF['LEAVE_GROUP'](leave_gc, 0 , auth_key, callback, err);
+                }
+                if (!CB_CALLED) callback({action : "leave"});
             }
 
             // Reset Connection if Count Less
@@ -3669,6 +3714,7 @@ function PN_API(setup) {
         */
         'here_now' : function( args, callback ) {
             var callback = args['callback'] || callback
+            ,   debug    = args['debug']
             ,   err      = args['error']    || function(){}
             ,   auth_key = args['auth_key'] || AUTH_KEY
             ,   channel  = args['channel']
@@ -3710,6 +3756,7 @@ function PN_API(setup) {
                 fail     : function(response) {
                     _invoke_error(response, err);
                 },
+                debug    : debug,
                 url      : url
             });
         },
@@ -4285,14 +4332,6 @@ function crypto_obj() {
         }
     };
 }
-/* =-====================================================================-= */
-/* =-====================================================================-= */
-/* =-=========================     UTIL     =============================-= */
-/* =-====================================================================-= */
-/* =-====================================================================-= */
-
-window['PUBNUB'] || (function() {
-
 /**
  * UTIL LOCALS
  */
@@ -4300,7 +4339,7 @@ window['PUBNUB'] || (function() {
 var SWF             = 'https://pubnub.a.ssl.fastly.net/pubnub.swf'
 ,   ASYNC           = 'async'
 ,   UA              = navigator.userAgent
-,   PNSDK           = 'PubNub-JS-' + 'Web' + '/' + '3.7.14'
+,   PNSDK           = 'PubNub-JS-' + 'Web' + '/' + '3.7.16'
 ,   XORIGN          = UA.indexOf('MSIE 6') == -1;
 
 /**
@@ -7762,8 +7801,9 @@ module.exports = exports['default'];
 
   var hasOwn = Object.prototype.hasOwnProperty;
   var undefined; // More compressible than void 0.
-  var iteratorSymbol =
-    typeof Symbol === "function" && Symbol.iterator || "@@iterator";
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
 
   var inModule = typeof module === "object";
   var runtime = global.regeneratorRuntime;
@@ -7833,7 +7873,7 @@ module.exports = exports['default'];
   var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype;
   GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
   GeneratorFunctionPrototype.constructor = GeneratorFunction;
-  GeneratorFunction.displayName = "GeneratorFunction";
+  GeneratorFunctionPrototype[toStringTagSymbol] = GeneratorFunction.displayName = "GeneratorFunction";
 
   // Helper for defining the .next, .throw, and .return methods of the
   // Iterator interface in terms of a single ._invoke method.
@@ -7860,6 +7900,9 @@ module.exports = exports['default'];
       Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
     } else {
       genFun.__proto__ = GeneratorFunctionPrototype;
+      if (!(toStringTagSymbol in genFun)) {
+        genFun[toStringTagSymbol] = "GeneratorFunction";
+      }
     }
     genFun.prototype = Object.create(Gp);
     return genFun;
@@ -7879,46 +7922,54 @@ module.exports = exports['default'];
   }
 
   function AsyncIterator(generator) {
-    // This invoke function is written in a style that assumes some
-    // calling function (or Promise) will handle exceptions.
-    function invoke(method, arg) {
-      var result = generator[method](arg);
-      var value = result.value;
-      return value instanceof AwaitArgument
-        ? Promise.resolve(value.arg).then(invokeNext, invokeThrow)
-        : Promise.resolve(value).then(function(unwrapped) {
-            // When a yielded Promise is resolved, its final value becomes
-            // the .value of the Promise<{value,done}> result for the
-            // current iteration. If the Promise is rejected, however, the
-            // result for this iteration will be rejected with the same
-            // reason. Note that rejections of yielded Promises are not
-            // thrown back into the generator function, as is the case
-            // when an awaited Promise is rejected. This difference in
-            // behavior between yield and await is important, because it
-            // allows the consumer to decide what to do with the yielded
-            // rejection (swallow it and continue, manually .throw it back
-            // into the generator, abandon iteration, whatever). With
-            // await, by contrast, there is no opportunity to examine the
-            // rejection reason outside the generator function, so the
-            // only option is to throw it from the await expression, and
-            // let the generator function handle the exception.
-            result.value = unwrapped;
-            return result;
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value instanceof AwaitArgument) {
+          return Promise.resolve(value.arg).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
           });
+        }
+
+        return Promise.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration. If the Promise is rejected, however, the
+          // result for this iteration will be rejected with the same
+          // reason. Note that rejections of yielded Promises are not
+          // thrown back into the generator function, as is the case
+          // when an awaited Promise is rejected. This difference in
+          // behavior between yield and await is important, because it
+          // allows the consumer to decide what to do with the yielded
+          // rejection (swallow it and continue, manually .throw it back
+          // into the generator, abandon iteration, whatever). With
+          // await, by contrast, there is no opportunity to examine the
+          // rejection reason outside the generator function, so the
+          // only option is to throw it from the await expression, and
+          // let the generator function handle the exception.
+          result.value = unwrapped;
+          resolve(result);
+        }, reject);
+      }
     }
 
     if (typeof process === "object" && process.domain) {
       invoke = process.domain.bind(invoke);
     }
 
-    var invokeNext = invoke.bind(generator, "next");
-    var invokeThrow = invoke.bind(generator, "throw");
-    var invokeReturn = invoke.bind(generator, "return");
     var previousPromise;
 
     function enqueue(method, arg) {
       function callInvokeWithMethodAndArg() {
-        return invoke(method, arg);
+        return new Promise(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
       }
 
       return previousPromise =
@@ -7939,9 +7990,7 @@ module.exports = exports['default'];
           // Avoid propagating failures to Promises returned by later
           // invocations of the iterator.
           callInvokeWithMethodAndArg
-        ) : new Promise(function (resolve) {
-          resolve(callInvokeWithMethodAndArg());
-        });
+        ) : callInvokeWithMethodAndArg();
     }
 
     // Define the unified helper method that is used to implement .next,
@@ -8115,6 +8164,8 @@ module.exports = exports['default'];
   Gp[iteratorSymbol] = function() {
     return this;
   };
+
+  Gp[toStringTagSymbol] = "Generator";
 
   Gp.toString = function() {
     return "[object Generator]";
