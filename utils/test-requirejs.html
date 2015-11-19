@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RingCentral JS SDK Tests</title>
+    <link rel="stylesheet" href="../bower_components/mocha/mocha.css">
+</head>
+<body>
+
+<div id="mocha"></div>
+
+<script type="text/javascript" src="../bower_components/requirejs/require.js"></script>
+<script type="text/javascript">
+
+    require.config({
+        paths: {
+            'ringcentral': '../build/ringcentral',
+            'ringcentral-tests': '../build/tests/ringcentral-tests',
+            'pubnub': '../bower_components/pubnub/web/pubnub',
+            'fetch': '../bower_components/fetch/fetch',
+            'es6-promise': '../bower_components/es6-promise/promise',
+            'mocha': '../bower_components/mocha/mocha',
+            'chai': '../bower_components/chai/chai',
+            'sinon-chai': '../bower_components/sinon-chai/lib/sinon-chai',
+            'sinon': '../bower_components/sinonjs/sinon'
+        },
+        shim: {
+            mocha: {exports: 'mocha'}
+        }
+    });
+
+    // force polyfills
+    window.Promise = null;
+    window.fetch = null;
+
+    require(['ringcentral-tests', 'mocha', 'es6-promise', 'fetch'], function(tests, mocha, Promise) {
+
+        Promise.polyfill();
+
+        mocha.run();
+
+    });
+
+</script>
+
+</body>
+</html>

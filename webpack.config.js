@@ -1,129 +1,87 @@
-var webpack = require('webpack'),
-    path = require('path'),
-    glob = require('glob'),
-    libExternals = {
-        'es6-promise': getExternal('Promise', 'es6-promise'),
-        'pubnub': getExternal('PUBNUB', 'pubnub'),
-        'xhr2': getExternal('XMLHttpRequest', 'xhr2', 'exports'), // exports will give an empty var in AMD
-        'dom-storage': getExternal('localStorage', 'dom-storage', 'exports')
-    },
-    testExternals = {
-        '../lib/RCSDK': getExternal('RCSDK', '../rc-sdk'),
-        'soap': getExternal('soap'),
-        'chai': getExternal('chai'),
-        'sinon': getExternal('sinon'),
-        'sinon-chai': getExternal('sinonChai', 'sinon-chai'),
-        'mocha': getExternal('mocha')
-    };
+(function() {
 
-function getExternal(root, cjs, amd) {
-    if (!cjs) cjs = root;
-    return {
-        amd: amd || cjs,
-        commonjs: cjs,
-        commonjs2: cjs,
-        root: root
-    };
-}
+    var webpack = require('webpack'),
+        externals = [
+            {'resumer': createExternal('resumer')},
+            {'mocha': createExternal('mocha')},
+            {'chai': createExternal('chai', 'chai', 'chai')},
+            {'sinon': createExternal('sinon', 'sinon', 'sinon')},
+            {'sinon-chai': createExternal('sinon-chai', 'sinon-chai')}
+        ],
+        bundleExternals = [
+            {'pubnub': createExternal('pubnub', 'pubnub')},
+            {'es6-promise': createExternal('es6-promise')},
+            {'node-fetch': createExternal('node-fetch')}
+        ];
 
-function createConfig(config) {
+    function createExternal(cjs, amd, root) {
+        var ext = {};
+        if (cjs) ext['commonjs'] = cjs;
+        if (cjs) ext['commonjs2'] = cjs;
+        if (amd) ext['amd'] = amd;
+        if (root) ext['root'] = root;
+        return ext;
+    }
 
-    return {
+    function extendConfig(conf) {
 
-        debug: true,
-        devtool: '#source-map',
-
-        externals: config.externals,
-        entry: config.entry,
-
-        output: {
-            filename: './build/[name]',
-            libraryTarget: 'umd', //TODO RCSDK.noConflict()
-            library: 'RCSDK',
-            sourcePrefix: ''
-        },
-
-        resolve: {
-            extensions: ['', '.ts', '.js', '.json'],
-            alias: {
-                'es6-promise': path.resolve('./bower_components/es6-promise-polyfill/promise.js'),
-                'pubnub': path.resolve('./bower_components/pubnub/web/pubnub.js') // smaller size than NPM version
-            }
-        },
-
-        module: {
-            loaders: [
-                {
-                    test: /\.ts$/,
-                    loader: 'ts-loader?sourceMap&target=ES5' //TODO Use typescript-loader and tsconfig.json
+        var config = {
+            context: __dirname,
+            debug: true,
+            devtool: '#source-map',
+            output: {
+                library: ['RingCentral', 'SDK'],
+                libraryTarget: 'umd',
+                path: __dirname + '/build',
+                publicPath: '/build/',
+                sourcePrefix: '',
+                filename: "[name].js",
+                chunkFilename: "[id].chunk.js"
+            },
+            resolve: {
+                extensions: ['', '.js'],
+                alias: {
+                    'pubnub': require.resolve('./bower_components/pubnub/web/pubnub.js'),
+                    'node-fetch': require.resolve('./bower_components/fetch/fetch.js'),
+                    'es6-promise': require.resolve('./bower_components/es6-promise/promise.js')
                 }
-            ]
-        },
+            },
+            module: {
+                loaders: [
+                    {test: /\.js$/, loaders: ['babel-loader?cacheDirectory'], exclude: /node_modules|bower_components/} //TODO: &optional[]=runtime
+                ]
+            },
+            node: {
+                Buffer: false,
+                process: false,
+                timers: false
+            }
+        };
 
-        node: {
-            buffer: false
-        },
+        Object.keys(conf).forEach(function(key) {
+            config[key] = conf[key];
+        });
 
-        plugins: [],
+        return config;
 
-        watchDelay: 200
+    }
 
-    };
+    module.exports = [
+        extendConfig({
+            entry: {'ringcentral': ['./src/SDK.js']},
+            externals: externals.concat(bundleExternals)
+        }),
+        extendConfig({
+            entry: {'ringcentral-bundle': ['./src/SDK.js']},
+            externals: externals
+        }),
+        extendConfig({
+            entry: {'tests/ringcentral-tests': ['./src/test/glob.js']},
+            externals: externals.concat(bundleExternals).concat([
+                {'../SDK': createExternal('../ringcentral', '../ringcentral', ['RingCentral', 'SDK'])},
+                {'./SDK': createExternal('../ringcentral', '../ringcentral', ['RingCentral', 'SDK'])}
+            ])
+        })
+    ];
 
-}
-
-module.exports = [
-    createConfig({
-        entry: {
-            'rc-sdk.js': ['./src/lib/RCSDK.ts'],
-            'tests/specs.js': glob
-                .sync('src/lib/**/*-spec.ts')
-                .sort(function(a, b) { return b.localeCompare(a); })
-                .concat('src/test/mocha.ts') // this one will be exported
-                .map(function(f) {
-                    return './' + f;
-                }),
-            'tests/specs-api.js': glob
-                .sync('src/test/specs-api/**/*-spec.ts')
-                .sort(function(a, b) { return b.localeCompare(a); })
-                .concat('src/test/mocha-api.ts') // this one will be exported
-                .map(function(f) {
-                    return './' + f;
-                })
-        },
-        externals: (function() {
-
-            var externals = {};
-
-            Object.keys(libExternals).forEach(function(key) {
-                externals[key] = libExternals[key];
-            });
-
-            Object.keys(testExternals).forEach(function(key) {
-                externals[key] = testExternals[key];
-            });
-
-            return externals;
-
-        })()
-    }),
-    createConfig({
-        entry: {
-            'rc-sdk-bundle.js': './src/lib/RCSDK.ts'
-        },
-        externals: (function() {
-
-            var externals = {};
-
-            Object.keys(libExternals).forEach(function(key) {
-                if (['es6-promise', 'pubnub'].indexOf(key) == -1) externals[key] = libExternals[key];
-            });
-
-            return externals;
-
-        })()
-    })
-];
-
-//console.log('Webpack Config');
-//console.log(JSON.stringify(module.exports, null, 2));
+})();

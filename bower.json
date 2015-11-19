@@ -1,27 +1,29 @@
 {
-  "version": "1.3.2",
-  "name": "rcsdk",
-  "main": "./build/rc-sdk.min.js",
+  "version": "2.0.0",
+  "name": "ringcentral",
+  "main": "./build/ringcentral.min.js",
   "ignore": [
     "**/*",
     "!README.md",
-    "!build/rc-sdk.js",
-    "!build/rc-sdk.js.map",
-    "!build/rc-sdk.min.js",
-    "!build/rc-sdk.min.js.map",
-    "!build/rc-sdk-bundle.js",
-    "!build/rc-sdk-bundle.js.map",
-    "!build/rc-sdk-bundle.min.js",
-    "!build/rc-sd-bundlek.min.js.map",
+    "!build/ringcentral.js",
+    "!build/ringcentral.js.map",
+    "!build/ringcentral.min.js",
+    "!build/ringcentral.min.js.map",
     "!demo/**/*",
     "!docs/**/*",
     "!src/**/*"
   ],
   "dependencies": {
-    "pubnub": "^3.7.11",
-    "es6-promise-polyfill": "*"
+    "es6-promise": "~2.2.0",
+    "fetch": "#master",
+    "pubnub": "~3.7.13"
   },
   "devDependencies": {
+    "chai": "~3.2.0",
+    "sinon-chai": "~2.8.0",
+    "mocha": "~2.2.5",
+    "sinonjs": "~1.14.1",
+    "requirejs": "~2.1.20"
   },
   "private": false,
   "license": "MIT",
@@ -36,6 +38,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://gitgub.com/ringcentral/js-sdk.git"
+    "url": "git://gitgub.com/ringcentral/ringcentral-js.git"
   }
 }

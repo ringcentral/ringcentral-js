@@ -30,103 +30,48 @@
                 document.getElementById('login').style.display = 'none';
                 document.getElementById('extension').style.display = 'block';
 
-                var activeCalls = 0,
-                        logDiv = document.getElementById('extension-presence-log'),
-                        callDiv = document.getElementById('extension-call-log');
+                var subscription1 = rcsdk
+                        .createCachedSubscription('subscription')
+                        .restore(['/account/~/extension/~/presence']);
 
-                function getExtension(cb) {
+                console.log('Cached subscription data', subscription1.subscription(), 'alive', subscription1.alive());
 
-                    platform.get('/account/~/extension/~')
-                            .then(function(ajax) {
-                                cb(ajax.json());
-                            })
-                            .catch(function(e) {
-                                console.error(e);
-                            });
-
-                }
-
-                function getPresence(cb) {
-
-                    platform.get('/account/~/extension/~/presence', {query: {detailedTelephonyState: true}})
-                            .then(function(ajax) {
-                                cb(ajax.json());
-                            }).catch(function(e) {
-                                console.error(e);
-                            });
-
-                }
-
-                function getCallLog(cb) {
-
-                    platform.get('/account/~/extension/~/call-log')
-                            .then(function(data) {
-                                cb(data.json().records);
-                            })
-                            .catch(function(e) {
-                                console.error(e);
-                            });
-
-                }
-
-                function getPresenceSubscription(event, cb) {
-
-                    var subscription = rcsdk.createSubscription();
-
-                    subscription.on(subscription.events.notification, function(msg) {
-                        cb(msg.body);
-                    });
-
-                    subscription
-                            .register({
-                                events: [event]
-                            })
-                            .then(function(ajax) {
-                                console.log('Subscribed', ajax);
-                            })
-                            .catch(function(e) {
-                                console.error(e);
-                            });
-
-                }
-
-                function presenceUpdate(presence) {
-
-                    var activeCall = presence.activeCalls && presence.activeCalls.length ? presence.activeCalls[presence.activeCalls.length - 1] : null;
-
-                    logDiv.innerHTML += '<hr><div style="font-size: 11px">' + JSON.stringify(presence) + '</div>';
-                    if (activeCall) logDiv.innerHTML += '<div><strong>' + activeCall.direction + ' call from ' + activeCall.from + ' to ' + activeCall.to + ' is ' + presence.telephonyStatus + '</strong></div>';
-
-                    activeCalls = (presence.telephonyStatus == 'NoCall' || !activeCall) ? 0 : presence.activeCalls.length;
-
-                    getCallLog(function(records) {
-
-                        var html = [];
-                        records.forEach(function(call) {
-                            html.push('<div>' + call.direction + ' ' + call.type + ' ' + call.action + ' - From ' + call.from.phoneNumber + ' to ' + call.to.phoneNumber + ' - ' + call.result + '</div>');
-                        });
-
-                        callDiv.innerHTML = html.join('');
-
-                    });
-
-                }
-
-                getExtension(function(extension) {
-
-                    logDiv.innerHTML = '';
-                    callDiv.innerHTML = '';
-                    document.getElementById('extension-info').innerHTML = '<strong>' + extension.id + ' ' + extension.extensionNumber + ' ' + extension.name + '</strong>';
-
-                    getPresence(function(presence) {
-
-                        presenceUpdate(presence);
-                        getPresenceSubscription('/account/~/extension/~/presence?detailedTelephonyState=true', presenceUpdate);
-
-                    });
-
+                subscription1.on(subscription1.events.subscribeSuccess, function() {
+                    console.log('Subscribed');
                 });
 
+                subscription1.on(subscription1.events.renewSuccess, function() {
+                    console.log('Renewed');
+                });
+
+                subscription1.register()
+                        .then(function(res) {
+
+                            console.log('Registered');
+
+                            var subscription2 = rcsdk.createSubscription();
+
+                            subscription2.setSubscription(subscription1.subscription());
+
+                            return subscription1.renew()
+                                    .then(function() {
+                                        console.log('Renewed first', subscription1.subscription().id);
+                                        return subscription2.renew();
+                                    })
+                                    .then(function(res) {
+                                        console.log('Renewed second', subscription2.subscription().id);
+                                        console.log('IDs match', subscription1.subscription().id == subscription2.subscription().id);
+                                    });
+
+                        })
+                        .catch(function(e) {
+                            console.error(e);
+                        });
+
+            }
+
+            function presenceUpdate() {
+                console.log(arguments);
             }
 
             function showLogin() {
@@ -144,10 +89,10 @@
                             })
                             .then(showExtension).catch(function(e) {
 
-                                alert(e.message || e.description || 'Server cannot authorize user');
-                                console.error(e.stack);
+                        alert(e.message || e.description || 'Server cannot authorize user');
+                        console.error(e.stack);
 
-                            });
+                    });
 
                 });
 
@@ -167,7 +112,7 @@
             document.getElementById('login-password').value = localStorage.getItem('ringcentral-demo-login-password');
             document.getElementById('login-extension').value = localStorage.getItem('ringcentral-demo-login-extension');
 
-            platform.loggedIn().then(function(res){
+            platform.loggedIn().then(function(res) {
                 if (res) {
                     showExtension();
                 } else {

@@ -3,65 +3,47 @@
     /** @type {gulp.Gulp} */
     var gulp = require('gulp'),
         gutil = require('gulp-util'),
+        rename = require('gulp-rename'),
         sourcemaps = require('gulp-sourcemaps'),
-        replace = require('gulp-replace'),
-        path = require('path'),
-        sourcemapsDebug = false,
-        webpackConfigure = {
-            useMemoryFs: true,
-            progress: false
-        },
-        webpackFormat = {
-            version: true,
-            timings: true
-        },
-        webpackFailAfter = {
-            errors: true,
-            warnings: true
-        };
+        uglify = require('gulp-uglify'),
+        fs = require('fs'),
+        exec = require('child_process').exec,
+        sourcemapsDebug = true;
 
-    /**
-     * Compiles TypeScript modules into a Webpack bundle (including external dependencies CryptoJS, Promise and PUBNUB)
-     * TODO TypeScript cache
-     * TODO Export definitions
-     */
-    gulp.task('webpack', [], function() {
+    function execute(cmd){
 
-        var webpack = require('gulp-webpack-build');
+        return function(cmd, cb) {
 
-        return gulp.src('./webpack.config.js', {base: path.resolve('./build')})
+            exec(cmd, {cwd: __dirname}, function(e, stdout, stderr) {
 
-            .pipe(webpack.init(webpackConfigure))
-            .pipe(webpack.run())
-            .pipe(webpack.format(webpackFormat))
-            .pipe(webpack.failAfter(webpackFailAfter))
-            .pipe(gulp.dest('./build'));
+                if (e === null) {
+                    gutil.log(stdout);
+                    return cb();
+                }
 
-    });
+                gutil.log(gutil.colors.red('External Command Error'));
+                gutil.log(stdout);
+                gutil.log(e.stack || e);
+                gutil.log(stderr);
 
-    /**
-     * Replaces Webpack stuff in source map files
-     */
-    gulp.task('sourcemap', ['webpack'], function() {
+                cb(e);
+            });
 
-        var replace = require('gulp-replace');
+        }.bind(null, cmd)
 
-        return gulp.src(['./build/rc-sdk.js.map', './build/rc-sdk-bundle.js.map'])
-            .pipe(replace(/webpack:\/\/\//g, ''))
-            .pipe(replace(/(\.\.\/src\/)/g, '.$1'))
-            .pipe(gulp.dest('./build'));
+    }
 
-    });
+    gulp.task('bower', execute('npm run bower'));
+
+    gulp.task('webpack', ['bower'], execute('npm run webpack'));
 
     /**
      * Minifies build and bundle
      */
-    gulp.task('uglify', ['sourcemap'], function() {
+    gulp.task('uglify', ['webpack'], function() {
 
-        var uglify = require('gulp-uglify'),
-            rename = require('gulp-rename');
-
-        return gulp.src(['./build/rc-sdk.js', './build/rc-sdk-bundle.js'])
+        return gulp
+            .src(['./build/ringcentral.js', './build/ringcentral-bundle.js'])
             .pipe(sourcemaps.init({loadMaps: true, debug: sourcemapsDebug}))
 
             .pipe(uglify())
@@ -74,49 +56,34 @@
     });
 
     /**
-     * Propagates version from lib/RCSDK.js to package.json and bower.json
+     * Propagates version number to package.json and bower.json
      */
-    gulp.task('version', ['webpack'], function() {
+    gulp.task('version', ['webpack'], function(cb) {
 
-        return gulp.src(['./bower.json', './package.json'])
-            .pipe(replace(/"version": "[^"]+?"/ig, '"version": "' + require('./build/rc-sdk').version + '"'))
-            .pipe(gulp.dest('.'));
+        var pkg = require('./package.json'),
+            bower = require('./bower.json'),
+            version = require('./build/ringcentral').version;
+
+        pkg.version = version;
+        bower.version = version;
+
+        fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));
+        fs.writeFileSync('./bower.json', JSON.stringify(bower, null, 2));
+
+        gutil.log('Current version is', gutil.colors.magenta(version));
+
+        cb();
 
     });
+
+    /**
+     * Quick Task
+     */
+    gulp.task('quick', ['webpack', 'version']);
 
     /**
      * Default Task
      */
-    gulp.task('default', ['uglify', 'version']);
-
-    /**
-     * Watch Task
-     *
-     * (!) This will not run version and sourcemap, the one must run full build before commit
-     */
-    gulp.task('watch', ['webpack'], function() {
-
-        var webpack = require('gulp-webpack-build');
-
-        gulp.watch('./src/**/*.ts').on('change', function(event) {
-
-            //gutil.log(gutil.template('File <%= file %> was <%= type %>, running tasks', {file: gutil.colors.magenta(event.path), type: event.type}));
-
-            if (event.type === 'changed') {
-
-                gulp.src(event.path, {base: path.resolve('./build')})
-                    .pipe(webpack.closest('webpack.config.js'))
-                    .pipe(webpack.init(webpackConfigure))
-                    .pipe(webpack.watch(function(err, stats) {
-                        gulp.src(this.path, {base: this.base})
-                            .pipe(webpack.proxy(err, stats))
-                            .pipe(webpack.format(webpackFormat))
-                            .pipe(gulp.dest('./build'));
-                    }));
-
-            }
-        });
-
-    });
+    gulp.task('default', ['quick', 'uglify']);
 
 })();
