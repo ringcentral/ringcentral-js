@@ -123,7 +123,7 @@ export default class Platform extends Observable {
      * @param {string} url
      * @return {Object}
      */
-    parseAuthRedirectUrl(url:string) {
+    parseAuthRedirectUrl(url) {
 
         var qs = parseQueryString(url.split('?').reverse()[0]),
             error = qs.error_description || qs.error;

@@ -11,11 +11,11 @@ export default class PubnubMock extends Observable {
 
     ready() {}
 
-    subscribe(options:PUBNUBSubscribeOptions) {
+    subscribe(options) {
         this.on('message-' + options.channel, options.message);
     }
 
-    unsubscribe(options:PUBNUBUnsubscribeOptions) {
+    unsubscribe(options) {
         this.off('message-' + options.channel);
     }
 

@@ -21,7 +21,7 @@ export default class Mock {
         return this._method;
     }
 
-    test(request:Request) {
+    test(request) {
 
         return request.url.indexOf(this._path) > -1 &&
                request.method.toUpperCase() == this._method;

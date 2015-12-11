@@ -125,7 +125,7 @@ export default class ApiResponse {
 
             // Step 3. Parse all other parts
 
-            this._multipart = parts.map((part:string, i) => {
+            this._multipart = parts.map((part, i) => {
 
                 var status = statusInfo.response[i].status;
 
@@ -182,7 +182,7 @@ export default class ApiResponse {
 
         (headersText || '')
             .split('\n')
-            .forEach((header:string) => {
+            .forEach((header) => {
 
                 var split = header.trim().split(ApiResponse._headerSeparator),
                     key = split.shift().trim(),

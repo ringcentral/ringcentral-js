@@ -1,9 +1,9 @@
 export default class Auth {
 
-    static refreshHandicapMs:number = 60 * 1000; // 1 minute
+    static refreshHandicapMs = 60 * 1000; // 1 minute
     static forcedTokenType = 'forced';
 
-    constructor(cache, cacheId:string) {
+    constructor(cache, cacheId) {
 
         /** @type {Cache} */
         this._cache = cache;

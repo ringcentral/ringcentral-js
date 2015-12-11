@@ -68,15 +68,15 @@
 
     module.exports = [
         extendConfig({
-            entry: {'ringcentral': ['./src/SDK.js']},
+            entry: {'ringcentral': ['babel-regenerator-runtime', './src/SDK.js']},
             externals: externals.concat(bundleExternals)
         }),
         extendConfig({
-            entry: {'ringcentral-bundle': ['./src/SDK.js']},
+            entry: {'ringcentral-bundle': ['babel-regenerator-runtime', './src/SDK.js']},
             externals: externals
         }),
         extendConfig({
-            entry: {'tests/ringcentral-tests': ['./src/test/glob.js']},
+            entry: {'tests/ringcentral-tests': ['babel-regenerator-runtime', './src/test/glob.js']},
             externals: externals.concat(bundleExternals).concat([
                 {'../SDK': createExternal('../ringcentral', '../ringcentral', ['RingCentral', 'SDK'])},
                 {'./SDK': createExternal('../ringcentral', '../ringcentral', ['RingCentral', 'SDK'])}
