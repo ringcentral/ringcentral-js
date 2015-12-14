@@ -1,6 +1,7 @@
 (function() {
 
     var webpack = require('webpack'),
+        path = require('path'),
         externals = [
             {'resumer': createExternal('resumer')},
             {'mocha': createExternal('mocha')},
@@ -48,7 +49,7 @@
             },
             module: {
                 loaders: [
-                    {test: /\.js$/, loaders: ['babel-loader?cacheDirectory'], exclude: /node_modules|bower_components/} //TODO: &optional[]=runtime
+                    {test: /\.js$/, loader: 'babel?cacheDirectory', include: path.join(__dirname, 'src')}
                 ]
             },
             node: {

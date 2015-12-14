@@ -728,11 +728,7 @@ module.exports = __webpack_require__(2);
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Utils = __webpack_require__(3);
 
@@ -837,42 +833,33 @@ var SDK = (function () {
      * @return {Platform}
      */
 
-    _createClass(SDK, [{
-        key: 'platform',
-        value: function platform() {
-            return this._platform;
-        }
+    SDK.prototype.platform = function platform() {
+        return this._platform;
+    };
 
-        /**
-         * @return {Subscription}
-         */
+    /**
+     * @return {Subscription}
+     */
 
-    }, {
-        key: 'createSubscription',
-        value: function createSubscription() {
-            return new _Subscription2.default(this._pubnubFactory, this._platform);
-        }
+    SDK.prototype.createSubscription = function createSubscription() {
+        return new _Subscription2.default(this._pubnubFactory, this._platform);
+    };
 
-        /**
-         * @return {CachedSubscription}
-         */
+    /**
+     * @return {CachedSubscription}
+     */
 
-    }, {
-        key: 'createCachedSubscription',
-        value: function createCachedSubscription(cacheKey) {
-            return new _CachedSubscription2.default(this._pubnubFactory, this._platform, this._cache, cacheKey);
-        }
+    SDK.prototype.createCachedSubscription = function createCachedSubscription(cacheKey) {
+        return new _CachedSubscription2.default(this._pubnubFactory, this._platform, this._cache, cacheKey);
+    };
 
-        /**
-         * @return {Cache}
-         */
+    /**
+     * @return {Cache}
+     */
 
-    }, {
-        key: 'cache',
-        value: function cache() {
-            return this._cache;
-        }
-    }]);
+    SDK.prototype.cache = function cache() {
+        return this._cache;
+    };
 
     return SDK;
 })();
@@ -917,9 +904,7 @@ exports.default = SDK;
 
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports.queryStringify = queryStringify;
 exports.parseQueryString = parseQueryString;
 exports.isFunction = isFunction;
@@ -1064,9 +1049,7 @@ function delay(timeout) {
 
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+exports.__esModule = true;
 exports.localStorage = exports.PUBNUB = exports.Headers = exports.Response = exports.Request = exports.fetch = exports.Promise = undefined;
 
 var _es6Promise = __webpack_require__(5);
@@ -1120,11 +1103,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1136,52 +1115,44 @@ var Cache = (function () {
         this._storage = storage;
     }
 
-    _createClass(Cache, [{
-        key: 'setPrefix',
-        value: function setPrefix(prefix) {
-            this._prefix = prefix || Cache.defaultPrefix;
-            return this;
-        }
-    }, {
-        key: 'setItem',
-        value: function setItem(key, data) {
-            this._storage[this._prefixKey(key)] = JSON.stringify(data);
-            return this;
-        }
-    }, {
-        key: 'removeItem',
-        value: function removeItem(key) {
-            delete this._storage[this._prefixKey(key)];
-            return this;
-        }
-    }, {
-        key: 'getItem',
-        value: function getItem(key) {
-            var item = this._storage[this._prefixKey(key)];
-            if (!item) return null;
-            return JSON.parse(item);
-        }
-    }, {
-        key: 'clean',
-        value: function clean() {
+    Cache.prototype.setPrefix = function setPrefix(prefix) {
+        this._prefix = prefix || Cache.defaultPrefix;
+        return this;
+    };
 
-            for (var key in this._storage) {
+    Cache.prototype.setItem = function setItem(key, data) {
+        this._storage[this._prefixKey(key)] = JSON.stringify(data);
+        return this;
+    };
 
-                if (!this._storage.hasOwnProperty(key)) continue;
+    Cache.prototype.removeItem = function removeItem(key) {
+        delete this._storage[this._prefixKey(key)];
+        return this;
+    };
 
-                if (key.indexOf(this._prefix) === 0) {
-                    delete this._storage[key];
-                }
+    Cache.prototype.getItem = function getItem(key) {
+        var item = this._storage[this._prefixKey(key)];
+        if (!item) return null;
+        return JSON.parse(item);
+    };
+
+    Cache.prototype.clean = function clean() {
+
+        for (var key in this._storage) {
+
+            if (!this._storage.hasOwnProperty(key)) continue;
+
+            if (key.indexOf(this._prefix) === 0) {
+                delete this._storage[key];
             }
+        }
 
-            return this;
-        }
-    }, {
-        key: '_prefixKey',
-        value: function _prefixKey(key) {
-            return this._prefix + key;
-        }
-    }]);
+        return this;
+    };
+
+    Cache.prototype._prefixKey = function _prefixKey(key) {
+        return this._prefix + key;
+    };
 
     return Cache;
 })();
@@ -1195,11 +1166,7 @@ exports.default = Cache;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1210,77 +1177,71 @@ var Observable = (function () {
         this.off();
     }
 
-    _createClass(Observable, [{
-        key: 'hasListeners',
-        value: function hasListeners(event) {
-            return event in this._listeners;
+    Observable.prototype.hasListeners = function hasListeners(event) {
+        return event in this._listeners;
+    };
+
+    Observable.prototype.on = function on(events, callback) {
+        var _this = this;
+
+        if (typeof events == 'string') events = [events];
+        if (!events) throw new Error('No events to subscribe to');
+        if (typeof callback !== 'function') throw new Error('Callback must be a function');
+
+        events.forEach(function (event) {
+
+            if (!_this.hasListeners(event)) _this._listeners[event] = [];
+
+            _this._listeners[event].push(callback);
+        });
+
+        return this;
+    };
+
+    Observable.prototype.emit = function emit(event) {
+        var _this2 = this;
+
+        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+            args[_key - 1] = arguments[_key];
         }
-    }, {
-        key: 'on',
-        value: function on(events, callback) {
-            var _this = this;
 
-            if (typeof events == 'string') events = [events];
-            if (!events) throw new Error('No events to subscribe to');
-            if (typeof callback !== 'function') throw new Error('Callback must be a function');
+        var result = null;
 
-            events.forEach(function (event) {
+        if (!this.hasListeners(event)) return null;
 
-                if (!_this.hasListeners(event)) _this._listeners[event] = [];
+        this._listeners[event].some(function (callback) {
 
-                _this._listeners[event].push(callback);
-            });
+            result = callback.apply(_this2, args);
+            return result === false;
+        });
 
-            return this;
-        }
-    }, {
-        key: 'emit',
-        value: function emit(event) {
-            var _this2 = this;
+        return result;
+    };
 
-            for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-                args[_key - 1] = arguments[_key];
-            }
+    Observable.prototype.off = function off(event, callback) {
+        var _this3 = this;
 
-            var result = null;
+        if (!event) {
 
-            if (!this.hasListeners(event)) return null;
+            this._listeners = {};
+        } else {
 
-            this._listeners[event].some(function (callback) {
+            if (!callback) {
 
-                result = callback.apply(_this2, args);
-                return result === false;
-            });
-
-            return result;
-        }
-    }, {
-        key: 'off',
-        value: function off(event, callback) {
-            var _this3 = this;
-
-            if (!event) {
-
-                this._listeners = {};
+                delete this._listeners[event];
             } else {
 
-                if (!callback) {
+                if (!this.hasListeners(event)) return this;
 
-                    delete this._listeners[event];
-                } else {
+                this._listeners[event].forEach(function (cb, i) {
 
-                    if (!this.hasListeners(event)) return this;
-
-                    this._listeners[event].forEach(function (cb, i) {
-
-                        if (cb === callback) delete _this3._listeners[event][i];
-                    });
-                }
+                    if (cb === callback) delete _this3._listeners[event][i];
+                });
             }
-
-            return this;
         }
-    }]);
+
+        return this;
+    };
 
     return Observable;
 })();
@@ -1293,11 +1254,7 @@ exports.default = Observable;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Externals = __webpack_require__(4);
 
@@ -1314,50 +1271,44 @@ var Queue = (function () {
         this._promise = null;
     }
 
-    _createClass(Queue, [{
-        key: 'isPaused',
-        value: function isPaused() {
+    Queue.prototype.isPaused = function isPaused() {
 
-            var time = this._cache.getItem(this._cacheId);
+        var time = this._cache.getItem(this._cacheId);
 
-            return !!time && Date.now() - parseInt(time) < Queue._releaseTimeout;
-        }
-    }, {
-        key: 'pause',
-        value: function pause() {
-            this._cache.setItem(this._cacheId, Date.now());
-            return this;
-        }
-    }, {
-        key: 'resume',
-        value: function resume() {
-            this._cache.removeItem(this._cacheId);
-            return this;
-        }
-    }, {
-        key: 'poll',
-        value: function poll() {
-            var _this = this;
+        return !!time && Date.now() - parseInt(time) < Queue._releaseTimeout;
+    };
 
-            if (this._promise) return this._promise;
+    Queue.prototype.pause = function pause() {
+        this._cache.setItem(this._cacheId, Date.now());
+        return this;
+    };
 
-            this._promise = new _Externals.Promise(function (resolve, reject) {
+    Queue.prototype.resume = function resume() {
+        this._cache.removeItem(this._cacheId);
+        return this;
+    };
 
-                (0, _Utils.poll)(function (next) {
+    Queue.prototype.poll = function poll() {
+        var _this = this;
 
-                    if (_this.isPaused()) return next();
+        if (this._promise) return this._promise;
 
-                    _this._promise = null;
+        this._promise = new _Externals.Promise(function (resolve, reject) {
 
-                    _this.resume(); // this is actually not needed but why not
+            (0, _Utils.poll)(function (next) {
 
-                    resolve(null);
-                }, Queue._pollInterval);
-            });
+                if (_this.isPaused()) return next();
 
-            return this._promise;
-        }
-    }]);
+                _this._promise = null;
+
+                _this.resume(); // this is actually not needed but why not
+
+                resolve(null);
+            }, Queue._pollInterval);
+        });
+
+        return this._promise;
+    };
 
     return Queue;
 })();
@@ -1372,11 +1323,7 @@ exports.default = Queue;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Externals = __webpack_require__(4);
 
@@ -1406,8 +1353,6 @@ var Client = (function (_Observable) {
     _inherits(Client, _Observable);
 
     function Client() {
-        var _Object$getPrototypeO;
-
         var _temp, _this, _ret;
 
         _classCallCheck(this, Client);
@@ -1416,208 +1361,199 @@ var Client = (function (_Observable) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Client)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.events = {
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, _Observable.call.apply(_Observable, [this].concat(args))), _this), _this.events = {
             beforeRequest: 'beforeRequest',
             requestSuccess: 'requestSuccess',
             requestError: 'requestError'
         }, _temp), _possibleConstructorReturn(_this, _ret);
     }
 
-    _createClass(Client, [{
-        key: 'sendRequest',
+    /**
+     * @param {Request} request
+     * @return {Promise<ApiResponse>}
+     */
 
-        /**
-         * @param {Request} request
-         * @return {Promise<ApiResponse>}
-         */
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
-                var apiResponse;
-                return regeneratorRuntime.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                apiResponse = new _ApiResponse2.default(request);
-                                _context.prev = 1;
+    Client.prototype.sendRequest = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
+            var apiResponse;
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                    switch (_context.prev = _context.next) {
+                        case 0:
+                            apiResponse = new _ApiResponse2.default(request);
+                            _context.prev = 1;
 
-                                //TODO Stop request if listeners return false
-                                this.emit(this.events.beforeRequest, apiResponse);
+                            //TODO Stop request if listeners return false
+                            this.emit(this.events.beforeRequest, apiResponse);
 
-                                _context.next = 5;
-                                return this._loadResponse(request);
+                            _context.next = 5;
+                            return this._loadResponse(request);
 
-                            case 5:
-                                apiResponse._response = _context.sent;
+                        case 5:
+                            apiResponse._response = _context.sent;
 
-                                if (!(apiResponse._isMultipart() || apiResponse._isJson())) {
-                                    _context.next = 10;
-                                    break;
-                                }
+                            if (!(apiResponse._isMultipart() || apiResponse._isJson())) {
+                                _context.next = 10;
+                                break;
+                            }
 
-                                _context.next = 9;
-                                return apiResponse.response().text();
+                            _context.next = 9;
+                            return apiResponse.response().text();
 
-                            case 9:
-                                apiResponse._text = _context.sent;
+                        case 9:
+                            apiResponse._text = _context.sent;
 
-                            case 10:
-                                if (apiResponse.ok()) {
-                                    _context.next = 12;
-                                    break;
-                                }
+                        case 10:
+                            if (apiResponse.ok()) {
+                                _context.next = 12;
+                                break;
+                            }
 
-                                throw new Error('Response has unsuccessful status');
+                            throw new Error('Response has unsuccessful status');
 
-                            case 12:
+                        case 12:
 
-                                this.emit(this.events.requestSuccess, apiResponse);
+                            this.emit(this.events.requestSuccess, apiResponse);
 
-                                return _context.abrupt('return', apiResponse);
+                            return _context.abrupt('return', apiResponse);
 
-                            case 16:
-                                _context.prev = 16;
-                                _context.t0 = _context['catch'](1);
+                        case 16:
+                            _context.prev = 16;
+                            _context.t0 = _context['catch'](1);
 
-                                if (!_context.t0.apiResponse) _context.t0 = this.makeError(_context.t0, apiResponse);
+                            if (!_context.t0.apiResponse) _context.t0 = this.makeError(_context.t0, apiResponse);
 
-                                this.emit(this.events.requestError, _context.t0);
+                            this.emit(this.events.requestError, _context.t0);
 
-                                throw _context.t0;
+                            throw _context.t0;
 
-                            case 21:
-                            case 'end':
-                                return _context.stop();
-                        }
+                        case 21:
+                        case 'end':
+                            return _context.stop();
                     }
-                }, _callee, this, [[1, 16]]);
-            }));
+                }
+            }, _callee, this, [[1, 16]]);
+        }));
 
-            return function sendRequest(_x) {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function sendRequest(_x) {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @param {Request} request
-         * @return {Promise<Response>}
-         * @private
-         */
+    /**
+     * @param {Request} request
+     * @return {Promise<Response>}
+     * @private
+     */
 
-    }, {
-        key: '_loadResponse',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(request) {
-                return regeneratorRuntime.wrap(function _callee2$(_context2) {
-                    while (1) {
-                        switch (_context2.prev = _context2.next) {
-                            case 0:
-                                _context2.next = 2;
-                                return _Externals.fetch.call(null, request);
+    Client.prototype._loadResponse = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(request) {
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                while (1) {
+                    switch (_context2.prev = _context2.next) {
+                        case 0:
+                            _context2.next = 2;
+                            return _Externals.fetch.call(null, request);
 
-                            case 2:
-                                return _context2.abrupt('return', _context2.sent);
+                        case 2:
+                            return _context2.abrupt('return', _context2.sent);
 
-                            case 3:
-                            case 'end':
-                                return _context2.stop();
-                        }
+                        case 3:
+                        case 'end':
+                            return _context2.stop();
                     }
-                }, _callee2, this);
-            }));
+                }
+            }, _callee2, this);
+        }));
 
-            return function _loadResponse(_x2) {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function _loadResponse(_x2) {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * Wraps the JS Error object with transaction information
-         * @param {Error|IApiError} e
-         * @param {ApiResponse} apiResponse
-         * @return {IApiError}
-         */
+    /**
+     * Wraps the JS Error object with transaction information
+     * @param {Error|IApiError} e
+     * @param {ApiResponse} apiResponse
+     * @return {IApiError}
+     */
 
-    }, {
-        key: 'makeError',
-        value: function makeError(e, apiResponse) {
+    Client.prototype.makeError = function makeError(e, apiResponse) {
 
-            // Wrap only if regular error
-            if (!e.hasOwnProperty('apiResponse') && !e.hasOwnProperty('originalMessage')) {
+        // Wrap only if regular error
+        if (!e.hasOwnProperty('apiResponse') && !e.hasOwnProperty('originalMessage')) {
 
-                e.apiResponse = apiResponse;
-                e.originalMessage = e.message;
-                e.message = apiResponse && apiResponse.error(true) || e.originalMessage;
-            }
-
-            return e;
+            e.apiResponse = apiResponse;
+            e.originalMessage = e.message;
+            e.message = apiResponse && apiResponse.error(true) || e.originalMessage;
         }
 
-        /**
-         *
-         * @param {object} init
-         * @param {object} [init.url]
-         * @param {object} [init.body]
-         * @param {string} [init.method]
-         * @param {object} [init.query]
-         * @param {object} [init.headers]
-         * @return {Request}
-         */
+        return e;
+    };
 
-    }, {
-        key: 'createRequest',
-        value: function createRequest(init) {
+    /**
+     *
+     * @param {object} init
+     * @param {object} [init.url]
+     * @param {object} [init.body]
+     * @param {string} [init.method]
+     * @param {object} [init.query]
+     * @param {object} [init.headers]
+     * @return {Request}
+     */
 
-            init = init || {};
-            init.headers = init.headers || {};
+    Client.prototype.createRequest = function createRequest(init) {
 
-            // Sanity checks
-            if (!init.url) throw new Error('Url is not defined');
-            if (!init.method) init.method = 'GET';
-            if (init.method && Client._allowedMethods.indexOf(init.method) < 0) throw new Error('Method has wrong value: ' + init.method);
+        init = init || {};
+        init.headers = init.headers || {};
 
-            // Defaults
-            init.credentials = init.credentials || 'include';
-            init.mode = init.mode || 'cors';
+        // Sanity checks
+        if (!init.url) throw new Error('Url is not defined');
+        if (!init.method) init.method = 'GET';
+        if (init.method && Client._allowedMethods.indexOf(init.method) < 0) throw new Error('Method has wrong value: ' + init.method);
 
-            // Append Query String
-            if (init.query) {
-                init.url = init.url + (init.url.indexOf('?') > -1 ? '&' : '?') + (0, _Utils.queryStringify)(init.query);
-            }
+        // Defaults
+        init.credentials = init.credentials || 'include';
+        init.mode = init.mode || 'cors';
 
-            if (!(0, _Utils2.findHeaderName)('Accept', init.headers)) {
-                init.headers['Accept'] = _ApiResponse2.default._jsonContentType;
-            }
-
-            // Serialize body
-            //TODO Check that body is a plain object
-            if (typeof init.body !== 'string' || !init.body) {
-
-                var contentTypeHeaderName = (0, _Utils2.findHeaderName)(_ApiResponse2.default._contentType, init.headers);
-
-                if (!contentTypeHeaderName) {
-                    contentTypeHeaderName = _ApiResponse2.default._contentType;
-                    init.headers[contentTypeHeaderName] = _ApiResponse2.default._jsonContentType;
-                }
-
-                var contentType = init.headers[contentTypeHeaderName];
-
-                // Assign a new encoded body
-                if (contentType.indexOf(_ApiResponse2.default._jsonContentType) > -1) {
-                    init.body = JSON.stringify(init.body);
-                } else if (contentType.indexOf(_ApiResponse2.default._urlencodedContentType) > -1) {
-                    init.body = (0, _Utils.queryStringify)(init.body);
-                }
-            }
-
-            // Create a request with encoded body
-            var req = new _Externals.Request(init.url, init);
-
-            // Keep the original body accessible directly (for mocks)
-            req.originalBody = init.body;
-
-            return req;
+        // Append Query String
+        if (init.query) {
+            init.url = init.url + (init.url.indexOf('?') > -1 ? '&' : '?') + (0, _Utils.queryStringify)(init.query);
         }
-    }]);
+
+        if (!(0, _Utils2.findHeaderName)('Accept', init.headers)) {
+            init.headers['Accept'] = _ApiResponse2.default._jsonContentType;
+        }
+
+        // Serialize body
+        //TODO Check that body is a plain object
+        if (typeof init.body !== 'string' || !init.body) {
+
+            var contentTypeHeaderName = (0, _Utils2.findHeaderName)(_ApiResponse2.default._contentType, init.headers);
+
+            if (!contentTypeHeaderName) {
+                contentTypeHeaderName = _ApiResponse2.default._contentType;
+                init.headers[contentTypeHeaderName] = _ApiResponse2.default._jsonContentType;
+            }
+
+            var contentType = init.headers[contentTypeHeaderName];
+
+            // Assign a new encoded body
+            if (contentType.indexOf(_ApiResponse2.default._jsonContentType) > -1) {
+                init.body = JSON.stringify(init.body);
+            } else if (contentType.indexOf(_ApiResponse2.default._urlencodedContentType) > -1) {
+                init.body = (0, _Utils.queryStringify)(init.body);
+            }
+        }
+
+        // Create a request with encoded body
+        var req = new _Externals.Request(init.url, init);
+
+        // Keep the original body accessible directly (for mocks)
+        req.originalBody = init.body;
+
+        return req;
+    };
 
     return Client;
 })(_Observable3.default);
@@ -1638,9 +1574,7 @@ exports.default = Client;
 
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 exports.createResponse = createResponse;
 exports.findHeaderName = findHeaderName;
 
@@ -1691,11 +1625,7 @@ function findHeaderName(name, headers) {
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Externals = __webpack_require__(4);
 
@@ -1733,191 +1663,169 @@ var ApiResponse = (function () {
      * @return {Response}
      */
 
-    _createClass(ApiResponse, [{
-        key: 'response',
-        value: function response() {
-            return this._response;
+    ApiResponse.prototype.response = function response() {
+        return this._response;
+    };
+
+    /**
+     * @return {Request}
+     */
+
+    ApiResponse.prototype.request = function request() {
+        return this._request;
+    };
+
+    /**
+     * @return {boolean}
+     */
+
+    ApiResponse.prototype.ok = function ok() {
+        return this._response && this._response.ok;
+    };
+
+    /**
+     * @return {string}
+     */
+
+    ApiResponse.prototype.text = function text() {
+        if (!this._isJson() && !this._isMultipart()) throw new Error('Response is not text');
+        return this._text;
+    };
+
+    /**
+     * @return {object}
+     */
+
+    ApiResponse.prototype.json = function json() {
+        if (!this._isJson()) throw new Error('Response is not JSON');
+        if (!this._json) {
+            this._json = this._text ? JSON.parse(this._text) : null;
         }
+        return this._json;
+    };
 
-        /**
-         * @return {Request}
-         */
+    /**
+     * @param [skipOKCheck]
+     * @return {string}
+     */
 
-    }, {
-        key: 'request',
-        value: function request() {
-            return this._request;
-        }
+    ApiResponse.prototype.error = function error(skipOKCheck) {
 
-        /**
-         * @return {boolean}
-         */
+        if (this.ok() && !skipOKCheck) return null;
 
-    }, {
-        key: 'ok',
-        value: function ok() {
-            return this._response && this._response.ok;
-        }
+        var message = (this._response && this._response.status ? this._response.status + ' ' : '') + (this._response && this._response.statusText ? this._response.statusText : '');
 
-        /**
-         * @return {string}
-         */
+        try {
 
-    }, {
-        key: 'text',
-        value: function text() {
-            if (!this._isJson() && !this._isMultipart()) throw new Error('Response is not text');
-            return this._text;
-        }
+            if (this.json().message) message = this.json().message;
+            if (this.json().error_description) message = this.json().error_description;
+            if (this.json().description) message = this.json().description;
+        } catch (e) {}
 
-        /**
-         * @return {object}
-         */
+        return message;
+    };
 
-    }, {
-        key: 'json',
-        value: function json() {
-            if (!this._isJson()) throw new Error('Response is not JSON');
-            if (!this._json) {
-                this._json = this._text ? JSON.parse(this._text) : null;
-            }
-            return this._json;
-        }
+    /**
+     * @return {ApiResponse[]}
+     */
 
-        /**
-         * @param [skipOKCheck]
-         * @return {string}
-         */
+    ApiResponse.prototype.multipart = function multipart() {
 
-    }, {
-        key: 'error',
-        value: function error(skipOKCheck) {
+        if (!this._isMultipart()) throw new Error('Response is not multipart');
 
-            if (this.ok() && !skipOKCheck) return null;
+        if (!this._multipart.length) {
 
-            var message = (this._response && this._response.status ? this._response.status + ' ' : '') + (this._response && this._response.statusText ? this._response.statusText : '');
+            // Step 1. Split multipart response
 
-            try {
+            var text = this.text();
 
-                if (this.json().message) message = this.json().message;
-                if (this.json().error_description) message = this.json().error_description;
-                if (this.json().description) message = this.json().description;
-            } catch (e) {}
+            if (!text) throw new Error('No response body');
 
-            return message;
-        }
+            var boundary = this._getContentType().match(/boundary=([^;]+)/i)[1];
 
-        /**
-         * @return {ApiResponse[]}
-         */
+            if (!boundary) throw new Error('Cannot find boundary');
 
-    }, {
-        key: 'multipart',
-        value: function multipart() {
+            var parts = text.toString().split(ApiResponse._boundarySeparator + boundary);
 
-            if (!this._isMultipart()) throw new Error('Response is not multipart');
+            if (parts[0].trim() === '') parts.shift();
+            if (parts[parts.length - 1].trim() == ApiResponse._boundarySeparator) parts.pop();
 
-            if (!this._multipart.length) {
+            if (parts.length < 1) throw new Error('No parts in body');
 
-                // Step 1. Split multipart response
+            // Step 2. Parse status info
 
-                var text = this.text();
+            var statusInfo = ApiResponse.create(parts.shift(), this._response.status, this._response.statusText).json();
 
-                if (!text) throw new Error('No response body');
+            // Step 3. Parse all other parts
 
-                var boundary = this._getContentType().match(/boundary=([^;]+)/i)[1];
+            this._multipart = parts.map(function (part, i) {
 
-                if (!boundary) throw new Error('Cannot find boundary');
+                var status = statusInfo.response[i].status;
 
-                var parts = text.toString().split(ApiResponse._boundarySeparator + boundary);
-
-                if (parts[0].trim() === '') parts.shift();
-                if (parts[parts.length - 1].trim() == ApiResponse._boundarySeparator) parts.pop();
-
-                if (parts.length < 1) throw new Error('No parts in body');
-
-                // Step 2. Parse status info
-
-                var statusInfo = ApiResponse.create(parts.shift(), this._response.status, this._response.statusText).json();
-
-                // Step 3. Parse all other parts
-
-                this._multipart = parts.map(function (part, i) {
-
-                    var status = statusInfo.response[i].status;
-
-                    return ApiResponse.create(part, status);
-                });
-            }
-
-            return this._multipart;
-        }
-    }, {
-        key: '_isContentType',
-        value: function _isContentType(contentType) {
-            return this._getContentType().indexOf(contentType) > -1;
-        }
-    }, {
-        key: '_getContentType',
-        value: function _getContentType() {
-            return this._response.headers.get(ApiResponse._contentType) || '';
-        }
-    }, {
-        key: '_isMultipart',
-        value: function _isMultipart() {
-            return this._isContentType(ApiResponse._multipartContentType);
-        }
-    }, {
-        key: '_isUrlEncoded',
-        value: function _isUrlEncoded() {
-            return this._isContentType(ApiResponse._urlencodedContentType);
-        }
-    }, {
-        key: '_isJson',
-        value: function _isJson() {
-            return this._isContentType(ApiResponse._jsonContentType);
-        }
-
-        /**
-         * Method is used to create ApiResponse object from string parts of multipart/mixed response
-         * @param {string} [text]
-         * @param {number} [status]
-         * @param {string} [statusText]
-         * @return {ApiResponse}
-         */
-
-    }], [{
-        key: 'create',
-        value: function create(text, status, statusText) {
-
-            text = text || '';
-            status = status || 200;
-            statusText = statusText || 'OK';
-
-            text = text.replace(/\r/g, '');
-
-            var headers = new _Externals.Headers(),
-                headersAndBody = text.split(ApiResponse._bodySeparator),
-                headersText = headersAndBody.length > 1 ? headersAndBody.shift() : '';
-
-            text = headersAndBody.join(ApiResponse._bodySeparator);
-
-            (headersText || '').split('\n').forEach(function (header) {
-
-                var split = header.trim().split(ApiResponse._headerSeparator),
-                    key = split.shift().trim(),
-                    value = split.join(ApiResponse._headerSeparator).trim();
-
-                if (key) headers.append(key, value);
+                return ApiResponse.create(part, status);
             });
-
-            return new ApiResponse(null, utils.createResponse(text, {
-                headers: headers,
-                status: status,
-                statusText: statusText
-            }), text);
         }
-    }]);
+
+        return this._multipart;
+    };
+
+    ApiResponse.prototype._isContentType = function _isContentType(contentType) {
+        return this._getContentType().indexOf(contentType) > -1;
+    };
+
+    ApiResponse.prototype._getContentType = function _getContentType() {
+        return this._response.headers.get(ApiResponse._contentType) || '';
+    };
+
+    ApiResponse.prototype._isMultipart = function _isMultipart() {
+        return this._isContentType(ApiResponse._multipartContentType);
+    };
+
+    ApiResponse.prototype._isUrlEncoded = function _isUrlEncoded() {
+        return this._isContentType(ApiResponse._urlencodedContentType);
+    };
+
+    ApiResponse.prototype._isJson = function _isJson() {
+        return this._isContentType(ApiResponse._jsonContentType);
+    };
+
+    /**
+     * Method is used to create ApiResponse object from string parts of multipart/mixed response
+     * @param {string} [text]
+     * @param {number} [status]
+     * @param {string} [statusText]
+     * @return {ApiResponse}
+     */
+
+    ApiResponse.create = function create(text, status, statusText) {
+
+        text = text || '';
+        status = status || 200;
+        statusText = statusText || 'OK';
+
+        text = text.replace(/\r/g, '');
+
+        var headers = new _Externals.Headers(),
+            headersAndBody = text.split(ApiResponse._bodySeparator),
+            headersText = headersAndBody.length > 1 ? headersAndBody.shift() : '';
+
+        text = headersAndBody.join(ApiResponse._bodySeparator);
+
+        (headersText || '').split('\n').forEach(function (header) {
+
+            var split = header.trim().split(ApiResponse._headerSeparator),
+                key = split.shift().trim(),
+                value = split.join(ApiResponse._headerSeparator).trim();
+
+            if (key) headers.append(key, value);
+        });
+
+        return new ApiResponse(null, utils.createResponse(text, {
+            headers: headers,
+            status: status,
+            statusText: statusText
+        }), text);
+    };
 
     return ApiResponse;
 })();
@@ -1937,11 +1845,7 @@ exports.default = ApiResponse;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Registry = __webpack_require__(15);
 
@@ -1967,46 +1871,42 @@ var Client = (function (_HttpClient) {
     function Client() {
         _classCallCheck(this, Client);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Client).call(this));
+        var _this = _possibleConstructorReturn(this, _HttpClient.call(this));
 
         _this._registry = new _Registry2.default();
         return _this;
     }
 
-    _createClass(Client, [{
-        key: 'registry',
-        value: function registry() {
-            return this._registry;
-        }
-    }, {
-        key: '_loadResponse',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
-                var mock;
-                return regeneratorRuntime.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                mock = this._registry.find(request);
-                                _context.next = 3;
-                                return mock.getResponse(request);
+    Client.prototype.registry = function registry() {
+        return this._registry;
+    };
 
-                            case 3:
-                                return _context.abrupt('return', _context.sent);
+    Client.prototype._loadResponse = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
+            var mock;
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                    switch (_context.prev = _context.next) {
+                        case 0:
+                            mock = this._registry.find(request);
+                            _context.next = 3;
+                            return mock.getResponse(request);
 
-                            case 4:
-                            case 'end':
-                                return _context.stop();
-                        }
+                        case 3:
+                            return _context.abrupt('return', _context.sent);
+
+                        case 4:
+                        case 'end':
+                            return _context.stop();
                     }
-                }, _callee, this);
-            }));
+                }
+            }, _callee, this);
+        }));
 
-            return function _loadResponse(_x) {
-                return ref.apply(this, arguments);
-            };
-        })()
-    }]);
+        return function _loadResponse(_x) {
+            return ref.apply(this, arguments);
+        };
+    })();
 
     return Client;
 })(_Client2.default);
@@ -2019,11 +1919,7 @@ exports.default = Client;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Mock = __webpack_require__(16);
 
@@ -2040,166 +1936,154 @@ var Registry = (function () {
         this._mocks = [];
     }
 
-    _createClass(Registry, [{
-        key: 'add',
-        value: function add(mock) {
-            this._mocks.push(mock);
-            return this;
-        }
-    }, {
-        key: 'clear',
-        value: function clear() {
-            this._mocks = [];
-            return this;
-        }
-    }, {
-        key: 'find',
-        value: function find(request) {
+    Registry.prototype.add = function add(mock) {
+        this._mocks.push(mock);
+        return this;
+    };
 
-            //console.log('Registry is looking for', request);
+    Registry.prototype.clear = function clear() {
+        this._mocks = [];
+        return this;
+    };
 
-            var mock = this._mocks.shift();
+    Registry.prototype.find = function find(request) {
 
-            if (!mock) throw new Error('No mock in registry for request ' + request.method + ' ' + request.url);
+        //console.log('Registry is looking for', request);
 
-            if (!mock.test(request)) throw new Error('Wrong request ' + request.method + ' ' + request.url + ' for expected mock ' + mock.method() + ' ' + mock.path());
+        var mock = this._mocks.shift();
 
-            return mock;
-        }
-    }, {
-        key: 'apiCall',
-        value: function apiCall(method, path, response, status, statusText) {
+        if (!mock) throw new Error('No mock in registry for request ' + request.method + ' ' + request.url);
 
-            this.add(new _Mock2.default(method, path, response, status, statusText));
+        if (!mock.test(request)) throw new Error('Wrong request ' + request.method + ' ' + request.url + ' for expected mock ' + mock.method() + ' ' + mock.path());
 
-            return this;
-        }
-    }, {
-        key: 'authentication',
-        value: function authentication() {
+        return mock;
+    };
+
+    Registry.prototype.apiCall = function apiCall(method, path, response, status, statusText) {
+
+        this.add(new _Mock2.default(method, path, response, status, statusText));
+
+        return this;
+    };
+
+    Registry.prototype.authentication = function authentication() {
+
+        this.apiCall('POST', '/restapi/oauth/token', {
+            'access_token': 'ACCESS_TOKEN',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'refresh_token': 'REFRESH_TOKEN',
+            'refresh_token_expires_in': 60480,
+            'scope': 'SMS RCM Foo Boo',
+            'expireTime': new Date().getTime() + 3600000
+        });
+
+        return this;
+    };
+
+    Registry.prototype.logout = function logout() {
+
+        this.apiCall('POST', '/restapi/oauth/revoke', {});
+
+        return this;
+    };
+
+    Registry.prototype.presenceLoad = function presenceLoad(id) {
+
+        this.apiCall('GET', '/restapi/v1.0/account/~/extension/' + id + '/presence', {
+            "uri": "https://platform.ringcentral.com/restapi/v1.0/account/123/extension/" + id + "/presence",
+            "extension": {
+                "uri": "https://platform.ringcentral.com/restapi/v1.0/account/123/extension/" + id,
+                "id": id,
+                "extensionNumber": "101"
+            },
+            "activeCalls": [],
+            "presenceStatus": "Available",
+            "telephonyStatus": "Ringing",
+            "userStatus": "Available",
+            "dndStatus": "TakeAllCalls",
+            "extensionId": id
+        });
+
+        return this;
+    };
+
+    Registry.prototype.subscribeGeneric = function subscribeGeneric(expiresIn) {
+
+        expiresIn = expiresIn || 15 * 60 * 60;
+
+        var date = new Date();
+
+        this.apiCall('POST', '/restapi/v1.0/subscription', {
+            'eventFilters': ['/restapi/v1.0/account/~/extension/~/presence'],
+            'expirationTime': new Date(date.getTime() + expiresIn * 1000).toISOString(),
+            'expiresIn': expiresIn,
+            'deliveryMode': {
+                'transportType': 'PubNub',
+                'encryption': false,
+                'address': '123_foo',
+                'subscriberKey': 'sub-c-foo',
+                'secretKey': 'sec-c-bar'
+            },
+            'id': 'foo-bar-baz',
+            'creationTime': date.toISOString(),
+            'status': 'Active',
+            'uri': 'https://platform.ringcentral.com/restapi/v1.0/subscription/foo-bar-baz'
+        });
+
+        return this;
+    };
+
+    Registry.prototype.subscribeOnPresence = function subscribeOnPresence(id, detailed) {
+
+        id = id || '1';
+
+        var date = new Date();
+
+        this.apiCall('POST', '/restapi/v1.0/subscription', {
+            'eventFilters': ['/restapi/v1.0/account/~/extension/' + id + '/presence' + (detailed ? '?detailedTelephonyState=true' : '')],
+            'expirationTime': new Date(date.getTime() + 15 * 60 * 60 * 1000).toISOString(),
+            'deliveryMode': {
+                'transportType': 'PubNub',
+                'encryption': true,
+                'address': '123_foo',
+                'subscriberKey': 'sub-c-foo',
+                'secretKey': 'sec-c-bar',
+                'encryptionAlgorithm': 'AES',
+                'encryptionKey': 'VQwb6EVNcQPBhE/JgFZ2zw=='
+            },
+            'creationTime': date.toISOString(),
+            'id': 'foo-bar-baz',
+            'status': 'Active',
+            'uri': 'https://platform.ringcentral.com/restapi/v1.0/subscription/foo-bar-baz'
+        });
+
+        return this;
+    };
+
+    Registry.prototype.tokenRefresh = function tokenRefresh(failure) {
+
+        if (!failure) {
 
             this.apiCall('POST', '/restapi/oauth/token', {
-                'access_token': 'ACCESS_TOKEN',
+                'access_token': 'ACCESS_TOKEN_FROM_REFRESH',
                 'token_type': 'bearer',
                 'expires_in': 3600,
-                'refresh_token': 'REFRESH_TOKEN',
+                'refresh_token': 'REFRESH_TOKEN_FROM_REFRESH',
                 'refresh_token_expires_in': 60480,
-                'scope': 'SMS RCM Foo Boo',
-                'expireTime': new Date().getTime() + 3600000
+                'scope': 'SMS RCM Foo Boo'
             });
+        } else {
 
-            return this;
+            this.apiCall('POST', '/restapi/oauth/token', {
+                'message': 'Wrong token',
+                'error_description': 'Wrong token',
+                'description': 'Wrong token'
+            }, 400);
         }
-    }, {
-        key: 'logout',
-        value: function logout() {
 
-            this.apiCall('POST', '/restapi/oauth/revoke', {});
-
-            return this;
-        }
-    }, {
-        key: 'presenceLoad',
-        value: function presenceLoad(id) {
-
-            this.apiCall('GET', '/restapi/v1.0/account/~/extension/' + id + '/presence', {
-                "uri": "https://platform.ringcentral.com/restapi/v1.0/account/123/extension/" + id + "/presence",
-                "extension": {
-                    "uri": "https://platform.ringcentral.com/restapi/v1.0/account/123/extension/" + id,
-                    "id": id,
-                    "extensionNumber": "101"
-                },
-                "activeCalls": [],
-                "presenceStatus": "Available",
-                "telephonyStatus": "Ringing",
-                "userStatus": "Available",
-                "dndStatus": "TakeAllCalls",
-                "extensionId": id
-            });
-
-            return this;
-        }
-    }, {
-        key: 'subscribeGeneric',
-        value: function subscribeGeneric(expiresIn) {
-
-            expiresIn = expiresIn || 15 * 60 * 60;
-
-            var date = new Date();
-
-            this.apiCall('POST', '/restapi/v1.0/subscription', {
-                'eventFilters': ['/restapi/v1.0/account/~/extension/~/presence'],
-                'expirationTime': new Date(date.getTime() + expiresIn * 1000).toISOString(),
-                'expiresIn': expiresIn,
-                'deliveryMode': {
-                    'transportType': 'PubNub',
-                    'encryption': false,
-                    'address': '123_foo',
-                    'subscriberKey': 'sub-c-foo',
-                    'secretKey': 'sec-c-bar'
-                },
-                'id': 'foo-bar-baz',
-                'creationTime': date.toISOString(),
-                'status': 'Active',
-                'uri': 'https://platform.ringcentral.com/restapi/v1.0/subscription/foo-bar-baz'
-            });
-
-            return this;
-        }
-    }, {
-        key: 'subscribeOnPresence',
-        value: function subscribeOnPresence(id, detailed) {
-
-            id = id || '1';
-
-            var date = new Date();
-
-            this.apiCall('POST', '/restapi/v1.0/subscription', {
-                'eventFilters': ['/restapi/v1.0/account/~/extension/' + id + '/presence' + (detailed ? '?detailedTelephonyState=true' : '')],
-                'expirationTime': new Date(date.getTime() + 15 * 60 * 60 * 1000).toISOString(),
-                'deliveryMode': {
-                    'transportType': 'PubNub',
-                    'encryption': true,
-                    'address': '123_foo',
-                    'subscriberKey': 'sub-c-foo',
-                    'secretKey': 'sec-c-bar',
-                    'encryptionAlgorithm': 'AES',
-                    'encryptionKey': 'VQwb6EVNcQPBhE/JgFZ2zw=='
-                },
-                'creationTime': date.toISOString(),
-                'id': 'foo-bar-baz',
-                'status': 'Active',
-                'uri': 'https://platform.ringcentral.com/restapi/v1.0/subscription/foo-bar-baz'
-            });
-
-            return this;
-        }
-    }, {
-        key: 'tokenRefresh',
-        value: function tokenRefresh(failure) {
-
-            if (!failure) {
-
-                this.apiCall('POST', '/restapi/oauth/token', {
-                    'access_token': 'ACCESS_TOKEN_FROM_REFRESH',
-                    'token_type': 'bearer',
-                    'expires_in': 3600,
-                    'refresh_token': 'REFRESH_TOKEN_FROM_REFRESH',
-                    'refresh_token_expires_in': 60480,
-                    'scope': 'SMS RCM Foo Boo'
-                });
-            } else {
-
-                this.apiCall('POST', '/restapi/oauth/token', {
-                    'message': 'Wrong token',
-                    'error_description': 'Wrong token',
-                    'description': 'Wrong token'
-                }, 400);
-            }
-
-            return this;
-        }
-    }]);
+        return this;
+    };
 
     return Registry;
 })();
@@ -2212,11 +2096,7 @@ exports.default = Registry;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _ApiResponse = __webpack_require__(13);
 
@@ -2244,65 +2124,58 @@ var Mock = (function () {
         this._statusText = statusText || 'OK';
     }
 
-    _createClass(Mock, [{
-        key: 'path',
-        value: function path() {
-            return this._path;
-        }
-    }, {
-        key: 'method',
-        value: function method() {
-            return this._method;
-        }
-    }, {
-        key: 'test',
-        value: function test(request) {
+    Mock.prototype.path = function path() {
+        return this._path;
+    };
 
-            return request.url.indexOf(this._path) > -1 && request.method.toUpperCase() == this._method;
-        }
-    }, {
-        key: 'getResponse',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
-                return regeneratorRuntime.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                _context.next = 2;
-                                return (0, _Utils.delay)(this._delay);
+    Mock.prototype.method = function method() {
+        return this._method;
+    };
 
-                            case 2:
-                                return _context.abrupt('return', this.createResponse(this._json));
+    Mock.prototype.test = function test(request) {
 
-                            case 3:
-                            case 'end':
-                                return _context.stop();
-                        }
+        return request.url.indexOf(this._path) > -1 && request.method.toUpperCase() == this._method;
+    };
+
+    Mock.prototype.getResponse = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                    switch (_context.prev = _context.next) {
+                        case 0:
+                            _context.next = 2;
+                            return (0, _Utils.delay)(this._delay);
+
+                        case 2:
+                            return _context.abrupt('return', this.createResponse(this._json));
+
+                        case 3:
+                        case 'end':
+                            return _context.stop();
                     }
-                }, _callee, this);
-            }));
+                }
+            }, _callee, this);
+        }));
 
-            return function getResponse(_x) {
-                return ref.apply(this, arguments);
-            };
-        })()
-    }, {
-        key: 'createResponse',
-        value: function createResponse(json, init) {
+        return function getResponse(_x) {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-            init = init || {};
+    Mock.prototype.createResponse = function createResponse(json, init) {
 
-            init.status = init.status || this._status;
-            init.statusText = init.statusText || this._statusText;
+        init = init || {};
 
-            var str = JSON.stringify(json),
-                res = (0, _Utils2.createResponse)(str, init);
+        init.status = init.status || this._status;
+        init.statusText = init.statusText || this._statusText;
 
-            res.headers.set(_ApiResponse2.default._contentType, _ApiResponse2.default._jsonContentType);
+        var str = JSON.stringify(json),
+            res = (0, _Utils2.createResponse)(str, init);
 
-            return res;
-        }
-    }]);
+        res.headers.set(_ApiResponse2.default._contentType, _ApiResponse2.default._jsonContentType);
+
+        return res;
+    };
 
     return Mock;
 })();
@@ -2315,11 +2188,7 @@ exports.default = Mock;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Observable2 = __webpack_require__(9);
 
@@ -2355,7 +2224,7 @@ var Platform = (function (_Observable) {
     function Platform(client, cache, server, appKey, appSecret) {
         _classCallCheck(this, Platform);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Platform).call(this));
+        var _this = _possibleConstructorReturn(this, _Observable.call(this));
 
         _this.events = {
             beforeLogin: 'beforeLogin',
@@ -2392,813 +2261,775 @@ var Platform = (function (_Observable) {
     // 1 week
     // Platform server by default sets it to 60 * 60 = 1 hour
 
-    _createClass(Platform, [{
-        key: 'auth',
-        value: function auth() {
-            return this._auth;
+    Platform.prototype.auth = function auth() {
+        return this._auth;
+    };
+
+    /**
+     * @return {Client}
+     */
+
+    Platform.prototype.client = function client() {
+        return this._client;
+    };
+
+    /**
+     * @param {string} path
+     * @param {object} [options]
+     * @param {boolean} [options.addServer]
+     * @param {string} [options.addMethod]
+     * @param {boolean} [options.addToken]
+     * @return {string}
+     */
+
+    Platform.prototype.createUrl = function createUrl(path, options) {
+
+        path = path || '';
+        options = options || {};
+
+        var builtUrl = '',
+            hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
+
+        if (options.addServer && !hasHttp) builtUrl += this._server;
+
+        if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp) builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
+
+        builtUrl += path;
+
+        if (options.addMethod || options.addToken) builtUrl += path.indexOf('?') > -1 ? '&' : '?';
+
+        if (options.addMethod) builtUrl += '_method=' + options.addMethod;
+        if (options.addToken) builtUrl += (options.addMethod ? '&' : '') + 'access_token=' + this._auth.accessToken();
+
+        return builtUrl;
+    };
+
+    /**
+     * @param {string} options.redirectUri
+     * @param {string} options.state
+     * @param {string} options.brandId
+     * @param {string} options.display
+     * @param {string} options.prompt
+     * @return {string}
+     */
+
+    Platform.prototype.authUrl = function authUrl(options) {
+
+        options = options || {};
+
+        return this.createUrl(Platform._authorizeEndpoint + '?' + (0, _Utils.queryStringify)({
+            'response_type': 'code',
+            'redirect_uri': options.redirectUri || '',
+            'client_id': this._appKey,
+            'state': options.state || '',
+            'brand_id': options.brandId || '',
+            'display': options.display || '',
+            'prompt': options.prompt || ''
+        }), { addServer: true });
+    };
+
+    /**
+     * @param {string} url
+     * @return {Object}
+     */
+
+    Platform.prototype.parseAuthRedirectUrl = function parseAuthRedirectUrl(url) {
+
+        var qs = (0, _Utils.parseQueryString)(url.split('?').reverse()[0]),
+            error = qs.error_description || qs.error;
+
+        if (error) {
+            var e = new Error(error);
+            e.error = qs.error;
+            throw e;
         }
 
-        /**
-         * @return {Client}
-         */
+        return qs;
+    };
 
-    }, {
-        key: 'client',
-        value: function client() {
-            return this._client;
-        }
+    /**
+     * @return {Promise<boolean>}
+     */
 
-        /**
-         * @param {string} path
-         * @param {object} [options]
-         * @param {boolean} [options.addServer]
-         * @param {string} [options.addMethod]
-         * @param {boolean} [options.addToken]
-         * @return {string}
-         */
+    Platform.prototype.loggedIn = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                    switch (_context.prev = _context.next) {
+                        case 0:
+                            _context.prev = 0;
+                            _context.next = 3;
+                            return this._ensureAuthentication();
 
-    }, {
-        key: 'createUrl',
-        value: function createUrl(path, options) {
+                        case 3:
+                            return _context.abrupt('return', true);
 
-            path = path || '';
-            options = options || {};
+                        case 6:
+                            _context.prev = 6;
+                            _context.t0 = _context['catch'](0);
+                            return _context.abrupt('return', false);
 
-            var builtUrl = '',
-                hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
-
-            if (options.addServer && !hasHttp) builtUrl += this._server;
-
-            if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp) builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
-
-            builtUrl += path;
-
-            if (options.addMethod || options.addToken) builtUrl += path.indexOf('?') > -1 ? '&' : '?';
-
-            if (options.addMethod) builtUrl += '_method=' + options.addMethod;
-            if (options.addToken) builtUrl += (options.addMethod ? '&' : '') + 'access_token=' + this._auth.accessToken();
-
-            return builtUrl;
-        }
-
-        /**
-         * @param {string} options.redirectUri
-         * @param {string} options.state
-         * @param {string} options.brandId
-         * @param {string} options.display
-         * @param {string} options.prompt
-         * @return {string}
-         */
-
-    }, {
-        key: 'authUrl',
-        value: function authUrl(options) {
-
-            options = options || {};
-
-            return this.createUrl(Platform._authorizeEndpoint + '?' + (0, _Utils.queryStringify)({
-                'response_type': 'code',
-                'redirect_uri': options.redirectUri || '',
-                'client_id': this._appKey,
-                'state': options.state || '',
-                'brand_id': options.brandId || '',
-                'display': options.display || '',
-                'prompt': options.prompt || ''
-            }), { addServer: true });
-        }
-
-        /**
-         * @param {string} url
-         * @return {Object}
-         */
-
-    }, {
-        key: 'parseAuthRedirectUrl',
-        value: function parseAuthRedirectUrl(url) {
-
-            var qs = (0, _Utils.parseQueryString)(url.split('?').reverse()[0]),
-                error = qs.error_description || qs.error;
-
-            if (error) {
-                var e = new Error(error);
-                e.error = qs.error;
-                throw e;
-            }
-
-            return qs;
-        }
-
-        /**
-         * @return {Promise<boolean>}
-         */
-
-    }, {
-        key: 'loggedIn',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
-                return regeneratorRuntime.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                _context.prev = 0;
-                                _context.next = 3;
-                                return this._ensureAuthentication();
-
-                            case 3:
-                                return _context.abrupt('return', true);
-
-                            case 6:
-                                _context.prev = 6;
-                                _context.t0 = _context['catch'](0);
-                                return _context.abrupt('return', false);
-
-                            case 9:
-                            case 'end':
-                                return _context.stop();
-                        }
+                        case 9:
+                        case 'end':
+                            return _context.stop();
                     }
-                }, _callee, this, [[0, 6]]);
-            }));
+                }
+            }, _callee, this, [[0, 6]]);
+        }));
 
-            return function loggedIn() {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function loggedIn() {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @param {string} options.username
-         * @param {string} options.password
-         * @param {string} options.extension
-         * @param {string} options.code
-         * @param {string} options.redirectUri
-         * @param {string} options.endpointId
-         * @returns {Promise<ApiResponse>}
-         */
+    /**
+     * @param {string} options.username
+     * @param {string} options.password
+     * @param {string} options.extension
+     * @param {string} options.code
+     * @param {string} options.redirectUri
+     * @param {string} options.endpointId
+     * @returns {Promise<ApiResponse>}
+     */
 
-    }, {
-        key: 'login',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(options) {
-                var body, apiResponse, json;
-                return regeneratorRuntime.wrap(function _callee2$(_context2) {
-                    while (1) {
-                        switch (_context2.prev = _context2.next) {
-                            case 0:
-                                _context2.prev = 0;
+    Platform.prototype.login = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(options) {
+            var body, apiResponse, json;
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                while (1) {
+                    switch (_context2.prev = _context2.next) {
+                        case 0:
+                            _context2.prev = 0;
 
-                                options = options || {};
+                            options = options || {};
 
-                                options.remember = options.remember || false;
+                            options.remember = options.remember || false;
 
-                                this.emit(this.events.beforeLogin);
+                            this.emit(this.events.beforeLogin);
 
-                                body = {
-                                    "access_token_ttl": Platform._accessTokenTtl,
-                                    "refresh_token_ttl": options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
-                                };
+                            body = {
+                                "access_token_ttl": Platform._accessTokenTtl,
+                                "refresh_token_ttl": options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
+                            };
 
-                                if (!options.code) {
+                            if (!options.code) {
 
-                                    body.grant_type = 'password';
-                                    body.username = options.username;
-                                    body.password = options.password;
-                                    body.extension = options.extension || '';
-                                } else if (options.code) {
+                                body.grant_type = 'password';
+                                body.username = options.username;
+                                body.password = options.password;
+                                body.extension = options.extension || '';
+                            } else if (options.code) {
 
-                                    body.grant_type = 'authorization_code';
-                                    body.code = options.code;
-                                    body.redirect_uri = options.redirectUri;
-                                    //body.client_id = this.getCredentials().key; // not needed
-                                }
+                                body.grant_type = 'authorization_code';
+                                body.code = options.code;
+                                body.redirect_uri = options.redirectUri;
+                                //body.client_id = this.getCredentials().key; // not needed
+                            }
 
-                                if (options.endpointId) body.endpoint_id = options.endpointId;
+                            if (options.endpointId) body.endpoint_id = options.endpointId;
 
-                                _context2.next = 9;
-                                return this._tokenRequest(Platform._tokenEndpoint, body);
+                            _context2.next = 9;
+                            return this._tokenRequest(Platform._tokenEndpoint, body);
 
-                            case 9:
-                                apiResponse = _context2.sent;
-                                json = apiResponse.json();
+                        case 9:
+                            apiResponse = _context2.sent;
+                            json = apiResponse.json();
 
-                                this._auth.setData(json).setRemember(options.remember);
+                            this._auth.setData(json).setRemember(options.remember);
 
-                                this.emit(this.events.loginSuccess, apiResponse);
+                            this.emit(this.events.loginSuccess, apiResponse);
 
-                                return _context2.abrupt('return', apiResponse);
+                            return _context2.abrupt('return', apiResponse);
 
-                            case 16:
-                                _context2.prev = 16;
-                                _context2.t0 = _context2['catch'](0);
+                        case 16:
+                            _context2.prev = 16;
+                            _context2.t0 = _context2['catch'](0);
 
+                            this._cache.clean();
+
+                            this.emit(this.events.loginError, _context2.t0);
+
+                            throw _context2.t0;
+
+                        case 21:
+                        case 'end':
+                            return _context2.stop();
+                    }
+                }
+            }, _callee2, this, [[0, 16]]);
+        }));
+
+        return function login(_x) {
+            return ref.apply(this, arguments);
+        };
+    })();
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.refresh = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+            var res, json;
+            return regeneratorRuntime.wrap(function _callee3$(_context3) {
+                while (1) {
+                    switch (_context3.prev = _context3.next) {
+                        case 0:
+                            _context3.prev = 0;
+
+                            this.emit(this.events.beforeRefresh);
+
+                            if (!this._queue.isPaused()) {
+                                _context3.next = 9;
+                                break;
+                            }
+
+                            _context3.next = 5;
+                            return this._queue.poll();
+
+                        case 5:
+                            if (this._isAccessTokenValid()) {
+                                _context3.next = 7;
+                                break;
+                            }
+
+                            throw new Error('Automatic authentification timeout');
+
+                        case 7:
+
+                            this.emit(this.events.refreshSuccess, null);
+
+                            return _context3.abrupt('return', null);
+
+                        case 9:
+
+                            this._queue.pause();
+
+                            // Make sure all existing AJAX calls had a chance to reach the server
+                            _context3.next = 12;
+                            return (0, _Utils.delay)(Platform._refreshDelayMs);
+
+                        case 12:
+                            if (this._auth.refreshToken()) {
+                                _context3.next = 14;
+                                break;
+                            }
+
+                            throw new Error('Refresh token is missing');
+
+                        case 14:
+                            if (this._auth.refreshTokenValid()) {
+                                _context3.next = 16;
+                                break;
+                            }
+
+                            throw new Error('Refresh token has expired');
+
+                        case 16:
+                            if (this._queue.isPaused()) {
+                                _context3.next = 18;
+                                break;
+                            }
+
+                            throw new Error('Queue was resumed before refresh call');
+
+                        case 18:
+                            _context3.next = 20;
+                            return this._tokenRequest(Platform._tokenEndpoint, {
+                                "grant_type": "refresh_token",
+                                "refresh_token": this._auth.refreshToken(),
+                                "access_token_ttl": Platform._accessTokenTtl,
+                                "refresh_token_ttl": this._auth.remember() ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
+                            });
+
+                        case 20:
+                            res = _context3.sent;
+                            json = res.json();
+
+                            if (json.access_token) {
+                                _context3.next = 24;
+                                break;
+                            }
+
+                            throw this._client.makeError(new Error('Malformed OAuth response'), res);
+
+                        case 24:
+
+                            this._auth.setData(json);
+                            this._queue.resume();
+
+                            this.emit(this.events.refreshSuccess, res);
+
+                            return _context3.abrupt('return', res);
+
+                        case 30:
+                            _context3.prev = 30;
+                            _context3.t0 = _context3['catch'](0);
+
+                            _context3.t0 = this._client.makeError(_context3.t0);
+
+                            if (Platform._clearCacheOnRefreshError) {
                                 this._cache.clean();
+                            }
 
-                                this.emit(this.events.loginError, _context2.t0);
+                            this.emit(this.events.refreshError, _context3.t0);
 
-                                throw _context2.t0;
+                            throw _context3.t0;
 
-                            case 21:
-                            case 'end':
-                                return _context2.stop();
-                        }
+                        case 36:
+                        case 'end':
+                            return _context3.stop();
                     }
-                }, _callee2, this, [[0, 16]]);
-            }));
+                }
+            }, _callee3, this, [[0, 30]]);
+        }));
 
-            return function login(_x) {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function refresh() {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @returns {Promise<ApiResponse>}
-         */
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
 
-    }, {
-        key: 'refresh',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
-                var res, json;
-                return regeneratorRuntime.wrap(function _callee3$(_context3) {
-                    while (1) {
-                        switch (_context3.prev = _context3.next) {
-                            case 0:
-                                _context3.prev = 0;
+    Platform.prototype.logout = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+            var res;
+            return regeneratorRuntime.wrap(function _callee4$(_context4) {
+                while (1) {
+                    switch (_context4.prev = _context4.next) {
+                        case 0:
+                            _context4.prev = 0;
 
-                                this.emit(this.events.beforeRefresh);
+                            this.emit(this.events.beforeLogout);
 
-                                if (!this._queue.isPaused()) {
-                                    _context3.next = 9;
-                                    break;
+                            this._queue.pause();
+
+                            _context4.next = 5;
+                            return this._tokenRequest(Platform._revokeEndpoint, {
+                                token: this._auth.accessToken()
+                            });
+
+                        case 5:
+                            res = _context4.sent;
+
+                            this._queue.resume();
+                            this._cache.clean();
+
+                            this.emit(this.events.logoutSuccess, res);
+
+                            return _context4.abrupt('return', res);
+
+                        case 12:
+                            _context4.prev = 12;
+                            _context4.t0 = _context4['catch'](0);
+
+                            this._queue.resume();
+
+                            this.emit(this.events.logoutError, _context4.t0);
+
+                            throw _context4.t0;
+
+                        case 17:
+                        case 'end':
+                            return _context4.stop();
+                    }
+                }
+            }, _callee4, this, [[0, 12]]);
+        }));
+
+        return function logout() {
+            return ref.apply(this, arguments);
+        };
+    })();
+
+    /**
+     * @param {Request} request
+     * @param {object} [options]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<Request>}
+     */
+
+    Platform.prototype.inflateRequest = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(request, options) {
+            return regeneratorRuntime.wrap(function _callee5$(_context5) {
+                while (1) {
+                    switch (_context5.prev = _context5.next) {
+                        case 0:
+
+                            options = options || {};
+
+                            if (!options.skipAuthCheck) {
+                                _context5.next = 3;
+                                break;
+                            }
+
+                            return _context5.abrupt('return', request);
+
+                        case 3:
+                            _context5.next = 5;
+                            return this._ensureAuthentication();
+
+                        case 5:
+
+                            request.headers.set('Authorization', this._authHeader());
+                            //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
+
+                            //TODO Add User-Agent here
+
+                            return _context5.abrupt('return', request);
+
+                        case 7:
+                        case 'end':
+                            return _context5.stop();
+                    }
+                }
+            }, _callee5, this);
+        }));
+
+        return function inflateRequest(_x2, _x3) {
+            return ref.apply(this, arguments);
+        };
+    })();
+
+    /**
+     * @param {Request} request
+     * @param {object} [options]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.sendRequest = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(request, options) {
+            return regeneratorRuntime.wrap(function _callee6$(_context6) {
+                while (1) {
+                    switch (_context6.prev = _context6.next) {
+                        case 0:
+                            _context6.prev = 0;
+                            _context6.next = 3;
+                            return this.inflateRequest(request, options);
+
+                        case 3:
+                            request = _context6.sent;
+                            _context6.next = 6;
+                            return this._client.sendRequest(request);
+
+                        case 6:
+                            return _context6.abrupt('return', _context6.sent);
+
+                        case 9:
+                            _context6.prev = 9;
+                            _context6.t0 = _context6['catch'](0);
+
+                            if (!(!_context6.t0.apiResponse || !_context6.t0.apiResponse.response() || _context6.t0.apiResponse.response().status != 401)) {
+                                _context6.next = 13;
+                                break;
+                            }
+
+                            throw _context6.t0;
+
+                        case 13:
+
+                            this._auth.cancelAccessToken();
+
+                            _context6.next = 16;
+                            return this.sendRequest(request, options);
+
+                        case 16:
+                            return _context6.abrupt('return', _context6.sent);
+
+                        case 17:
+                        case 'end':
+                            return _context6.stop();
+                    }
+                }
+            }, _callee6, this, [[0, 9]]);
+        }));
+
+        return function sendRequest(_x4, _x5) {
+            return ref.apply(this, arguments);
+        };
+    })();
+
+    /**
+     * General purpose function to send anything to server
+     * @param {string} options.url
+     * @param {object} [options.body]
+     * @param {string} [options.method]
+     * @param {object} [options.query]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.send = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
+            var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+            return regeneratorRuntime.wrap(function _callee7$(_context7) {
+                while (1) {
+                    switch (_context7.prev = _context7.next) {
+                        case 0:
+
+                            //FIXME https://github.com/bitinn/node-fetch/issues/43
+                            options.url = this.createUrl(options.url, { addServer: true });
+
+                            _context7.next = 3;
+                            return this.sendRequest(this._client.createRequest(options), options);
+
+                        case 3:
+                            return _context7.abrupt('return', _context7.sent);
+
+                        case 4:
+                        case 'end':
+                            return _context7.stop();
+                    }
+                }
+            }, _callee7, this);
+        }));
+
+        return function send(_x6) {
+            return ref.apply(this, arguments);
+        };
+    })();
+
+    /**
+     * @param {string} url
+     * @param {object} [query]
+     * @param {object} [options]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.get = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(url, query, options) {
+            return regeneratorRuntime.wrap(function _callee8$(_context8) {
+                while (1) {
+                    switch (_context8.prev = _context8.next) {
+                        case 0:
+                            options = options || {};
+                            options.method = 'GET';
+                            options.url = url;
+                            options.query = query;
+                            _context8.next = 6;
+                            return this.send(options);
+
+                        case 6:
+                            return _context8.abrupt('return', _context8.sent);
+
+                        case 7:
+                        case 'end':
+                            return _context8.stop();
+                    }
+                }
+            }, _callee8, this);
+        }));
+
+        return function get(_x8, _x9, _x10) {
+            return ref.apply(this, arguments);
+        };
+    })();
+
+    /**
+     * @param {string} url
+     * @param {object} body
+     * @param {object} [query]
+     * @param {object} [options]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.post = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(url, body, query, options) {
+            return regeneratorRuntime.wrap(function _callee9$(_context9) {
+                while (1) {
+                    switch (_context9.prev = _context9.next) {
+                        case 0:
+                            options = options || {};
+                            options.method = 'POST';
+                            options.url = url;
+                            options.query = query;
+                            options.body = body;
+                            _context9.next = 7;
+                            return this.send(options);
+
+                        case 7:
+                            return _context9.abrupt('return', _context9.sent);
+
+                        case 8:
+                        case 'end':
+                            return _context9.stop();
+                    }
+                }
+            }, _callee9, this);
+        }));
+
+        return function post(_x11, _x12, _x13, _x14) {
+            return ref.apply(this, arguments);
+        };
+    })();
+
+    /**
+     * @param {string} url
+     * @param {object} [body]
+     * @param {object} [query]
+     * @param {object} [options]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype.put = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(url, body, query, options) {
+            return regeneratorRuntime.wrap(function _callee10$(_context10) {
+                while (1) {
+                    switch (_context10.prev = _context10.next) {
+                        case 0:
+                            options = options || {};
+                            options.method = 'PUT';
+                            options.url = url;
+                            options.query = query;
+                            options.body = body;
+                            _context10.next = 7;
+                            return this.send(options);
+
+                        case 7:
+                            return _context10.abrupt('return', _context10.sent);
+
+                        case 8:
+                        case 'end':
+                            return _context10.stop();
+                    }
+                }
+            }, _callee10, this);
+        }));
+
+        return function put(_x15, _x16, _x17, _x18) {
+            return ref.apply(this, arguments);
+        };
+    })();
+
+    /**
+     * @param {string} url
+     * @param {string} [query]
+     * @param {object} [options]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+    Platform.prototype['delete'] = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(url, query, options) {
+            return regeneratorRuntime.wrap(function _callee11$(_context11) {
+                while (1) {
+                    switch (_context11.prev = _context11.next) {
+                        case 0:
+                            options = options || {};
+                            options.method = 'DELETE';
+                            options.url = url;
+                            options.query = query;
+                            _context11.next = 6;
+                            return this.send(options);
+
+                        case 6:
+                            return _context11.abrupt('return', _context11.sent);
+
+                        case 7:
+                        case 'end':
+                            return _context11.stop();
+                    }
+                }
+            }, _callee11, this);
+        }));
+
+        return function _delete(_x19, _x20, _x21) {
+            return ref.apply(this, arguments);
+        };
+    })();
+
+    Platform.prototype._tokenRequest = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(path, body) {
+            return regeneratorRuntime.wrap(function _callee12$(_context12) {
+                while (1) {
+                    switch (_context12.prev = _context12.next) {
+                        case 0:
+                            _context12.next = 2;
+                            return this.send({
+                                url: path,
+                                skipAuthCheck: true,
+                                body: body,
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': 'Basic ' + this._apiKey(),
+                                    'Content-Type': 'application/x-www-form-urlencoded'
                                 }
+                            });
 
-                                _context3.next = 5;
-                                return this._queue.poll();
+                        case 2:
+                            return _context12.abrupt('return', _context12.sent);
 
-                            case 5:
-                                if (this._isAccessTokenValid()) {
-                                    _context3.next = 7;
-                                    break;
-                                }
-
-                                throw new Error('Automatic authentification timeout');
-
-                            case 7:
-
-                                this.emit(this.events.refreshSuccess, null);
-
-                                return _context3.abrupt('return', null);
-
-                            case 9:
-
-                                this._queue.pause();
-
-                                // Make sure all existing AJAX calls had a chance to reach the server
-                                _context3.next = 12;
-                                return (0, _Utils.delay)(Platform._refreshDelayMs);
-
-                            case 12:
-                                if (this._auth.refreshToken()) {
-                                    _context3.next = 14;
-                                    break;
-                                }
-
-                                throw new Error('Refresh token is missing');
-
-                            case 14:
-                                if (this._auth.refreshTokenValid()) {
-                                    _context3.next = 16;
-                                    break;
-                                }
-
-                                throw new Error('Refresh token has expired');
-
-                            case 16:
-                                if (this._queue.isPaused()) {
-                                    _context3.next = 18;
-                                    break;
-                                }
-
-                                throw new Error('Queue was resumed before refresh call');
-
-                            case 18:
-                                _context3.next = 20;
-                                return this._tokenRequest(Platform._tokenEndpoint, {
-                                    "grant_type": "refresh_token",
-                                    "refresh_token": this._auth.refreshToken(),
-                                    "access_token_ttl": Platform._accessTokenTtl,
-                                    "refresh_token_ttl": this._auth.remember() ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
-                                });
-
-                            case 20:
-                                res = _context3.sent;
-                                json = res.json();
-
-                                if (json.access_token) {
-                                    _context3.next = 24;
-                                    break;
-                                }
-
-                                throw this._client.makeError(new Error('Malformed OAuth response'), res);
-
-                            case 24:
-
-                                this._auth.setData(json);
-                                this._queue.resume();
-
-                                this.emit(this.events.refreshSuccess, res);
-
-                                return _context3.abrupt('return', res);
-
-                            case 30:
-                                _context3.prev = 30;
-                                _context3.t0 = _context3['catch'](0);
-
-                                _context3.t0 = this._client.makeError(_context3.t0);
-
-                                if (Platform._clearCacheOnRefreshError) {
-                                    this._cache.clean();
-                                }
-
-                                this.emit(this.events.refreshError, _context3.t0);
-
-                                throw _context3.t0;
-
-                            case 36:
-                            case 'end':
-                                return _context3.stop();
-                        }
+                        case 3:
+                        case 'end':
+                            return _context12.stop();
                     }
-                }, _callee3, this, [[0, 30]]);
-            }));
+                }
+            }, _callee12, this);
+        }));
 
-            return function refresh() {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function _tokenRequest(_x22, _x23) {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @returns {Promise<ApiResponse>}
-         */
+    Platform.prototype._ensureAuthentication = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
+            return regeneratorRuntime.wrap(function _callee13$(_context13) {
+                while (1) {
+                    switch (_context13.prev = _context13.next) {
+                        case 0:
+                            if (!this._isAccessTokenValid()) {
+                                _context13.next = 2;
+                                break;
+                            }
 
-    }, {
-        key: 'logout',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
-                var res;
-                return regeneratorRuntime.wrap(function _callee4$(_context4) {
-                    while (1) {
-                        switch (_context4.prev = _context4.next) {
-                            case 0:
-                                _context4.prev = 0;
+                            return _context13.abrupt('return', null);
 
-                                this.emit(this.events.beforeLogout);
+                        case 2:
+                            _context13.next = 4;
+                            return this.refresh();
 
-                                this._queue.pause();
+                        case 4:
+                            return _context13.abrupt('return', _context13.sent);
 
-                                _context4.next = 5;
-                                return this._tokenRequest(Platform._revokeEndpoint, {
-                                    token: this._auth.accessToken()
-                                });
-
-                            case 5:
-                                res = _context4.sent;
-
-                                this._queue.resume();
-                                this._cache.clean();
-
-                                this.emit(this.events.logoutSuccess, res);
-
-                                return _context4.abrupt('return', res);
-
-                            case 12:
-                                _context4.prev = 12;
-                                _context4.t0 = _context4['catch'](0);
-
-                                this._queue.resume();
-
-                                this.emit(this.events.logoutError, _context4.t0);
-
-                                throw _context4.t0;
-
-                            case 17:
-                            case 'end':
-                                return _context4.stop();
-                        }
+                        case 5:
+                        case 'end':
+                            return _context13.stop();
                     }
-                }, _callee4, this, [[0, 12]]);
-            }));
+                }
+            }, _callee13, this);
+        }));
 
-            return function logout() {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function _ensureAuthentication() {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @param {Request} request
-         * @param {object} [options]
-         * @param {boolean} [options.skipAuthCheck]
-         * @return {Promise<Request>}
-         */
+    Platform.prototype._isAccessTokenValid = function _isAccessTokenValid() {
 
-    }, {
-        key: 'inflateRequest',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(request, options) {
-                return regeneratorRuntime.wrap(function _callee5$(_context5) {
-                    while (1) {
-                        switch (_context5.prev = _context5.next) {
-                            case 0:
+        return this._auth.accessTokenValid() && !this._queue.isPaused();
+    };
 
-                                options = options || {};
+    Platform.prototype._apiKey = function _apiKey() {
+        var apiKey = this._appKey + ':' + this._appSecret;
+        return typeof btoa == 'function' ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
+    };
 
-                                if (!options.skipAuthCheck) {
-                                    _context5.next = 3;
-                                    break;
-                                }
-
-                                return _context5.abrupt('return', request);
-
-                            case 3:
-                                _context5.next = 5;
-                                return this._ensureAuthentication();
-
-                            case 5:
-
-                                request.headers.set('Authorization', this._authHeader());
-                                //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
-
-                                //TODO Add User-Agent here
-
-                                return _context5.abrupt('return', request);
-
-                            case 7:
-                            case 'end':
-                                return _context5.stop();
-                        }
-                    }
-                }, _callee5, this);
-            }));
-
-            return function inflateRequest(_x2, _x3) {
-                return ref.apply(this, arguments);
-            };
-        })()
-
-        /**
-         * @param {Request} request
-         * @param {object} [options]
-         * @param {boolean} [options.skipAuthCheck]
-         * @return {Promise<ApiResponse>}
-         */
-
-    }, {
-        key: 'sendRequest',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(request, options) {
-                return regeneratorRuntime.wrap(function _callee6$(_context6) {
-                    while (1) {
-                        switch (_context6.prev = _context6.next) {
-                            case 0:
-                                _context6.prev = 0;
-                                _context6.next = 3;
-                                return this.inflateRequest(request, options);
-
-                            case 3:
-                                request = _context6.sent;
-                                _context6.next = 6;
-                                return this._client.sendRequest(request);
-
-                            case 6:
-                                return _context6.abrupt('return', _context6.sent);
-
-                            case 9:
-                                _context6.prev = 9;
-                                _context6.t0 = _context6['catch'](0);
-
-                                if (!(!_context6.t0.apiResponse || !_context6.t0.apiResponse.response() || _context6.t0.apiResponse.response().status != 401)) {
-                                    _context6.next = 13;
-                                    break;
-                                }
-
-                                throw _context6.t0;
-
-                            case 13:
-
-                                this._auth.cancelAccessToken();
-
-                                _context6.next = 16;
-                                return this.sendRequest(request, options);
-
-                            case 16:
-                                return _context6.abrupt('return', _context6.sent);
-
-                            case 17:
-                            case 'end':
-                                return _context6.stop();
-                        }
-                    }
-                }, _callee6, this, [[0, 9]]);
-            }));
-
-            return function sendRequest(_x4, _x5) {
-                return ref.apply(this, arguments);
-            };
-        })()
-
-        /**
-         * General purpose function to send anything to server
-         * @param {string} options.url
-         * @param {object} [options.body]
-         * @param {string} [options.method]
-         * @param {object} [options.query]
-         * @param {object} [options.headers]
-         * @param {boolean} [options.skipAuthCheck]
-         * @return {Promise<ApiResponse>}
-         */
-
-    }, {
-        key: 'send',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
-                var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-                return regeneratorRuntime.wrap(function _callee7$(_context7) {
-                    while (1) {
-                        switch (_context7.prev = _context7.next) {
-                            case 0:
-
-                                //FIXME https://github.com/bitinn/node-fetch/issues/43
-                                options.url = this.createUrl(options.url, { addServer: true });
-
-                                _context7.next = 3;
-                                return this.sendRequest(this._client.createRequest(options), options);
-
-                            case 3:
-                                return _context7.abrupt('return', _context7.sent);
-
-                            case 4:
-                            case 'end':
-                                return _context7.stop();
-                        }
-                    }
-                }, _callee7, this);
-            }));
-
-            return function send(_x6) {
-                return ref.apply(this, arguments);
-            };
-        })()
-
-        /**
-         * @param {string} url
-         * @param {object} [query]
-         * @param {object} [options]
-         * @param {object} [options.headers]
-         * @param {boolean} [options.skipAuthCheck]
-         * @return {Promise<ApiResponse>}
-         */
-
-    }, {
-        key: 'get',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(url, query, options) {
-                return regeneratorRuntime.wrap(function _callee8$(_context8) {
-                    while (1) {
-                        switch (_context8.prev = _context8.next) {
-                            case 0:
-                                options = options || {};
-                                options.method = 'GET';
-                                options.url = url;
-                                options.query = query;
-                                _context8.next = 6;
-                                return this.send(options);
-
-                            case 6:
-                                return _context8.abrupt('return', _context8.sent);
-
-                            case 7:
-                            case 'end':
-                                return _context8.stop();
-                        }
-                    }
-                }, _callee8, this);
-            }));
-
-            return function get(_x8, _x9, _x10) {
-                return ref.apply(this, arguments);
-            };
-        })()
-
-        /**
-         * @param {string} url
-         * @param {object} body
-         * @param {object} [query]
-         * @param {object} [options]
-         * @param {object} [options.headers]
-         * @param {boolean} [options.skipAuthCheck]
-         * @return {Promise<ApiResponse>}
-         */
-
-    }, {
-        key: 'post',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(url, body, query, options) {
-                return regeneratorRuntime.wrap(function _callee9$(_context9) {
-                    while (1) {
-                        switch (_context9.prev = _context9.next) {
-                            case 0:
-                                options = options || {};
-                                options.method = 'POST';
-                                options.url = url;
-                                options.query = query;
-                                options.body = body;
-                                _context9.next = 7;
-                                return this.send(options);
-
-                            case 7:
-                                return _context9.abrupt('return', _context9.sent);
-
-                            case 8:
-                            case 'end':
-                                return _context9.stop();
-                        }
-                    }
-                }, _callee9, this);
-            }));
-
-            return function post(_x11, _x12, _x13, _x14) {
-                return ref.apply(this, arguments);
-            };
-        })()
-
-        /**
-         * @param {string} url
-         * @param {object} [body]
-         * @param {object} [query]
-         * @param {object} [options]
-         * @param {object} [options.headers]
-         * @param {boolean} [options.skipAuthCheck]
-         * @return {Promise<ApiResponse>}
-         */
-
-    }, {
-        key: 'put',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(url, body, query, options) {
-                return regeneratorRuntime.wrap(function _callee10$(_context10) {
-                    while (1) {
-                        switch (_context10.prev = _context10.next) {
-                            case 0:
-                                options = options || {};
-                                options.method = 'PUT';
-                                options.url = url;
-                                options.query = query;
-                                options.body = body;
-                                _context10.next = 7;
-                                return this.send(options);
-
-                            case 7:
-                                return _context10.abrupt('return', _context10.sent);
-
-                            case 8:
-                            case 'end':
-                                return _context10.stop();
-                        }
-                    }
-                }, _callee10, this);
-            }));
-
-            return function put(_x15, _x16, _x17, _x18) {
-                return ref.apply(this, arguments);
-            };
-        })()
-
-        /**
-         * @param {string} url
-         * @param {string} [query]
-         * @param {object} [options]
-         * @param {object} [options.headers]
-         * @param {boolean} [options.skipAuthCheck]
-         * @return {Promise<ApiResponse>}
-         */
-
-    }, {
-        key: 'delete',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(url, query, options) {
-                return regeneratorRuntime.wrap(function _callee11$(_context11) {
-                    while (1) {
-                        switch (_context11.prev = _context11.next) {
-                            case 0:
-                                options = options || {};
-                                options.method = 'DELETE';
-                                options.url = url;
-                                options.query = query;
-                                _context11.next = 6;
-                                return this.send(options);
-
-                            case 6:
-                                return _context11.abrupt('return', _context11.sent);
-
-                            case 7:
-                            case 'end':
-                                return _context11.stop();
-                        }
-                    }
-                }, _callee11, this);
-            }));
-
-            return function _delete(_x19, _x20, _x21) {
-                return ref.apply(this, arguments);
-            };
-        })()
-    }, {
-        key: '_tokenRequest',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(path, body) {
-                return regeneratorRuntime.wrap(function _callee12$(_context12) {
-                    while (1) {
-                        switch (_context12.prev = _context12.next) {
-                            case 0:
-                                _context12.next = 2;
-                                return this.send({
-                                    url: path,
-                                    skipAuthCheck: true,
-                                    body: body,
-                                    method: 'POST',
-                                    headers: {
-                                        'Authorization': 'Basic ' + this._apiKey(),
-                                        'Content-Type': 'application/x-www-form-urlencoded'
-                                    }
-                                });
-
-                            case 2:
-                                return _context12.abrupt('return', _context12.sent);
-
-                            case 3:
-                            case 'end':
-                                return _context12.stop();
-                        }
-                    }
-                }, _callee12, this);
-            }));
-
-            return function _tokenRequest(_x22, _x23) {
-                return ref.apply(this, arguments);
-            };
-        })()
-    }, {
-        key: '_ensureAuthentication',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
-                return regeneratorRuntime.wrap(function _callee13$(_context13) {
-                    while (1) {
-                        switch (_context13.prev = _context13.next) {
-                            case 0:
-                                if (!this._isAccessTokenValid()) {
-                                    _context13.next = 2;
-                                    break;
-                                }
-
-                                return _context13.abrupt('return', null);
-
-                            case 2:
-                                _context13.next = 4;
-                                return this.refresh();
-
-                            case 4:
-                                return _context13.abrupt('return', _context13.sent);
-
-                            case 5:
-                            case 'end':
-                                return _context13.stop();
-                        }
-                    }
-                }, _callee13, this);
-            }));
-
-            return function _ensureAuthentication() {
-                return ref.apply(this, arguments);
-            };
-        })()
-    }, {
-        key: '_isAccessTokenValid',
-        value: function _isAccessTokenValid() {
-
-            return this._auth.accessTokenValid() && !this._queue.isPaused();
-        }
-    }, {
-        key: '_apiKey',
-        value: function _apiKey() {
-            var apiKey = this._appKey + ':' + this._appSecret;
-            return typeof btoa == 'function' ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
-        }
-    }, {
-        key: '_authHeader',
-        value: function _authHeader() {
-            var token = this._auth.accessToken();
-            return this._auth.tokenType() + (token ? ' ' + token : '');
-        }
-    }]);
+    Platform.prototype._authHeader = function _authHeader() {
+        var token = this._auth.accessToken();
+        return this._auth.tokenType() + (token ? ' ' + token : '');
+    };
 
     return Platform;
 })(_Observable3.default);
@@ -3222,11 +3053,7 @@ exports.default = Platform;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -3239,146 +3066,125 @@ var Auth = (function () {
         this._cacheId = cacheId;
     } // 1 minute
 
-    _createClass(Auth, [{
-        key: 'accessToken',
-        value: function accessToken() {
-            return this.data().access_token;
-        }
-    }, {
-        key: 'refreshToken',
-        value: function refreshToken() {
-            return this.data().refresh_token;
-        }
-    }, {
-        key: 'tokenType',
-        value: function tokenType() {
-            return this.data().token_type;
-        }
+    Auth.prototype.accessToken = function accessToken() {
+        return this.data().access_token;
+    };
 
-        /**
-         * @return {{token_type: string, access_token: string, expires_in: number, refresh_token: string, refresh_token_expires_in: number}}
-         */
+    Auth.prototype.refreshToken = function refreshToken() {
+        return this.data().refresh_token;
+    };
 
-    }, {
-        key: 'data',
-        value: function data() {
+    Auth.prototype.tokenType = function tokenType() {
+        return this.data().token_type;
+    };
 
-            return this._cache.getItem(this._cacheId) || {
-                token_type: '',
-                access_token: '',
-                expires_in: 0,
-                refresh_token: '',
-                refresh_token_expires_in: 0
-            };
-        }
+    /**
+     * @return {{token_type: string, access_token: string, expires_in: number, refresh_token: string, refresh_token_expires_in: number}}
+     */
 
-        /**
-         * @param {object} newData
-         * @return {Auth}
-         */
+    Auth.prototype.data = function data() {
 
-    }, {
-        key: 'setData',
-        value: function setData(newData) {
+        return this._cache.getItem(this._cacheId) || {
+            token_type: '',
+            access_token: '',
+            expires_in: 0,
+            refresh_token: '',
+            refresh_token_expires_in: 0
+        };
+    };
 
-            newData = newData || {};
+    /**
+     * @param {object} newData
+     * @return {Auth}
+     */
 
-            var data = this.data();
+    Auth.prototype.setData = function setData(newData) {
 
-            Object.keys(newData).forEach(function (key) {
-                data[key] = newData[key];
-            });
+        newData = newData || {};
 
-            data.expire_time = Date.now() + data.expires_in * 1000;
-            data.refresh_token_expire_time = Date.now() + data.refresh_token_expires_in * 1000;
+        var data = this.data();
 
-            this._cache.setItem(this._cacheId, data);
+        Object.keys(newData).forEach(function (key) {
+            data[key] = newData[key];
+        });
 
-            return this;
-        }
+        data.expire_time = Date.now() + data.expires_in * 1000;
+        data.refresh_token_expire_time = Date.now() + data.refresh_token_expires_in * 1000;
 
-        /**
-         * Check if there is a valid (not expired) access token
-         * @return {boolean}
-         */
+        this._cache.setItem(this._cacheId, data);
 
-    }, {
-        key: 'accessTokenValid',
-        value: function accessTokenValid() {
+        return this;
+    };
 
-            var authData = this.data();
-            return authData.token_type === Auth.forcedTokenType || authData.expire_time - Auth.refreshHandicapMs > Date.now();
-        }
+    /**
+     * Check if there is a valid (not expired) access token
+     * @return {boolean}
+     */
 
-        /**
-         * Check if there is a valid (not expired) access token
-         * @return {boolean}
-         */
+    Auth.prototype.accessTokenValid = function accessTokenValid() {
 
-    }, {
-        key: 'refreshTokenValid',
-        value: function refreshTokenValid() {
+        var authData = this.data();
+        return authData.token_type === Auth.forcedTokenType || authData.expire_time - Auth.refreshHandicapMs > Date.now();
+    };
 
-            return this.data().refresh_token_expire_time > Date.now();
-        }
+    /**
+     * Check if there is a valid (not expired) access token
+     * @return {boolean}
+     */
 
-        /**
-         * @return {Auth}
-         */
+    Auth.prototype.refreshTokenValid = function refreshTokenValid() {
 
-    }, {
-        key: 'cancelAccessToken',
-        value: function cancelAccessToken() {
+        return this.data().refresh_token_expire_time > Date.now();
+    };
 
-            return this.setData({
-                access_token: '',
-                expires_in: 0
-            });
-        }
+    /**
+     * @return {Auth}
+     */
 
-        /**
-         * This method sets a special authentication mode used in Service Web
-         * @return {Auth}
-         */
+    Auth.prototype.cancelAccessToken = function cancelAccessToken() {
 
-    }, {
-        key: 'forceAuthentication',
-        value: function forceAuthentication() {
+        return this.setData({
+            access_token: '',
+            expires_in: 0
+        });
+    };
 
-            this.setData({
-                token_type: Auth.forcedTokenType,
-                access_token: '',
-                expires_in: 0,
-                refresh_token: '',
-                refresh_token_expires_in: 0
-            });
+    /**
+     * This method sets a special authentication mode used in Service Web
+     * @return {Auth}
+     */
 
-            return this;
-        }
+    Auth.prototype.forceAuthentication = function forceAuthentication() {
 
-        /**
-         * @param remember
-         * @return {Auth}
-         */
+        this.setData({
+            token_type: Auth.forcedTokenType,
+            access_token: '',
+            expires_in: 0,
+            refresh_token: '',
+            refresh_token_expires_in: 0
+        });
 
-    }, {
-        key: 'setRemember',
-        value: function setRemember(remember) {
+        return this;
+    };
 
-            return this.setData({ remember: remember });
-        }
+    /**
+     * @param remember
+     * @return {Auth}
+     */
 
-        /**
-         * @return {boolean}
-         */
+    Auth.prototype.setRemember = function setRemember(remember) {
 
-    }, {
-        key: 'remember',
-        value: function remember() {
+        return this.setData({ remember: remember });
+    };
 
-            return !!this.data().remember;
-        }
-    }]);
+    /**
+     * @return {boolean}
+     */
+
+    Auth.prototype.remember = function remember() {
+
+        return !!this.data().remember;
+    };
 
     return Auth;
 })();
@@ -3405,11 +3211,7 @@ exports.default = Auth;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _PubnubMock = __webpack_require__(20);
 
@@ -3428,12 +3230,9 @@ var PubnubMockFactory = (function () {
         this.crypto_obj = _Externals.PUBNUB.crypto_obj;
     }
 
-    _createClass(PubnubMockFactory, [{
-        key: 'init',
-        value: function init(options) {
-            return new _PubnubMock2.default(options);
-        }
-    }]);
+    PubnubMockFactory.prototype.init = function init(options) {
+        return new _PubnubMock2.default(options);
+    };
 
     return PubnubMockFactory;
 })();
@@ -3446,11 +3245,7 @@ exports.default = PubnubMockFactory;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Observable2 = __webpack_require__(9);
 
@@ -3472,32 +3267,26 @@ var PubnubMock = (function (_Observable) {
     function PubnubMock(options) {
         _classCallCheck(this, PubnubMock);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PubnubMock).call(this));
+        var _this = _possibleConstructorReturn(this, _Observable.call(this));
 
         _this.options = options;
         _this.crypto_obj = _Externals.PUBNUB.crypto_obj;
         return _this;
     }
 
-    _createClass(PubnubMock, [{
-        key: 'ready',
-        value: function ready() {}
-    }, {
-        key: 'subscribe',
-        value: function subscribe(options) {
-            this.on('message-' + options.channel, options.message);
-        }
-    }, {
-        key: 'unsubscribe',
-        value: function unsubscribe(options) {
-            this.off('message-' + options.channel);
-        }
-    }, {
-        key: 'receiveMessage',
-        value: function receiveMessage(msg, channel) {
-            this.emit('message-' + channel, msg, 'env', channel);
-        }
-    }]);
+    PubnubMock.prototype.ready = function ready() {};
+
+    PubnubMock.prototype.subscribe = function subscribe(options) {
+        this.on('message-' + options.channel, options.message);
+    };
+
+    PubnubMock.prototype.unsubscribe = function unsubscribe(options) {
+        this.off('message-' + options.channel);
+    };
+
+    PubnubMock.prototype.receiveMessage = function receiveMessage(msg, channel) {
+        this.emit('message-' + channel, msg, 'env', channel);
+    };
 
     return PubnubMock;
 })(_Observable3.default);
@@ -3510,11 +3299,7 @@ exports.default = PubnubMock;
 
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Observable2 = __webpack_require__(9);
 
@@ -3542,7 +3327,7 @@ var Subscription = (function (_Observable) {
     function Subscription(pubnubFactory, platform) {
         _classCallCheck(this, Subscription);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Subscription).call(this));
+        var _this = _possibleConstructorReturn(this, _Observable.call(this));
 
         _this.events = {
             notification: 'notification',
@@ -3563,423 +3348,392 @@ var Subscription = (function (_Observable) {
         return _this;
     }
 
-    _createClass(Subscription, [{
-        key: 'subscribed',
-        value: function subscribed() {
+    Subscription.prototype.subscribed = function subscribed() {
 
-            return !!(this._subscription.id && this._subscription.deliveryMode && this._subscription.deliveryMode.subscriberKey && this._subscription.deliveryMode.address);
-        }
+        return !!(this._subscription.id && this._subscription.deliveryMode && this._subscription.deliveryMode.subscriberKey && this._subscription.deliveryMode.address);
+    };
 
-        /**
-         * @return {boolean}
-         */
+    /**
+     * @return {boolean}
+     */
 
-    }, {
-        key: 'alive',
-        value: function alive() {
+    Subscription.prototype.alive = function alive() {
 
-            return this.subscribed() && Date.now() < this.expirationTime();
-        }
-    }, {
-        key: 'expirationTime',
-        value: function expirationTime() {
-            return new Date(this._subscription.expirationTime || 0).getTime() - Subscription._renewHandicapMs;
-        }
-    }, {
-        key: 'setSubscription',
-        value: function setSubscription(subscription) {
+        return this.subscribed() && Date.now() < this.expirationTime();
+    };
 
-            subscription = subscription || {};
+    Subscription.prototype.expirationTime = function expirationTime() {
+        return new Date(this._subscription.expirationTime || 0).getTime() - Subscription._renewHandicapMs;
+    };
 
-            this._clearTimeout();
+    Subscription.prototype.setSubscription = function setSubscription(subscription) {
 
-            this._subscription = subscription;
+        subscription = subscription || {};
 
-            if (!this._pubnub) this._subscribeAtPubnub();
+        this._clearTimeout();
 
-            this._setTimeout();
+        this._subscription = subscription;
 
-            return this;
-        }
-    }, {
-        key: 'subscription',
-        value: function subscription() {
-            return this._subscription;
-        }
+        if (!this._pubnub) this._subscribeAtPubnub();
 
-        /**
-         * Creates or updates subscription if there is an active one
-         * @returns {Promise<ApiResponse>}
-         */
+        this._setTimeout();
 
-    }, {
-        key: 'register',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
-                return regeneratorRuntime.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                if (!this.alive()) {
-                                    _context.next = 6;
-                                    break;
-                                }
+        return this;
+    };
 
-                                _context.next = 3;
-                                return this.renew();
+    Subscription.prototype.subscription = function subscription() {
+        return this._subscription;
+    };
 
-                            case 3:
-                                return _context.abrupt('return', _context.sent);
+    /**
+     * Creates or updates subscription if there is an active one
+     * @returns {Promise<ApiResponse>}
+     */
 
-                            case 6:
-                                _context.next = 8;
-                                return this.subscribe();
+    Subscription.prototype.register = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                    switch (_context.prev = _context.next) {
+                        case 0:
+                            if (!this.alive()) {
+                                _context.next = 6;
+                                break;
+                            }
 
-                            case 8:
-                                return _context.abrupt('return', _context.sent);
+                            _context.next = 3;
+                            return this.renew();
 
-                            case 9:
-                            case 'end':
-                                return _context.stop();
-                        }
+                        case 3:
+                            return _context.abrupt('return', _context.sent);
+
+                        case 6:
+                            _context.next = 8;
+                            return this.subscribe();
+
+                        case 8:
+                            return _context.abrupt('return', _context.sent);
+
+                        case 9:
+                        case 'end':
+                            return _context.stop();
                     }
-                }, _callee, this);
-            }));
+                }
+            }, _callee, this);
+        }));
 
-            return function register() {
-                return ref.apply(this, arguments);
-            };
-        })()
-    }, {
-        key: 'eventFilters',
-        value: function eventFilters() {
-            return this._subscription.eventFilters || [];
-        }
+        return function register() {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @param {string[]} events
-         * @return {Subscription}
-         */
+    Subscription.prototype.eventFilters = function eventFilters() {
+        return this._subscription.eventFilters || [];
+    };
 
-    }, {
-        key: 'addEventFilters',
-        value: function addEventFilters(events) {
-            this.setEventFilters(this.eventFilters().concat(events));
-            return this;
-        }
+    /**
+     * @param {string[]} events
+     * @return {Subscription}
+     */
 
-        /**
-         * @param {string[]} events
-         * @return {Subscription}
-         */
+    Subscription.prototype.addEventFilters = function addEventFilters(events) {
+        this.setEventFilters(this.eventFilters().concat(events));
+        return this;
+    };
 
-    }, {
-        key: 'setEventFilters',
-        value: function setEventFilters(events) {
-            this._subscription.eventFilters = events;
-            return this;
-        }
+    /**
+     * @param {string[]} events
+     * @return {Subscription}
+     */
 
-        /**
-         * @returns {Promise<ApiResponse>}
-         */
+    Subscription.prototype.setEventFilters = function setEventFilters(events) {
+        this._subscription.eventFilters = events;
+        return this;
+    };
 
-    }, {
-        key: 'subscribe',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
-                var response, json;
-                return regeneratorRuntime.wrap(function _callee2$(_context2) {
-                    while (1) {
-                        switch (_context2.prev = _context2.next) {
-                            case 0:
-                                _context2.prev = 0;
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
 
-                                this._clearTimeout();
+    Subscription.prototype.subscribe = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+            var response, json;
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                while (1) {
+                    switch (_context2.prev = _context2.next) {
+                        case 0:
+                            _context2.prev = 0;
 
-                                if (this.eventFilters().length) {
-                                    _context2.next = 4;
-                                    break;
+                            this._clearTimeout();
+
+                            if (this.eventFilters().length) {
+                                _context2.next = 4;
+                                break;
+                            }
+
+                            throw new Error('Events are undefined');
+
+                        case 4:
+                            _context2.next = 6;
+                            return this._platform.post('/restapi/v1.0/subscription', {
+                                eventFilters: this._getFullEventFilters(),
+                                deliveryMode: {
+                                    transportType: 'PubNub'
                                 }
+                            });
 
-                                throw new Error('Events are undefined');
+                        case 6:
+                            response = _context2.sent;
+                            json = response.json();
 
-                            case 4:
-                                _context2.next = 6;
-                                return this._platform.post('/restapi/v1.0/subscription', {
-                                    eventFilters: this._getFullEventFilters(),
-                                    deliveryMode: {
-                                        transportType: 'PubNub'
-                                    }
-                                });
+                            this.setSubscription(json).emit(this.events.subscribeSuccess, response);
 
-                            case 6:
-                                response = _context2.sent;
-                                json = response.json();
+                            return _context2.abrupt('return', response);
 
-                                this.setSubscription(json).emit(this.events.subscribeSuccess, response);
+                        case 12:
+                            _context2.prev = 12;
+                            _context2.t0 = _context2['catch'](0);
 
-                                return _context2.abrupt('return', response);
+                            _context2.t0 = this._platform.client().makeError(_context2.t0);
 
-                            case 12:
-                                _context2.prev = 12;
-                                _context2.t0 = _context2['catch'](0);
+                            this.reset().emit(this.events.subscribeError, _context2.t0);
 
-                                _context2.t0 = this._platform.client().makeError(_context2.t0);
+                            throw _context2.t0;
 
-                                this.reset().emit(this.events.subscribeError, _context2.t0);
-
-                                throw _context2.t0;
-
-                            case 17:
-                            case 'end':
-                                return _context2.stop();
-                        }
+                        case 17:
+                        case 'end':
+                            return _context2.stop();
                     }
-                }, _callee2, this, [[0, 12]]);
-            }));
+                }
+            }, _callee2, this, [[0, 12]]);
+        }));
 
-            return function subscribe() {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function subscribe() {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @returns {Promise<ApiResponse>}
-         */
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
 
-    }, {
-        key: 'renew',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
-                var response, json;
-                return regeneratorRuntime.wrap(function _callee3$(_context3) {
-                    while (1) {
-                        switch (_context3.prev = _context3.next) {
-                            case 0:
-                                _context3.prev = 0;
+    Subscription.prototype.renew = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+            var response, json;
+            return regeneratorRuntime.wrap(function _callee3$(_context3) {
+                while (1) {
+                    switch (_context3.prev = _context3.next) {
+                        case 0:
+                            _context3.prev = 0;
 
-                                this._clearTimeout();
+                            this._clearTimeout();
 
-                                if (this.alive()) {
-                                    _context3.next = 4;
-                                    break;
-                                }
+                            if (this.alive()) {
+                                _context3.next = 4;
+                                break;
+                            }
 
-                                throw new Error('Subscription is not alive');
+                            throw new Error('Subscription is not alive');
 
-                            case 4:
-                                if (this.eventFilters().length) {
-                                    _context3.next = 6;
-                                    break;
-                                }
+                        case 4:
+                            if (this.eventFilters().length) {
+                                _context3.next = 6;
+                                break;
+                            }
 
-                                throw new Error('Events are undefined');
+                            throw new Error('Events are undefined');
 
-                            case 6:
-                                _context3.next = 8;
-                                return this._platform.put('/restapi/v1.0/subscription/' + this._subscription.id, {
-                                    eventFilters: this._getFullEventFilters()
-                                });
+                        case 6:
+                            _context3.next = 8;
+                            return this._platform.put('/restapi/v1.0/subscription/' + this._subscription.id, {
+                                eventFilters: this._getFullEventFilters()
+                            });
 
-                            case 8:
-                                response = _context3.sent;
-                                json = response.json();
+                        case 8:
+                            response = _context3.sent;
+                            json = response.json();
 
-                                this.setSubscription(json).emit(this.events.renewSuccess, response);
+                            this.setSubscription(json).emit(this.events.renewSuccess, response);
 
-                                return _context3.abrupt('return', response);
+                            return _context3.abrupt('return', response);
 
-                            case 14:
-                                _context3.prev = 14;
-                                _context3.t0 = _context3['catch'](0);
+                        case 14:
+                            _context3.prev = 14;
+                            _context3.t0 = _context3['catch'](0);
 
-                                _context3.t0 = this._platform.client().makeError(_context3.t0);
+                            _context3.t0 = this._platform.client().makeError(_context3.t0);
 
-                                this.reset().emit(this.events.renewError, _context3.t0);
+                            this.reset().emit(this.events.renewError, _context3.t0);
 
-                                throw _context3.t0;
+                            throw _context3.t0;
 
-                            case 19:
-                            case 'end':
-                                return _context3.stop();
-                        }
+                        case 19:
+                        case 'end':
+                            return _context3.stop();
                     }
-                }, _callee3, this, [[0, 14]]);
-            }));
+                }
+            }, _callee3, this, [[0, 14]]);
+        }));
 
-            return function renew() {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function renew() {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @returns {Promise<ApiResponse>}
-         */
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
 
-    }, {
-        key: 'remove',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
-                var response;
-                return regeneratorRuntime.wrap(function _callee4$(_context4) {
-                    while (1) {
-                        switch (_context4.prev = _context4.next) {
-                            case 0:
-                                _context4.prev = 0;
+    Subscription.prototype.remove = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+            var response;
+            return regeneratorRuntime.wrap(function _callee4$(_context4) {
+                while (1) {
+                    switch (_context4.prev = _context4.next) {
+                        case 0:
+                            _context4.prev = 0;
 
-                                if (this.subscribed()) {
-                                    _context4.next = 3;
-                                    break;
-                                }
+                            if (this.subscribed()) {
+                                _context4.next = 3;
+                                break;
+                            }
 
-                                throw new Error('No subscription');
+                            throw new Error('No subscription');
 
-                            case 3:
-                                _context4.next = 5;
-                                return this._platform.delete('/restapi/v1.0/subscription/' + this._subscription.id);
+                        case 3:
+                            _context4.next = 5;
+                            return this._platform.delete('/restapi/v1.0/subscription/' + this._subscription.id);
 
-                            case 5:
-                                response = _context4.sent;
+                        case 5:
+                            response = _context4.sent;
 
-                                this.reset().emit(this.events.removeSuccess, response);
+                            this.reset().emit(this.events.removeSuccess, response);
 
-                                return _context4.abrupt('return', response);
+                            return _context4.abrupt('return', response);
 
-                            case 10:
-                                _context4.prev = 10;
-                                _context4.t0 = _context4['catch'](0);
+                        case 10:
+                            _context4.prev = 10;
+                            _context4.t0 = _context4['catch'](0);
 
-                                _context4.t0 = this._platform.client().makeError(_context4.t0);
+                            _context4.t0 = this._platform.client().makeError(_context4.t0);
 
-                                this.emit(this.events.removeError, _context4.t0);
+                            this.emit(this.events.removeError, _context4.t0);
 
-                                throw _context4.t0;
+                            throw _context4.t0;
 
-                            case 15:
-                            case 'end':
-                                return _context4.stop();
-                        }
+                        case 15:
+                        case 'end':
+                            return _context4.stop();
                     }
-                }, _callee4, this, [[0, 10]]);
-            }));
+                }
+            }, _callee4, this, [[0, 10]]);
+        }));
 
-            return function remove() {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function remove() {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @returns {Promise<ApiResponse>}
-         */
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
 
-    }, {
-        key: 'resubscribe',
-        value: function resubscribe() {
+    Subscription.prototype.resubscribe = function resubscribe() {
 
-            return this.reset().setEventFilters(this.eventFilters()).subscribe();
-        }
+        return this.reset().setEventFilters(this.eventFilters()).subscribe();
+    };
 
-        /**
-         * Remove subscription and disconnect from PUBNUB
-         * This method resets subscription at client side but backend is not notified
-         */
+    /**
+     * Remove subscription and disconnect from PUBNUB
+     * This method resets subscription at client side but backend is not notified
+     */
 
-    }, {
-        key: 'reset',
-        value: function reset() {
-            this._clearTimeout();
-            if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({ channel: this._subscription.deliveryMode.address });
-            this._subscription = {};
-            return this;
-        }
-    }, {
-        key: '_getFullEventFilters',
-        value: function _getFullEventFilters() {
-            var _this2 = this;
+    Subscription.prototype.reset = function reset() {
+        this._clearTimeout();
+        if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({ channel: this._subscription.deliveryMode.address });
+        this._subscription = {};
+        return this;
+    };
 
-            return this.eventFilters().map(function (event) {
-                return _this2._platform.createUrl(event);
-            });
-        }
-    }, {
-        key: '_setTimeout',
-        value: function _setTimeout() {
-            var _this3 = this;
+    Subscription.prototype._getFullEventFilters = function _getFullEventFilters() {
+        var _this2 = this;
 
-            this._clearTimeout();
+        return this.eventFilters().map(function (event) {
+            return _this2._platform.createUrl(event);
+        });
+    };
 
-            if (!this.alive()) throw new Error('Subscription is not alive');
+    Subscription.prototype._setTimeout = function _setTimeout() {
+        var _this3 = this;
 
-            (0, _Utils.poll)(function (next) {
+        this._clearTimeout();
 
-                if (_this3.alive()) return next();
+        if (!this.alive()) throw new Error('Subscription is not alive');
 
-                _this3.renew();
-            }, Subscription._pollInterval, this._timeout);
+        (0, _Utils.poll)(function (next) {
 
-            return this;
-        }
-    }, {
-        key: '_clearTimeout',
-        value: function _clearTimeout() {
+            if (_this3.alive()) return next();
 
-            (0, _Utils.stopPolling)(this._timeout);
+            _this3.renew();
+        }, Subscription._pollInterval, this._timeout);
 
-            return this;
-        }
-    }, {
-        key: '_decrypt',
-        value: function _decrypt(message) {
+        return this;
+    };
 
-            if (!this.subscribed()) throw new Error('No subscription');
+    Subscription.prototype._clearTimeout = function _clearTimeout() {
 
-            if (this._subscription.deliveryMode.encryptionKey) {
+        (0, _Utils.stopPolling)(this._timeout);
 
-                var PUBNUB = this._pubnubFactory;
+        return this;
+    };
 
-                message = PUBNUB.crypto_obj.decrypt(message, this._subscription.deliveryMode.encryptionKey, {
-                    encryptKey: false,
-                    keyEncoding: 'base64',
-                    keyLength: 128,
-                    mode: 'ecb'
-                });
-            }
+    Subscription.prototype._decrypt = function _decrypt(message) {
 
-            return message;
-        }
-    }, {
-        key: '_notify',
-        value: function _notify(message) {
+        if (!this.subscribed()) throw new Error('No subscription');
 
-            this.emit(this.events.notification, this._decrypt(message));
-
-            return this;
-        }
-    }, {
-        key: '_subscribeAtPubnub',
-        value: function _subscribeAtPubnub() {
-
-            if (!this.alive()) throw new Error('Subscription is not alive');
+        if (this._subscription.deliveryMode.encryptionKey) {
 
             var PUBNUB = this._pubnubFactory;
 
-            this._pubnub = PUBNUB.init({
-                ssl: true,
-                subscribe_key: this._subscription.deliveryMode.subscriberKey
+            message = PUBNUB.crypto_obj.decrypt(message, this._subscription.deliveryMode.encryptionKey, {
+                encryptKey: false,
+                keyEncoding: 'base64',
+                keyLength: 128,
+                mode: 'ecb'
             });
-
-            this._pubnub.ready();
-
-            this._pubnub.subscribe({
-                channel: this._subscription.deliveryMode.address,
-                message: this._notify.bind(this),
-                connect: function connect() {}
-            });
-
-            return this;
         }
-    }]);
+
+        return message;
+    };
+
+    Subscription.prototype._notify = function _notify(message) {
+
+        this.emit(this.events.notification, this._decrypt(message));
+
+        return this;
+    };
+
+    Subscription.prototype._subscribeAtPubnub = function _subscribeAtPubnub() {
+
+        if (!this.alive()) throw new Error('Subscription is not alive');
+
+        var PUBNUB = this._pubnubFactory;
+
+        this._pubnub = PUBNUB.init({
+            ssl: true,
+            subscribe_key: this._subscription.deliveryMode.subscriberKey
+        });
+
+        this._pubnub.ready();
+
+        this._pubnub.subscribe({
+            channel: this._subscription.deliveryMode.address,
+            message: this._notify.bind(this),
+            connect: function connect() {}
+        });
+
+        return this;
+    };
 
     return Subscription;
 })(_Observable3.default);
@@ -4014,13 +3768,7 @@ exports.default = Subscription;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+exports.__esModule = true;
 
 var _Subscription2 = __webpack_require__(21);
 
@@ -4046,7 +3794,7 @@ var CachedSubscription = (function (_Subscription) {
     function CachedSubscription(pubnubFactory, platform, cache, cacheKey) {
         _classCallCheck(this, CachedSubscription);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CachedSubscription).call(this, pubnubFactory, platform));
+        var _this = _possibleConstructorReturn(this, _Subscription.call(this, pubnubFactory, platform));
 
         _this._cache = cache;
         _this._cacheKey = cacheKey;
@@ -4086,120 +3834,111 @@ var CachedSubscription = (function (_Subscription) {
      * @private
      */
 
-    _createClass(CachedSubscription, [{
-        key: '_queue',
-        value: (function () {
-            var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(actionCb, queue, successEvent, errorEvent, errorMessage) {
-                var res;
-                return regeneratorRuntime.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                _context.prev = 0;
+    CachedSubscription.prototype._queue = (function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(actionCb, queue, successEvent, errorEvent, errorMessage) {
+            var res;
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                    switch (_context.prev = _context.next) {
+                        case 0:
+                            _context.prev = 0;
 
-                                if (!queue.isPaused()) {
-                                    _context.next = 8;
-                                    break;
-                                }
+                            if (!queue.isPaused()) {
+                                _context.next = 8;
+                                break;
+                            }
 
-                                _context.next = 4;
-                                return queue.poll();
+                            _context.next = 4;
+                            return queue.poll();
 
-                            case 4:
-                                if (this.alive()) {
-                                    _context.next = 6;
-                                    break;
-                                }
+                        case 4:
+                            if (this.alive()) {
+                                _context.next = 6;
+                                break;
+                            }
 
-                                throw new Error(errorMessage);
+                            throw new Error(errorMessage);
 
-                            case 6:
+                        case 6:
 
-                                this.emit(successEvent, null);
+                            this.emit(successEvent, null);
 
-                                return _context.abrupt('return', null);
+                            return _context.abrupt('return', null);
 
-                            case 8:
+                        case 8:
 
-                                queue.pause();
+                            queue.pause();
 
-                                _context.next = 11;
-                                return actionCb.call(this);
+                            _context.next = 11;
+                            return actionCb.call(this);
 
-                            case 11:
-                                res = _context.sent;
+                        case 11:
+                            res = _context.sent;
 
-                                queue.resume();
+                            queue.resume();
 
-                                this.emit(successEvent, res);
+                            this.emit(successEvent, res);
 
-                                return _context.abrupt('return', res);
+                            return _context.abrupt('return', res);
 
-                            case 17:
-                                _context.prev = 17;
-                                _context.t0 = _context['catch'](0);
+                        case 17:
+                            _context.prev = 17;
+                            _context.t0 = _context['catch'](0);
 
-                                this.emit(errorEvent, _context.t0);
+                            this.emit(errorEvent, _context.t0);
 
-                                throw _context.t0;
+                            throw _context.t0;
 
-                            case 21:
-                            case 'end':
-                                return _context.stop();
-                        }
+                        case 21:
+                        case 'end':
+                            return _context.stop();
                     }
-                }, _callee, this, [[0, 17]]);
-            }));
+                }
+            }, _callee, this, [[0, 17]]);
+        }));
 
-            return function _queue(_x, _x2, _x3, _x4, _x5) {
-                return ref.apply(this, arguments);
-            };
-        })()
+        return function _queue(_x, _x2, _x3, _x4, _x5) {
+            return ref.apply(this, arguments);
+        };
+    })();
 
-        /**
-         * @returns {Promise<ApiResponse>}
-         */
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
 
-    }, {
-        key: 'renew',
-        value: function renew() {
+    CachedSubscription.prototype.renew = function renew() {
 
-            return this._queue(_get(Object.getPrototypeOf(CachedSubscription.prototype), 'renew', this), this._renewQueue, this.events.queuedRenewSuccess, this.events.queuedRenewError, 'Subscription is not alive after renew timeout');
+        return this._queue(_Subscription.prototype.renew, this._renewQueue, this.events.queuedRenewSuccess, this.events.queuedRenewError, 'Subscription is not alive after renew timeout');
+    };
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+    CachedSubscription.prototype.resubscribe = function resubscribe() {
+
+        return this._queue(_Subscription.prototype.resubscribe, this._resubscribeQueue, this.events.queuedResubscribeSuccess, this.events.queuedResubscribeError, 'Subscription is not alive after resubscribe timeout');
+    };
+
+    /**
+     * @param {string[]} events
+     * @return {CachedSubscription}
+     */
+
+    CachedSubscription.prototype.restore = function restore(events) {
+
+        var cachedSubscriptionData = this._cache.getItem(this._cacheKey);
+
+        if (cachedSubscriptionData) {
+            try {
+                this.setSubscription(cachedSubscriptionData);
+            } catch (e) {}
+        } else {
+            this.setEventFilters(events);
         }
 
-        /**
-         * @returns {Promise<ApiResponse>}
-         */
-
-    }, {
-        key: 'resubscribe',
-        value: function resubscribe() {
-
-            return this._queue(_get(Object.getPrototypeOf(CachedSubscription.prototype), 'resubscribe', this), this._resubscribeQueue, this.events.queuedResubscribeSuccess, this.events.queuedResubscribeError, 'Subscription is not alive after resubscribe timeout');
-        }
-
-        /**
-         * @param {string[]} events
-         * @return {CachedSubscription}
-         */
-
-    }, {
-        key: 'restore',
-        value: function restore(events) {
-
-            var cachedSubscriptionData = this._cache.getItem(this._cacheKey);
-
-            if (cachedSubscriptionData) {
-                try {
-                    this.setSubscription(cachedSubscriptionData);
-                } catch (e) {}
-            } else {
-                this.setEventFilters(events);
-            }
-
-            return this;
-        }
-    }]);
+        return this;
+    };
 
     return CachedSubscription;
 })(_Subscription3.default);
