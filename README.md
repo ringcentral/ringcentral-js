@@ -477,7 +477,7 @@ In the notification event handler application may have a bunch of if's that will
 ```js
 subscription.on(subscription.events.notification, function(msg) {
     if (msg.event.indexOf('/presence') > -1) { ... }
-    elseif (msg.event.indexOf('/message-store') > -1) { ... }
+    else if (msg.event.indexOf('/message-store') > -1) { ... }
     else { ... }
 });
 ```
