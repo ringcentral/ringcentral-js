@@ -31,7 +31,7 @@ export default class Registry {
 
     }
 
-    apiCall(method:string, path:string, response:any, status, statusText) {
+    apiCall(method, path, response, status, statusText) {
 
         this.add(new Mock(method, path, response, status, statusText));
 

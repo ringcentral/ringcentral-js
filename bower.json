@@ -1,5 +1,4 @@
 {
-  "version": "2.0.1",
   "name": "ringcentral",
   "main": "./build/ringcentral.min.js",
   "ignore": [

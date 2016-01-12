@@ -7,7 +7,7 @@ export default class PubnubMockFactory {
         this.crypto_obj = PUBNUB.crypto_obj;
     }
 
-    init(options:PUBNUBInitOptions) {
+    init(options) {
         return new PubnubMock(options);
     }
 

@@ -23,7 +23,7 @@ describe('RingCentral', function() {
 
     }
 
-    it('connects to sandbox', function() {
+    it.skip('connects to sandbox', function() {
         return test(this, SDK.server.sandbox);
     });
 

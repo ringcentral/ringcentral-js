@@ -20,11 +20,9 @@ import PubnubMockFactory from './pubnub/PubnubFactory';
 import Subscription from './subscription/Subscription';
 import CachedSubscription from './subscription/CachedSubscription';
 
-require("regenerator/runtime");
-
 export default class SDK {
 
-    static version = '2.0.1';
+    static version = '2.0.2';
 
     static server = {
         sandbox: 'https://platform.devtest.ringcentral.com',

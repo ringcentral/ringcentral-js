@@ -457,7 +457,7 @@ describe('RingCentral.platform.Platform', function() {
 
                 var platform = sdk.platform();
 
-                function test(method:string) {
+                function test(method) {
 
                     var path = '/foo/' + method;
 
