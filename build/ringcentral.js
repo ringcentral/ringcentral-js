@@ -3358,7 +3358,6 @@ var Subscription = (function (_Observable) {
      */
 
     Subscription.prototype.alive = function alive() {
-
         return this.subscribed() && Date.now() < this.expirationTime();
     };
 
@@ -3528,12 +3527,12 @@ var Subscription = (function (_Observable) {
 
                             this._clearTimeout();
 
-                            if (this.alive()) {
+                            if (this.subscribed()) {
                                 _context3.next = 4;
                                 break;
                             }
 
-                            throw new Error('Subscription is not alive');
+                            throw new Error('No subscription');
 
                         case 4:
                             if (this.eventFilters().length) {

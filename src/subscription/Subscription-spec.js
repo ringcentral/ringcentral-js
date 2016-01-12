@@ -74,7 +74,7 @@ describe('RingCentral.subscription.Subscription', function() {
                         throw new Error('This should not be reached');
                     })
                     .catch(function(e) {
-                        expect(e.message).to.equal('Subscription is not alive');
+                        expect(e.message).to.equal('No subscription');
                     });
 
             });

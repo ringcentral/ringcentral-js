@@ -42,9 +42,7 @@ export default class Subscription extends Observable {
      * @return {boolean}
      */
     alive() {
-
         return this.subscribed() && Date.now() < this.expirationTime();
-
     }
 
     expirationTime() {
@@ -154,7 +152,7 @@ export default class Subscription extends Observable {
 
             this._clearTimeout();
 
-            if (!this.alive()) throw new Error('Subscription is not alive');
+            if (!this.subscribed()) throw new Error('No subscription');
 
             if (!this.eventFilters().length) throw new Error('Events are undefined');
 
