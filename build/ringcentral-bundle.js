@@ -864,7 +864,7 @@ var SDK = (function () {
     return SDK;
 })();
 
-SDK.version = '2.0.1';
+SDK.version = '2.0.2';
 SDK.server = {
     sandbox: 'https://platform.devtest.ringcentral.com',
     production: 'https://platform.ringcentral.com'
@@ -6057,7 +6057,9 @@ var Client = (function (_Observable) {
         // Sanity checks
         if (!init.url) throw new Error('Url is not defined');
         if (!init.method) init.method = 'GET';
-        if (init.method && Client._allowedMethods.indexOf(init.method) < 0) throw new Error('Method has wrong value: ' + init.method);
+        if (init.method && Client._allowedMethods.indexOf(init.method.toUpperCase()) < 0) {
+            throw new Error('Method has wrong value: ' + init.method);
+        }
 
         // Defaults
         init.credentials = init.credentials || 'include';
