@@ -69,7 +69,7 @@ Add the following to your HTML:
 </script>
 ```
 
-**Not recommended!** If you are in a hurry, you can use bundled version with all dependencies:
+**Not recommended!** You also can use bundle version with all dependencies:
 
 ```html
 <script type="text/javascript" src="path-to-scripts/ringcentral/build/ringcentral-bundle.js"></script><!-- or ringcentral-bundle.min.js -->
@@ -100,9 +100,6 @@ require.config({
 require(['ringcentral', 'es6-promise', 'fetch'], function(SDK, Promise) {
     
     Promise.polyfill();
-    // or
-    SDK.externals._Promise = Promise;
-    
     var sdk = new SDK(...);
     
 });
@@ -121,26 +118,16 @@ Make sure that polyfills are loaded before or together with SDK.
 2. Require the SDK:
 
     ```js
-    var RingCentral = require('ringcentral');
+    var SDK = require('ringcentral');
+    var sdk = new SDK(...);
     ```
 
 ## Set things up for Browserify or Webpack
 
 **!!! This is experimental !!!**
 
-1. Install the NPM package:
-
-    ```sh
-    npm install ringcentral --save
-    ```
-
-2. Require the SDK:
-
-    ```js
-    var RingCentral = require('ringcentral');
-    ```
-
-3. Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
+1. Follow installation steps for NodeJS
+2. Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
     
     ```js
     {
@@ -236,7 +223,7 @@ application can log in so that it can access the features of the API.
 
 ## Login
 
-Login is accomplished by calling the `platform.authorize()` method of the Platform singleton with username, extension
+Login is accomplished by calling the `platform.login()` method of the Platform singleton with username, extension
 (optional), and password as parameters. A `Promise` instance is returned, resolved with an AJAX `Response` object.
 
 ```js
@@ -267,7 +254,7 @@ and such.
 
 Login can, of course, fail - a user can enter the incorrect password or mistype their user name.
 
-To handle cases where login fails, you can provide an error handler function in a call to the promise's `catch` method.
+To handle cases where login fails, you can provide an error handler function in a call to the Promise's `catch` method.
 To keep this example simple, a simple JavaScript alert is being used. In a real application, you will want to provide
 a good UX in your login form UI.
 
@@ -490,7 +477,7 @@ In the notification event handler application may have a bunch of if's that will
 ```js
 subscription.on(subscription.events.notification, function(msg) {
     if (msg.event.indexOf('/presence') > -1) { ... }
-    elseif (msg.event.indexOf('/message-store') > -1) { ... }
+    else if (msg.event.indexOf('/message-store') > -1) { ... }
     else { ... }
 });
 ```
