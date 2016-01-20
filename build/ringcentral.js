@@ -728,8 +728,6 @@ module.exports = __webpack_require__(2);
 
 'use strict';
 
-exports.__esModule = true;
-
 var _Utils = __webpack_require__(3);
 
 var Utils = _interopRequireWildcard(_Utils);
@@ -864,7 +862,7 @@ var SDK = (function () {
     return SDK;
 })();
 
-SDK.version = '2.0.2';
+SDK.version = '2.0.3';
 SDK.server = {
     sandbox: 'https://platform.devtest.ringcentral.com',
     production: 'https://platform.ringcentral.com'
@@ -896,7 +894,8 @@ SDK.mocks = {
 SDK.pubnub = {
     PubnubMockFactory: _PubnubFactory2.default
 };
-exports.default = SDK;
+
+module.exports = SDK;
 
 /***/ },
 /* 3 */
