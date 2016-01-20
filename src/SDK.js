@@ -20,9 +20,9 @@ import PubnubMockFactory from './pubnub/PubnubFactory';
 import Subscription from './subscription/Subscription';
 import CachedSubscription from './subscription/CachedSubscription';
 
-export default class SDK {
+class SDK {
 
-    static version = '2.0.2';
+    static version = '2.0.3';
 
     static server = {
         sandbox: 'https://platform.devtest.ringcentral.com',
@@ -117,3 +117,5 @@ export default class SDK {
     };
 
 }
+
+module.exports = SDK;
