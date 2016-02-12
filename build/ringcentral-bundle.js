@@ -1046,7 +1046,7 @@ function delay(timeout) {
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-'use strict';
+/* WEBPACK VAR INJECTION */(function(global) {"use strict";
 
 exports.__esModule = true;
 exports.localStorage = exports.PUBNUB = exports.Headers = exports.Response = exports.Request = exports.fetch = exports.Promise = undefined;
@@ -1065,7 +1065,7 @@ var _pubnub2 = _interopRequireDefault(_pubnub);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var root = new Function('return this')();
+var root = typeof window !== "undefined" && window || typeof global !== "undefined" && global || Function("return this;")();
 
 var Promise = exports.Promise = _es6Promise2.default && _es6Promise2.default.Promise || root.Promise;
 
@@ -1077,6 +1077,7 @@ var Headers = exports.Headers = root.Headers || fetch.Headers;
 var PUBNUB = exports.PUBNUB = root.PUBNUB || _pubnub2.default;
 
 var localStorage = exports.localStorage = typeof root.localStorage !== 'undefined' ? root.localStorage : {};
+/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 5 */
