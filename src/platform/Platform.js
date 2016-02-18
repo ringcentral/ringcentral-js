@@ -1,8 +1,8 @@
-import Observable from '../core/Observable';
-import Queue from '../core/Queue';
-import Auth from './Auth';
-import {Promise} from '../core/Externals';
-import {queryStringify, parseQueryString, delay} from '../core/Utils';
+import Observable from "../core/Observable";
+import Queue from "../core/Queue";
+import Auth from "./Auth";
+import {Promise} from "../core/Externals";
+import {queryStringify, parseQueryString, delay} from "../core/Utils";
 
 export default class Platform extends Observable {
 
@@ -30,7 +30,7 @@ export default class Platform extends Observable {
         logoutError: 'logoutError'
     };
 
-    constructor(client, cache, server, appKey, appSecret) {
+    constructor(client, cache, server, appKey, appSecret, appName, appVersion, sdkVersion) {
 
         super();
 
@@ -47,6 +47,9 @@ export default class Platform extends Observable {
         this._queue = new Queue(this._cache, Platform._cacheId + '-refresh');
 
         this._auth = new Auth(this._cache, Platform._cacheId);
+
+        this._userAgent = (appName ? (appName + (appVersion ? '/' + appVersion : '')) + ' ' : '') +
+                          'RCJSSDK/' + sdkVersion;
 
     }
 
@@ -334,10 +337,10 @@ export default class Platform extends Observable {
 
         await this._ensureAuthentication();
 
+        request.headers.set('X-User-Agent', this._userAgent);
+        request.headers.set('Client-Id', this._appKey);
         request.headers.set('Authorization', this._authHeader());
         //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
-
-        //TODO Add User-Agent here
 
         return request;
 

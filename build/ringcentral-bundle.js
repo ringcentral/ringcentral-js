@@ -822,7 +822,7 @@ var SDK = (function () {
 
         this._client = options.client || new _Client2.default();
 
-        this._platform = new _Platform2.default(this._client, this._cache, options.server, options.appKey, options.appSecret);
+        this._platform = new _Platform2.default(this._client, this._cache, options.server, options.appKey, options.appSecret, options.appName, options.appVersion, SDK.version);
 
         this._pubnubFactory = options.pubnubFactory || Externals.PUBNUB;
     }
@@ -862,7 +862,7 @@ var SDK = (function () {
     return SDK;
 })();
 
-SDK.version = '2.0.4';
+SDK.version = '2.0.5';
 SDK.server = {
     sandbox: 'https://platform.devtest.ringcentral.com',
     production: 'https://platform.ringcentral.com'
@@ -6735,7 +6735,7 @@ exports.default = Mock;
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-'use strict';
+"use strict";
 
 exports.__esModule = true;
 
@@ -6770,7 +6770,7 @@ var Platform = (function (_Observable) {
 
     // 10 hours
 
-    function Platform(client, cache, server, appKey, appSecret) {
+    function Platform(client, cache, server, appKey, appSecret, appName, appVersion, sdkVersion) {
         _classCallCheck(this, Platform);
 
         var _this = _possibleConstructorReturn(this, _Observable.call(this));
@@ -6800,6 +6800,8 @@ var Platform = (function (_Observable) {
         _this._queue = new _Queue2.default(_this._cache, Platform._cacheId + '-refresh');
 
         _this._auth = new _Auth2.default(_this._cache, Platform._cacheId);
+
+        _this._userAgent = (appName ? appName + (appVersion ? '/' + appVersion : '') + ' ' : '') + 'RCJSSDK/' + sdkVersion;
 
         return _this;
     }
@@ -6911,15 +6913,15 @@ var Platform = (function (_Observable) {
                             return this._ensureAuthentication();
 
                         case 3:
-                            return _context.abrupt('return', true);
+                            return _context.abrupt("return", true);
 
                         case 6:
                             _context.prev = 6;
-                            _context.t0 = _context['catch'](0);
-                            return _context.abrupt('return', false);
+                            _context.t0 = _context["catch"](0);
+                            return _context.abrupt("return", false);
 
                         case 9:
-                        case 'end':
+                        case "end":
                             return _context.stop();
                     }
                 }
@@ -6988,11 +6990,11 @@ var Platform = (function (_Observable) {
 
                             this.emit(this.events.loginSuccess, apiResponse);
 
-                            return _context2.abrupt('return', apiResponse);
+                            return _context2.abrupt("return", apiResponse);
 
                         case 16:
                             _context2.prev = 16;
-                            _context2.t0 = _context2['catch'](0);
+                            _context2.t0 = _context2["catch"](0);
 
                             this._cache.clean();
 
@@ -7001,7 +7003,7 @@ var Platform = (function (_Observable) {
                             throw _context2.t0;
 
                         case 21:
-                        case 'end':
+                        case "end":
                             return _context2.stop();
                     }
                 }
@@ -7048,7 +7050,7 @@ var Platform = (function (_Observable) {
 
                             this.emit(this.events.refreshSuccess, null);
 
-                            return _context3.abrupt('return', null);
+                            return _context3.abrupt("return", null);
 
                         case 9:
 
@@ -7109,11 +7111,11 @@ var Platform = (function (_Observable) {
 
                             this.emit(this.events.refreshSuccess, res);
 
-                            return _context3.abrupt('return', res);
+                            return _context3.abrupt("return", res);
 
                         case 30:
                             _context3.prev = 30;
-                            _context3.t0 = _context3['catch'](0);
+                            _context3.t0 = _context3["catch"](0);
 
                             _context3.t0 = this._client.makeError(_context3.t0);
 
@@ -7126,7 +7128,7 @@ var Platform = (function (_Observable) {
                             throw _context3.t0;
 
                         case 36:
-                        case 'end':
+                        case "end":
                             return _context3.stop();
                     }
                 }
@@ -7168,11 +7170,11 @@ var Platform = (function (_Observable) {
 
                             this.emit(this.events.logoutSuccess, res);
 
-                            return _context4.abrupt('return', res);
+                            return _context4.abrupt("return", res);
 
                         case 12:
                             _context4.prev = 12;
-                            _context4.t0 = _context4['catch'](0);
+                            _context4.t0 = _context4["catch"](0);
 
                             this._queue.resume();
 
@@ -7181,7 +7183,7 @@ var Platform = (function (_Observable) {
                             throw _context4.t0;
 
                         case 17:
-                        case 'end':
+                        case "end":
                             return _context4.stop();
                     }
                 }
@@ -7214,7 +7216,7 @@ var Platform = (function (_Observable) {
                                 break;
                             }
 
-                            return _context5.abrupt('return', request);
+                            return _context5.abrupt("return", request);
 
                         case 3:
                             _context5.next = 5;
@@ -7222,15 +7224,15 @@ var Platform = (function (_Observable) {
 
                         case 5:
 
+                            request.headers.set('X-User-Agent', this._userAgent);
+                            request.headers.set('Client-Id', this._appKey);
                             request.headers.set('Authorization', this._authHeader());
                             //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
 
-                            //TODO Add User-Agent here
+                            return _context5.abrupt("return", request);
 
-                            return _context5.abrupt('return', request);
-
-                        case 7:
-                        case 'end':
+                        case 9:
+                        case "end":
                             return _context5.stop();
                     }
                 }
@@ -7265,11 +7267,11 @@ var Platform = (function (_Observable) {
                             return this._client.sendRequest(request);
 
                         case 6:
-                            return _context6.abrupt('return', _context6.sent);
+                            return _context6.abrupt("return", _context6.sent);
 
                         case 9:
                             _context6.prev = 9;
-                            _context6.t0 = _context6['catch'](0);
+                            _context6.t0 = _context6["catch"](0);
 
                             if (!(!_context6.t0.apiResponse || !_context6.t0.apiResponse.response() || _context6.t0.apiResponse.response().status != 401)) {
                                 _context6.next = 13;
@@ -7286,10 +7288,10 @@ var Platform = (function (_Observable) {
                             return this.sendRequest(request, options);
 
                         case 16:
-                            return _context6.abrupt('return', _context6.sent);
+                            return _context6.abrupt("return", _context6.sent);
 
                         case 17:
-                        case 'end':
+                        case "end":
                             return _context6.stop();
                     }
                 }
@@ -7327,10 +7329,10 @@ var Platform = (function (_Observable) {
                             return this.sendRequest(this._client.createRequest(options), options);
 
                         case 3:
-                            return _context7.abrupt('return', _context7.sent);
+                            return _context7.abrupt("return", _context7.sent);
 
                         case 4:
-                        case 'end':
+                        case "end":
                             return _context7.stop();
                     }
                 }
@@ -7365,10 +7367,10 @@ var Platform = (function (_Observable) {
                             return this.send(options);
 
                         case 6:
-                            return _context8.abrupt('return', _context8.sent);
+                            return _context8.abrupt("return", _context8.sent);
 
                         case 7:
-                        case 'end':
+                        case "end":
                             return _context8.stop();
                     }
                 }
@@ -7405,10 +7407,10 @@ var Platform = (function (_Observable) {
                             return this.send(options);
 
                         case 7:
-                            return _context9.abrupt('return', _context9.sent);
+                            return _context9.abrupt("return", _context9.sent);
 
                         case 8:
-                        case 'end':
+                        case "end":
                             return _context9.stop();
                     }
                 }
@@ -7445,10 +7447,10 @@ var Platform = (function (_Observable) {
                             return this.send(options);
 
                         case 7:
-                            return _context10.abrupt('return', _context10.sent);
+                            return _context10.abrupt("return", _context10.sent);
 
                         case 8:
-                        case 'end':
+                        case "end":
                             return _context10.stop();
                     }
                 }
@@ -7483,10 +7485,10 @@ var Platform = (function (_Observable) {
                             return this.send(options);
 
                         case 6:
-                            return _context11.abrupt('return', _context11.sent);
+                            return _context11.abrupt("return", _context11.sent);
 
                         case 7:
-                        case 'end':
+                        case "end":
                             return _context11.stop();
                     }
                 }
@@ -7517,10 +7519,10 @@ var Platform = (function (_Observable) {
                             });
 
                         case 2:
-                            return _context12.abrupt('return', _context12.sent);
+                            return _context12.abrupt("return", _context12.sent);
 
                         case 3:
-                        case 'end':
+                        case "end":
                             return _context12.stop();
                     }
                 }
@@ -7543,17 +7545,17 @@ var Platform = (function (_Observable) {
                                 break;
                             }
 
-                            return _context13.abrupt('return', null);
+                            return _context13.abrupt("return", null);
 
                         case 2:
                             _context13.next = 4;
                             return this.refresh();
 
                         case 4:
-                            return _context13.abrupt('return', _context13.sent);
+                            return _context13.abrupt("return", _context13.sent);
 
                         case 5:
-                        case 'end':
+                        case "end":
                             return _context13.stop();
                     }
                 }

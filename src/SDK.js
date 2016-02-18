@@ -22,7 +22,7 @@ import CachedSubscription from './subscription/CachedSubscription';
 
 class SDK {
 
-    static version = '2.0.4';
+    static version = '2.0.5';
 
     static server = {
         sandbox: 'https://platform.devtest.ringcentral.com',
@@ -49,7 +49,16 @@ class SDK {
 
         this._client = options.client || new Client();
 
-        this._platform = new Platform(this._client, this._cache, options.server, options.appKey, options.appSecret);
+        this._platform = new Platform(
+            this._client,
+            this._cache,
+            options.server,
+            options.appKey,
+            options.appSecret,
+            options.appName,
+            options.appVersion,
+            SDK.version
+        );
 
         this._pubnubFactory = options.pubnubFactory || Externals.PUBNUB;
 

@@ -22,7 +22,7 @@
             var appKey = localStorage.getItem('ringcentral-demo-appKey'),
                 appSecret = localStorage.getItem('ringcentral-demo-appSecret'),
                 server = localStorage.getItem('ringcentral-demo-server'),
-                rcsdk = new RingCentral.SDK({server: server, appKey: appKey, appSecret: appSecret}),
+                rcsdk = new RingCentral.SDK({server: server, appKey: appKey, appSecret: appSecret, appName:'Demo', appVersion: '1.0.0'}),
                 platform = rcsdk.platform();
 
             function showExtension() {
