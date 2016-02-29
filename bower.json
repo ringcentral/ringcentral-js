@@ -28,8 +28,14 @@
     "sinonjs": "~1.14.1",
     "requirejs": "~2.1.20"
   },
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
   "private": false,
   "license": "MIT",
+  "homepage": "https://github.com/ringcentral/ringcentral-js",
   "authors": [
     {
       "name": "RingCentral, Inc.",
@@ -43,5 +49,5 @@
     "type": "git",
     "url": "git://github.com/ringcentral/ringcentral-js.git"
   },
-  "version": "2.0.4"
+  "version": "2.0.5"
 }

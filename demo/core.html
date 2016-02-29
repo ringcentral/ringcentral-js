@@ -20,10 +20,10 @@
         window.addEventListener('load', function() {
 
             var appKey = localStorage.getItem('ringcentral-demo-appKey'),
-                    appSecret = localStorage.getItem('ringcentral-demo-appSecret'),
-                    server = localStorage.getItem('ringcentral-demo-server'),
-                    rcsdk = new RingCentral.SDK({server: server, appKey: appKey, appSecret: appSecret}),
-                    platform = rcsdk.platform();
+                appSecret = localStorage.getItem('ringcentral-demo-appSecret'),
+                server = localStorage.getItem('ringcentral-demo-server'),
+                rcsdk = new RingCentral.SDK({server: server, appKey: appKey, appSecret: appSecret, appName:'Demo', appVersion: '1.0.0'}),
+                platform = rcsdk.platform();
 
             function showExtension() {
 
@@ -31,41 +31,41 @@
                 document.getElementById('extension').style.display = 'block';
 
                 var activeCalls = 0,
-                        logDiv = document.getElementById('extension-presence-log'),
-                        callDiv = document.getElementById('extension-call-log');
+                    logDiv = document.getElementById('extension-presence-log'),
+                    callDiv = document.getElementById('extension-call-log');
 
                 function getExtension(cb) {
 
                     platform.get('/account/~/extension/~')
-                            .then(function(ajax) {
-                                cb(ajax.json());
-                            })
-                            .catch(function(e) {
-                                console.error(e);
-                            });
+                        .then(function(ajax) {
+                            cb(ajax.json());
+                        })
+                        .catch(function(e) {
+                            console.error(e);
+                        });
 
                 }
 
                 function getPresence(cb) {
 
                     platform.get('/account/~/extension/~/presence', {query: {detailedTelephonyState: true}})
-                            .then(function(ajax) {
-                                cb(ajax.json());
-                            }).catch(function(e) {
-                                console.error(e);
-                            });
+                        .then(function(ajax) {
+                            cb(ajax.json());
+                        }).catch(function(e) {
+                        console.error(e);
+                    });
 
                 }
 
                 function getCallLog(cb) {
 
                     platform.get('/account/~/extension/~/call-log')
-                            .then(function(data) {
-                                cb(data.json().records);
-                            })
-                            .catch(function(e) {
-                                console.error(e);
-                            });
+                        .then(function(data) {
+                            cb(data.json().records);
+                        })
+                        .catch(function(e) {
+                            console.error(e);
+                        });
 
                 }
 
@@ -78,15 +78,14 @@
                     });
 
                     subscription
-                            .register({
-                                events: [event]
-                            })
-                            .then(function(ajax) {
-                                console.log('Subscribed', ajax);
-                            })
-                            .catch(function(e) {
-                                console.error(e);
-                            });
+                        .addEventFilters([event])
+                        .register()
+                        .then(function(ajax) {
+                            console.log('Subscribed', ajax);
+                        })
+                        .catch(function(e) {
+                            console.error(e);
+                        });
 
                 }
 
@@ -137,17 +136,17 @@
                 document.getElementById('login-submit').addEventListener('click', function() {
 
                     platform
-                            .login({
-                                username: document.getElementById('login-username').value,
-                                extension: document.getElementById('login-extension').value,
-                                password: document.getElementById('login-password').value
-                            })
-                            .then(showExtension).catch(function(e) {
+                        .login({
+                            username: document.getElementById('login-username').value,
+                            extension: document.getElementById('login-extension').value,
+                            password: document.getElementById('login-password').value
+                        })
+                        .then(showExtension).catch(function(e) {
 
-                                alert(e.message || e.description || 'Server cannot authorize user');
-                                console.error(e.stack);
+                        alert(e.message || e.description || 'Server cannot authorize user');
+                        console.error(e.stack);
 
-                            });
+                    });
 
                 });
 
@@ -167,7 +166,7 @@
             document.getElementById('login-password').value = localStorage.getItem('ringcentral-demo-login-password');
             document.getElementById('login-extension').value = localStorage.getItem('ringcentral-demo-login-extension');
 
-            platform.loggedIn().then(function(res){
+            platform.loggedIn().then(function(res) {
                 if (res) {
                     showExtension();
                 } else {

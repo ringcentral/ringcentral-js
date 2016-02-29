@@ -1,8 +1,10 @@
-import ES6Promise from 'es6-promise';
-import nodeFetch from 'node-fetch';
-import pubnub from 'pubnub';
+import ES6Promise from "es6-promise";
+import nodeFetch from "node-fetch";
+import pubnub from "pubnub";
 
-var root = (new Function('return this'))();
+var root = (typeof window !== "undefined" && window) ||
+           (typeof global !== "undefined" && global) ||
+           Function("return this;")();
 
 export var Promise = (ES6Promise && ES6Promise.Promise) || root.Promise;
 
