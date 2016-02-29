@@ -1,8 +1,17 @@
 language: node_js
 node_js:
-- '0.12'
-- '0.11'
-- iojs
+  - '0.11'
+  - '0.12'
+  - '4'
+  - stable
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
 deploy:
   provider: npm
   email: kirill.konshin@gmail.com
