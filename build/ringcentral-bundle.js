@@ -801,6 +801,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var SDK = (function () {
 
     /**
+     * @namespace RingCentral
      * @constructor
      * @param {object} [options]
      * @param {string} [options.server]
