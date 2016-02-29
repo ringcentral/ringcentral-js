@@ -30,6 +30,7 @@ class SDK {
     };
 
     /**
+     * @namespace RingCentral
      * @constructor
      * @param {object} [options]
      * @param {string} [options.server]
