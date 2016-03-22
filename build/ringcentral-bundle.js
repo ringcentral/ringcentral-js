@@ -752,43 +752,39 @@ var _Client = __webpack_require__(15);
 
 var _Client2 = _interopRequireDefault(_Client);
 
-var _ApiResponse = __webpack_require__(17);
+var _ApiResponse = __webpack_require__(16);
 
 var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
 
-var _Utils2 = __webpack_require__(16);
-
-var HttpUtils = _interopRequireWildcard(_Utils2);
-
-var _ClientMock = __webpack_require__(18);
+var _ClientMock = __webpack_require__(17);
 
 var _ClientMock2 = _interopRequireDefault(_ClientMock);
 
-var _Mock = __webpack_require__(20);
+var _Mock = __webpack_require__(19);
 
 var _Mock2 = _interopRequireDefault(_Mock);
 
-var _Registry = __webpack_require__(19);
+var _Registry = __webpack_require__(18);
 
 var _Registry2 = _interopRequireDefault(_Registry);
 
-var _Platform = __webpack_require__(21);
+var _Platform = __webpack_require__(20);
 
 var _Platform2 = _interopRequireDefault(_Platform);
 
-var _Auth = __webpack_require__(22);
+var _Auth = __webpack_require__(21);
 
 var _Auth2 = _interopRequireDefault(_Auth);
 
-var _PubnubFactory = __webpack_require__(23);
+var _PubnubFactory = __webpack_require__(22);
 
 var _PubnubFactory2 = _interopRequireDefault(_PubnubFactory);
 
-var _Subscription = __webpack_require__(25);
+var _Subscription = __webpack_require__(24);
 
 var _Subscription2 = _interopRequireDefault(_Subscription);
 
-var _CachedSubscription = __webpack_require__(26);
+var _CachedSubscription = __webpack_require__(25);
 
 var _CachedSubscription2 = _interopRequireDefault(_CachedSubscription);
 
@@ -864,10 +860,14 @@ var SDK = function () {
         return this._cache;
     };
 
+    SDK.handleAuthRedirect = function handleAuthRedirect(origin) {
+        window.opener.postMessage({ RCAuthorizationCode: window.location.search }, origin || window.location.origin);
+    };
+
     return SDK;
 }();
 
-SDK.version = '2.0.5';
+SDK.version = '2.0.6';
 SDK.server = {
     sandbox: 'https://platform.devtest.ringcentral.com',
     production: 'https://platform.ringcentral.com'
@@ -881,8 +881,7 @@ SDK.core = {
 };
 SDK.http = {
     Client: _Client2.default,
-    ApiResponse: _ApiResponse2.default,
-    Utils: HttpUtils
+    ApiResponse: _ApiResponse2.default
 };
 SDK.platform = {
     Auth: _Auth2.default,
@@ -910,10 +909,16 @@ module.exports = SDK;
 'use strict';
 
 exports.__esModule = true;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 exports.queryStringify = queryStringify;
 exports.parseQueryString = parseQueryString;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
+exports.isObject = isObject;
+exports.isObjectObject = isObjectObject;
+exports.isPlainObject = isPlainObject;
 exports.poll = poll;
 exports.stopPolling = stopPolling;
 exports.isNodeJS = isNodeJS;
@@ -999,6 +1004,36 @@ function isFunction(obj) {
  */
 function isArray(obj) {
     return Array.isArray ? Array.isArray(obj) : typeof obj === "array";
+}
+
+function isObject(o) {
+    return o != null && (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === 'object' && !isArray(o);
+}
+
+function isObjectObject(o) {
+    return isObject(o) === true && Object.prototype.toString.call(o) === '[object Object]';
+}
+
+function isPlainObject(o) {
+    var ctor, prot;
+
+    if (isObjectObject(o) === false) return false;
+
+    // If has modified constructor
+    ctor = o.constructor;
+    if (typeof ctor !== 'function') return false;
+
+    // If has modified prototype
+    prot = ctor.prototype;
+    if (isObjectObject(prot) === false) return false;
+
+    // If constructor does not have an Object-specific method
+    if (prot.hasOwnProperty('isPrototypeOf') === false) {
+        return false;
+    }
+
+    // Most likely a plain Object
+    return true;
 }
 
 /**
@@ -5874,27 +5909,26 @@ exports.default = Queue;
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-'use strict';
+"use strict";
 
 exports.__esModule = true;
+exports.findHeaderName = findHeaderName;
 
 var _Externals = __webpack_require__(4);
 
 var _Utils = __webpack_require__(3);
 
-var _Utils2 = __webpack_require__(16);
-
 var _Observable2 = __webpack_require__(13);
 
 var _Observable3 = _interopRequireDefault(_Observable2);
 
-var _ApiResponse = __webpack_require__(17);
+var _ApiResponse = __webpack_require__(16);
 
 var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _Externals.Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _Externals.Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -5945,35 +5979,26 @@ var Client = function (_Observable) {
 
                         case 5:
                             apiResponse._response = _context.sent;
+                            _context.next = 8;
+                            return apiResponse._init();
 
-                            if (!(apiResponse._isMultipart() || apiResponse._isJson())) {
-                                _context.next = 10;
-                                break;
-                            }
-
-                            _context.next = 9;
-                            return apiResponse.response().text();
-
-                        case 9:
-                            apiResponse._text = _context.sent;
-
-                        case 10:
+                        case 8:
                             if (apiResponse.ok()) {
-                                _context.next = 12;
+                                _context.next = 10;
                                 break;
                             }
 
                             throw new Error('Response has unsuccessful status');
 
-                        case 12:
+                        case 10:
 
                             this.emit(this.events.requestSuccess, apiResponse);
 
-                            return _context.abrupt('return', apiResponse);
+                            return _context.abrupt("return", apiResponse);
 
-                        case 16:
-                            _context.prev = 16;
-                            _context.t0 = _context['catch'](1);
+                        case 14:
+                            _context.prev = 14;
+                            _context.t0 = _context["catch"](1);
 
 
                             if (!_context.t0.apiResponse) _context.t0 = this.makeError(_context.t0, apiResponse);
@@ -5982,17 +6007,19 @@ var Client = function (_Observable) {
 
                             throw _context.t0;
 
-                        case 21:
-                        case 'end':
+                        case 19:
+                        case "end":
                             return _context.stop();
                     }
                 }
-            }, _callee, this, [[1, 16]]);
+            }, _callee, this, [[1, 14]]);
         }));
 
-        return function sendRequest(_x) {
+        function sendRequest(_x) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return sendRequest;
     }();
 
     /**
@@ -6012,19 +6039,21 @@ var Client = function (_Observable) {
                             return _Externals.fetch.call(null, request);
 
                         case 2:
-                            return _context2.abrupt('return', _context2.sent);
+                            return _context2.abrupt("return", _context2.sent);
 
                         case 3:
-                        case 'end':
+                        case "end":
                             return _context2.stop();
                     }
                 }
             }, _callee2, this);
         }));
 
-        return function _loadResponse(_x2) {
+        function _loadResponse(_x2) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return _loadResponse;
     }();
 
     /**
@@ -6081,15 +6110,14 @@ var Client = function (_Observable) {
             init.url = init.url + (init.url.indexOf('?') > -1 ? '&' : '?') + (0, _Utils.queryStringify)(init.query);
         }
 
-        if (!(0, _Utils2.findHeaderName)('Accept', init.headers)) {
+        if (!findHeaderName('Accept', init.headers)) {
             init.headers['Accept'] = _ApiResponse2.default._jsonContentType;
         }
 
         // Serialize body
-        //TODO Check that body is a plain object
-        if (typeof init.body !== 'string' || !init.body) {
+        if ((0, _Utils.isPlainObject)(init.body) || !init.body) {
 
-            var contentTypeHeaderName = (0, _Utils2.findHeaderName)(_ApiResponse2.default._contentType, init.headers);
+            var contentTypeHeaderName = findHeaderName(_ApiResponse2.default._contentType, init.headers);
 
             if (!contentTypeHeaderName) {
                 contentTypeHeaderName = _ApiResponse2.default._contentType;
@@ -6118,59 +6146,8 @@ var Client = function (_Observable) {
     return Client;
 }(_Observable3.default);
 
-/**
- * @name IApiError
- * @property {string} stack
- * @property {string} originalMessage
- * @property {ApiResponse} apiResponse
- */
-
-
 Client._allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
 exports.default = Client;
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-'use strict';
-
-exports.__esModule = true;
-exports.createResponse = createResponse;
-exports.findHeaderName = findHeaderName;
-
-var _Externals = __webpack_require__(4);
-
-var _Utils = __webpack_require__(3);
-
-var utils = _interopRequireWildcard(_Utils);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-/**
- * Creates a response
- * @param stringBody
- * @param init
- * @return {Response}
- */
-function createResponse(stringBody, init) {
-
-    init = init || {};
-
-    var response = new _Externals.Response(stringBody, init);
-
-    //TODO Wait for https://github.com/bitinn/node-fetch/issues/38
-    if (utils.isNodeJS()) {
-
-        response._text = stringBody;
-        response._decode = function () {
-            return this._text;
-        };
-    }
-
-    return response;
-}
-
 function findHeaderName(name, headers) {
     name = name.toLowerCase();
     return Object.keys(headers).reduce(function (res, key) {
@@ -6180,8 +6157,15 @@ function findHeaderName(name, headers) {
     }, null);
 }
 
+/**
+ * @name IApiError
+ * @property {string} stack
+ * @property {string} originalMessage
+ * @property {ApiResponse} apiResponse
+ */
+
 /***/ },
-/* 17 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -6190,11 +6174,7 @@ exports.__esModule = true;
 
 var _Externals = __webpack_require__(4);
 
-var _Utils = __webpack_require__(16);
-
-var utils = _interopRequireWildcard(_Utils);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _Externals.Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _Externals.Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6219,6 +6199,41 @@ var ApiResponse = function () {
         this._json = null;
         this._multipart = [];
     }
+
+    ApiResponse.prototype._init = function () {
+        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+            return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                    switch (_context.prev = _context.next) {
+                        case 0:
+                            if (!(this._isMultipart() || this._isJson())) {
+                                _context.next = 4;
+                                break;
+                            }
+
+                            _context.next = 3;
+                            return this.response().text();
+
+                        case 3:
+                            this._text = _context.sent;
+
+                        case 4:
+                            return _context.abrupt('return', this);
+
+                        case 5:
+                        case 'end':
+                            return _context.stop();
+                    }
+                }
+            }, _callee, this);
+        }));
+
+        function _init() {
+            return ref.apply(this, arguments);
+        }
+
+        return _init;
+    }();
 
     /**
      * @return {Response}
@@ -6378,7 +6393,7 @@ var ApiResponse = function () {
             headersAndBody = text.split(ApiResponse._bodySeparator),
             headersText = headersAndBody.length > 1 ? headersAndBody.shift() : '';
 
-        text = headersAndBody.join(ApiResponse._bodySeparator);
+        text = headersAndBody.length > 0 ? headersAndBody.join(ApiResponse._bodySeparator) : null;
 
         (headersText || '').split('\n').forEach(function (header) {
 
@@ -6389,7 +6404,7 @@ var ApiResponse = function () {
             if (key) headers.append(key, value);
         });
 
-        return new ApiResponse(null, utils.createResponse(text, {
+        return new ApiResponse(null, new _Externals.Response(text ? text : null, {
             headers: headers,
             status: status,
             statusText: statusText
@@ -6409,14 +6424,14 @@ ApiResponse._boundarySeparator = '--';
 exports.default = ApiResponse;
 
 /***/ },
-/* 18 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _Registry = __webpack_require__(19);
+var _Registry = __webpack_require__(18);
 
 var _Registry2 = _interopRequireDefault(_Registry);
 
@@ -6472,9 +6487,11 @@ var Client = function (_HttpClient) {
             }, _callee, this);
         }));
 
-        return function _loadResponse(_x) {
+        function _loadResponse(_x) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return _loadResponse;
     }();
 
     return Client;
@@ -6483,14 +6500,14 @@ var Client = function (_HttpClient) {
 exports.default = Client;
 
 /***/ },
-/* 19 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _Mock = __webpack_require__(20);
+var _Mock = __webpack_require__(19);
 
 var _Mock2 = _interopRequireDefault(_Mock);
 
@@ -6660,24 +6677,24 @@ var Registry = function () {
 exports.default = Registry;
 
 /***/ },
-/* 20 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _ApiResponse = __webpack_require__(17);
+var _Externals = __webpack_require__(4);
+
+var _ApiResponse = __webpack_require__(16);
 
 var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
 
 var _Utils = __webpack_require__(3);
 
-var _Utils2 = __webpack_require__(16);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _Externals.Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _Externals.Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6726,9 +6743,11 @@ var Mock = function () {
             }, _callee, this);
         }));
 
-        return function getResponse(_x) {
+        function getResponse(_x) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return getResponse;
     }();
 
     Mock.prototype.createResponse = function createResponse(json, init) {
@@ -6739,7 +6758,7 @@ var Mock = function () {
         init.statusText = init.statusText || this._statusText;
 
         var str = JSON.stringify(json),
-            res = (0, _Utils2.createResponse)(str, init);
+            res = new _Externals.Response(str, init);
 
         res.headers.set(_ApiResponse2.default._contentType, _ApiResponse2.default._jsonContentType);
 
@@ -6752,12 +6771,14 @@ var Mock = function () {
 exports.default = Mock;
 
 /***/ },
-/* 21 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
+
+var _Externals = __webpack_require__(4);
 
 var _Observable2 = __webpack_require__(13);
 
@@ -6767,7 +6788,7 @@ var _Queue = __webpack_require__(14);
 
 var _Queue2 = _interopRequireDefault(_Queue);
 
-var _Auth = __webpack_require__(22);
+var _Auth = __webpack_require__(21);
 
 var _Auth2 = _interopRequireDefault(_Auth);
 
@@ -6775,7 +6796,7 @@ var _Utils = __webpack_require__(3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _Externals.Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _Externals.Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6882,6 +6903,7 @@ var Platform = function (_Observable) {
      * @param {string} options.brandId
      * @param {string} options.display
      * @param {string} options.prompt
+     * @param {object} [options]
      * @return {string}
      */
 
@@ -6922,6 +6944,80 @@ var Platform = function (_Observable) {
     };
 
     /**
+     * Convenience method to handle 3-legged OAuth
+     *
+     * Attention! This is an experimental method and it's signature and behavior may change without notice.
+     *
+     * @experimental
+     * @param {number} [options.width]
+     * @param {number} [options.height]
+     * @param {object} [options.login] additional options for login()
+     * @param {string} [options.origin]
+     * @param {string} [options.property] name of window.postMessage's event data property
+     * @param {string} [options.target] target for window.open()
+     * @param {string} options.url
+     * @return {Promise}
+     */
+
+
+    Platform.prototype.authWindow = function authWindow(options) {
+        var _this2 = this;
+
+        return new _Externals.Promise(function (resolve, reject) {
+
+            if (!(0, _Utils.isBrowser)()) throw new Error('This method can be used only in browser');
+
+            if (!options.url) throw new Error('Missing mandatory URL parameter');
+
+            options = options || {};
+            options.url = options.url || 400;
+            options.width = options.width || 400;
+            options.height = options.height || 600;
+            options.origin = options.origin || window.location.origin;
+            options.property = options.property || 'RCAuthorizationCode';
+            options.target = options.target || '_blank';
+
+            var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+            var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+            var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+            var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+            var left = width / 2 - options.width / 2 + dualScreenLeft;
+            var top = height / 2 - options.height / 2 + dualScreenTop;
+            var win = window.open(options.url, '_blank', options.target == '_blank' ? 'scrollbars=yes, status=yes, width=' + options.width + ', height=' + options.height + ', left=' + left + ', top=' + top : '');
+
+            if (window.focus) win.focus();
+
+            var eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent';
+            var eventRemoveMethod = eventMethod == 'addEventListener' ? 'removeEventListener' : 'detachEvent';
+            var messageEvent = eventMethod == 'addEventListener' ? 'message' : 'onmessage';
+
+            var eventListener = function eventListener(e) {
+
+                if (e.origin != options.origin) return;
+                if (!e.data || !e.data[options.property]) return; // keep waiting
+
+                win.close();
+                window[eventRemoveMethod](messageEvent, eventListener);
+
+                try {
+
+                    var loginOptions = _this2.parseAuthRedirectUrl(e.data[options.property]);
+
+                    if (!loginOptions.code) throw new Error('No authorization code');
+
+                    resolve(loginOptions);
+                } catch (e) {
+                    reject(e);
+                }
+            };
+
+            window[eventMethod](messageEvent, eventListener, false);
+        });
+    };
+
+    /**
      * @return {Promise<boolean>}
      */
 
@@ -6952,9 +7048,11 @@ var Platform = function (_Observable) {
             }, _callee, this, [[0, 6]]);
         }));
 
-        return function loggedIn() {
+        function loggedIn() {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return loggedIn;
     }();
 
     /**
@@ -7040,9 +7138,11 @@ var Platform = function (_Observable) {
             }, _callee2, this, [[0, 18]]);
         }));
 
-        return function login(_x) {
+        function login(_x) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return login;
     }();
 
     /**
@@ -7168,9 +7268,11 @@ var Platform = function (_Observable) {
             }, _callee3, this, [[0, 30]]);
         }));
 
-        return function refresh() {
+        function refresh() {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return refresh;
     }();
 
     /**
@@ -7227,9 +7329,11 @@ var Platform = function (_Observable) {
             }, _callee4, this, [[0, 12]]);
         }));
 
-        return function logout() {
+        function logout() {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return logout;
     }();
 
     /**
@@ -7277,9 +7381,11 @@ var Platform = function (_Observable) {
             }, _callee5, this);
         }));
 
-        return function inflateRequest(_x2, _x3) {
+        function inflateRequest(_x2, _x3) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return inflateRequest;
     }();
 
     /**
@@ -7337,9 +7443,11 @@ var Platform = function (_Observable) {
             }, _callee6, this, [[0, 9]]);
         }));
 
-        return function sendRequest(_x4, _x5) {
+        function sendRequest(_x4, _x5) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return sendRequest;
     }();
 
     /**
@@ -7379,9 +7487,11 @@ var Platform = function (_Observable) {
             }, _callee7, this);
         }));
 
-        return function send(_x6) {
+        function send(_x6) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return send;
     }();
 
     /**
@@ -7418,9 +7528,11 @@ var Platform = function (_Observable) {
             }, _callee8, this);
         }));
 
-        return function get(_x8, _x9, _x10) {
+        function get(_x8, _x9, _x10) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return get;
     }();
 
     /**
@@ -7459,9 +7571,11 @@ var Platform = function (_Observable) {
             }, _callee9, this);
         }));
 
-        return function post(_x11, _x12, _x13, _x14) {
+        function post(_x11, _x12, _x13, _x14) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return post;
     }();
 
     /**
@@ -7500,9 +7614,11 @@ var Platform = function (_Observable) {
             }, _callee10, this);
         }));
 
-        return function put(_x15, _x16, _x17, _x18) {
+        function put(_x15, _x16, _x17, _x18) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return put;
     }();
 
     /**
@@ -7539,9 +7655,11 @@ var Platform = function (_Observable) {
             }, _callee11, this);
         }));
 
-        return function _delete(_x19, _x20, _x21) {
+        function _delete(_x19, _x20, _x21) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return _delete;
     }();
 
     Platform.prototype._tokenRequest = function () {
@@ -7573,9 +7691,11 @@ var Platform = function (_Observable) {
             }, _callee12, this);
         }));
 
-        return function _tokenRequest(_x22, _x23) {
+        function _tokenRequest(_x22, _x23) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return _tokenRequest;
     }();
 
     Platform.prototype._ensureAuthentication = function () {
@@ -7606,9 +7726,11 @@ var Platform = function (_Observable) {
             }, _callee13, this);
         }));
 
-        return function _ensureAuthentication() {
+        function _ensureAuthentication() {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return _ensureAuthentication;
     }();
 
     Platform.prototype._isAccessTokenValid = function _isAccessTokenValid() {
@@ -7642,7 +7764,7 @@ Platform._clearCacheOnRefreshError = false;
 exports.default = Platform;
 
 /***/ },
-/* 22 */
+/* 21 */
 /***/ function(module, exports) {
 
 'use strict';
@@ -7789,14 +7911,14 @@ Auth.forcedTokenType = 'forced';
 exports.default = Auth;
 
 /***/ },
-/* 23 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _PubnubMock = __webpack_require__(24);
+var _PubnubMock = __webpack_require__(23);
 
 var _PubnubMock2 = _interopRequireDefault(_PubnubMock);
 
@@ -7823,7 +7945,7 @@ var PubnubMockFactory = function () {
 exports.default = PubnubMockFactory;
 
 /***/ },
-/* 24 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -7877,7 +7999,7 @@ var PubnubMock = function (_Observable) {
 exports.default = PubnubMock;
 
 /***/ },
-/* 25 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -8007,9 +8129,11 @@ var Subscription = function (_Observable) {
             }, _callee, this);
         }));
 
-        return function register() {
+        function register() {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return register;
     }();
 
     Subscription.prototype.eventFilters = function eventFilters() {
@@ -8099,9 +8223,11 @@ var Subscription = function (_Observable) {
             }, _callee2, this, [[0, 12]]);
         }));
 
-        return function subscribe() {
+        function subscribe() {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return subscribe;
     }();
 
     /**
@@ -8170,9 +8296,11 @@ var Subscription = function (_Observable) {
             }, _callee3, this, [[0, 14]]);
         }));
 
-        return function renew() {
+        function renew() {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return renew;
     }();
 
     /**
@@ -8227,9 +8355,11 @@ var Subscription = function (_Observable) {
             }, _callee4, this, [[0, 10]]);
         }));
 
-        return function remove() {
+        function remove() {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return remove;
     }();
 
     /**
@@ -8362,7 +8492,7 @@ Subscription._pollInterval = 10 * 1000;
 exports.default = Subscription;
 
 /***/ },
-/* 26 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -8371,7 +8501,7 @@ exports.__esModule = true;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _Subscription2 = __webpack_require__(25);
+var _Subscription2 = __webpack_require__(24);
 
 var _Subscription3 = _interopRequireDefault(_Subscription2);
 
@@ -8501,9 +8631,11 @@ var CachedSubscription = function (_Subscription) {
             }, _callee, this, [[0, 17]]);
         }));
 
-        return function _queue(_x, _x2, _x3, _x4, _x5) {
+        function _queue(_x, _x2, _x3, _x4, _x5) {
             return ref.apply(this, arguments);
-        };
+        }
+
+        return _queue;
     }();
 
     /**

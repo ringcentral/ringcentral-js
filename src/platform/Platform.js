@@ -1,7 +1,8 @@
+import {Promise} from "../core/Externals";
 import Observable from "../core/Observable";
 import Queue from "../core/Queue";
 import Auth from "./Auth";
-import {queryStringify, parseQueryString, delay} from "../core/Utils";
+import {queryStringify, parseQueryString, delay, isBrowser} from "../core/Utils";
 
 export default class Platform extends Observable {
 
@@ -102,6 +103,7 @@ export default class Platform extends Observable {
      * @param {string} options.brandId
      * @param {string} options.display
      * @param {string} options.prompt
+     * @param {object} [options]
      * @return {string}
      */
     authUrl(options) {
@@ -136,6 +138,81 @@ export default class Platform extends Observable {
         }
 
         return qs;
+
+    }
+
+    /**
+     * Convenience method to handle 3-legged OAuth
+     *
+     * Attention! This is an experimental method and it's signature and behavior may change without notice.
+     *
+     * @experimental
+     * @param {number} [options.width]
+     * @param {number} [options.height]
+     * @param {object} [options.login] additional options for login()
+     * @param {string} [options.origin]
+     * @param {string} [options.property] name of window.postMessage's event data property
+     * @param {string} [options.target] target for window.open()
+     * @param {string} options.url
+     * @return {Promise}
+     */
+    authWindow(options) {
+
+        return new Promise((resolve, reject) => {
+
+            if (!isBrowser()) throw new Error('This method can be used only in browser');
+
+            if (!options.url) throw new Error('Missing mandatory URL parameter');
+
+            options = options || {};
+            options.url = options.url || 400;
+            options.width = options.width || 400;
+            options.height = options.height || 600;
+            options.origin = options.origin || window.location.origin;
+            options.property = options.property || 'RCAuthorizationCode';
+            options.target = options.target || '_blank';
+
+            var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+            var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+            var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+            var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+            var left = ((width / 2) - (options.width / 2)) + dualScreenLeft;
+            var top = ((height / 2) - (options.height / 2)) + dualScreenTop;
+            var win = window.open(options.url, '_blank', (options.target == '_blank') ? 'scrollbars=yes, status=yes, width=' + options.width + ', height=' + options.height + ', left=' + left + ', top=' + top : '');
+
+            if (window.focus) win.focus();
+
+            var eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent';
+            var eventRemoveMethod = eventMethod == 'addEventListener' ? 'removeEventListener' : 'detachEvent';
+            var messageEvent = eventMethod == 'addEventListener' ? 'message' : 'onmessage';
+
+            var eventListener = (e) => {
+
+                if (e.origin != options.origin) return;
+                if (!e.data || !e.data[options.property]) return; // keep waiting
+
+                win.close();
+                window[eventRemoveMethod](messageEvent, eventListener);
+
+                try {
+
+                    var loginOptions = this.parseAuthRedirectUrl(e.data[options.property]);
+
+                    if (!loginOptions.code) throw new Error('No authorization code');
+
+                    resolve(loginOptions);
+
+                } catch (e) {
+                    reject(e);
+                }
+
+            };
+
+            window[eventMethod](messageEvent, eventListener, false);
+
+        });
 
     }
 

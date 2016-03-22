@@ -6,7 +6,6 @@ import Queue from './core/Queue';
 
 import Client from './http/Client';
 import ApiResponse from './http/ApiResponse';
-import * as HttpUtils from './http/Utils';
 
 import {default as ClientMock} from './mocks/ClientMock';
 import Mock from './mocks/Mock';
@@ -22,7 +21,7 @@ import CachedSubscription from './subscription/CachedSubscription';
 
 class SDK {
 
-    static version = '2.0.5';
+    static version = '2.0.6';
 
     static server = {
         sandbox: 'https://platform.devtest.ringcentral.com',
@@ -103,8 +102,7 @@ class SDK {
 
     static http = {
         Client: Client,
-        ApiResponse: ApiResponse,
-        Utils: HttpUtils
+        ApiResponse: ApiResponse
     };
 
     static platform = {
@@ -125,6 +123,10 @@ class SDK {
     static pubnub = {
         PubnubMockFactory: PubnubMockFactory
     };
+
+    static handleAuthRedirect(origin) {
+        window.opener.postMessage({RCAuthorizationCode: window.location.search}, origin || window.location.origin);
+    }
 
 }
 

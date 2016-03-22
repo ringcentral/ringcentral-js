@@ -46,7 +46,7 @@ Pick the option that works best for you:
     ```sh
     bower install ringcentral --save
     ```
-    
+
 - Donwload everything manually *(not recommended)*:
     - [ZIP file with source code](https://github.com/ringcentral/ringcentral-js/archive/master.zip)
     - [Fetch](https://github.com/github/fetch), direct download: [fetch.js](https://raw.githubusercontent.com/github/fetch/master/fetch.js)
@@ -98,10 +98,10 @@ require.config({
 
 // Then you can use the SDK like any other AMD component
 require(['ringcentral', 'es6-promise', 'fetch'], function(SDK, Promise) {
-    
+
     Promise.polyfill();
     var sdk = new SDK(...);
-    
+
 });
 ```
 
@@ -128,7 +128,7 @@ Make sure that polyfills are loaded before or together with SDK.
 
 1. Follow installation steps for NodeJS
 2. Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
-    
+
     ```js
     {
         resolve: {
@@ -197,8 +197,8 @@ Full list of migration instructions:
 The SDK is represented by the global RingCentral constructor. Your application must create an instance of this object:
 
 In order to bootstrap the RingCentral JavaScript SDK, you have to first get a reference to the Platform singleton and
-then configure it. Before you can do anything using the Platform singleton, you need to configure it with the server URL 
-(this tells the SDK which server to connect to) and your unique API key (this is provided by RingCentral's developer 
+then configure it. Before you can do anything using the Platform singleton, you need to configure it with the server URL
+(this tells the SDK which server to connect to) and your unique API key (this is provided by RingCentral's developer
 relations team).
 
 ```js
@@ -331,23 +331,23 @@ rcsdk.platform()
         body: {...}
     })
     .then(function(apiResponse){
-    
+
         alert(apiResponse.json().name);
-        
+
     })
     .catch(function(e){
-    
+
         alert(e.message);
-        
+
         // please note that ajax property may not be accessible if error occurred before AJAX send
         if (e.apiResponse && e.apiResponse()) {
-        
+
             var request = e.apiResponse().request();
-            
+
             alert('Ajax error ' + e.message + ' for URL' + request.url + ' ' + e.apiResponse().error());
-            
+
         }
-        
+
     });
 
 // Shorthand methods
@@ -444,7 +444,7 @@ subscription.register();
 ```
 
 With this technique subscription remove request on window/tab closing is no longer needed.
- 
+
 In any case if application logic dictates that subscription is not used anymore by any of it's instances, subscription
 can be removed from the server to make sure application stays within limits.
 
@@ -488,7 +488,7 @@ The above mentioned things are put together into `CachedSubscription` class and 
 
 ```js
 var subscription = rcsdk.createCachedSubscription('cache-key').restore(['/account/~/extension/~/presence']);
-                        
+
 // use it as usual
 subscription.register();
 ```
@@ -536,11 +536,11 @@ function create(unsavedRingout) {
     platform
         .post('/account/~/extension/~/ringout', unsavedRingout)
         .then(function(response) {
-    
+
             ringout = response.json();
             console.info('First status:', ringout.status.callStatus);
             update();
-            
+
         })
         .catch(handleError);
 
@@ -555,20 +555,20 @@ function update() {
     clearTimeout(timeout);
 
     setTimeout(function() {
-    
+
         if (ringout.status && ringout.status.callStatus !== 'InProgress') return;
-    
+
         platform
             .get(ringout.uri)
             .then(function(response) {
-        
+
                 ringout = response.json();
                 console.info('Current status:', ringout.status.callStatus);
                 update();
-        
+
             })
             .catch(handleError);
-            
+
     }, 500);
 
 }
@@ -587,7 +587,7 @@ function hangUp() {
             .catch(handleError);
 
     }
-    
+
     // Clean
     ringout = {
         from: {phoneNumber: ''},
@@ -614,7 +614,7 @@ create({
 # Call management using JavaScript
 
 If you are integrating with a CRM or ERP system, use of the JavaScript SDK is highly recommended. Following is an
-example of a call management integration that includes monitoring of incoming calls and performing of RingOuts. 
+example of a call management integration that includes monitoring of incoming calls and performing of RingOuts.
 
 A call management integration usually consists of the following tasks:
 
@@ -681,7 +681,7 @@ rcsdk.platform()
         alert('Recent Calls Error: ' + e.message);
     });
 ```
-    
+
 By default, the load request returns calls that were made during the last week. To alter the time frame, provide custom
 `query.dateTo` and `query.dateFrom` properties.
 
@@ -717,9 +717,9 @@ Modern browsers have `FormData` class which could be used for sending faxes.
 
 ```js
 var body = {
-        to: {phoneNumber: '123'}, // see all available options on Developer Portal 
+        to: [{phoneNumber: '123'}], // see all available options on Developer Portal
         faxResolution: 'High'
-    }, 
+    },
     formData = new FormData();
 
 // This is the mandatory part, the name and type should always be as follows
@@ -760,16 +760,16 @@ Then you can build your fax, but keep in mind that FormData API in NodeJS is sli
 ```js
 var FormData = require('form-data'),
     body = {
-        to: {phoneNumber: '123'}, // see all available options on Developer Portal 
+        to: [{phoneNumber: '123'}], // see all available options on Developer Portal
         faxResolution: 'High'
-    }, 
+    },
     formData = new FormData();
 
 // This is the mandatory part, the name and type should always be as follows
 formData.append('json', new Buffer(JSON.stringify(body)), {filename: 'request.json', contentType: 'application/json'});
 
 // To send a plain text
-formData.append('attachment', new Buffer('some plain text'), 'text.txt', {type: 'application/octet-stream'});
+formData.append('attachment', new Buffer('some plain text'), {filename: 'text.txt', contentType: 'text/plain'});
 
 // To send a file from file system
 formData.append('attachment', require('fs').createReadStream('/foo/bar.jpg'));
@@ -791,7 +791,7 @@ such as [visibility.js](https://github.com/ai/visibilityjs).
 
 This allows tracking the visibility of the page/tab/window/frame so that the application can react accordingly.
 Following are some actions that the application may wish to take whenever it becomes visible:
-    
+
 - Check authentication
 - Reload/resync time-sensitinve information from the server
 - Send heartbeats to the server

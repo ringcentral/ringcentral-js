@@ -11,8 +11,8 @@
     <script type="text/javascript">
         window.fetch = null; // force to use polyfill
     </script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.9.0/fetch.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.33.0/es6-shim.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.0/fetch.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub.js"></script>
     <script src="../build/ringcentral.js" type="text/javascript"></script>
     <script type="text/javascript">
@@ -24,6 +24,11 @@
                 server = localStorage.getItem('ringcentral-demo-server'),
                 rcsdk = new RingCentral.SDK({server: server, appKey: appKey, appSecret: appSecret, appName:'Demo', appVersion: '1.0.0'}),
                 platform = rcsdk.platform();
+
+            if (!platform._appSecret || !platform._appKey || !platform._server) {
+                location.assign('apiKey.html');
+                return;
+            }
 
             function showExtension() {
 
@@ -141,7 +146,14 @@
                             extension: document.getElementById('login-extension').value,
                             password: document.getElementById('login-password').value
                         })
-                        .then(showExtension).catch(function(e) {
+                        .then(function(res){
+                            localStorage.setItem('ringcentral-demo-login-username', document.getElementById('login-username').value);
+                            localStorage.setItem('ringcentral-demo-login-password', document.getElementById('login-extension').value);
+                            localStorage.setItem('ringcentral-demo-login-extension', document.getElementById('login-password').value);
+                            return res;
+                        })
+                        .then(showExtension)
+                        .catch(function(e) {
 
                         alert(e.message || e.description || 'Server cannot authorize user');
                         console.error(e.stack);
@@ -162,9 +174,9 @@
                 showLogin();
             });
 
-            document.getElementById('login-username').value = localStorage.getItem('ringcentral-demo-login-username');
-            document.getElementById('login-password').value = localStorage.getItem('ringcentral-demo-login-password');
-            document.getElementById('login-extension').value = localStorage.getItem('ringcentral-demo-login-extension');
+            document.getElementById('login-username').value = localStorage.getItem('ringcentral-demo-login-username') || '';
+            document.getElementById('login-password').value = localStorage.getItem('ringcentral-demo-login-password') || '';
+            document.getElementById('login-extension').value = localStorage.getItem('ringcentral-demo-login-extension') || '';
 
             platform.loggedIn().then(function(res) {
                 if (res) {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SSO &mdash; RingCentral&trade; Platform</title>
+    <title>3-legged OAuth &mdash; RingCentral&trade; Platform</title>
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="../common.css">
@@ -37,7 +37,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">Login Form @ RingCentral</div>
         <div class="panel-body">
-            <iframe name="sso" id="sso" style="width: 100%; height: 500px; border: 0" src="redirect.html"></iframe>
+            <button onclick="authorize(); return void(0);" class="btn btn-primary">Open SSO Window</button>
         </div>
     </div>
 
@@ -50,19 +50,19 @@
 
 </div>
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.9.0/fetch.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.33.0/es6-shim.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.0/fetch.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub.js"></script>
 <script src="../../build/ringcentral.js" type="text/javascript"></script>
 <script type="text/javascript">
 
-    var REDIRECT_URI = decodeURIComponent(window.location.href.split('sso', 1) + 'sso/redirect.html'),
-            rcsdk = new RingCentral.SDK({
-                server: localStorage.getItem('ringcentral-demo-server') || RingCentral.SDK.server.sandbox,
-                appKey: localStorage.getItem('ringcentral-demo-appKey'),
-                appSecret: localStorage.getItem('ringcentral-demo-appSecret')
-            }),
-            platform = rcsdk.platform();
+    var REDIRECT_URI = decodeURIComponent(window.location.href.split('oauth', 1) + 'oauth/redirect.html'),
+        rcsdk = new RingCentral.SDK({
+            server: localStorage.getItem('ringcentral-demo-server') || RingCentral.SDK.server.sandbox,
+            appKey: localStorage.getItem('ringcentral-demo-appKey'),
+            appSecret: localStorage.getItem('ringcentral-demo-appSecret')
+        }),
+        platform = rcsdk.platform();
 
     if (!platform._appSecret || !platform._appKey || !platform._server) {
         location.assign('../apiKey.html');
@@ -71,50 +71,25 @@
     document.getElementById('redirectUri').innerText = REDIRECT_URI;
     document.getElementById('redirectUri').href = REDIRECT_URI;
 
-    function authorize(options) {
+    function authorize() {
 
-        try {
-
-            var qs = platform.parseAuthRedirectUrl(window.frames.sso.location.search);
-
-            if (!qs.code) return;
-
-            qs.redirectUri = REDIRECT_URI;
-
-            console.log('About to authorize with the following stuff', qs);
-
-            platform
-                    .login(qs)
-                    .then(function(res) {
-                        console.log('Auth response', res.json);
-                        alert('Auth success, demo ends here');
-                    })
-                    .catch(function(e) {
-                        alert('Token error\n\n' + e.message);
-                    });
-
-        } catch (e) {
-            alert('Auth error\n\n' + e.message);
-        }
+        platform.authWindow({
+                url: platform.authUrl()
+            })
+            .then(function(options) {
+                options.redirectUri = REDIRECT_URI;
+                return platform.login(options);
+            })
+            .then(function(res) {
+                alert('Login successful\n\n' + JSON.stringify(res.json(), null, 2));
+            })
+            .catch(function(e) {
+                alert('Auth error\n\n' + e.message);
+            })
 
     }
-
-    function openSSO() {
-
-        var url = platform.authUrl({
-            redirectUri: REDIRECT_URI,
-            prompt: 'login sso',
-            display: 'touch'
-        });
-
-        window.open(url, 'sso');
-
-    }
-
-    openSSO();
 
 </script>
-
 
 </body>
 </html>
