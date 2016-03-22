@@ -112,25 +112,6 @@ export default class Auth {
 
     }
 
-    /**
-     * @param remember
-     * @return {Auth}
-     */
-    setRemember(remember) {
-
-        return this.setData({remember: remember});
-
-    }
-
-    /**
-     * @return {boolean}
-     */
-    remember() {
-
-        return !!this.data().remember;
-
-    }
-
 }
 
 //export interface IAuthData {

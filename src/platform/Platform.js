@@ -1,14 +1,12 @@
 import Observable from "../core/Observable";
 import Queue from "../core/Queue";
 import Auth from "./Auth";
-import {Promise} from "../core/Externals";
 import {queryStringify, parseQueryString, delay} from "../core/Utils";
 
 export default class Platform extends Observable {
 
     static _urlPrefix = '/restapi';
     static _apiVersion = 'v1.0';
-    static _accessTokenTtl = null; // Platform server by default sets it to 60 * 60 = 1 hour
     static _refreshTokenTtl = 10 * 60 * 60; // 10 hours
     static _refreshTokenTtlRemember = 7 * 24 * 60 * 60; // 1 week
     static _tokenEndpoint = '/restapi/oauth/token';
@@ -16,7 +14,7 @@ export default class Platform extends Observable {
     static _authorizeEndpoint = '/restapi/oauth/authorize';
     static _refreshDelayMs = 100;
     static _cacheId = 'platform';
-    static _clearCacheOnRefreshError = true;
+    static _clearCacheOnRefreshError = false;
 
     events = {
         beforeLogin: 'beforeLogin',
@@ -162,6 +160,9 @@ export default class Platform extends Observable {
      * @param {string} options.code
      * @param {string} options.redirectUri
      * @param {string} options.endpointId
+     * @param {string} options.remember
+     * @param {string} options.accessTokenTtl
+     * @param {string} options.refreshTokenTtl
      * @returns {Promise<ApiResponse>}
      */
     async login(options) {
@@ -170,14 +171,9 @@ export default class Platform extends Observable {
 
             options = options || {};
 
-            options.remember = options.remember || false;
-
             this.emit(this.events.beforeLogin);
 
-            var body = {
-                "access_token_ttl": Platform._accessTokenTtl,
-                "refresh_token_ttl": options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
-            };
+            var body = {};
 
             if (!options.code) {
 
@@ -196,13 +192,14 @@ export default class Platform extends Observable {
             }
 
             if (options.endpointId) body.endpoint_id = options.endpointId;
+            if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
+            if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+            if (options.remember && !options.refreshTokenTtl) body.refreshTokenTtl = options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl;
 
             var apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body),
                 json = apiResponse.json();
 
-            this._auth
-                .setData(json)
-                .setRemember(options.remember);
+            this._auth.setData(json);
 
             this.emit(this.events.loginSuccess, apiResponse);
 
@@ -257,8 +254,8 @@ export default class Platform extends Observable {
             var res = await this._tokenRequest(Platform._tokenEndpoint, {
                     "grant_type": "refresh_token",
                     "refresh_token": this._auth.refreshToken(),
-                    "access_token_ttl": Platform._accessTokenTtl,
-                    "refresh_token_ttl": this._auth.remember() ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
+                    "access_token_ttl": this._auth.data().expires_in + 1,
+                    "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
                 }),
                 json = res.json();
 
