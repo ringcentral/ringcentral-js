@@ -74,8 +74,8 @@
 
 </div>
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.9.0/fetch.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.33.0/es6-shim.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.0/fetch.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub.js"></script>
 <script src="../build/ringcentral.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -108,6 +108,8 @@
         localStorage.setItem('ringcentral-demo-server', (serverField.value).trim());
         localStorage.setItem('ringcentral-demo-appKey', (appKeyField.value).trim());
         localStorage.setItem('ringcentral-demo-appSecret', (appSecretField.value).trim());
+
+        alert('Saved');
 
         app();
 

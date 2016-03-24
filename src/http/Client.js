@@ -1,8 +1,7 @@
-import {fetch, Request, Response, Headers, Promise} from '../core/Externals';
-import {queryStringify} from '../core/Utils';
-import {findHeaderName} from './Utils';
-import Observable from '../core/Observable';
-import ApiResponse from './ApiResponse';
+import {fetch, Request} from "../core/Externals";
+import {queryStringify, isPlainObject, isNodeJS} from "../core/Utils";
+import Observable from "../core/Observable";
+import ApiResponse from "./ApiResponse";
 
 export default class Client extends Observable {
 
@@ -29,9 +28,7 @@ export default class Client extends Observable {
 
             apiResponse._response = await this._loadResponse(request);
 
-            if (apiResponse._isMultipart() || apiResponse._isJson()) {
-                apiResponse._text = await apiResponse.response().text();
-            }
+            await apiResponse._init();
 
             if (!apiResponse.ok()) throw new Error('Response has unsuccessful status');
 
@@ -117,8 +114,7 @@ export default class Client extends Observable {
         }
 
         // Serialize body
-        //TODO Check that body is a plain object
-        if (typeof init.body !== 'string' || !init.body) {
+        if (isPlainObject(init.body) || !init.body) {
 
             var contentTypeHeaderName = findHeaderName(ApiResponse._contentType, init.headers);
 
@@ -148,6 +144,15 @@ export default class Client extends Observable {
 
     }
 
+}
+
+export function findHeaderName(name, headers) {
+    name = name.toLowerCase();
+    return Object.keys(headers).reduce(function(res, key) {
+        if (res) return res;
+        if (name == key.toLowerCase()) return key;
+        return res;
+    }, null);
 }
 
 /**

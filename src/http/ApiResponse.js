@@ -1,5 +1,4 @@
 import {fetch, Request, Response, Headers, Promise} from '../core/Externals';
-import * as utils from './Utils';
 
 export default class ApiResponse {
 
@@ -27,6 +26,16 @@ export default class ApiResponse {
         this._text = responseText;
         this._json = null;
         this._multipart = [];
+
+    }
+
+    async _init(){
+
+        if (this._isMultipart() || this._isJson()) {
+            this._text = await this.response().text();
+        }
+
+        return this;
 
     }
 
@@ -178,7 +187,7 @@ export default class ApiResponse {
             headersAndBody = text.split(ApiResponse._bodySeparator),
             headersText = (headersAndBody.length > 1) ? headersAndBody.shift() : '';
 
-        text = headersAndBody.join(ApiResponse._bodySeparator);
+        text = headersAndBody.length > 0 ? headersAndBody.join(ApiResponse._bodySeparator) : null;
 
         (headersText || '')
             .split('\n')
@@ -192,7 +201,7 @@ export default class ApiResponse {
 
             });
 
-        return new ApiResponse(null, utils.createResponse(text, {
+        return new ApiResponse(null, new Response(text ? text : null, {
             headers: headers,
             status: status,
             statusText: statusText

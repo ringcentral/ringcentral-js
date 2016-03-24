@@ -1,14 +1,13 @@
+import {Promise} from "../core/Externals";
 import Observable from "../core/Observable";
 import Queue from "../core/Queue";
 import Auth from "./Auth";
-import {Promise} from "../core/Externals";
-import {queryStringify, parseQueryString, delay} from "../core/Utils";
+import {queryStringify, parseQueryString, delay, isBrowser} from "../core/Utils";
 
 export default class Platform extends Observable {
 
     static _urlPrefix = '/restapi';
     static _apiVersion = 'v1.0';
-    static _accessTokenTtl = null; // Platform server by default sets it to 60 * 60 = 1 hour
     static _refreshTokenTtl = 10 * 60 * 60; // 10 hours
     static _refreshTokenTtlRemember = 7 * 24 * 60 * 60; // 1 week
     static _tokenEndpoint = '/restapi/oauth/token';
@@ -16,7 +15,7 @@ export default class Platform extends Observable {
     static _authorizeEndpoint = '/restapi/oauth/authorize';
     static _refreshDelayMs = 100;
     static _cacheId = 'platform';
-    static _clearCacheOnRefreshError = true;
+    static _clearCacheOnRefreshError = false;
 
     events = {
         beforeLogin: 'beforeLogin',
@@ -104,6 +103,7 @@ export default class Platform extends Observable {
      * @param {string} options.brandId
      * @param {string} options.display
      * @param {string} options.prompt
+     * @param {object} [options]
      * @return {string}
      */
     authUrl(options) {
@@ -142,6 +142,81 @@ export default class Platform extends Observable {
     }
 
     /**
+     * Convenience method to handle 3-legged OAuth
+     *
+     * Attention! This is an experimental method and it's signature and behavior may change without notice.
+     *
+     * @experimental
+     * @param {number} [options.width]
+     * @param {number} [options.height]
+     * @param {object} [options.login] additional options for login()
+     * @param {string} [options.origin]
+     * @param {string} [options.property] name of window.postMessage's event data property
+     * @param {string} [options.target] target for window.open()
+     * @param {string} options.url
+     * @return {Promise}
+     */
+    authWindow(options) {
+
+        return new Promise((resolve, reject) => {
+
+            if (!isBrowser()) throw new Error('This method can be used only in browser');
+
+            if (!options.url) throw new Error('Missing mandatory URL parameter');
+
+            options = options || {};
+            options.url = options.url || 400;
+            options.width = options.width || 400;
+            options.height = options.height || 600;
+            options.origin = options.origin || window.location.origin;
+            options.property = options.property || 'RCAuthorizationCode';
+            options.target = options.target || '_blank';
+
+            var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+            var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+            var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+            var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+            var left = ((width / 2) - (options.width / 2)) + dualScreenLeft;
+            var top = ((height / 2) - (options.height / 2)) + dualScreenTop;
+            var win = window.open(options.url, '_blank', (options.target == '_blank') ? 'scrollbars=yes, status=yes, width=' + options.width + ', height=' + options.height + ', left=' + left + ', top=' + top : '');
+
+            if (window.focus) win.focus();
+
+            var eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent';
+            var eventRemoveMethod = eventMethod == 'addEventListener' ? 'removeEventListener' : 'detachEvent';
+            var messageEvent = eventMethod == 'addEventListener' ? 'message' : 'onmessage';
+
+            var eventListener = (e) => {
+
+                if (e.origin != options.origin) return;
+                if (!e.data || !e.data[options.property]) return; // keep waiting
+
+                win.close();
+                window[eventRemoveMethod](messageEvent, eventListener);
+
+                try {
+
+                    var loginOptions = this.parseAuthRedirectUrl(e.data[options.property]);
+
+                    if (!loginOptions.code) throw new Error('No authorization code');
+
+                    resolve(loginOptions);
+
+                } catch (e) {
+                    reject(e);
+                }
+
+            };
+
+            window[eventMethod](messageEvent, eventListener, false);
+
+        });
+
+    }
+
+    /**
      * @return {Promise<boolean>}
      */
     async loggedIn() {
@@ -162,6 +237,9 @@ export default class Platform extends Observable {
      * @param {string} options.code
      * @param {string} options.redirectUri
      * @param {string} options.endpointId
+     * @param {string} options.remember
+     * @param {string} options.accessTokenTtl
+     * @param {string} options.refreshTokenTtl
      * @returns {Promise<ApiResponse>}
      */
     async login(options) {
@@ -170,14 +248,9 @@ export default class Platform extends Observable {
 
             options = options || {};
 
-            options.remember = options.remember || false;
-
             this.emit(this.events.beforeLogin);
 
-            var body = {
-                "access_token_ttl": Platform._accessTokenTtl,
-                "refresh_token_ttl": options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
-            };
+            var body = {};
 
             if (!options.code) {
 
@@ -196,13 +269,14 @@ export default class Platform extends Observable {
             }
 
             if (options.endpointId) body.endpoint_id = options.endpointId;
+            if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
+            if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+            if (options.remember && !options.refreshTokenTtl) body.refreshTokenTtl = options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl;
 
             var apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body),
                 json = apiResponse.json();
 
-            this._auth
-                .setData(json)
-                .setRemember(options.remember);
+            this._auth.setData(json);
 
             this.emit(this.events.loginSuccess, apiResponse);
 
@@ -257,8 +331,8 @@ export default class Platform extends Observable {
             var res = await this._tokenRequest(Platform._tokenEndpoint, {
                     "grant_type": "refresh_token",
                     "refresh_token": this._auth.refreshToken(),
-                    "access_token_ttl": Platform._accessTokenTtl,
-                    "refresh_token_ttl": this._auth.remember() ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl
+                    "access_token_ttl": this._auth.data().expires_in + 1,
+                    "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
                 }),
                 json = res.json();
 

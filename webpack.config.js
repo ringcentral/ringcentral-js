@@ -3,7 +3,6 @@
     var webpack = require('webpack'),
         path = require('path'),
         externals = [
-            {'resumer': createExternal('resumer')},
             {'mocha': createExternal('mocha')},
             {'chai': createExternal('chai', 'chai', 'chai')},
             {'sinon': createExternal('sinon', 'sinon', 'sinon')},

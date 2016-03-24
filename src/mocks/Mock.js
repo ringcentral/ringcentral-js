@@ -1,6 +1,6 @@
+import {fetch, Request, Response, Headers, Promise} from '../core/Externals';
 import ApiResponse from '../http/ApiResponse';
 import {delay} from '../core/Utils';
-import {createResponse} from '../http/Utils';
 
 export default class Mock {
 
@@ -44,7 +44,7 @@ export default class Mock {
         init.statusText = init.statusText || this._statusText;
 
         var str = JSON.stringify(json),
-            res = createResponse(str, init);
+            res = new Response(str, init);
 
         res.headers.set(ApiResponse._contentType, ApiResponse._jsonContentType);
 
