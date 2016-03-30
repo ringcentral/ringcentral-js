@@ -1,5 +1,5 @@
 import {fetch, Request} from "../core/Externals";
-import {queryStringify, isPlainObject, isNodeJS} from "../core/Utils";
+import {uuid, queryStringify, isPlainObject, isArray, isNodeJS} from "../core/Utils";
 import Observable from "../core/Observable";
 import ApiResponse from "./ApiResponse";
 
@@ -132,6 +132,44 @@ export default class Client extends Observable {
                 init.body = queryStringify(init.body);
             }
 
+        }
+        
+        // Batch request via PUT
+        if (init.batch && init.method === 'PUT' && isArray(init.body)) {
+          
+          let boundry = 'Boundary_' + uuid();
+          
+          init.headers[ApiResponse._contentType] = `${ApiResponse._multipartContentType}; boundary=${boundry}`;
+          
+          init.body = init.body.reduce((body, item) => {
+
+            item.headers = item.headers || {};
+            
+            var contentTypeHeaderName = findHeaderName(ApiResponse._contentType, item.headers);
+
+            if (!contentTypeHeaderName) {
+                contentTypeHeaderName = ApiResponse._contentType;
+                item.headers[contentTypeHeaderName] = ApiResponse._jsonContentType;
+            }
+
+            var contentType = item.headers[contentTypeHeaderName];
+            
+            body += `--${boundry}\r\n`;
+            
+            if (contentType.indexOf(ApiResponse._jsonContentType) > -1) {
+              body += `${ApiResponse._contentType}: ${ApiResponse._jsonContentType}\r\n\r\n`;
+              body += `${JSON.stringify(item.body)}\r\n`;
+            } else if (contentType.indexOf(ApiResponse._urlencodedContentType) > -1) {
+              body += `${ApiResponse._contentType}: ${ApiResponse._urlencodedContentType}\r\n\r\n`;
+              body += `${queryStringify(item.body)}\r\n`;
+            }
+            
+            return body;
+            
+          }, '');
+          
+          init.body += `--${boundry}--`;
+          
         }
 
         // Create a request with encoded body
