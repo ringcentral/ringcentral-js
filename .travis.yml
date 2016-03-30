@@ -20,3 +20,7 @@ deploy:
   on:
     tags: true
     repo: ringcentral/ringcentral-js
+before_install:
+  - export CHROME_BIN=chromium-browser
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start

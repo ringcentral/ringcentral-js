@@ -4,7 +4,7 @@ module.exports = function(config) {
 
     config.set({
 
-        basePath: '../',
+        basePath: '.',
 
         frameworks: [
             'mocha',
@@ -14,14 +14,12 @@ module.exports = function(config) {
 
         files: [
             require.resolve('karma-chai-plugins/function-bind-polyfill'),
-            './bower_components/pubnub/web/pubnub.js',
-            './bower_components/es6-promise/promise.js',
-            './bower_components/fetch/fetch.js',
+            require.resolve('whatwg-fetch/fetch'),
+            require.resolve('es6-promise/dist/es6-promise.js'),
+            require.resolve('pubnub/modern/dist/pubnub.js'),
             './build/ringcentral.js',
             './build/tests/ringcentral-tests.js'
         ],
-
-        exclude: [],
 
         reporters: [
             //'html',
@@ -38,31 +36,47 @@ module.exports = function(config) {
             dir: './build/karma'
         },
 
-        logLevel: config.LOG_ERROR, // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+        logLevel: config.LOG_WARN,
 
         preprocessors: {
             './build/*.js': ['coverage']
         },
 
         browsers: [
-            //'Chrome',
+            process.env.CI || process.env.TRAVIS ? 'ChromeTravis' : 'Chrome',
+            'Firefox',
             'PhantomJS'
         ],
 
         plugins: [
+            'karma-chai-plugins',
             'karma-chrome-launcher',
             'karma-coverage',
+            'karma-firefox-launcher',
             'karma-html-reporter',
             'karma-mocha',
             'karma-mocha-reporter',
-            'karma-phantomjs-launcher',
-            'karma-chai-plugins'
+            'karma-phantomjs-launcher'
         ],
 
-        singleRun: true,
-        captureTimeout: 5000,
-        browserNoActivityTimeout: 5000,
-        requireJsShowNoTimestampsError: false
+        customLaunchers: {
+            ChromeTravis: {
+                base: 'Chrome',
+                flags: ['--no-sandbox']
+            }
+        },
+
+        client: {
+            captureConsole: true,
+            showDebugMessages: true,
+            mocha: {
+                ui: 'bdd',
+                timeout: 5000
+
+            }
+        },
+
+        singleRun: true
 
     });
 

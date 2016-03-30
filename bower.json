@@ -17,16 +17,9 @@
     "!src/**/*"
   ],
   "dependencies": {
-    "es6-promise": "~2.2.0",
-    "fetch": "#master",
-    "pubnub": "~3.7.13"
-  },
-  "devDependencies": {
-    "chai": "~3.2.0",
-    "sinon-chai": "~2.8.0",
-    "mocha": "~2.2.5",
-    "sinonjs": "~1.14.1",
-    "requirejs": "~2.1.20"
+    "es6-promise": "^3.2.1",
+    "fetch": "^0.11.0",
+    "pubnub": "^3.14.4"
   },
   "moduleType": [
     "amd",
@@ -48,6 +41,5 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/ringcentral/ringcentral-js.git"
-  },
-  "version": "2.0.6"
+  }
 }
