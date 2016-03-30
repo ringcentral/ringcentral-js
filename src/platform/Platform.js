@@ -506,6 +506,7 @@ export default class Platform extends Observable {
      * @param {object} [query]
      * @param {object} [options]
      * @param {object} [options.headers]
+     * @param {boolean} [options.batch]
      * @param {boolean} [options.skipAuthCheck]
      * @return {Promise<ApiResponse>}
      */
@@ -515,6 +516,7 @@ export default class Platform extends Observable {
         options.url = url;
         options.query = query;
         options.body = body;
+        options.batch = !!options.batch;
         return await this.send(options);
     }
 
