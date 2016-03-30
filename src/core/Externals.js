@@ -1,4 +1,4 @@
-import ES6Promise from "es6-promise";
+import es6Promise from "es6-promise";
 import nodeFetch from "node-fetch";
 import pubnub from "pubnub";
 
@@ -6,13 +6,15 @@ var root = (typeof window !== "undefined" && window) ||
            (typeof global !== "undefined" && global) ||
            Function("return this;")();
 
-export var Promise = (ES6Promise && ES6Promise.Promise) || root.Promise;
+var Promise = (es6Promise && es6Promise.Promise) || root.Promise;
 
-export var fetch = root.fetch || nodeFetch;
-export var Request = root.Request || fetch.Request;
-export var Response = root.Response || fetch.Response;
-export var Headers = root.Headers || fetch.Headers;
+var fetch = nodeFetch || root.fetch;
+var Request = fetch.Request || root.Request;
+var Response = fetch.Response || root.Response;
+var Headers = fetch.Headers || root.Headers;
 
-export var PUBNUB = root.PUBNUB || pubnub;
+var PUBNUB = pubnub || root.PUBNUB;
 
-export var localStorage = (typeof root.localStorage !== 'undefined') ? root.localStorage : {};
+var localStorage = (typeof root.localStorage !== 'undefined') ? root.localStorage : {};
+
+export {Promise, fetch, Request, Response, Headers, PUBNUB, localStorage};

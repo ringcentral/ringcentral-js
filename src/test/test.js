@@ -1,11 +1,12 @@
-import _mocha from 'mocha';
-import _chai from 'chai';
-import _sinon from 'sinon';
-import _sinonChai from 'sinon-chai';
-import SDK from '../SDK';
+import chai from "chai";
+import sinon from "sinon";
+import SDK from "../SDK";
 
-export var chai = _chai || window.chai;
-export var sinon = _sinon || window.sinon;
+export mocha from 'mocha';
+export sinonChai from 'sinon-chai';
+
+export {chai, sinon};
+
 export var expect = chai.expect;
 export var spy = sinon.spy;
 
@@ -72,7 +73,7 @@ export async function getMock(fn) {
 
 export function asyncTest(fn) {
 
-    return function(){
+    return function() {
         return getMock(fn);
     };
 

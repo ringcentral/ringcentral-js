@@ -201,7 +201,7 @@ export default class ApiResponse {
 
             });
 
-        return new ApiResponse(null, new Response(text ? text : null, {
+        return new ApiResponse(null, new Response(text ? text : undefined, {
             headers: headers,
             status: status,
             statusText: statusText

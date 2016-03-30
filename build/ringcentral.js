@@ -867,7 +867,7 @@ var SDK = function () {
     return SDK;
 }();
 
-SDK.version = '2.0.6';
+SDK.version = ("2.1.0");
 SDK.server = {
     sandbox: 'https://platform.devtest.ringcentral.com',
     production: 'https://platform.ringcentral.com'
@@ -1108,16 +1108,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var root = typeof window !== "undefined" && window || typeof global !== "undefined" && global || Function("return this;")();
 
-var Promise = exports.Promise = _es6Promise2.default && _es6Promise2.default.Promise || root.Promise;
+var Promise = _es6Promise2.default && _es6Promise2.default.Promise || root.Promise;
 
-var fetch = exports.fetch = root.fetch || _nodeFetch2.default;
-var Request = exports.Request = root.Request || fetch.Request;
-var Response = exports.Response = root.Response || fetch.Response;
-var Headers = exports.Headers = root.Headers || fetch.Headers;
+var fetch = _nodeFetch2.default || root.fetch;
+var Request = fetch.Request || root.Request;
+var Response = fetch.Response || root.Response;
+var Headers = fetch.Headers || root.Headers;
 
-var PUBNUB = exports.PUBNUB = root.PUBNUB || _pubnub2.default;
+var PUBNUB = _pubnub2.default || root.PUBNUB;
 
-var localStorage = exports.localStorage = typeof root.localStorage !== 'undefined' ? root.localStorage : {};
+var localStorage = typeof root.localStorage !== 'undefined' ? root.localStorage : {};
+
+exports.Promise = Promise;
+exports.fetch = fetch;
+exports.Request = Request;
+exports.Response = Response;
+exports.Headers = Headers;
+exports.PUBNUB = PUBNUB;
+exports.localStorage = localStorage;
 /* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -1857,7 +1865,7 @@ var ApiResponse = function () {
             if (key) headers.append(key, value);
         });
 
-        return new ApiResponse(null, new _Externals.Response(text ? text : null, {
+        return new ApiResponse(null, new _Externals.Response(text ? text : undefined, {
             headers: headers,
             status: status,
             statusText: statusText
