@@ -284,7 +284,7 @@ export default class Platform extends Observable {
 
         } catch (e) {
 
-            this._cache.clean();
+            this._clearCache();
 
             this.emit(this.events.loginError, e);
 
@@ -352,7 +352,7 @@ export default class Platform extends Observable {
             e = this._client.makeError(e);
 
             if (Platform._clearCacheOnRefreshError) {
-                this._cache.clean();
+                this._clearCache();
             }
 
             this.emit(this.events.refreshError, e);
@@ -379,7 +379,7 @@ export default class Platform extends Observable {
             });
 
             this._queue.resume();
-            this._cache.clean();
+            this._clearCache();
 
             this.emit(this.events.logoutSuccess, res);
 
@@ -554,6 +554,10 @@ export default class Platform extends Observable {
         if (this._isAccessTokenValid()) return null;
         return await this.refresh();
 
+    }
+    
+    _clearCache() {
+        this._cache.removeItem(Platform._cacheId);
     }
 
     _isAccessTokenValid() {
