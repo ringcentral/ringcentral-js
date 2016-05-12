@@ -115,39 +115,6 @@ export function isPlainObject(o) {
     return true;
 }
 
-/**
- * @param fn
- * @param interval
- * @param timeout
- */
-export function poll(fn, interval, timeout) { //NodeJS.Timer|number
-
-    module.exports.stopPolling(timeout);
-
-    interval = interval || 1000;
-
-    var next = (delay) => {
-
-        delay = delay || interval;
-
-        interval = delay;
-
-        return setTimeout(() => {
-
-            fn(next, delay);
-
-        }, delay);
-
-    };
-
-    return next();
-
-}
-
-export function stopPolling(timeout) {
-    if (timeout) clearTimeout(timeout);
-}
-
 export function isNodeJS() {
     return (typeof process !== 'undefined');
 }

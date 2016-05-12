@@ -78,36 +78,33 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub.js"></script>
 <script src="../build/ringcentral.js" type="text/javascript"></script>
+<script src="scripts.js" type="text/javascript"></script>
 <script type="text/javascript">
 
     var form = document.getElementsByTagName('form')[0],
-            isTokenValid = document.getElementById('isTokenValid'),
-            appKeyField = document.getElementById('appKey'),
-            appSecretField = document.getElementById('appSecret'),
-            serverField = document.getElementById('server');
+        isTokenValid = document.getElementById('isTokenValid'),
+        appKeyField = document.getElementById('appKey'),
+        appSecretField = document.getElementById('appSecret'),
+        serverField = document.getElementById('server');
 
     function app() {
 
-        var rcsdk = new RingCentral.SDK({
-                    server: localStorage.getItem('ringcentral-demo-server') || RingCentral.SDK.server.sandbox,
-                    appKey: localStorage.getItem('ringcentral-demo-appKey'),
-                    appSecret: localStorage.getItem('ringcentral-demo-appSecret')
-                }),
-                platform = rcsdk.platform();
+        var sdk = getSDK(),
+            platform = sdk.platform();
 
         isTokenValid.style.display = platform.auth().accessTokenValid() ? '' : 'none';
 
         appKeyField.value = platform._appKey;
         appSecretField.value = platform._appSecret;
-        serverField.value = platform._server;
+        serverField.value = platform._server || RingCentral.SDK.server.sandbox;
 
     }
 
     function save() {
 
-        localStorage.setItem('ringcentral-demo-server', (serverField.value).trim());
-        localStorage.setItem('ringcentral-demo-appKey', (appKeyField.value).trim());
-        localStorage.setItem('ringcentral-demo-appSecret', (appSecretField.value).trim());
+        localStorage.setItem('ringcentral-demo-server', serverField.value.trim());
+        localStorage.setItem('ringcentral-demo-appKey', appKeyField.value.trim());
+        localStorage.setItem('ringcentral-demo-appSecret', appSecretField.value.trim());
 
         alert('Saved');
 

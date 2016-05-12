@@ -1,8 +1,9 @@
+import "babel-regenerator-runtime";
+
 import * as Utils from './core/Utils';
 import Cache from './core/Cache';
 import * as Externals from './core/Externals';
-import Observable from './core/Observable';
-import Queue from './core/Queue';
+import EventEmitter from 'events';
 
 import Client from './http/Client';
 import ApiResponse from './http/ApiResponse';
@@ -21,7 +22,7 @@ import CachedSubscription from './subscription/CachedSubscription';
 
 class SDK {
 
-    static version = '2.0.6';
+    static version = (typeof VERSION !== 'undefined' ? VERSION : 'x.x.x');
 
     static server = {
         sandbox: 'https://platform.devtest.ringcentral.com',
@@ -44,6 +45,14 @@ class SDK {
     constructor(options) {
 
         options = options || {};
+
+        if (!Externals.fetch) {
+            throw new Error('Native Fetch is missing, set RingCentral.SDK.core.Externals.fetch to your favorite alternative');
+        }
+
+        if (!Externals.Promise) {
+            throw new Error('Native Promise is missing, set RingCentral.SDK.core.Externals.Promise to your favorite alternative');
+        }
 
         this._cache = new Cache(Externals.localStorage, options.cachePrefix);
 
@@ -94,10 +103,9 @@ class SDK {
 
     static core = {
         Cache: Cache,
-        Observable: Observable,
+        EventEmitter: EventEmitter,
         Utils: Utils,
-        Externals: Externals,
-        Queue: Queue
+        Externals: Externals
     };
 
     static http = {
@@ -124,7 +132,7 @@ class SDK {
         PubnubMockFactory: PubnubMockFactory
     };
 
-    static handleAuthRedirect(origin) {
+    static handleLoginRedirect(origin) {
         window.opener.postMessage({RCAuthorizationCode: window.location.search}, origin || window.location.origin);
     }
 

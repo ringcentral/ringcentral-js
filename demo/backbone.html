@@ -1,214 +1,183 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Backbone &mdash; RingCentral&trade; Platform</title>
-    <script type="text/javascript" src="http://underscorejs.org/underscore.js"></script>
-    <script type="text/javascript" src="http://backbonejs.org/backbone.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.0/fetch.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub.js"></script>
-    <script src="../build/ringcentral.js" type="text/javascript"></script>
+    <title>Core &mdash; RingCentral&trade; Platform</title>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="common.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body>
 
-    <script type="text/javascript">
+<div class="container">
 
-        window.addEventListener('load', function() {
+    <h1>
+        <a href="index.html" id="logo"></a>
+    </h1>
 
-            var appKey = localStorage.getItem('ringcentral-demo-appKey'),
-                    appSecret = localStorage.getItem('ringcentral-demo-appSecret'),
-                    server = localStorage.getItem('ringcentral-demo-server'),
-                    rcsdk = new RingCentral.sdk.SDK({server: server, appKey: appKey, appSecret: appSecret}),
-                    platform = rcsdk.getPlatform();
+    <hr>
 
-            //////////
+    <div id="extension">
+        <div id="extension-info"></div>
+        <div id="extension-call-log"></div>
+        <div id="extension-presence-log"></div>
+    </div>
 
-            /**
-             * Provides integration between Backbone and RCSDK
-             */
-            Backbone.ajax = function(request) {
+    <hr>
 
-                return platform.apiCall(request.url, {
+    <p class="text-center text-muted">
+        &copy; 1999 &ndash; <span id="date"></span> RingCentral&trade;, Inc. All rights reserved.
+        <script> document.getElementById('date').innerHTML = (new Date()).getFullYear().toString(); </script>
+    </p>
+
+</div>
+
+<script type="text/javascript" src="http://underscorejs.org/underscore.js"></script>
+<script type="text/javascript" src="http://backbonejs.org/backbone.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.0/fetch.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub.js"></script>
+<script src="../build/ringcentral.js" type="text/javascript"></script>
+<script src="scripts.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    (function() {
+
+        var sdk = getSDK();
+        var platform = sdk.platform();
+
+        //////////
+
+        /**
+         * Provides integration between Backbone and RingCentral SDK
+         */
+        Backbone.ajax = function(request) {
+
+            return platform
+                .send({
                     method: request.type,
+                    url: request.url,
                     get: request.type === 'GET' ? request.data : null,
                     post: request.type !== 'GET' ? request.data : null,
                     headers: request.headers
-                }).then(function(ajax) {
-                    request.success && request.success(ajax);
-                    return ajax;
-                }).catch(function(e) {
+                })
+                .then(function(res) {
+                    request.success && request.success(res);
+                    return res;
+                })
+                .catch(function(e) {
                     request.error && request.error(e);
                     throw e;
                 });
 
-            };
+        };
 
-            //////////
+        //////////
 
-            var RestModel = Backbone.Model.extend({
-                defaults: {
-                    id: null,
-                    uri: null
-                },
-                /**
-                 * @param {Ajax|object} ajax
-                 * @returns {object}
-                 */
-                parse: function(ajax) {
-                    return ('getJson' in ajax) ? ajax.getJson() : ajax;
-                },
-                url: function() {
-                    return (this.urlRoot || (this.collection && this.collection.url) || '/') +
-                           (this.isNew() ? '' : '/' + encodeURIComponent(this.id));
-                }
-            });
-
-            var RestCollection = Backbone.Collection.extend({
-                model: RestModel,
-                /**
-                 * @param {Ajax} ajax
-                 * @returns {array}
-                 */
-                parse: function(ajax) {
-                    return ajax.getJson().records;
-                }
-            });
-
-            //////////
-
-            var Call = RestModel.extend({
-                defaults: {
-                    sessionId: null,
-                    startTime: null,
-                    duration: null,
-                    type: null,
-                    direction: null,
-                    action: null,
-                    result: null,
-                    to: null,
-                    from: null
-                },
-                urlRoot: rcsdk.getCallHelper().createUrl()
-            });
-
-            var CallCollection = RestCollection.extend({
-                model: Call,
-                url: rcsdk.getCallHelper().createUrl()
-            });
-
-            var Extension = RestModel.extend({
-                defaults: {
-                    extensionNumber: null,
-                    name: null,
-                    type: null,
-                    contact: null,
-                    regionalSettings: null,
-                    serviceFeatures: null,
-                    status: null,
-                    setupWizardState: null
-                },
-                urlRoot: rcsdk.getExtensionHelper().createUrl()
-            });
-
-            //////////
-
-            function showExtension() {
-
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('extension').style.display = 'block';
-
-                var callDiv = document.getElementById('extension-call-log');
-
-                (new CallCollection()).fetch({
-                    success: function(collection, response, options) {
-
-                        callDiv.innerHTML = collection.map(function(call) {
-                            return '<div>' + call.get('direction') + ' ' + call.get('type') + ' ' + call.get('action') + ' - From ' + (call.get('from').phoneNumber || 'Unknown') + ' to ' + call.get('to').phoneNumber + ' - ' + call.get('result') + '</div>';
-                        }).join('');
-
-
-                    },
-                    error: function(collection, response, options) {
-                    }
-                });
-
-                (new Extension({id: '~'})).fetch({
-                    success: function(extension, response, options) {
-                        document.getElementById('extension-info').innerHTML = '<strong>' + extension.get('id') + ' ' + extension.get('extensionNumber') + ' ' + extension.get('name') + '</strong>';
-                    },
-                    error: function(extension, response, options) {
-                    }
-                });
-
+        var RestModel = Backbone.Model.extend({
+            defaults: {
+                id: null,
+                uri: null
+            },
+            /**
+             * @param {ApiResponse|object} res
+             * @returns {object}
+             */
+            parse: function(res) {
+                return ('json' in res) ? res.json() : res;
+            },
+            url: function() {
+                return (this.urlRoot || (this.collection && this.collection.url) || '/') +
+                       (this.isNew() ? '' : '/' + encodeURIComponent(this.id));
             }
-
-            function showLogin() {
-
-                document.getElementById('extension').style.display = 'none';
-                document.getElementById('login').style.display = 'block';
-
-                document.getElementById('login-submit').addEventListener('click', function() {
-
-                    platform.authorize({
-                        username: document.getElementById('login-username').value,
-                        extension: document.getElementById('login-extension').value,
-                        password: document.getElementById('login-password').value
-                    }).then(showExtension).catch(function(e) {
-
-                        console.error(e);
-                        alert(e.message || e.description || 'Server cannot authorize user');
-
-                    });
-
-                });
-
-            }
-
-            document.getElementById('extension-info-logout').addEventListener('click', function(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                platform.logout();
-            });
-
-            platform.on(platform.events.logoutSuccess, function() {
-                showLogin();
-            });
-
-            document.getElementById('login-username').value = localStorage.getItem('rscdk-demo-login-username');
-            document.getElementById('login-password').value = localStorage.getItem('rscdk-demo-login-password');
-            document.getElementById('login-extension').value = localStorage.getItem('rscdk-demo-login-extension');
-
-            platform.isAuthorized().then(showExtension).catch(showLogin);
-
         });
 
-    </script>
-    <style type="text/css">
+        var RestCollection = Backbone.Collection.extend({
+            model: RestModel,
+            /**
+             * @param {ApiResponse} res
+             * @returns {array}
+             */
+            parse: function(res) {
+                return res.json().records;
+            }
+        });
 
-        .screen {
-            display: none;
+        //////////
+
+        var Call = RestModel.extend({
+            defaults: {
+                sessionId: null,
+                startTime: null,
+                duration: null,
+                type: null,
+                direction: null,
+                action: null,
+                result: null,
+                to: null,
+                from: null
+            },
+            urlRoot: '/account/~/extension/~/call-log'
+        });
+
+        var CallCollection = RestCollection.extend({
+            model: Call,
+            url: '/account/~/extension/~/call-log'
+        });
+
+        var Extension = RestModel.extend({
+            defaults: {
+                extensionNumber: null,
+                name: null,
+                type: null,
+                contact: null,
+                regionalSettings: null,
+                serviceFeatures: null,
+                status: null,
+                setupWizardState: null
+            },
+            urlRoot: '/account/~/extension'
+        });
+
+        //////////
+
+        function showExtension() {
+
+            var callDiv = document.getElementById('extension-call-log');
+
+            (new CallCollection()).fetch({
+                success: function(collection, response, options) {
+
+                    callDiv.innerHTML = collection.map(function(call) {
+                        return '<div>' + call.get('direction') + ' ' + call.get('type') + ' ' + call.get('action') + ' - From ' + (call.get('from').phoneNumber || 'Unknown') + ' to ' + call.get('to').phoneNumber + ' - ' + call.get('result') + '</div>';
+                    }).join('');
+
+
+                },
+                error: function(collection, response, options) {
+                }
+            });
+
+            (new Extension({id: '~'})).fetch({
+                success: function(extension, response, options) {
+                    document.getElementById('extension-info').innerHTML = '<strong>' + extension.get('id') + ' ' + extension.get('extensionNumber') + ' ' + extension.get('name') + '</strong>';
+                },
+                error: function(extension, response, options) {
+                }
+            });
+
         }
 
-    </style>
-</head>
-<body>
+        platform.ensureLoggedIn().then(showExtension).catch(function(){
+            location.assign('login.htnl');
+        });
 
-<div id="login" class="screen">
-    <p><label>Login: <input type="text" id="login-username"></label></p>
+    })();
 
-    <p><label>Password: <input type="password" id="login-password"></label></p>
+</script>
 
-    <p><label>Extension: <input type="text" id="login-extension"></label></p>
-
-    <p>
-        <button id="login-submit" type="button">Submit</button>
-    </p>
-</div>
-
-<div id="extension" class="screen">
-    <button type="button" id="extension-info-logout">Logout</button>
-    <div id="extension-info"></div>
-    <div id="extension-call-log"></div>
-    <div id="extension-presence-log"></div>
-</div>
 
 </body>
 </html>

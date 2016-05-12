@@ -6,9 +6,7 @@
             {'mocha': createExternal('mocha')},
             {'chai': createExternal('chai', 'chai', 'chai')},
             {'sinon': createExternal('sinon', 'sinon', 'sinon')},
-            {'sinon-chai': createExternal('sinon-chai', 'sinon-chai')}
-        ],
-        bundleExternals = [
+            {'sinon-chai': createExternal('sinon-chai', 'sinon-chai')},
             {'pubnub': createExternal('pubnub', 'pubnub')},
             {'es6-promise': createExternal('es6-promise')},
             {'node-fetch': createExternal('node-fetch')}
@@ -39,12 +37,7 @@
                 chunkFilename: "[id].chunk.js"
             },
             resolve: {
-                extensions: ['', '.js'],
-                alias: {
-                    'pubnub': require.resolve('./bower_components/pubnub/web/pubnub.js'),
-                    'node-fetch': require.resolve('./bower_components/fetch/fetch.js'),
-                    'es6-promise': require.resolve('./bower_components/es6-promise/promise.js')
-                }
+                extensions: ['', '.js']
             },
             module: {
                 loaders: [
@@ -55,7 +48,16 @@
                 Buffer: false,
                 process: false,
                 timers: false
-            }
+            },
+            plugins: [
+                new webpack.optimize.UglifyJsPlugin({
+                    include: /\.min\.js$/,
+                    minimize: true
+                }),
+                new webpack.DefinePlugin({
+                    VERSION: JSON.stringify(require('./package.json').version)
+                })
+            ]
         };
 
         Object.keys(conf).forEach(function(key) {
@@ -68,16 +70,15 @@
 
     module.exports = [
         extendConfig({
-            entry: {'ringcentral': ['babel-regenerator-runtime', './src/SDK.js']},
-            externals: externals.concat(bundleExternals)
-        }),
-        extendConfig({
-            entry: {'ringcentral-bundle': ['babel-regenerator-runtime', './src/SDK.js']},
+            entry: {
+                'ringcentral': ['./src/SDK.js'],
+                'ringcentral.min': ['./src/SDK.js']
+            },
             externals: externals
         }),
         extendConfig({
-            entry: {'tests/ringcentral-tests': ['babel-regenerator-runtime', './src/test/glob.js']},
-            externals: externals.concat(bundleExternals).concat([
+            entry: {'tests/ringcentral-tests': ['./src/test/glob.js']},
+            externals: externals.concat([
                 {'../SDK': createExternal('../ringcentral', '../ringcentral', ['RingCentral', 'SDK'])},
                 {'./SDK': createExternal('../ringcentral', '../ringcentral', ['RingCentral', 'SDK'])}
             ])

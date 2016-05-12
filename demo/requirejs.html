@@ -41,31 +41,33 @@
             'ringcentral': '../build/ringcentral',
             'pubnub': 'https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub',
             'fetch': 'https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.0/fetch',
-            'shim': 'https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise'
+            'promise': 'https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise'
         }
     });
 
-    require(['ringcentral', 'shim', 'fetch'], function(SDK, shim) {
+    require(['ringcentral', 'promise', 'fetch'], function(SDK, promise) {
+
+        promise.polyfill();
 
         var sdk = new SDK({server: SDK.server.sandbox});
 
-//        sdk.platform().auth().forceAuthentication();
+        sdk.platform().get('', {skipAuthCheck: true})
+            .then(function(apiResponse) {
 
-        sdk.platform().get('', {skipAuthCheck: true}).then(function(apiResponse) {
+                document.getElementById('report').innerHTML = [
+                    'RingCentral version: ' + SDK.version,
+                    'API version: ' + apiResponse.json().versionString,
+                    'PUBNUB version: ' + SDK.core.Externals.PUBNUB.get_version(),
+                    'Promise native: ' + (Promise.toString().trim() == 'function Promise() { [native code] }'),
+                    'Fetch native: ' + (SDK.core.Externals.fetch.toString().trim() == 'function fetch() { [native code] }'),
+                    'Root scope is not poisoned: ' + (window.RingCentral == undefined)
+                ].join('<br>');
 
-            document.getElementById('report').innerHTML = [
-                'RingCentral version: ' + SDK.version,
-                'API version: ' + apiResponse.json().versionString,
-                'PUBNUB version: ' + SDK.core.Externals.PUBNUB.get_version(),
-                'Promise native: ' + (Promise.toString().trim() == 'function Promise() { [native code] }'),
-                'Fetch native: ' + (SDK.core.Externals.fetch.toString().trim() == 'function fetch() { [native code] }'),
-                'Root scope is not poisoned: ' + (window.RingCentral == undefined)
-            ].join('<br>');
-
-        }).catch(function(e) {
-            alert(e.message + '\n\n' + e.stack);
-            console.error(e.message + '\n\n' + e.stack);
-        });
+            })
+            .catch(function(e) {
+                alert(e.message + '\n\n' + e.stack);
+                console.error(e.message + '\n\n' + e.stack);
+            });
 
     });
 

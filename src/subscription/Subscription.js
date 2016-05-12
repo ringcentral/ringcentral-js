@@ -1,8 +1,6 @@
-import Observable from '../core/Observable';
-import Client from '../http/Client';
-import {poll, stopPolling, delay} from '../core/Utils';
+import EventEmitter from "events";
 
-export default class Subscription extends Observable {
+export default class Subscription extends EventEmitter {
 
     static _renewHandicapMs = 2 * 60 * 1000;
     static _pollInterval = 10 * 1000;
@@ -24,17 +22,20 @@ export default class Subscription extends Observable {
         this._pubnubFactory = pubnubFactory;
         this._platform = platform;
         this._pubnub = null;
+        this._pubnubLastChannel = null;
         this._timeout = null;
-        this._subscription = {};
+        this._subscription = null;
 
     }
 
-    subscribed(){
+    subscribed() {
 
-        return !!(this._subscription.id &&
-                  this._subscription.deliveryMode &&
-                  this._subscription.deliveryMode.subscriberKey &&
-                  this._subscription.deliveryMode.address);
+        var subscription = this.subscription();
+
+        return !!(subscription.id &&
+                  subscription.deliveryMode &&
+                  subscription.deliveryMode.subscriberKey &&
+                  subscription.deliveryMode.address);
 
     }
 
@@ -45,8 +46,16 @@ export default class Subscription extends Observable {
         return this.subscribed() && Date.now() < this.expirationTime();
     }
 
+    /**
+     * @return {boolean}
+     */
+    expired() {
+        if (!this.subscribed()) return true;
+        return !this.subscribed() || Date.now() > this.subscription().expirationTime;
+    }
+
     expirationTime() {
-        return new Date(this._subscription.expirationTime || 0).getTime() - Subscription._renewHandicapMs;
+        return new Date(this.subscription().expirationTime || 0).getTime() - Subscription._renewHandicapMs;
     }
 
     setSubscription(subscription) {
@@ -54,11 +63,8 @@ export default class Subscription extends Observable {
         subscription = subscription || {};
 
         this._clearTimeout();
-
-        this._subscription = subscription;
-
-        if (!this._pubnub) this._subscribeAtPubnub();
-
+        this._setSubscription(subscription);
+        this._subscribeAtPubnub();
         this._setTimeout();
 
         return this;
@@ -66,7 +72,7 @@ export default class Subscription extends Observable {
     }
 
     subscription() {
-        return this._subscription;
+        return this._subscription || {};
     }
 
     /**
@@ -84,7 +90,7 @@ export default class Subscription extends Observable {
     }
 
     eventFilters() {
-        return this._subscription.eventFilters || [];
+        return this.subscription().eventFilters || [];
     }
 
     /**
@@ -101,7 +107,9 @@ export default class Subscription extends Observable {
      * @return {Subscription}
      */
     setEventFilters(events) {
-        this._subscription.eventFilters = events;
+        var subscription = this.subscription();
+        subscription.eventFilters = events;
+        this._setSubscription(subscription);
         return this;
     }
 
@@ -116,7 +124,7 @@ export default class Subscription extends Observable {
 
             if (!this.eventFilters().length) throw new Error('Events are undefined');
 
-            var response = await this._platform.post('/restapi/v1.0/subscription', {
+            var response = await this._platform.post('/subscription', {
                     eventFilters: this._getFullEventFilters(),
                     deliveryMode: {
                         transportType: 'PubNub'
@@ -156,7 +164,7 @@ export default class Subscription extends Observable {
 
             if (!this.eventFilters().length) throw new Error('Events are undefined');
 
-            var response = await this._platform.put('/restapi/v1.0/subscription/' + this._subscription.id, {
+            var response = await this._platform.put('/subscription/' + this.subscription().id, {
                 eventFilters: this._getFullEventFilters()
             });
 
@@ -189,7 +197,7 @@ export default class Subscription extends Observable {
 
             if (!this.subscribed()) throw new Error('No subscription');
 
-            var response = await this._platform.delete('/restapi/v1.0/subscription/' + this._subscription.id);
+            var response = await this._platform.delete('/subscription/' + this.subscription().id);
 
             this.reset()
                 .emit(this.events.removeSuccess, response);
@@ -212,9 +220,8 @@ export default class Subscription extends Observable {
      * @returns {Promise<ApiResponse>}
      */
     resubscribe() {
-
-        return this.reset().setEventFilters(this.eventFilters()).subscribe();
-
+        var filters = this.eventFilters();
+        return this.reset().setEventFilters(filters).subscribe();
     }
 
     /**
@@ -223,9 +230,13 @@ export default class Subscription extends Observable {
      */
     reset() {
         this._clearTimeout();
-        if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({channel: this._subscription.deliveryMode.address});
-        this._subscription = {};
+        if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({channel: this.subscription().deliveryMode.address});
+        this._setSubscription(null);
         return this;
+    }
+
+    _setSubscription(subscription) {
+        this._subscription = subscription;
     }
 
     _getFullEventFilters() {
@@ -242,35 +253,34 @@ export default class Subscription extends Observable {
 
         if (!this.alive()) throw new Error('Subscription is not alive');
 
-        poll((next)=> {
+        this._timeout = setInterval(()=> {
 
-            if (this.alive()) return next();
+            if (this.alive()) return;
 
-            this.renew();
+            if (this.expired()) {
+                this.subscribe();
+            } else {
+                this.renew();
+            }
 
-        }, Subscription._pollInterval, this._timeout);
+        }, Subscription._pollInterval);
 
         return this;
 
     }
 
     _clearTimeout() {
-
-        stopPolling(this._timeout);
-
+        clearInterval(this._timeout);
         return this;
-
     }
 
     _decrypt(message) {
 
         if (!this.subscribed()) throw new Error('No subscription');
 
-        if (this._subscription.deliveryMode.encryptionKey) {
+        if (this.subscription().deliveryMode.encryptionKey) {
 
-            var PUBNUB = this._pubnubFactory;
-
-            message = PUBNUB.crypto_obj.decrypt(message, this._subscription.deliveryMode.encryptionKey, {
+            message = this._pubnubFactory.crypto_obj.decrypt(message, this.subscription().deliveryMode.encryptionKey, {
                 encryptKey: false,
                 keyEncoding: 'base64',
                 keyLength: 128,
@@ -284,28 +294,46 @@ export default class Subscription extends Observable {
     }
 
     _notify(message) {
-
         this.emit(this.events.notification, this._decrypt(message));
-
         return this;
-
     }
 
     _subscribeAtPubnub() {
 
         if (!this.alive()) throw new Error('Subscription is not alive');
 
-        var PUBNUB = this._pubnubFactory;
+        var deliveryMode = this.subscription().deliveryMode;
 
-        this._pubnub = PUBNUB.init({
-            ssl: true,
-            subscribe_key: this._subscription.deliveryMode.subscriberKey
-        });
+        if (this._pubnub) {
 
-        this._pubnub.ready();
+            if (this._pubnubLastChannel == deliveryMode.address) { // Nothing to update, keep listening to same channel
+                return this;
+            } else if (this._pubnubLastChannel) { // Need to subscribe to new channel
+                this._pubnub.unsubscribe({channel: this._pubnubLastChannel});
+            }
+
+            // Re-init for new data
+            this._pubnub = this._pubnub.init({
+                ssl: true,
+                subscribe_key: deliveryMode.subscriberKey
+            });
+
+        } else {
+
+            // Init from scratch
+            this._pubnub = this._pubnubFactory.init({
+                ssl: true,
+                subscribe_key: deliveryMode.subscriberKey
+            });
+
+            this._pubnub.ready(); //TODO This may be not needed anymore
+
+        }
+
+        this._pubnubLastChannel = deliveryMode.address;
 
         this._pubnub.subscribe({
-            channel: this._subscription.deliveryMode.address,
+            channel: deliveryMode.address,
             message: this._notify.bind(this),
             connect: () => {}
         });

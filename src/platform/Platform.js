@@ -1,15 +1,12 @@
 import {Promise} from "../core/Externals";
-import Observable from "../core/Observable";
-import Queue from "../core/Queue";
+import EventEmitter from "events";
 import Auth from "./Auth";
-import {queryStringify, parseQueryString, delay, isBrowser} from "../core/Utils";
+import {queryStringify, parseQueryString, isBrowser, delay} from "../core/Utils";
 
-export default class Platform extends Observable {
+export default class Platform extends EventEmitter {
 
     static _urlPrefix = '/restapi';
     static _apiVersion = 'v1.0';
-    static _refreshTokenTtl = 10 * 60 * 60; // 10 hours
-    static _refreshTokenTtlRemember = 7 * 24 * 60 * 60; // 1 week
     static _tokenEndpoint = '/restapi/oauth/token';
     static _revokeEndpoint = '/restapi/oauth/revoke';
     static _authorizeEndpoint = '/restapi/oauth/authorize';
@@ -43,7 +40,8 @@ export default class Platform extends Observable {
         /** @type {Client} */
         this._client = client;
 
-        this._queue = new Queue(this._cache, Platform._cacheId + '-refresh');
+        /** @type {Promise<ApiResponse>} */
+        this._refreshPromise = null;
 
         this._auth = new Auth(this._cache, Platform._cacheId);
 
@@ -106,7 +104,7 @@ export default class Platform extends Observable {
      * @param {object} [options]
      * @return {string}
      */
-    authUrl(options) {
+    loginUrl(options) {
 
         options = options || {};
 
@@ -126,7 +124,7 @@ export default class Platform extends Observable {
      * @param {string} url
      * @return {Object}
      */
-    parseAuthRedirectUrl(url) {
+    parseLoginRedirectUrl(url) {
 
         var qs = parseQueryString(url.split('?').reverse()[0]),
             error = qs.error_description || qs.error;
@@ -156,7 +154,7 @@ export default class Platform extends Observable {
      * @param {string} options.url
      * @return {Promise}
      */
-    authWindow(options) {
+    loginWindow(options) {
 
         return new Promise((resolve, reject) => {
 
@@ -198,7 +196,7 @@ export default class Platform extends Observable {
 
                 try {
 
-                    var loginOptions = this.parseAuthRedirectUrl(e.data[options.property]);
+                    var loginOptions = this.parseLoginRedirectUrl(e.data[options.property]);
 
                     if (!loginOptions.code) throw new Error('No authorization code');
 
@@ -222,7 +220,7 @@ export default class Platform extends Observable {
     async loggedIn() {
 
         try {
-            await this._ensureAuthentication();
+            await this.ensureLoggedIn();
             return true;
         } catch (e) {
             return false;
@@ -271,7 +269,6 @@ export default class Platform extends Observable {
             if (options.endpointId) body.endpoint_id = options.endpointId;
             if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
             if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
-            if (options.remember && !options.refreshTokenTtl) body.refreshTokenTtl = options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl;
 
             var apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body),
                 json = apiResponse.json();
@@ -296,36 +293,19 @@ export default class Platform extends Observable {
 
     /**
      * @returns {Promise<ApiResponse>}
+     * @private
      */
-    async refresh() {
+    async _refresh() {
 
         try {
 
             this.emit(this.events.beforeRefresh);
 
-            if (this._queue.isPaused()) {
-
-                await this._queue.poll();
-
-                if (!this._isAccessTokenValid()) {
-                    throw new Error('Automatic authentification timeout');
-                }
-
-                this.emit(this.events.refreshSuccess, null);
-
-                return null;
-
-            }
-
-            this._queue.pause();
-
-            // Make sure all existing AJAX calls had a chance to reach the server
             await delay(Platform._refreshDelayMs);
 
             // Perform sanity checks
             if (!this._auth.refreshToken()) throw new Error('Refresh token is missing');
             if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
-            if (!this._queue.isPaused()) throw new Error('Queue was resumed before refresh call');
 
             /** @type {ApiResponse} */
             var res = await this._tokenRequest(Platform._tokenEndpoint, {
@@ -341,7 +321,6 @@ export default class Platform extends Observable {
             }
 
             this._auth.setData(json);
-            this._queue.resume();
 
             this.emit(this.events.refreshSuccess, res);
 
@@ -366,19 +345,44 @@ export default class Platform extends Observable {
     /**
      * @returns {Promise<ApiResponse>}
      */
+    async refresh() {
+
+        if (this._refreshPromise) {
+            return this._refreshPromise;
+        }
+
+        try {
+
+            this._refreshPromise = this._refresh()
+                .then((res) => {
+                    this._refreshPromise = null;
+                    return res;
+                });
+
+            return this._refreshPromise;
+
+        } catch (e) {
+
+            this._refreshPromise = null;
+            throw e;
+
+        }
+
+    }
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
     async logout() {
 
         try {
 
             this.emit(this.events.beforeLogout);
 
-            this._queue.pause();
-
             var res = await this._tokenRequest(Platform._revokeEndpoint, {
                 token: this._auth.accessToken()
             });
 
-            this._queue.resume();
             this._cache.clean();
 
             this.emit(this.events.logoutSuccess, res);
@@ -386,8 +390,6 @@ export default class Platform extends Observable {
             return res;
 
         } catch (e) {
-
-            this._queue.resume();
 
             this.emit(this.events.logoutError, e);
 
@@ -409,7 +411,7 @@ export default class Platform extends Observable {
 
         if (options.skipAuthCheck) return request;
 
-        await this._ensureAuthentication();
+        await this.ensureLoggedIn();
 
         request.headers.set('X-User-Agent', this._userAgent);
         request.headers.set('Client-Id', this._appKey);
@@ -549,17 +551,13 @@ export default class Platform extends Observable {
 
     }
 
-    async _ensureAuthentication() {
-
+    async ensureLoggedIn() {
         if (this._isAccessTokenValid()) return null;
         return await this.refresh();
-
     }
 
     _isAccessTokenValid() {
-
-        return (this._auth.accessTokenValid() && !this._queue.isPaused());
-
+        return (this._auth.accessTokenValid());
     }
 
     _apiKey() {
