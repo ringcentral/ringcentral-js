@@ -1,12 +1,16 @@
-import Observable from '../core/Observable';
-import {PUBNUB} from '../core/Externals';
+import EventEmitter from "events";
+import {PUBNUB} from "../core/Externals";
 
-export default class PubnubMock extends Observable {
+export default class PubnubMock extends EventEmitter {
 
     constructor(options) {
         super();
         this.options = options;
         this.crypto_obj = PUBNUB.crypto_obj;
+    }
+
+    init(options) {
+        this.options = options;
     }
 
     ready() {}
@@ -16,7 +20,7 @@ export default class PubnubMock extends Observable {
     }
 
     unsubscribe(options) {
-        this.off('message-' + options.channel);
+        this.removeAllListeners('message-' + options.channel);
     }
 
     receiveMessage(msg, channel) {

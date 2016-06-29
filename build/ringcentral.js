@@ -54,12 +54,196 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-__webpack_require__(1);
-module.exports = __webpack_require__(2);
+module.exports = __webpack_require__(1);
 
 
 /***/ },
 /* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+__webpack_require__(2);
+
+var _Utils = __webpack_require__(3);
+
+var Utils = _interopRequireWildcard(_Utils);
+
+var _Cache = __webpack_require__(8);
+
+var _Cache2 = _interopRequireDefault(_Cache);
+
+var _Externals = __webpack_require__(4);
+
+var Externals = _interopRequireWildcard(_Externals);
+
+var _events = __webpack_require__(9);
+
+var _events2 = _interopRequireDefault(_events);
+
+var _Client = __webpack_require__(10);
+
+var _Client2 = _interopRequireDefault(_Client);
+
+var _ApiResponse = __webpack_require__(11);
+
+var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
+
+var _ClientMock = __webpack_require__(12);
+
+var _ClientMock2 = _interopRequireDefault(_ClientMock);
+
+var _Mock = __webpack_require__(14);
+
+var _Mock2 = _interopRequireDefault(_Mock);
+
+var _Registry = __webpack_require__(13);
+
+var _Registry2 = _interopRequireDefault(_Registry);
+
+var _Platform = __webpack_require__(15);
+
+var _Platform2 = _interopRequireDefault(_Platform);
+
+var _Auth = __webpack_require__(16);
+
+var _Auth2 = _interopRequireDefault(_Auth);
+
+var _PubnubFactory = __webpack_require__(17);
+
+var _PubnubFactory2 = _interopRequireDefault(_PubnubFactory);
+
+var _Subscription = __webpack_require__(19);
+
+var _Subscription2 = _interopRequireDefault(_Subscription);
+
+var _CachedSubscription = __webpack_require__(20);
+
+var _CachedSubscription2 = _interopRequireDefault(_CachedSubscription);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SDK = function () {
+
+    /**
+     * @namespace RingCentral
+     * @constructor
+     * @param {object} [options]
+     * @param {string} [options.server]
+     * @param {string} [options.cachePrefix]
+     * @param {string} [options.appSecret]
+     * @param {string} [options.appKey]
+     * @param {string} [options.appName]
+     * @param {string} [options.appVersion]
+     * @param {string} [options.pubnubFactory]
+     * @param {string} [options.client]
+     */
+
+    function SDK(options) {
+        _classCallCheck(this, SDK);
+
+        options = options || {};
+
+        if (!Externals.fetch) {
+            throw new Error('Native Fetch is missing, set RingCentral.SDK.core.Externals.fetch to your favorite alternative');
+        }
+
+        if (!Externals.Promise) {
+            throw new Error('Native Promise is missing, set RingCentral.SDK.core.Externals.Promise to your favorite alternative');
+        }
+
+        this._cache = new _Cache2.default(Externals.localStorage, options.cachePrefix);
+
+        this._client = options.client || new _Client2.default();
+
+        this._platform = new _Platform2.default(this._client, this._cache, options.server, options.appKey, options.appSecret, options.appName, options.appVersion, SDK.version);
+
+        this._pubnubFactory = options.pubnubFactory || Externals.PUBNUB;
+    }
+
+    /**
+     * @return {Platform}
+     */
+
+
+    SDK.prototype.platform = function platform() {
+        return this._platform;
+    };
+
+    /**
+     * @return {Subscription}
+     */
+
+
+    SDK.prototype.createSubscription = function createSubscription() {
+        return new _Subscription2.default(this._pubnubFactory, this._platform);
+    };
+
+    /**
+     * @return {CachedSubscription}
+     */
+
+
+    SDK.prototype.createCachedSubscription = function createCachedSubscription(cacheKey) {
+        return new _CachedSubscription2.default(this._pubnubFactory, this._platform, this._cache, cacheKey);
+    };
+
+    /**
+     * @return {Cache}
+     */
+
+
+    SDK.prototype.cache = function cache() {
+        return this._cache;
+    };
+
+    SDK.handleLoginRedirect = function handleLoginRedirect(origin) {
+        window.opener.postMessage({ RCAuthorizationCode: window.location.search }, origin || window.location.origin);
+    };
+
+    return SDK;
+}();
+
+SDK.version =  true ? ("3.0.0-rc1") : 'x.x.x';
+SDK.server = {
+    sandbox: 'https://platform.devtest.ringcentral.com',
+    production: 'https://platform.ringcentral.com'
+};
+SDK.core = {
+    Cache: _Cache2.default,
+    EventEmitter: _events2.default,
+    Utils: Utils,
+    Externals: Externals
+};
+SDK.http = {
+    Client: _Client2.default,
+    ApiResponse: _ApiResponse2.default
+};
+SDK.platform = {
+    Auth: _Auth2.default,
+    Platform: _Platform2.default
+};
+SDK.subscription = {
+    Subscription: _Subscription2.default
+};
+SDK.mocks = {
+    Client: _ClientMock2.default,
+    Registry: _Registry2.default,
+    Mock: _Mock2.default
+};
+SDK.pubnub = {
+    PubnubMockFactory: _PubnubFactory2.default
+};
+
+
+module.exports = SDK;
+
+/***/ },
+/* 2 */
 /***/ function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
@@ -723,186 +907,6 @@ module.exports = __webpack_require__(2);
 /* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-'use strict';
-
-var _Utils = __webpack_require__(3);
-
-var Utils = _interopRequireWildcard(_Utils);
-
-var _Cache = __webpack_require__(8);
-
-var _Cache2 = _interopRequireDefault(_Cache);
-
-var _Externals = __webpack_require__(4);
-
-var Externals = _interopRequireWildcard(_Externals);
-
-var _Observable = __webpack_require__(9);
-
-var _Observable2 = _interopRequireDefault(_Observable);
-
-var _Queue = __webpack_require__(10);
-
-var _Queue2 = _interopRequireDefault(_Queue);
-
-var _Client = __webpack_require__(11);
-
-var _Client2 = _interopRequireDefault(_Client);
-
-var _ApiResponse = __webpack_require__(12);
-
-var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
-
-var _ClientMock = __webpack_require__(13);
-
-var _ClientMock2 = _interopRequireDefault(_ClientMock);
-
-var _Mock = __webpack_require__(15);
-
-var _Mock2 = _interopRequireDefault(_Mock);
-
-var _Registry = __webpack_require__(14);
-
-var _Registry2 = _interopRequireDefault(_Registry);
-
-var _Platform = __webpack_require__(16);
-
-var _Platform2 = _interopRequireDefault(_Platform);
-
-var _Auth = __webpack_require__(17);
-
-var _Auth2 = _interopRequireDefault(_Auth);
-
-var _PubnubFactory = __webpack_require__(18);
-
-var _PubnubFactory2 = _interopRequireDefault(_PubnubFactory);
-
-var _Subscription = __webpack_require__(20);
-
-var _Subscription2 = _interopRequireDefault(_Subscription);
-
-var _CachedSubscription = __webpack_require__(21);
-
-var _CachedSubscription2 = _interopRequireDefault(_CachedSubscription);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var SDK = function () {
-
-    /**
-     * @namespace RingCentral
-     * @constructor
-     * @param {object} [options]
-     * @param {string} [options.server]
-     * @param {string} [options.cachePrefix]
-     * @param {string} [options.appSecret]
-     * @param {string} [options.appKey]
-     * @param {string} [options.appName]
-     * @param {string} [options.appVersion]
-     * @param {string} [options.pubnubFactory]
-     * @param {string} [options.client]
-     */
-
-    function SDK(options) {
-        _classCallCheck(this, SDK);
-
-        options = options || {};
-
-        this._cache = new _Cache2.default(Externals.localStorage, options.cachePrefix);
-
-        this._client = options.client || new _Client2.default();
-
-        this._platform = new _Platform2.default(this._client, this._cache, options.server, options.appKey, options.appSecret, options.appName, options.appVersion, SDK.version);
-
-        this._pubnubFactory = options.pubnubFactory || Externals.PUBNUB;
-    }
-
-    /**
-     * @return {Platform}
-     */
-
-
-    SDK.prototype.platform = function platform() {
-        return this._platform;
-    };
-
-    /**
-     * @return {Subscription}
-     */
-
-
-    SDK.prototype.createSubscription = function createSubscription() {
-        return new _Subscription2.default(this._pubnubFactory, this._platform);
-    };
-
-    /**
-     * @return {CachedSubscription}
-     */
-
-
-    SDK.prototype.createCachedSubscription = function createCachedSubscription(cacheKey) {
-        return new _CachedSubscription2.default(this._pubnubFactory, this._platform, this._cache, cacheKey);
-    };
-
-    /**
-     * @return {Cache}
-     */
-
-
-    SDK.prototype.cache = function cache() {
-        return this._cache;
-    };
-
-    SDK.handleAuthRedirect = function handleAuthRedirect(origin) {
-        window.opener.postMessage({ RCAuthorizationCode: window.location.search }, origin || window.location.origin);
-    };
-
-    return SDK;
-}();
-
-SDK.version = '2.0.6';
-SDK.server = {
-    sandbox: 'https://platform.devtest.ringcentral.com',
-    production: 'https://platform.ringcentral.com'
-};
-SDK.core = {
-    Cache: _Cache2.default,
-    Observable: _Observable2.default,
-    Utils: Utils,
-    Externals: Externals,
-    Queue: _Queue2.default
-};
-SDK.http = {
-    Client: _Client2.default,
-    ApiResponse: _ApiResponse2.default
-};
-SDK.platform = {
-    Auth: _Auth2.default,
-    Platform: _Platform2.default
-};
-SDK.subscription = {
-    Subscription: _Subscription2.default
-};
-SDK.mocks = {
-    Client: _ClientMock2.default,
-    Registry: _Registry2.default,
-    Mock: _Mock2.default
-};
-SDK.pubnub = {
-    PubnubMockFactory: _PubnubFactory2.default
-};
-
-
-module.exports = SDK;
-
-/***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -919,8 +923,6 @@ exports.isArray = isArray;
 exports.isObject = isObject;
 exports.isObjectObject = isObjectObject;
 exports.isPlainObject = isPlainObject;
-exports.poll = poll;
-exports.stopPolling = stopPolling;
 exports.isNodeJS = isNodeJS;
 exports.isBrowser = isBrowser;
 exports.delay = delay;
@@ -1036,37 +1038,6 @@ function isPlainObject(o) {
     return true;
 }
 
-/**
- * @param fn
- * @param interval
- * @param timeout
- */
-function poll(fn, interval, timeout) {
-    //NodeJS.Timer|number
-
-    module.exports.stopPolling(timeout);
-
-    interval = interval || 1000;
-
-    var next = function next(delay) {
-
-        delay = delay || interval;
-
-        interval = delay;
-
-        return setTimeout(function () {
-
-            fn(next, delay);
-        }, delay);
-    };
-
-    return next();
-}
-
-function stopPolling(timeout) {
-    if (timeout) clearTimeout(timeout);
-}
-
 function isNodeJS() {
     return typeof process !== 'undefined';
 }
@@ -1108,16 +1079,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var root = typeof window !== "undefined" && window || typeof global !== "undefined" && global || Function("return this;")();
 
-var Promise = exports.Promise = _es6Promise2.default && _es6Promise2.default.Promise || root.Promise;
+var Promise = _es6Promise2.default && _es6Promise2.default.Promise || root.Promise;
 
-var fetch = exports.fetch = root.fetch || _nodeFetch2.default;
-var Request = exports.Request = root.Request || fetch.Request;
-var Response = exports.Response = root.Response || fetch.Response;
-var Headers = exports.Headers = root.Headers || fetch.Headers;
+var fetch = _nodeFetch2.default && typeof _nodeFetch2.default == 'function' ? _nodeFetch2.default : root.fetch;
+var Request = fetch.Request || root.Request;
+var Response = fetch.Response || root.Response;
+var Headers = fetch.Headers || root.Headers;
 
-var PUBNUB = exports.PUBNUB = root.PUBNUB || _pubnub2.default;
+var PUBNUB = _pubnub2.default || root.PUBNUB;
 
-var localStorage = exports.localStorage = typeof root.localStorage !== 'undefined' ? root.localStorage : {};
+var localStorage = typeof root.localStorage !== 'undefined' ? root.localStorage : {};
+
+exports.Promise = Promise;
+exports.fetch = fetch;
+exports.Request = Request;
+exports.Response = Response;
+exports.Headers = Headers;
+exports.PUBNUB = PUBNUB;
+exports.localStorage = localStorage;
 /* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
@@ -1205,161 +1184,312 @@ exports.default = Cache;
 /* 9 */
 /***/ function(module, exports) {
 
-'use strict';
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-exports.__esModule = true;
+function EventEmitter() {
+  this._events = this._events || {};
+  this._maxListeners = this._maxListeners || undefined;
+}
+module.exports = EventEmitter;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
 
-var Observable = function () {
-    function Observable() {
-        _classCallCheck(this, Observable);
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._maxListeners = undefined;
 
-        this.off();
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+EventEmitter.defaultMaxListeners = 10;
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function(n) {
+  if (!isNumber(n) || n < 0 || isNaN(n))
+    throw TypeError('n must be a positive number');
+  this._maxListeners = n;
+  return this;
+};
+
+EventEmitter.prototype.emit = function(type) {
+  var er, handler, len, args, i, listeners;
+
+  if (!this._events)
+    this._events = {};
+
+  // If there is no 'error' event listener then throw.
+  if (type === 'error') {
+    if (!this._events.error ||
+        (isObject(this._events.error) && !this._events.error.length)) {
+      er = arguments[1];
+      if (er instanceof Error) {
+        throw er; // Unhandled 'error' event
+      } else {
+        // At least give some kind of context to the user
+        var err = new Error('Uncaught, unspecified "error" event. (' + er + ')');
+        err.context = er;
+        throw err;
+      }
+    }
+  }
+
+  handler = this._events[type];
+
+  if (isUndefined(handler))
+    return false;
+
+  if (isFunction(handler)) {
+    switch (arguments.length) {
+      // fast cases
+      case 1:
+        handler.call(this);
+        break;
+      case 2:
+        handler.call(this, arguments[1]);
+        break;
+      case 3:
+        handler.call(this, arguments[1], arguments[2]);
+        break;
+      // slower
+      default:
+        args = Array.prototype.slice.call(arguments, 1);
+        handler.apply(this, args);
+    }
+  } else if (isObject(handler)) {
+    args = Array.prototype.slice.call(arguments, 1);
+    listeners = handler.slice();
+    len = listeners.length;
+    for (i = 0; i < len; i++)
+      listeners[i].apply(this, args);
+  }
+
+  return true;
+};
+
+EventEmitter.prototype.addListener = function(type, listener) {
+  var m;
+
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
+
+  if (!this._events)
+    this._events = {};
+
+  // To avoid recursion in the case that type === "newListener"! Before
+  // adding it to the listeners, first emit "newListener".
+  if (this._events.newListener)
+    this.emit('newListener', type,
+              isFunction(listener.listener) ?
+              listener.listener : listener);
+
+  if (!this._events[type])
+    // Optimize the case of one listener. Don't need the extra array object.
+    this._events[type] = listener;
+  else if (isObject(this._events[type]))
+    // If we've already got an array, just append.
+    this._events[type].push(listener);
+  else
+    // Adding the second element, need to change to array.
+    this._events[type] = [this._events[type], listener];
+
+  // Check for listener leak
+  if (isObject(this._events[type]) && !this._events[type].warned) {
+    if (!isUndefined(this._maxListeners)) {
+      m = this._maxListeners;
+    } else {
+      m = EventEmitter.defaultMaxListeners;
     }
 
-    Observable.prototype.hasListeners = function hasListeners(event) {
-        return event in this._listeners;
-    };
+    if (m && m > 0 && this._events[type].length > m) {
+      this._events[type].warned = true;
+      console.error('(node) warning: possible EventEmitter memory ' +
+                    'leak detected. %d listeners added. ' +
+                    'Use emitter.setMaxListeners() to increase limit.',
+                    this._events[type].length);
+      if (typeof console.trace === 'function') {
+        // not supported in IE 10
+        console.trace();
+      }
+    }
+  }
 
-    Observable.prototype.on = function on(events, callback) {
-        var _this = this;
+  return this;
+};
 
-        if (typeof events == 'string') events = [events];
-        if (!events) throw new Error('No events to subscribe to');
-        if (typeof callback !== 'function') throw new Error('Callback must be a function');
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
 
-        events.forEach(function (event) {
+EventEmitter.prototype.once = function(type, listener) {
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
 
-            if (!_this.hasListeners(event)) _this._listeners[event] = [];
+  var fired = false;
 
-            _this._listeners[event].push(callback);
-        });
+  function g() {
+    this.removeListener(type, g);
 
-        return this;
-    };
+    if (!fired) {
+      fired = true;
+      listener.apply(this, arguments);
+    }
+  }
 
-    Observable.prototype.emit = function emit(event) {
-        var _this2 = this;
+  g.listener = listener;
+  this.on(type, g);
 
-        for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-            args[_key - 1] = arguments[_key];
-        }
+  return this;
+};
 
-        var result = null;
+// emits a 'removeListener' event iff the listener was removed
+EventEmitter.prototype.removeListener = function(type, listener) {
+  var list, position, length, i;
 
-        if (!this.hasListeners(event)) return null;
+  if (!isFunction(listener))
+    throw TypeError('listener must be a function');
 
-        this._listeners[event].some(function (callback) {
+  if (!this._events || !this._events[type])
+    return this;
 
-            result = callback.apply(_this2, args);
-            return result === false;
-        });
+  list = this._events[type];
+  length = list.length;
+  position = -1;
 
-        return result;
-    };
+  if (list === listener ||
+      (isFunction(list.listener) && list.listener === listener)) {
+    delete this._events[type];
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
 
-    Observable.prototype.off = function off(event, callback) {
-        var _this3 = this;
+  } else if (isObject(list)) {
+    for (i = length; i-- > 0;) {
+      if (list[i] === listener ||
+          (list[i].listener && list[i].listener === listener)) {
+        position = i;
+        break;
+      }
+    }
 
-        if (!event) {
+    if (position < 0)
+      return this;
 
-            this._listeners = {};
-        } else {
+    if (list.length === 1) {
+      list.length = 0;
+      delete this._events[type];
+    } else {
+      list.splice(position, 1);
+    }
 
-            if (!callback) {
+    if (this._events.removeListener)
+      this.emit('removeListener', type, listener);
+  }
 
-                delete this._listeners[event];
-            } else {
+  return this;
+};
 
-                if (!this.hasListeners(event)) return this;
+EventEmitter.prototype.removeAllListeners = function(type) {
+  var key, listeners;
 
-                this._listeners[event].forEach(function (cb, i) {
+  if (!this._events)
+    return this;
 
-                    if (cb === callback) delete _this3._listeners[event][i];
-                });
-            }
-        }
+  // not listening for removeListener, no need to emit
+  if (!this._events.removeListener) {
+    if (arguments.length === 0)
+      this._events = {};
+    else if (this._events[type])
+      delete this._events[type];
+    return this;
+  }
 
-        return this;
-    };
+  // emit removeListener for all listeners on all events
+  if (arguments.length === 0) {
+    for (key in this._events) {
+      if (key === 'removeListener') continue;
+      this.removeAllListeners(key);
+    }
+    this.removeAllListeners('removeListener');
+    this._events = {};
+    return this;
+  }
 
-    return Observable;
-}();
+  listeners = this._events[type];
 
-exports.default = Observable;
+  if (isFunction(listeners)) {
+    this.removeListener(type, listeners);
+  } else if (listeners) {
+    // LIFO order
+    while (listeners.length)
+      this.removeListener(type, listeners[listeners.length - 1]);
+  }
+  delete this._events[type];
+
+  return this;
+};
+
+EventEmitter.prototype.listeners = function(type) {
+  var ret;
+  if (!this._events || !this._events[type])
+    ret = [];
+  else if (isFunction(this._events[type]))
+    ret = [this._events[type]];
+  else
+    ret = this._events[type].slice();
+  return ret;
+};
+
+EventEmitter.prototype.listenerCount = function(type) {
+  if (this._events) {
+    var evlistener = this._events[type];
+
+    if (isFunction(evlistener))
+      return 1;
+    else if (evlistener)
+      return evlistener.length;
+  }
+  return 0;
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  return emitter.listenerCount(type);
+};
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+
 
 /***/ },
 /* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-'use strict';
-
-exports.__esModule = true;
-
-var _Externals = __webpack_require__(4);
-
-var _Utils = __webpack_require__(3);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Queue = function () {
-    function Queue(cache, cacheId) {
-        _classCallCheck(this, Queue);
-
-        this._cache = cache;
-        this._cacheId = cacheId;
-        this._promise = null;
-    }
-
-    Queue.prototype.isPaused = function isPaused() {
-
-        var time = this._cache.getItem(this._cacheId);
-
-        return !!time && Date.now() - parseInt(time) < Queue._releaseTimeout;
-    };
-
-    Queue.prototype.pause = function pause() {
-        this._cache.setItem(this._cacheId, Date.now());
-        return this;
-    };
-
-    Queue.prototype.resume = function resume() {
-        this._cache.removeItem(this._cacheId);
-        return this;
-    };
-
-    Queue.prototype.poll = function poll() {
-        var _this = this;
-
-        if (this._promise) return this._promise;
-
-        this._promise = new _Externals.Promise(function (resolve, reject) {
-
-            (0, _Utils.poll)(function (next) {
-
-                if (_this.isPaused()) return next();
-
-                _this._promise = null;
-
-                _this.resume(); // this is actually not needed but why not
-
-                resolve(null);
-            }, Queue._pollInterval);
-        });
-
-        return this._promise;
-    };
-
-    return Queue;
-}();
-
-Queue._pollInterval = 250;
-Queue._releaseTimeout = 5000;
-exports.default = Queue;
-
-/***/ },
-/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1371,11 +1501,11 @@ var _Externals = __webpack_require__(4);
 
 var _Utils = __webpack_require__(3);
 
-var _Observable2 = __webpack_require__(9);
+var _events = __webpack_require__(9);
 
-var _Observable3 = _interopRequireDefault(_Observable2);
+var _events2 = _interopRequireDefault(_events);
 
-var _ApiResponse = __webpack_require__(12);
+var _ApiResponse = __webpack_require__(11);
 
 var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
 
@@ -1389,8 +1519,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Client = function (_Observable) {
-    _inherits(Client, _Observable);
+var Client = function (_EventEmitter) {
+    _inherits(Client, _EventEmitter);
 
     function Client() {
         var _temp, _this, _ret;
@@ -1401,7 +1531,7 @@ var Client = function (_Observable) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = _possibleConstructorReturn(this, _Observable.call.apply(_Observable, [this].concat(args))), _this), _this.events = {
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, _EventEmitter.call.apply(_EventEmitter, [this].concat(args))), _this), _this.events = {
             beforeRequest: 'beforeRequest',
             requestSuccess: 'requestSuccess',
             requestError: 'requestError'
@@ -1414,7 +1544,7 @@ var Client = function (_Observable) {
      */
 
     Client.prototype.sendRequest = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
+        var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
             var apiResponse;
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
@@ -1469,7 +1599,7 @@ var Client = function (_Observable) {
         }));
 
         function sendRequest(_x) {
-            return ref.apply(this, arguments);
+            return _ref.apply(this, arguments);
         }
 
         return sendRequest;
@@ -1483,7 +1613,7 @@ var Client = function (_Observable) {
 
 
     Client.prototype._loadResponse = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(request) {
+        var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(request) {
             return regeneratorRuntime.wrap(function _callee2$(_context2) {
                 while (1) {
                     switch (_context2.prev = _context2.next) {
@@ -1503,7 +1633,7 @@ var Client = function (_Observable) {
         }));
 
         function _loadResponse(_x2) {
-            return ref.apply(this, arguments);
+            return _ref2.apply(this, arguments);
         }
 
         return _loadResponse;
@@ -1597,7 +1727,7 @@ var Client = function (_Observable) {
     };
 
     return Client;
-}(_Observable3.default);
+}(_events2.default);
 
 Client._allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
 exports.default = Client;
@@ -1618,7 +1748,7 @@ function findHeaderName(name, headers) {
  */
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -1654,7 +1784,7 @@ var ApiResponse = function () {
     }
 
     ApiResponse.prototype._init = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+        var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
                     switch (_context.prev = _context.next) {
@@ -1682,7 +1812,7 @@ var ApiResponse = function () {
         }));
 
         function _init() {
-            return ref.apply(this, arguments);
+            return _ref.apply(this, arguments);
         }
 
         return _init;
@@ -1857,7 +1987,7 @@ var ApiResponse = function () {
             if (key) headers.append(key, value);
         });
 
-        return new ApiResponse(null, new _Externals.Response(text ? text : null, {
+        return new ApiResponse(null, new _Externals.Response(text ? text : undefined, {
             headers: headers,
             status: status,
             statusText: statusText
@@ -1877,18 +2007,18 @@ ApiResponse._boundarySeparator = '--';
 exports.default = ApiResponse;
 
 /***/ },
-/* 13 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _Registry = __webpack_require__(14);
+var _Registry = __webpack_require__(13);
 
 var _Registry2 = _interopRequireDefault(_Registry);
 
-var _Client = __webpack_require__(11);
+var _Client = __webpack_require__(10);
 
 var _Client2 = _interopRequireDefault(_Client);
 
@@ -1919,7 +2049,7 @@ var Client = function (_HttpClient) {
     };
 
     Client.prototype._loadResponse = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
+        var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
             var mock;
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
@@ -1941,7 +2071,7 @@ var Client = function (_HttpClient) {
         }));
 
         function _loadResponse(_x) {
-            return ref.apply(this, arguments);
+            return _ref.apply(this, arguments);
         }
 
         return _loadResponse;
@@ -1953,14 +2083,14 @@ var Client = function (_HttpClient) {
 exports.default = Client;
 
 /***/ },
-/* 14 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _Mock = __webpack_require__(15);
+var _Mock = __webpack_require__(14);
 
 var _Mock2 = _interopRequireDefault(_Mock);
 
@@ -1998,9 +2128,9 @@ var Registry = function () {
         return mock;
     };
 
-    Registry.prototype.apiCall = function apiCall(method, path, response, status, statusText) {
+    Registry.prototype.apiCall = function apiCall(method, path, response, status, statusText, delay) {
 
-        this.add(new _Mock2.default(method, path, response, status, statusText));
+        this.add(new _Mock2.default(method, path, response, status, statusText, delay));
 
         return this;
     };
@@ -2130,7 +2260,7 @@ var Registry = function () {
 exports.default = Registry;
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -2139,7 +2269,7 @@ exports.__esModule = true;
 
 var _Externals = __webpack_require__(4);
 
-var _ApiResponse = __webpack_require__(12);
+var _ApiResponse = __webpack_require__(11);
 
 var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
 
@@ -2177,7 +2307,7 @@ var Mock = function () {
     };
 
     Mock.prototype.getResponse = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
+        var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(request) {
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
                     switch (_context.prev = _context.next) {
@@ -2197,7 +2327,7 @@ var Mock = function () {
         }));
 
         function getResponse(_x) {
-            return ref.apply(this, arguments);
+            return _ref.apply(this, arguments);
         }
 
         return getResponse;
@@ -2224,7 +2354,7 @@ var Mock = function () {
 exports.default = Mock;
 
 /***/ },
-/* 16 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2233,15 +2363,11 @@ exports.__esModule = true;
 
 var _Externals = __webpack_require__(4);
 
-var _Observable2 = __webpack_require__(9);
+var _events = __webpack_require__(9);
 
-var _Observable3 = _interopRequireDefault(_Observable2);
+var _events2 = _interopRequireDefault(_events);
 
-var _Queue = __webpack_require__(10);
-
-var _Queue2 = _interopRequireDefault(_Queue);
-
-var _Auth = __webpack_require__(17);
+var _Auth = __webpack_require__(16);
 
 var _Auth2 = _interopRequireDefault(_Auth);
 
@@ -2257,15 +2383,13 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Platform = function (_Observable) {
-    _inherits(Platform, _Observable);
-
-    // 10 hours
+var Platform = function (_EventEmitter) {
+    _inherits(Platform, _EventEmitter);
 
     function Platform(client, cache, server, appKey, appSecret, appName, appVersion, sdkVersion) {
         _classCallCheck(this, Platform);
 
-        var _this = _possibleConstructorReturn(this, _Observable.call(this));
+        var _this = _possibleConstructorReturn(this, _EventEmitter.call(this));
 
         _this.events = {
             beforeLogin: 'beforeLogin',
@@ -2290,7 +2414,8 @@ var Platform = function (_Observable) {
         /** @type {Client} */
         _this._client = client;
 
-        _this._queue = new _Queue2.default(_this._cache, Platform._cacheId + '-refresh');
+        /** @type {Promise<ApiResponse>} */
+        _this._refreshPromise = null;
 
         _this._auth = new _Auth2.default(_this._cache, Platform._cacheId);
 
@@ -2302,7 +2427,6 @@ var Platform = function (_Observable) {
     /**
      * @return {Auth}
      */
-    // 1 week
 
 
     Platform.prototype.auth = function auth() {
@@ -2361,7 +2485,7 @@ var Platform = function (_Observable) {
      */
 
 
-    Platform.prototype.authUrl = function authUrl(options) {
+    Platform.prototype.loginUrl = function loginUrl(options) {
 
         options = options || {};
 
@@ -2382,7 +2506,7 @@ var Platform = function (_Observable) {
      */
 
 
-    Platform.prototype.parseAuthRedirectUrl = function parseAuthRedirectUrl(url) {
+    Platform.prototype.parseLoginRedirectUrl = function parseLoginRedirectUrl(url) {
 
         var qs = (0, _Utils.parseQueryString)(url.split('?').reverse()[0]),
             error = qs.error_description || qs.error;
@@ -2413,7 +2537,7 @@ var Platform = function (_Observable) {
      */
 
 
-    Platform.prototype.authWindow = function authWindow(options) {
+    Platform.prototype.loginWindow = function loginWindow(options) {
         var _this2 = this;
 
         return new _Externals.Promise(function (resolve, reject) {
@@ -2456,7 +2580,7 @@ var Platform = function (_Observable) {
 
                 try {
 
-                    var loginOptions = _this2.parseAuthRedirectUrl(e.data[options.property]);
+                    var loginOptions = _this2.parseLoginRedirectUrl(e.data[options.property]);
 
                     if (!loginOptions.code) throw new Error('No authorization code');
 
@@ -2476,14 +2600,14 @@ var Platform = function (_Observable) {
 
 
     Platform.prototype.loggedIn = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+        var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
                     switch (_context.prev = _context.next) {
                         case 0:
                             _context.prev = 0;
                             _context.next = 3;
-                            return this._ensureAuthentication();
+                            return this.ensureLoggedIn();
 
                         case 3:
                             return _context.abrupt("return", true);
@@ -2502,7 +2626,7 @@ var Platform = function (_Observable) {
         }));
 
         function loggedIn() {
-            return ref.apply(this, arguments);
+            return _ref.apply(this, arguments);
         }
 
         return loggedIn;
@@ -2523,7 +2647,7 @@ var Platform = function (_Observable) {
 
 
     Platform.prototype.login = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(options) {
+        var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(options) {
             var body, apiResponse, json;
             return regeneratorRuntime.wrap(function _callee2$(_context2) {
                 while (1) {
@@ -2556,12 +2680,11 @@ var Platform = function (_Observable) {
                             if (options.endpointId) body.endpoint_id = options.endpointId;
                             if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
                             if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
-                            if (options.remember && !options.refreshTokenTtl) body.refreshTokenTtl = options.remember ? Platform._refreshTokenTtlRemember : Platform._refreshTokenTtl;
 
-                            _context2.next = 11;
+                            _context2.next = 10;
                             return this._tokenRequest(Platform._tokenEndpoint, body);
 
-                        case 11:
+                        case 10:
                             apiResponse = _context2.sent;
                             json = apiResponse.json();
 
@@ -2572,8 +2695,8 @@ var Platform = function (_Observable) {
 
                             return _context2.abrupt("return", apiResponse);
 
-                        case 18:
-                            _context2.prev = 18;
+                        case 17:
+                            _context2.prev = 17;
                             _context2.t0 = _context2["catch"](0);
 
 
@@ -2583,16 +2706,16 @@ var Platform = function (_Observable) {
 
                             throw _context2.t0;
 
-                        case 23:
+                        case 22:
                         case "end":
                             return _context2.stop();
                     }
                 }
-            }, _callee2, this, [[0, 18]]);
+            }, _callee2, this, [[0, 17]]);
         }));
 
         function login(_x) {
-            return ref.apply(this, arguments);
+            return _ref2.apply(this, arguments);
         }
 
         return login;
@@ -2600,11 +2723,12 @@ var Platform = function (_Observable) {
 
     /**
      * @returns {Promise<ApiResponse>}
+     * @private
      */
 
 
-    Platform.prototype.refresh = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+    Platform.prototype._refresh = function () {
+        var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
             var res, json;
             return regeneratorRuntime.wrap(function _callee3$(_context3) {
                 while (1) {
@@ -2615,62 +2739,27 @@ var Platform = function (_Observable) {
 
                             this.emit(this.events.beforeRefresh);
 
-                            if (!this._queue.isPaused()) {
-                                _context3.next = 9;
-                                break;
-                            }
-
-                            _context3.next = 5;
-                            return this._queue.poll();
-
-                        case 5:
-                            if (this._isAccessTokenValid()) {
-                                _context3.next = 7;
-                                break;
-                            }
-
-                            throw new Error('Automatic authentification timeout');
-
-                        case 7:
-
-                            this.emit(this.events.refreshSuccess, null);
-
-                            return _context3.abrupt("return", null);
-
-                        case 9:
-
-                            this._queue.pause();
-
-                            // Make sure all existing AJAX calls had a chance to reach the server
-                            _context3.next = 12;
+                            _context3.next = 4;
                             return (0, _Utils.delay)(Platform._refreshDelayMs);
 
-                        case 12:
+                        case 4:
                             if (this._auth.refreshToken()) {
-                                _context3.next = 14;
+                                _context3.next = 6;
                                 break;
                             }
 
                             throw new Error('Refresh token is missing');
 
-                        case 14:
+                        case 6:
                             if (this._auth.refreshTokenValid()) {
-                                _context3.next = 16;
+                                _context3.next = 8;
                                 break;
                             }
 
                             throw new Error('Refresh token has expired');
 
-                        case 16:
-                            if (this._queue.isPaused()) {
-                                _context3.next = 18;
-                                break;
-                            }
-
-                            throw new Error('Queue was resumed before refresh call');
-
-                        case 18:
-                            _context3.next = 20;
+                        case 8:
+                            _context3.next = 10;
                             return this._tokenRequest(Platform._tokenEndpoint, {
                                 "grant_type": "refresh_token",
                                 "refresh_token": this._auth.refreshToken(),
@@ -2678,28 +2767,27 @@ var Platform = function (_Observable) {
                                 "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
                             });
 
-                        case 20:
+                        case 10:
                             res = _context3.sent;
                             json = res.json();
 
                             if (json.access_token) {
-                                _context3.next = 24;
+                                _context3.next = 14;
                                 break;
                             }
 
                             throw this._client.makeError(new Error('Malformed OAuth response'), res);
 
-                        case 24:
+                        case 14:
 
                             this._auth.setData(json);
-                            this._queue.resume();
 
                             this.emit(this.events.refreshSuccess, res);
 
                             return _context3.abrupt("return", res);
 
-                        case 30:
-                            _context3.prev = 30;
+                        case 19:
+                            _context3.prev = 19;
                             _context3.t0 = _context3["catch"](0);
 
 
@@ -2713,16 +2801,70 @@ var Platform = function (_Observable) {
 
                             throw _context3.t0;
 
-                        case 36:
+                        case 25:
                         case "end":
                             return _context3.stop();
                     }
                 }
-            }, _callee3, this, [[0, 30]]);
+            }, _callee3, this, [[0, 19]]);
+        }));
+
+        function _refresh() {
+            return _ref3.apply(this, arguments);
+        }
+
+        return _refresh;
+    }();
+
+    /**
+     * @returns {Promise<ApiResponse>}
+     */
+
+
+    Platform.prototype.refresh = function () {
+        var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+            var _this3 = this;
+
+            return regeneratorRuntime.wrap(function _callee4$(_context4) {
+                while (1) {
+                    switch (_context4.prev = _context4.next) {
+                        case 0:
+                            if (!this._refreshPromise) {
+                                _context4.next = 2;
+                                break;
+                            }
+
+                            return _context4.abrupt("return", this._refreshPromise);
+
+                        case 2:
+                            _context4.prev = 2;
+
+
+                            this._refreshPromise = this._refresh().then(function (res) {
+                                _this3._refreshPromise = null;
+                                return res;
+                            });
+
+                            return _context4.abrupt("return", this._refreshPromise);
+
+                        case 7:
+                            _context4.prev = 7;
+                            _context4.t0 = _context4["catch"](2);
+
+
+                            this._refreshPromise = null;
+                            throw _context4.t0;
+
+                        case 11:
+                        case "end":
+                            return _context4.stop();
+                    }
+                }
+            }, _callee4, this, [[2, 7]]);
         }));
 
         function refresh() {
-            return ref.apply(this, arguments);
+            return _ref4.apply(this, arguments);
         }
 
         return refresh;
@@ -2734,56 +2876,51 @@ var Platform = function (_Observable) {
 
 
     Platform.prototype.logout = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+        var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
             var res;
-            return regeneratorRuntime.wrap(function _callee4$(_context4) {
+            return regeneratorRuntime.wrap(function _callee5$(_context5) {
                 while (1) {
-                    switch (_context4.prev = _context4.next) {
+                    switch (_context5.prev = _context5.next) {
                         case 0:
-                            _context4.prev = 0;
+                            _context5.prev = 0;
 
 
                             this.emit(this.events.beforeLogout);
 
-                            this._queue.pause();
-
-                            _context4.next = 5;
+                            _context5.next = 4;
                             return this._tokenRequest(Platform._revokeEndpoint, {
                                 token: this._auth.accessToken()
                             });
 
-                        case 5:
-                            res = _context4.sent;
+                        case 4:
+                            res = _context5.sent;
 
 
-                            this._queue.resume();
                             this._cache.clean();
 
                             this.emit(this.events.logoutSuccess, res);
 
-                            return _context4.abrupt("return", res);
+                            return _context5.abrupt("return", res);
 
-                        case 12:
-                            _context4.prev = 12;
-                            _context4.t0 = _context4["catch"](0);
+                        case 10:
+                            _context5.prev = 10;
+                            _context5.t0 = _context5["catch"](0);
 
 
-                            this._queue.resume();
+                            this.emit(this.events.logoutError, _context5.t0);
 
-                            this.emit(this.events.logoutError, _context4.t0);
+                            throw _context5.t0;
 
-                            throw _context4.t0;
-
-                        case 17:
+                        case 14:
                         case "end":
-                            return _context4.stop();
+                            return _context5.stop();
                     }
                 }
-            }, _callee4, this, [[0, 12]]);
+            }, _callee5, this, [[0, 10]]);
         }));
 
         function logout() {
-            return ref.apply(this, arguments);
+            return _ref5.apply(this, arguments);
         }
 
         return logout;
@@ -2798,24 +2935,24 @@ var Platform = function (_Observable) {
 
 
     Platform.prototype.inflateRequest = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(request, options) {
-            return regeneratorRuntime.wrap(function _callee5$(_context5) {
+        var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(request, options) {
+            return regeneratorRuntime.wrap(function _callee6$(_context6) {
                 while (1) {
-                    switch (_context5.prev = _context5.next) {
+                    switch (_context6.prev = _context6.next) {
                         case 0:
 
                             options = options || {};
 
                             if (!options.skipAuthCheck) {
-                                _context5.next = 3;
+                                _context6.next = 3;
                                 break;
                             }
 
-                            return _context5.abrupt("return", request);
+                            return _context6.abrupt("return", request);
 
                         case 3:
-                            _context5.next = 5;
-                            return this._ensureAuthentication();
+                            _context6.next = 5;
+                            return this.ensureLoggedIn();
 
                         case 5:
 
@@ -2824,18 +2961,18 @@ var Platform = function (_Observable) {
                             request.headers.set('Authorization', this._authHeader());
                             //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
 
-                            return _context5.abrupt("return", request);
+                            return _context6.abrupt("return", request);
 
                         case 9:
                         case "end":
-                            return _context5.stop();
+                            return _context6.stop();
                     }
                 }
-            }, _callee5, this);
+            }, _callee6, this);
         }));
 
         function inflateRequest(_x2, _x3) {
-            return ref.apply(this, arguments);
+            return _ref6.apply(this, arguments);
         }
 
         return inflateRequest;
@@ -2850,54 +2987,54 @@ var Platform = function (_Observable) {
 
 
     Platform.prototype.sendRequest = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(request, options) {
-            return regeneratorRuntime.wrap(function _callee6$(_context6) {
+        var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(request, options) {
+            return regeneratorRuntime.wrap(function _callee7$(_context7) {
                 while (1) {
-                    switch (_context6.prev = _context6.next) {
+                    switch (_context7.prev = _context7.next) {
                         case 0:
-                            _context6.prev = 0;
-                            _context6.next = 3;
+                            _context7.prev = 0;
+                            _context7.next = 3;
                             return this.inflateRequest(request, options);
 
                         case 3:
-                            request = _context6.sent;
-                            _context6.next = 6;
+                            request = _context7.sent;
+                            _context7.next = 6;
                             return this._client.sendRequest(request);
 
                         case 6:
-                            return _context6.abrupt("return", _context6.sent);
+                            return _context7.abrupt("return", _context7.sent);
 
                         case 9:
-                            _context6.prev = 9;
-                            _context6.t0 = _context6["catch"](0);
+                            _context7.prev = 9;
+                            _context7.t0 = _context7["catch"](0);
 
-                            if (!(!_context6.t0.apiResponse || !_context6.t0.apiResponse.response() || _context6.t0.apiResponse.response().status != 401)) {
-                                _context6.next = 13;
+                            if (!(!_context7.t0.apiResponse || !_context7.t0.apiResponse.response() || _context7.t0.apiResponse.response().status != 401)) {
+                                _context7.next = 13;
                                 break;
                             }
 
-                            throw _context6.t0;
+                            throw _context7.t0;
 
                         case 13:
 
                             this._auth.cancelAccessToken();
 
-                            _context6.next = 16;
+                            _context7.next = 16;
                             return this.sendRequest(request, options);
 
                         case 16:
-                            return _context6.abrupt("return", _context6.sent);
+                            return _context7.abrupt("return", _context7.sent);
 
                         case 17:
                         case "end":
-                            return _context6.stop();
+                            return _context7.stop();
                     }
                 }
-            }, _callee6, this, [[0, 9]]);
+            }, _callee7, this, [[0, 9]]);
         }));
 
         function sendRequest(_x4, _x5) {
-            return ref.apply(this, arguments);
+            return _ref7.apply(this, arguments);
         }
 
         return sendRequest;
@@ -2916,32 +3053,32 @@ var Platform = function (_Observable) {
 
 
     Platform.prototype.send = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
+        var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
             var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-            return regeneratorRuntime.wrap(function _callee7$(_context7) {
+            return regeneratorRuntime.wrap(function _callee8$(_context8) {
                 while (1) {
-                    switch (_context7.prev = _context7.next) {
+                    switch (_context8.prev = _context8.next) {
                         case 0:
 
                             //FIXME https://github.com/bitinn/node-fetch/issues/43
                             options.url = this.createUrl(options.url, { addServer: true });
 
-                            _context7.next = 3;
+                            _context8.next = 3;
                             return this.sendRequest(this._client.createRequest(options), options);
 
                         case 3:
-                            return _context7.abrupt("return", _context7.sent);
+                            return _context8.abrupt("return", _context8.sent);
 
                         case 4:
                         case "end":
-                            return _context7.stop();
+                            return _context8.stop();
                     }
                 }
-            }, _callee7, this);
+            }, _callee8, this);
         }));
 
         function send(_x6) {
-            return ref.apply(this, arguments);
+            return _ref8.apply(this, arguments);
         }
 
         return send;
@@ -2958,31 +3095,31 @@ var Platform = function (_Observable) {
 
 
     Platform.prototype.get = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(url, query, options) {
-            return regeneratorRuntime.wrap(function _callee8$(_context8) {
+        var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(url, query, options) {
+            return regeneratorRuntime.wrap(function _callee9$(_context9) {
                 while (1) {
-                    switch (_context8.prev = _context8.next) {
+                    switch (_context9.prev = _context9.next) {
                         case 0:
                             options = options || {};
                             options.method = 'GET';
                             options.url = url;
                             options.query = query;
-                            _context8.next = 6;
+                            _context9.next = 6;
                             return this.send(options);
 
                         case 6:
-                            return _context8.abrupt("return", _context8.sent);
+                            return _context9.abrupt("return", _context9.sent);
 
                         case 7:
                         case "end":
-                            return _context8.stop();
+                            return _context9.stop();
                     }
                 }
-            }, _callee8, this);
+            }, _callee9, this);
         }));
 
         function get(_x8, _x9, _x10) {
-            return ref.apply(this, arguments);
+            return _ref9.apply(this, arguments);
         }
 
         return get;
@@ -3000,56 +3137,13 @@ var Platform = function (_Observable) {
 
 
     Platform.prototype.post = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(url, body, query, options) {
-            return regeneratorRuntime.wrap(function _callee9$(_context9) {
-                while (1) {
-                    switch (_context9.prev = _context9.next) {
-                        case 0:
-                            options = options || {};
-                            options.method = 'POST';
-                            options.url = url;
-                            options.query = query;
-                            options.body = body;
-                            _context9.next = 7;
-                            return this.send(options);
-
-                        case 7:
-                            return _context9.abrupt("return", _context9.sent);
-
-                        case 8:
-                        case "end":
-                            return _context9.stop();
-                    }
-                }
-            }, _callee9, this);
-        }));
-
-        function post(_x11, _x12, _x13, _x14) {
-            return ref.apply(this, arguments);
-        }
-
-        return post;
-    }();
-
-    /**
-     * @param {string} url
-     * @param {object} [body]
-     * @param {object} [query]
-     * @param {object} [options]
-     * @param {object} [options.headers]
-     * @param {boolean} [options.skipAuthCheck]
-     * @return {Promise<ApiResponse>}
-     */
-
-
-    Platform.prototype.put = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(url, body, query, options) {
+        var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(url, body, query, options) {
             return regeneratorRuntime.wrap(function _callee10$(_context10) {
                 while (1) {
                     switch (_context10.prev = _context10.next) {
                         case 0:
                             options = options || {};
-                            options.method = 'PUT';
+                            options.method = 'POST';
                             options.url = url;
                             options.query = query;
                             options.body = body;
@@ -3067,8 +3161,51 @@ var Platform = function (_Observable) {
             }, _callee10, this);
         }));
 
+        function post(_x11, _x12, _x13, _x14) {
+            return _ref10.apply(this, arguments);
+        }
+
+        return post;
+    }();
+
+    /**
+     * @param {string} url
+     * @param {object} [body]
+     * @param {object} [query]
+     * @param {object} [options]
+     * @param {object} [options.headers]
+     * @param {boolean} [options.skipAuthCheck]
+     * @return {Promise<ApiResponse>}
+     */
+
+
+    Platform.prototype.put = function () {
+        var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(url, body, query, options) {
+            return regeneratorRuntime.wrap(function _callee11$(_context11) {
+                while (1) {
+                    switch (_context11.prev = _context11.next) {
+                        case 0:
+                            options = options || {};
+                            options.method = 'PUT';
+                            options.url = url;
+                            options.query = query;
+                            options.body = body;
+                            _context11.next = 7;
+                            return this.send(options);
+
+                        case 7:
+                            return _context11.abrupt("return", _context11.sent);
+
+                        case 8:
+                        case "end":
+                            return _context11.stop();
+                    }
+                }
+            }, _callee11, this);
+        }));
+
         function put(_x15, _x16, _x17, _x18) {
-            return ref.apply(this, arguments);
+            return _ref11.apply(this, arguments);
         }
 
         return put;
@@ -3085,43 +3222,43 @@ var Platform = function (_Observable) {
 
 
     Platform.prototype['delete'] = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(url, query, options) {
-            return regeneratorRuntime.wrap(function _callee11$(_context11) {
+        var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(url, query, options) {
+            return regeneratorRuntime.wrap(function _callee12$(_context12) {
                 while (1) {
-                    switch (_context11.prev = _context11.next) {
+                    switch (_context12.prev = _context12.next) {
                         case 0:
                             options = options || {};
                             options.method = 'DELETE';
                             options.url = url;
                             options.query = query;
-                            _context11.next = 6;
+                            _context12.next = 6;
                             return this.send(options);
 
                         case 6:
-                            return _context11.abrupt("return", _context11.sent);
+                            return _context12.abrupt("return", _context12.sent);
 
                         case 7:
                         case "end":
-                            return _context11.stop();
+                            return _context12.stop();
                     }
                 }
-            }, _callee11, this);
+            }, _callee12, this);
         }));
 
         function _delete(_x19, _x20, _x21) {
-            return ref.apply(this, arguments);
+            return _ref12.apply(this, arguments);
         }
 
         return _delete;
     }();
 
     Platform.prototype._tokenRequest = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(path, body) {
-            return regeneratorRuntime.wrap(function _callee12$(_context12) {
+        var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(path, body) {
+            return regeneratorRuntime.wrap(function _callee13$(_context13) {
                 while (1) {
-                    switch (_context12.prev = _context12.next) {
+                    switch (_context13.prev = _context13.next) {
                         case 0:
-                            _context12.next = 2;
+                            _context13.next = 2;
                             return this.send({
                                 url: path,
                                 skipAuthCheck: true,
@@ -3134,44 +3271,9 @@ var Platform = function (_Observable) {
                             });
 
                         case 2:
-                            return _context12.abrupt("return", _context12.sent);
-
-                        case 3:
-                        case "end":
-                            return _context12.stop();
-                    }
-                }
-            }, _callee12, this);
-        }));
-
-        function _tokenRequest(_x22, _x23) {
-            return ref.apply(this, arguments);
-        }
-
-        return _tokenRequest;
-    }();
-
-    Platform.prototype._ensureAuthentication = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
-            return regeneratorRuntime.wrap(function _callee13$(_context13) {
-                while (1) {
-                    switch (_context13.prev = _context13.next) {
-                        case 0:
-                            if (!this._isAccessTokenValid()) {
-                                _context13.next = 2;
-                                break;
-                            }
-
-                            return _context13.abrupt("return", null);
-
-                        case 2:
-                            _context13.next = 4;
-                            return this.refresh();
-
-                        case 4:
                             return _context13.abrupt("return", _context13.sent);
 
-                        case 5:
+                        case 3:
                         case "end":
                             return _context13.stop();
                     }
@@ -3179,16 +3281,50 @@ var Platform = function (_Observable) {
             }, _callee13, this);
         }));
 
-        function _ensureAuthentication() {
-            return ref.apply(this, arguments);
+        function _tokenRequest(_x22, _x23) {
+            return _ref13.apply(this, arguments);
         }
 
-        return _ensureAuthentication;
+        return _tokenRequest;
+    }();
+
+    Platform.prototype.ensureLoggedIn = function () {
+        var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
+            return regeneratorRuntime.wrap(function _callee14$(_context14) {
+                while (1) {
+                    switch (_context14.prev = _context14.next) {
+                        case 0:
+                            if (!this._isAccessTokenValid()) {
+                                _context14.next = 2;
+                                break;
+                            }
+
+                            return _context14.abrupt("return", null);
+
+                        case 2:
+                            _context14.next = 4;
+                            return this.refresh();
+
+                        case 4:
+                            return _context14.abrupt("return", _context14.sent);
+
+                        case 5:
+                        case "end":
+                            return _context14.stop();
+                    }
+                }
+            }, _callee14, this);
+        }));
+
+        function ensureLoggedIn() {
+            return _ref14.apply(this, arguments);
+        }
+
+        return ensureLoggedIn;
     }();
 
     Platform.prototype._isAccessTokenValid = function _isAccessTokenValid() {
-
-        return this._auth.accessTokenValid() && !this._queue.isPaused();
+        return this._auth.accessTokenValid();
     };
 
     Platform.prototype._apiKey = function _apiKey() {
@@ -3202,12 +3338,10 @@ var Platform = function (_Observable) {
     };
 
     return Platform;
-}(_Observable3.default);
+}(_events2.default);
 
 Platform._urlPrefix = '/restapi';
 Platform._apiVersion = 'v1.0';
-Platform._refreshTokenTtl = 10 * 60 * 60;
-Platform._refreshTokenTtlRemember = 7 * 24 * 60 * 60;
 Platform._tokenEndpoint = '/restapi/oauth/token';
 Platform._revokeEndpoint = '/restapi/oauth/revoke';
 Platform._authorizeEndpoint = '/restapi/oauth/authorize';
@@ -3217,7 +3351,7 @@ Platform._clearCacheOnRefreshError = false;
 exports.default = Platform;
 
 /***/ },
-/* 17 */
+/* 16 */
 /***/ function(module, exports) {
 
 'use strict';
@@ -3364,14 +3498,14 @@ Auth.forcedTokenType = 'forced';
 exports.default = Auth;
 
 /***/ },
-/* 18 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _PubnubMock = __webpack_require__(19);
+var _PubnubMock = __webpack_require__(18);
 
 var _PubnubMock2 = _interopRequireDefault(_PubnubMock);
 
@@ -3398,16 +3532,16 @@ var PubnubMockFactory = function () {
 exports.default = PubnubMockFactory;
 
 /***/ },
-/* 19 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-'use strict';
+"use strict";
 
 exports.__esModule = true;
 
-var _Observable2 = __webpack_require__(9);
+var _events = __webpack_require__(9);
 
-var _Observable3 = _interopRequireDefault(_Observable2);
+var _events2 = _interopRequireDefault(_events);
 
 var _Externals = __webpack_require__(4);
 
@@ -3419,18 +3553,22 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var PubnubMock = function (_Observable) {
-    _inherits(PubnubMock, _Observable);
+var PubnubMock = function (_EventEmitter) {
+    _inherits(PubnubMock, _EventEmitter);
 
     function PubnubMock(options) {
         _classCallCheck(this, PubnubMock);
 
-        var _this = _possibleConstructorReturn(this, _Observable.call(this));
+        var _this = _possibleConstructorReturn(this, _EventEmitter.call(this));
 
         _this.options = options;
         _this.crypto_obj = _Externals.PUBNUB.crypto_obj;
         return _this;
     }
+
+    PubnubMock.prototype.init = function init(options) {
+        this.options = options;
+    };
 
     PubnubMock.prototype.ready = function ready() {};
 
@@ -3439,7 +3577,7 @@ var PubnubMock = function (_Observable) {
     };
 
     PubnubMock.prototype.unsubscribe = function unsubscribe(options) {
-        this.off('message-' + options.channel);
+        this.removeAllListeners('message-' + options.channel);
     };
 
     PubnubMock.prototype.receiveMessage = function receiveMessage(msg, channel) {
@@ -3447,27 +3585,21 @@ var PubnubMock = function (_Observable) {
     };
 
     return PubnubMock;
-}(_Observable3.default);
+}(_events2.default);
 
 exports.default = PubnubMock;
 
 /***/ },
-/* 20 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _Observable2 = __webpack_require__(9);
+var _events = __webpack_require__(9);
 
-var _Observable3 = _interopRequireDefault(_Observable2);
-
-var _Client = __webpack_require__(11);
-
-var _Client2 = _interopRequireDefault(_Client);
-
-var _Utils = __webpack_require__(3);
+var _events2 = _interopRequireDefault(_events);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3479,13 +3611,13 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Subscription = function (_Observable) {
-    _inherits(Subscription, _Observable);
+var Subscription = function (_EventEmitter) {
+    _inherits(Subscription, _EventEmitter);
 
     function Subscription(pubnubFactory, platform) {
         _classCallCheck(this, Subscription);
 
-        var _this = _possibleConstructorReturn(this, _Observable.call(this));
+        var _this = _possibleConstructorReturn(this, _EventEmitter.call(this));
 
         _this.events = {
             notification: 'notification',
@@ -3501,15 +3633,18 @@ var Subscription = function (_Observable) {
         _this._pubnubFactory = pubnubFactory;
         _this._platform = platform;
         _this._pubnub = null;
+        _this._pubnubLastChannel = null;
         _this._timeout = null;
-        _this._subscription = {};
+        _this._subscription = null;
 
         return _this;
     }
 
     Subscription.prototype.subscribed = function subscribed() {
 
-        return !!(this._subscription.id && this._subscription.deliveryMode && this._subscription.deliveryMode.subscriberKey && this._subscription.deliveryMode.address);
+        var subscription = this.subscription();
+
+        return !!(subscription.id && subscription.deliveryMode && subscription.deliveryMode.subscriberKey && subscription.deliveryMode.address);
     };
 
     /**
@@ -3521,8 +3656,18 @@ var Subscription = function (_Observable) {
         return this.subscribed() && Date.now() < this.expirationTime();
     };
 
+    /**
+     * @return {boolean}
+     */
+
+
+    Subscription.prototype.expired = function expired() {
+        if (!this.subscribed()) return true;
+        return !this.subscribed() || Date.now() > this.subscription().expirationTime;
+    };
+
     Subscription.prototype.expirationTime = function expirationTime() {
-        return new Date(this._subscription.expirationTime || 0).getTime() - Subscription._renewHandicapMs;
+        return new Date(this.subscription().expirationTime || 0).getTime() - Subscription._renewHandicapMs;
     };
 
     Subscription.prototype.setSubscription = function setSubscription(subscription) {
@@ -3530,18 +3675,15 @@ var Subscription = function (_Observable) {
         subscription = subscription || {};
 
         this._clearTimeout();
-
-        this._subscription = subscription;
-
-        if (!this._pubnub) this._subscribeAtPubnub();
-
+        this._setSubscription(subscription);
+        this._subscribeAtPubnub();
         this._setTimeout();
 
         return this;
     };
 
     Subscription.prototype.subscription = function subscription() {
-        return this._subscription;
+        return this._subscription || {};
     };
 
     /**
@@ -3551,7 +3693,7 @@ var Subscription = function (_Observable) {
 
 
     Subscription.prototype.register = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+        var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
                     switch (_context.prev = _context.next) {
@@ -3583,14 +3725,14 @@ var Subscription = function (_Observable) {
         }));
 
         function register() {
-            return ref.apply(this, arguments);
+            return _ref.apply(this, arguments);
         }
 
         return register;
     }();
 
     Subscription.prototype.eventFilters = function eventFilters() {
-        return this._subscription.eventFilters || [];
+        return this.subscription().eventFilters || [];
     };
 
     /**
@@ -3611,7 +3753,9 @@ var Subscription = function (_Observable) {
 
 
     Subscription.prototype.setEventFilters = function setEventFilters(events) {
-        this._subscription.eventFilters = events;
+        var subscription = this.subscription();
+        subscription.eventFilters = events;
+        this._setSubscription(subscription);
         return this;
     };
 
@@ -3621,7 +3765,7 @@ var Subscription = function (_Observable) {
 
 
     Subscription.prototype.subscribe = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+        var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
             var response, json;
             return regeneratorRuntime.wrap(function _callee2$(_context2) {
                 while (1) {
@@ -3641,7 +3785,7 @@ var Subscription = function (_Observable) {
 
                         case 4:
                             _context2.next = 6;
-                            return this._platform.post('/restapi/v1.0/subscription', {
+                            return this._platform.post('/subscription', {
                                 eventFilters: this._getFullEventFilters(),
                                 deliveryMode: {
                                     transportType: 'PubNub'
@@ -3677,7 +3821,7 @@ var Subscription = function (_Observable) {
         }));
 
         function subscribe() {
-            return ref.apply(this, arguments);
+            return _ref2.apply(this, arguments);
         }
 
         return subscribe;
@@ -3689,7 +3833,7 @@ var Subscription = function (_Observable) {
 
 
     Subscription.prototype.renew = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+        var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
             var response, json;
             return regeneratorRuntime.wrap(function _callee3$(_context3) {
                 while (1) {
@@ -3717,7 +3861,7 @@ var Subscription = function (_Observable) {
 
                         case 6:
                             _context3.next = 8;
-                            return this._platform.put('/restapi/v1.0/subscription/' + this._subscription.id, {
+                            return this._platform.put('/subscription/' + this.subscription().id, {
                                 eventFilters: this._getFullEventFilters()
                             });
 
@@ -3750,7 +3894,7 @@ var Subscription = function (_Observable) {
         }));
 
         function renew() {
-            return ref.apply(this, arguments);
+            return _ref3.apply(this, arguments);
         }
 
         return renew;
@@ -3762,7 +3906,7 @@ var Subscription = function (_Observable) {
 
 
     Subscription.prototype.remove = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+        var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
             var response;
             return regeneratorRuntime.wrap(function _callee4$(_context4) {
                 while (1) {
@@ -3779,7 +3923,7 @@ var Subscription = function (_Observable) {
 
                         case 3:
                             _context4.next = 5;
-                            return this._platform.delete('/restapi/v1.0/subscription/' + this._subscription.id);
+                            return this._platform.delete('/subscription/' + this.subscription().id);
 
                         case 5:
                             response = _context4.sent;
@@ -3809,7 +3953,7 @@ var Subscription = function (_Observable) {
         }));
 
         function remove() {
-            return ref.apply(this, arguments);
+            return _ref4.apply(this, arguments);
         }
 
         return remove;
@@ -3821,8 +3965,8 @@ var Subscription = function (_Observable) {
 
 
     Subscription.prototype.resubscribe = function resubscribe() {
-
-        return this.reset().setEventFilters(this.eventFilters()).subscribe();
+        var filters = this.eventFilters();
+        return this.reset().setEventFilters(filters).subscribe();
     };
 
     /**
@@ -3833,9 +3977,13 @@ var Subscription = function (_Observable) {
 
     Subscription.prototype.reset = function reset() {
         this._clearTimeout();
-        if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({ channel: this._subscription.deliveryMode.address });
-        this._subscription = {};
+        if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({ channel: this.subscription().deliveryMode.address });
+        this._setSubscription(null);
         return this;
+    };
+
+    Subscription.prototype._setSubscription = function _setSubscription(subscription) {
+        this._subscription = subscription;
     };
 
     Subscription.prototype._getFullEventFilters = function _getFullEventFilters() {
@@ -3853,20 +4001,22 @@ var Subscription = function (_Observable) {
 
         if (!this.alive()) throw new Error('Subscription is not alive');
 
-        (0, _Utils.poll)(function (next) {
+        this._timeout = setInterval(function () {
 
-            if (_this3.alive()) return next();
+            if (_this3.alive()) return;
 
-            _this3.renew();
-        }, Subscription._pollInterval, this._timeout);
+            if (_this3.expired()) {
+                _this3.subscribe();
+            } else {
+                _this3.renew();
+            }
+        }, Subscription._pollInterval);
 
         return this;
     };
 
     Subscription.prototype._clearTimeout = function _clearTimeout() {
-
-        (0, _Utils.stopPolling)(this._timeout);
-
+        clearInterval(this._timeout);
         return this;
     };
 
@@ -3874,11 +4024,9 @@ var Subscription = function (_Observable) {
 
         if (!this.subscribed()) throw new Error('No subscription');
 
-        if (this._subscription.deliveryMode.encryptionKey) {
+        if (this.subscription().deliveryMode.encryptionKey) {
 
-            var PUBNUB = this._pubnubFactory;
-
-            message = PUBNUB.crypto_obj.decrypt(message, this._subscription.deliveryMode.encryptionKey, {
+            message = this._pubnubFactory.crypto_obj.decrypt(message, this.subscription().deliveryMode.encryptionKey, {
                 encryptKey: false,
                 keyEncoding: 'base64',
                 keyLength: 128,
@@ -3890,9 +4038,7 @@ var Subscription = function (_Observable) {
     };
 
     Subscription.prototype._notify = function _notify(message) {
-
         this.emit(this.events.notification, this._decrypt(message));
-
         return this;
     };
 
@@ -3900,17 +4046,38 @@ var Subscription = function (_Observable) {
 
         if (!this.alive()) throw new Error('Subscription is not alive');
 
-        var PUBNUB = this._pubnubFactory;
+        var deliveryMode = this.subscription().deliveryMode;
 
-        this._pubnub = PUBNUB.init({
-            ssl: true,
-            subscribe_key: this._subscription.deliveryMode.subscriberKey
-        });
+        if (this._pubnub) {
 
-        this._pubnub.ready();
+            if (this._pubnubLastChannel == deliveryMode.address) {
+                // Nothing to update, keep listening to same channel
+                return this;
+            } else if (this._pubnubLastChannel) {
+                // Need to subscribe to new channel
+                this._pubnub.unsubscribe({ channel: this._pubnubLastChannel });
+            }
+
+            // Re-init for new data
+            this._pubnub = this._pubnub.init({
+                ssl: true,
+                subscribe_key: deliveryMode.subscriberKey
+            });
+        } else {
+
+            // Init from scratch
+            this._pubnub = this._pubnubFactory.init({
+                ssl: true,
+                subscribe_key: deliveryMode.subscriberKey
+            });
+
+            this._pubnub.ready(); //TODO This may be not needed anymore
+        }
+
+        this._pubnubLastChannel = deliveryMode.address;
 
         this._pubnub.subscribe({
-            channel: this._subscription.deliveryMode.address,
+            channel: deliveryMode.address,
             message: this._notify.bind(this),
             connect: function connect() {}
         });
@@ -3919,7 +4086,7 @@ var Subscription = function (_Observable) {
     };
 
     return Subscription;
-}(_Observable3.default);
+}(_events2.default);
 
 //export interface ISubscription {
 //    id?:string;
@@ -3945,26 +4112,18 @@ Subscription._pollInterval = 10 * 1000;
 exports.default = Subscription;
 
 /***/ },
-/* 21 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-'use strict';
+"use strict";
 
 exports.__esModule = true;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _Subscription2 = __webpack_require__(20);
+var _Subscription2 = __webpack_require__(19);
 
 var _Subscription3 = _interopRequireDefault(_Subscription2);
 
-var _Queue = __webpack_require__(10);
-
-var _Queue2 = _interopRequireDefault(_Queue);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -3978,140 +4137,26 @@ var CachedSubscription = function (_Subscription) {
     function CachedSubscription(pubnubFactory, platform, cache, cacheKey) {
         _classCallCheck(this, CachedSubscription);
 
+        /** @type {Cache} */
+
         var _this = _possibleConstructorReturn(this, _Subscription.call(this, pubnubFactory, platform));
 
         _this._cache = cache;
         _this._cacheKey = cacheKey;
-        _this._renewQueue = new _Queue2.default(_this._cache, cacheKey + '-renew');
-        _this._resubscribeQueue = new _Queue2.default(_this._cache, cacheKey + '-resubscribe');
-
-        _this.events = _extends({}, _this.events, {
-            queuedRenewSuccess: 'queuedRenewSuccess',
-            queuedRenewError: 'queuedRenewError',
-            queuedResubscribeSuccess: 'queuedResubscribeSuccess',
-            queuedResubscribeError: 'queuedResubscribeError'
-        });
-
-        _this.on(_this.events.renewError, function () {
-            _this.resubscribe();
-        });
-
-        _this.on([_this.events.subscribeSuccess, _this.events.renewSuccess], function () {
-            _this._cache.setItem(_this._cacheKey, _this.subscription());
-        });
-
-        _this.on(_this.events.removeSuccess, function () {
-            _this._cache.removeItem(_this._cacheKey);
-        });
 
         return _this;
     }
 
-    /**
-     * TODO Combine with Platform.refresh and move elsewhere
-     * @param actionCb
-     * @param queue
-     * @param successEvent
-     * @param errorEvent
-     * @param errorMessage
-     * @return {*}
-     * @private
-     */
+    CachedSubscription.prototype.subscription = function subscription() {
+        return this._cache.getItem(this._cacheKey) || {};
+    };
 
-
-    CachedSubscription.prototype._queue = function () {
-        var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(actionCb, queue, successEvent, errorEvent, errorMessage) {
-            var res;
-            return regeneratorRuntime.wrap(function _callee$(_context) {
-                while (1) {
-                    switch (_context.prev = _context.next) {
-                        case 0:
-                            _context.prev = 0;
-
-                            if (!queue.isPaused()) {
-                                _context.next = 8;
-                                break;
-                            }
-
-                            _context.next = 4;
-                            return queue.poll();
-
-                        case 4:
-                            if (this.alive()) {
-                                _context.next = 6;
-                                break;
-                            }
-
-                            throw new Error(errorMessage);
-
-                        case 6:
-
-                            this.emit(successEvent, null);
-
-                            return _context.abrupt('return', null);
-
-                        case 8:
-
-                            queue.pause();
-
-                            _context.next = 11;
-                            return actionCb.call(this);
-
-                        case 11:
-                            res = _context.sent;
-
-
-                            queue.resume();
-
-                            this.emit(successEvent, res);
-
-                            return _context.abrupt('return', res);
-
-                        case 17:
-                            _context.prev = 17;
-                            _context.t0 = _context['catch'](0);
-
-
-                            this.emit(errorEvent, _context.t0);
-
-                            throw _context.t0;
-
-                        case 21:
-                        case 'end':
-                            return _context.stop();
-                    }
-                }
-            }, _callee, this, [[0, 17]]);
-        }));
-
-        function _queue(_x, _x2, _x3, _x4, _x5) {
-            return ref.apply(this, arguments);
-        }
-
-        return _queue;
-    }();
-
-    /**
-     * @returns {Promise<ApiResponse>}
-     */
-
-
-    CachedSubscription.prototype.renew = function renew() {
-
-        return this._queue(_Subscription.prototype.renew, this._renewQueue, this.events.queuedRenewSuccess, this.events.queuedRenewError, 'Subscription is not alive after renew timeout');
+    CachedSubscription.prototype._setSubscription = function _setSubscription(subscription) {
+        return this._cache.setItem(this._cacheKey, subscription);
     };
 
     /**
-     * @returns {Promise<ApiResponse>}
-     */
-
-
-    CachedSubscription.prototype.resubscribe = function resubscribe() {
-
-        return this._queue(_Subscription.prototype.resubscribe, this._resubscribeQueue, this.events.queuedResubscribeSuccess, this.events.queuedResubscribeError, 'Subscription is not alive after resubscribe timeout');
-    };
-
-    /**
+     * This function checks whether there are any pre-defined eventFilters in cache and if not -- uses provided as defaults
      * @param {string[]} events
      * @return {CachedSubscription}
      */
@@ -4119,13 +4164,7 @@ var CachedSubscription = function (_Subscription) {
 
     CachedSubscription.prototype.restore = function restore(events) {
 
-        var cachedSubscriptionData = this._cache.getItem(this._cacheKey);
-
-        if (cachedSubscriptionData) {
-            try {
-                this.setSubscription(cachedSubscriptionData);
-            } catch (e) {}
-        } else {
+        if (!this.eventFilters().length) {
             this.setEventFilters(events);
         }
 

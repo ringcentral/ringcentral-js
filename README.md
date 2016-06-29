@@ -47,6 +47,12 @@ Pick the option that works best for you:
     bower install ringcentral --save
     ```
 
+- Use CDN **Attention! Versions listed here may be outdated**:
+    - https://cdn.rawgit.com/ringcentral/ringcentral-js/master/build/ringcentral.js
+    - https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.0/fetch.js
+    - https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise.js
+    - https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub.js
+
 - Donwload everything manually *(not recommended)*:
     - [ZIP file with source code](https://github.com/ringcentral/ringcentral-js/archive/master.zip)
     - [Fetch](https://github.com/github/fetch), direct download: [fetch.js](https://raw.githubusercontent.com/github/fetch/master/fetch.js)
@@ -69,43 +75,24 @@ Add the following to your HTML:
 </script>
 ```
 
-**Not recommended!** You also can use bundle version with all dependencies:
-
-```html
-<script type="text/javascript" src="path-to-scripts/ringcentral/build/ringcentral-bundle.js"></script><!-- or ringcentral-bundle.min.js -->
-<script type="text/javascript">
-
-    var sdk = new RingCentral.SDK(...);
-
-</script>
-```
-
-Keep in mind that this is for quick start only and for production you should add each dependency separately to have
-full control over the process.
-
 ### If you use RequireJS in your project
 
 ```js
 // Add this to your RequireJS configuration file
 require.config({
     paths: {
-        'es6-promise': 'path-to-scripts/es6-promise-polyfill/promise',
-        'fetch': 'path-to-scripts/fetch/fetch',
         'pubnub': 'path-to-scripts/pubnub/web/pubnub'
         'ringcentral': 'path-to-scripts/ringcentral/build/ringcentral', // or ringcentral.min
     }
 });
 
 // Then you can use the SDK like any other AMD component
-require(['ringcentral', 'es6-promise', 'fetch'], function(SDK, Promise) {
-
-    Promise.polyfill();
+require(['ringcentral'], function(SDK) {
     var sdk = new SDK(...);
-
 });
 ```
 
-Make sure that polyfills are loaded before or together with SDK.
+Make sure that polyfills are added to the page before or together with SDK.
 
 ## Set things up in NodeJS
 
@@ -130,15 +117,37 @@ Make sure that polyfills are loaded before or together with SDK.
 2. Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
 
     ```js
-    {
+    module.exports = {
         resolve: {
             alias: {
-                'node-fetch': path.resolve('./bower_components/fetch/fetch.js'),
-                'es6-promise': path.resolve('./bower_components/es6-promise/promise.js'),
-                'pubnub': path.resolve('./bower_components/pubnub/web/pubnub.js')
+                'node-fetch': 'whatwg-fetch',
+                'pubnub': require.resolve('pubnub/modern/pubnub')
             }
         }
-    }
+    };
+    ```
+
+    For old NPM versions which install packages in a nested way:
+
+    ```sh
+    $ npm instal resolve-from --save
+    ```
+
+    Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
+
+    ```js
+    var resolve = require('resolve-from');
+
+    module.exports = {
+        resolve: {
+            alias: {
+                'node-fetch': resolve(require.resolve('ringcentral'), 'whatwg-fetch') ||
+                              resolve(process.cwd(), 'whatwg-fetch'),
+                'pubnub': resolve(require.resolve('ringcentral'), 'pubnub/modern/pubnub') ||
+                          resolve(process.cwd(), 'pubnub/modern/pubnub')
+            }
+        }
+    };
     ```
 
 To reduce the size of your Webpack bundle it's better to use browser version of dependencies (instead of the ones that
@@ -180,13 +189,8 @@ But taking into account the nature of polyfills, it's better to keep them global
 
 **In SDK version 2.0 Helpers were moved to separate repository: [ringcentral-js-helpers](https://github.com/ringcentral/ringcentral-js-helpers).**
 
-A lot of code improvements were implemented in order to make SDK compatible with WhatWG Fetch, DOM Requests & DOM Responses.
-
-Full list of migration instructions:
-
-- [0.13 to 0.14](docs/migration-0.13-0.14.md)
-- [1.1 to 1.2](docs/migration-1.1-1.2.md)
-- [1.x to 2.0](docs/migration-1.x-2.0.md)
+A lot of code improvements were implemented in order to make SDK compatible with WhatWG Fetch, DOM Requests &
+DOM Responses: see [full list of migration instructions](CHANGELOG.md).
 
 ***
 
@@ -211,6 +215,9 @@ var rcsdk = new RingCentral.SDK({
 ```
 
 This instance will be used later on to perform calls to API.
+
+If you need to use 2 or more RingCentral accounts simultaneously, you need to create an instance of SDK for each account
+and provide some unique `cachePrefix` to SDK constructor (otherwise instances will share authentication).
 
 ## Get the Platform singleton
 
@@ -264,7 +271,13 @@ To check in your Application if the user is authenticated, you can call the `log
 singleton:
 
 ```js
-rcsdk.platform().loggedIn().then(function(status){ ... });
+rcsdk.platform().loggedIn().then(function(status){ if (status) { ... } else { ... } });
+```
+
+Or you can call `ensureLogedIn` method which works the same way as `loggedIn` but rejects promise on failure:
+
+```js
+rcsdk.platform().ensureLogedIn().then(function(){ ... }).catch(function(){ ... });
 ```
 
 The SDK takes care of the token lifecycle. It will refresh tokens for you automatically. It will also automatically
@@ -316,6 +329,8 @@ In the NodeJS it might be useful to replace simple built-in storage with somethi
 ```js
 RingCentral.SDK.core.Externals.localStorage = Anything;
 ```
+
+SDK works with `localStorage` as with a simple object.
 
 # API calls
 

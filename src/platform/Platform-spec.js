@@ -1,5 +1,4 @@
-import {expect, getSdk, getMock, getRegistry, asyncTest, spy} from '../test/test';
-import SDK from '../SDK';
+import {expect, getSdk, getMock, getRegistry, asyncTest, spy} from "../test/test";
 
 describe('RingCentral.platform.Platform', function() {
 
@@ -48,18 +47,6 @@ describe('RingCentral.platform.Platform', function() {
 
         }));
 
-        it('is not authenticated if paused', function() {
-
-            var sdk = getSdk(),
-                platform = sdk.platform(),
-                queue = platform['_queue'];
-
-            queue.pause();
-            expect(platform.auth().accessTokenValid()).to.equal(false);
-            queue.resume();
-
-        });
-
     });
 
     describe('authorized', function() {
@@ -77,55 +64,6 @@ describe('RingCentral.platform.Platform', function() {
             await platform.loggedIn();
 
             expect(platform.auth().accessToken()).to.equal('ACCESS_TOKEN_FROM_REFRESH');
-
-        }));
-
-        it('waits for refresh to resolve from other tab', function() {
-
-            return getMock((sdk)=> {
-
-                var queue = sdk.platform()['_queue'],
-                    platform = sdk.platform(),
-                    token = 'ACCESS_TOKEN_FROM_OTHER_TAB';
-
-                expect(platform.auth().accessToken()).to.not.equal(token);
-
-                queue.pause();
-
-                setTimeout(function() {
-
-                    platform.auth().setData({
-                        access_token: token,
-                        expires_in: 60 * 60 // 1 hour
-                    });
-
-                    queue.resume();
-
-                }, 10);
-
-                platform.auth().cancelAccessToken();
-
-                return platform
-                    .loggedIn()
-                    .then(function() {
-                        expect(platform.auth().accessToken()).to.equal(token);
-                    });
-
-            });
-
-        });
-
-        it('produces error if refresh did not happen', asyncTest(async function(sdk) {
-
-            var queue = sdk.platform()['_queue'], // accessing private member
-                platform = sdk.platform();
-
-            queue.pause();
-
-            platform.auth().cancelAccessToken();
-
-            var res = await platform.loggedIn();
-            expect(res).to.equal(false);
 
         }));
 
@@ -242,29 +180,6 @@ describe('RingCentral.platform.Platform', function() {
 
         });
 
-        it('sits and waits for the queue to be released, no matter how many pending refreshes there are', function() {
-
-            return getMock((sdk)=> {
-
-                var queue = sdk.platform()['_queue'],
-                    platform = sdk.platform();
-
-                queue.pause();
-
-                setTimeout(() => {
-                    queue.resume();
-                }, 5);
-
-                return Promise.all([
-                    platform.refresh(),
-                    platform.refresh(),
-                    platform.refresh()
-                ]);
-
-            });
-
-        });
-
         it('handles subsequent refreshes', function() {
 
             return getMock((sdk)=> {
@@ -335,8 +250,7 @@ describe('RingCentral.platform.Platform', function() {
 
                 platform.auth().cancelAccessToken();
 
-                return Promise
-                    .all([
+                return Promise.all([
                         platform.get('/foo'),
                         platform.get('/foo'),
                         platform.get('/foo')
@@ -349,98 +263,6 @@ describe('RingCentral.platform.Platform', function() {
                         expect(res[0].increment).to.equal(1);
                         expect(res[1].increment).to.equal(2);
                         expect(res[2].increment).to.equal(3);
-                    });
-
-            });
-
-        });
-
-        it('immediately (synchronously) pauses', function() {
-
-            return getMock((sdk)=> {
-
-                var queue = sdk.platform()['_queue'],
-                    platform = sdk.platform();
-
-                getRegistry().tokenRefresh();
-
-                var refresh = platform.refresh();
-
-                expect(queue.isPaused()).to.equal(true);
-
-                return refresh;
-
-            });
-
-        });
-
-
-        it('throws error if queue was unpaused before refresh call', function() {
-
-            return getMock((sdk)=> {
-
-                var queue = sdk.platform()['_queue'],
-                    platform = sdk.platform();
-
-                getRegistry().tokenRefresh();
-
-                var refresh = platform.refresh();
-
-                queue.resume();
-
-                return refresh
-                    .then(function() {
-                        throw new Error('This should not be reached');
-                    })
-                    .catch(function(e) {
-                        expect(e.message).to.equal('Queue was resumed before refresh call');
-                    });
-
-            });
-
-        });
-
-    });
-
-    describe('refreshPolling', function() {
-
-        it('polls the status of semaphor and resumes operation', function() {
-
-            return getMock((sdk)=> {
-
-                var queue = sdk.platform()['_queue'],
-                    platform = sdk.platform();
-
-                queue.pause();
-
-                setTimeout(() => {
-                    queue.resume();
-                }, 10);
-
-                return platform.refresh();
-
-            });
-
-        });
-
-        it('resolves with error if token is not valid after releaseTimeout', function() {
-
-            return getMock((sdk)=> {
-
-                var queue = sdk.platform()['_queue'],
-                    platform = sdk.platform();
-
-                queue.pause(); // resume() will not be called in this test
-
-                platform.auth().cancelAccessToken();
-
-                return platform
-                    .refresh()
-                    .then(function() {
-                        throw new Error('This should not be reached');
-                    })
-                    .catch(function(e) {
-                        expect(e.message).to.equal('Automatic authentification timeout');
                     });
 
             });

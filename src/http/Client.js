@@ -1,9 +1,9 @@
 import {fetch, Request} from "../core/Externals";
-import {queryStringify, isPlainObject, isNodeJS} from "../core/Utils";
-import Observable from "../core/Observable";
+import {queryStringify, isPlainObject} from "../core/Utils";
+import EventEmitter from "events";
 import ApiResponse from "./ApiResponse";
 
-export default class Client extends Observable {
+export default class Client extends EventEmitter {
 
     static _allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
 
