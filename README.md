@@ -738,7 +738,7 @@ var body = {
     formData = new FormData();
 
 // This is the mandatory part, the name and type should always be as follows
-formData.append('json', new File([JSON.stringify(body)]), 'request.json', {type: 'application/json'});
+formData.append('json', new File([JSON.stringify(body)], 'request.json', {type: 'application/json'}));
 
 // Find the input[type=file] field on the page
 var fileField = document.getElementById('input-type-file-field');
@@ -749,7 +749,7 @@ for (var i = 0, file; file = fileField.files[i]; ++i) {
 }
 
 // To send a plain text
-formData.append('attachment', new File(['some plain text']), 'text.txt', {type: 'application/octet-stream'});
+formData.append('attachment', new File(['some plain text'], 'text.txt', {type: 'application/octet-stream'}));
 
 // Send the fax
 rcsdk.platform().post('/account/~/extension/~/fax', formData);
