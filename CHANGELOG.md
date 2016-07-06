@@ -12,6 +12,7 @@ This document contains only major functionality changes in certain versions. Min
     use `accessTokenTtl` and `refreshTokenTtl`
 - `Subscription` will not throw an error when it can't renew because it's expired when timeout hits (computer woke up
     after sleep, for example), it will automatically `subscribe` again with the same `eventFilter`s
+- Removed `CachedSubscription` queue-related methods
 
 ## 2.0
 

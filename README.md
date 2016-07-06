@@ -508,13 +508,6 @@ var subscription = rcsdk.createCachedSubscription('cache-key').restore(['/accoun
 subscription.register();
 ```
 
-`CachedSubscription` class has 4 extra events which you can use for more granular control:
-
-- `queuedRenewSuccess`
-- `queuedRenewError`
-- `queuedResubscribeSuccess`
-- `queuedResubscribeError`
-
 ***
 
 # Making telephony calls
