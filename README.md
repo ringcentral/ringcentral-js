@@ -207,8 +207,8 @@ relations team).
 
 ```js
 var rcsdk = new RingCentral.SDK({
-    server: 'https://platform.devtest.ringcentral.com', // SANDBOX
-    //server: 'https://platform.ringcentral.com', // PRODUCTION
+    server: RingCentral.SDK.server.sandbox,
+//  server: RingCentral.SDK.server.production,
     appKey: 'yourAppKey',
     appSecret: 'yourAppSecret'
 });
