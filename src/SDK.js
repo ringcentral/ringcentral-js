@@ -41,6 +41,7 @@ class SDK {
      * @param {string} [options.appVersion]
      * @param {string} [options.pubnubFactory]
      * @param {string} [options.client]
+     * @param {string} [options.redirectUri]
      */
     constructor(options) {
 
