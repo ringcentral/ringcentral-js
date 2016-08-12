@@ -66,7 +66,8 @@ class SDK {
             options.appSecret,
             options.appName,
             options.appVersion,
-            SDK.version
+            SDK.version,
+            options.redirectUri
         );
 
         this._pubnubFactory = options.pubnubFactory || Externals.PUBNUB;

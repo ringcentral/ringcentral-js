@@ -26,7 +26,7 @@ export default class Platform extends EventEmitter {
         logoutError: 'logoutError'
     };
 
-    constructor(client, cache, server, appKey, appSecret, appName, appVersion, sdkVersion) {
+    constructor(client, cache, server, appKey, appSecret, appName, appVersion, sdkVersion, redirectUri) {
 
         super();
 
@@ -47,6 +47,8 @@ export default class Platform extends EventEmitter {
 
         this._userAgent = (appName ? (appName + (appVersion ? '/' + appVersion : '')) + ' ' : '') +
                           'RCJSSDK/' + sdkVersion;
+
+        this._redirectUri = redirectUri || '';
 
     }
 
@@ -110,7 +112,7 @@ export default class Platform extends EventEmitter {
 
         return this.createUrl(Platform._authorizeEndpoint + '?' + queryStringify({
                 'response_type': 'code',
-                'redirect_uri': options.redirectUri || '',
+                'redirect_uri': options.redirectUri || this._redirectUri,
                 'client_id': this._appKey,
                 'state': options.state || '',
                 'brand_id': options.brandId || '',
@@ -261,7 +263,7 @@ export default class Platform extends EventEmitter {
 
                 body.grant_type = 'authorization_code';
                 body.code = options.code;
-                body.redirect_uri = options.redirectUri;
+                body.redirect_uri = options.redirectUri || this._redirectUri;
                 //body.client_id = this.getCredentials().key; // not needed
 
             }
