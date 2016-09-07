@@ -49,9 +49,9 @@ Pick the option that works best for you:
 
 - Use CDN **Attention! Versions listed here may be outdated**:
     - https://cdn.rawgit.com/ringcentral/ringcentral-js/master/build/ringcentral.js
-    - https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.0/fetch.js
-    - https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.1/es6-promise.js
-    - https://cdnjs.cloudflare.com/ajax/libs/pubnub/3.7.7/pubnub.js
+    - https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.1/fetch.js
+    - https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.js
+    - https://cdn.pubnub.com/pubnub-3.15.2.js
 
 - Donwload everything manually *(not recommended)*:
     - [ZIP file with source code](https://github.com/ringcentral/ringcentral-js/archive/master.zip)
@@ -200,15 +200,15 @@ DOM Responses: see [full list of migration instructions](CHANGELOG.md).
 
 The SDK is represented by the global RingCentral constructor. Your application must create an instance of this object:
 
-In order to bootstrap the RingCentral JavaScript SDK, you have to first get a reference to the Platform singleton and
-then configure it. Before you can do anything using the Platform singleton, you need to configure it with the server URL
+In order to bootstrap the RingCentral JavaScript SDK, you have to first get a reference to the Platform object and
+then configure it. Before you can do anything using the Platform object, you need to configure it with the server URL
 (this tells the SDK which server to connect to) and your unique API key (this is provided by RingCentral's developer
 relations team).
 
 ```js
 var rcsdk = new RingCentral.SDK({
-    server: 'https://platform.devtest.ringcentral.com', // SANDBOX
-    //server: 'https://platform.ringcentral.com', // PRODUCTION
+    server: RingCentral.SDK.server.sandbox,
+//  server: RingCentral.SDK.server.production,
     appKey: 'yourAppKey',
     appSecret: 'yourAppSecret'
     //redirectUri: '' // optional
@@ -220,18 +220,18 @@ This instance will be used later on to perform calls to API.
 If you need to use 2 or more RingCentral accounts simultaneously, you need to create an instance of SDK for each account
 and provide some unique `cachePrefix` to SDK constructor (otherwise instances will share authentication).
 
-## Get the Platform singleton
+## Get the Platform object
 
 ```js
 var platform = rcsdk.platform();
 ```
 
-Now that you have your platform singleton and SDK has been configured with the correct server URL and API key, your
+Now that you have your platform object and SDK has been configured with the correct server URL and API key, your
 application can log in so that it can access the features of the API.
 
 ## Login
 
-Login is accomplished by calling the `platform.login()` method of the Platform singleton with username, extension
+Login is accomplished by calling the `platform.login()` method of the Platform object with username, extension
 (optional), and password as parameters. A `Promise` instance is returned, resolved with an AJAX `Response` object.
 
 ```js
@@ -269,7 +269,7 @@ a good UX in your login form UI.
 ## Checking login state
 
 To check in your Application if the user is authenticated, you can call the `loggedIn` method of the platform
-singleton:
+object:
 
 ```js
 rcsdk.platform().loggedIn().then(function(status){ if (status) { ... } else { ... } });
@@ -294,7 +294,7 @@ rcsdk.platform().auth().accessTokenValid(); // returns boolean
 
 ## Logout
 
-Logging the user out is trivial - just call the `logout` method on the platform singleton:
+Logging the user out is trivial - just call the `logout` method on the platform object:
 
 ```js
 rcsdk.platform().logout().then(...).catch(...);
@@ -311,7 +311,7 @@ The platform provides the following events:
 - `refreshSuccess`
 - `refreshError` &mdash; application may listen to this error and show login page
 
-To listen on platform events, you should call the `on` method of the platform singleton:
+To listen on platform events, you should call the `on` method of the platform object:
 
 ```js
 var platform = rcsdk.platform();
@@ -335,7 +335,7 @@ SDK works with `localStorage` as with a simple object.
 
 # API calls
 
-To perform an authenticated API call, you should use the one of the methods of the platform singleton:
+To perform an authenticated API call, you should use the one of the methods of the platform object:
 
 ```js
 rcsdk.platform()
@@ -508,13 +508,6 @@ var subscription = rcsdk.createCachedSubscription('cache-key').restore(['/accoun
 // use it as usual
 subscription.register();
 ```
-
-`CachedSubscription` class has 4 extra events which you can use for more granular control:
-
-- `queuedRenewSuccess`
-- `queuedRenewError`
-- `queuedResubscribeSuccess`
-- `queuedResubscribeError`
 
 ***
 
@@ -739,7 +732,7 @@ var body = {
     formData = new FormData();
 
 // This is the mandatory part, the name and type should always be as follows
-formData.append('json', new File([JSON.stringify(body)]), 'request.json', {type: 'application/json'});
+formData.append('json', new File([JSON.stringify(body)], 'request.json', {type: 'application/json'}));
 
 // Find the input[type=file] field on the page
 var fileField = document.getElementById('input-type-file-field');
@@ -750,7 +743,7 @@ for (var i = 0, file; file = fileField.files[i]; ++i) {
 }
 
 // To send a plain text
-formData.append('attachment', new File(['some plain text']), 'text.txt', {type: 'application/octet-stream'});
+formData.append('attachment', new File(['some plain text'], 'text.txt', {type: 'application/octet-stream'}));
 
 // Send the fax
 rcsdk.platform().post('/account/~/extension/~/fax', formData);
