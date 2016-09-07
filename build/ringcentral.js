@@ -61,7 +61,7 @@ module.exports = __webpack_require__(1);
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-'use strict';
+"use strict";
 
 __webpack_require__(2);
 
@@ -141,12 +141,21 @@ var SDK = function () {
      * @param {string} [options.appVersion]
      * @param {string} [options.pubnubFactory]
      * @param {string} [options.client]
+     * @param {string} [options.redirectUri]
      */
 
-    function SDK(options) {
-        _classCallCheck(this, SDK);
+    function SDK(_ref) {
+        var server = _ref.server;
+        var cachePrefix = _ref.cachePrefix;
+        var appSecret = _ref.appSecret;
+        var appKey = _ref.appKey;
+        var appName = _ref.appName;
+        var appVersion = _ref.appVersion;
+        var pubnubFactory = _ref.pubnubFactory;
+        var client = _ref.client;
+        var redirectUri = _ref.redirectUri;
 
-        options = options || {};
+        _classCallCheck(this, SDK);
 
         if (!Externals.fetch) {
             throw new Error('Native Fetch is missing, set RingCentral.SDK.core.Externals.fetch to your favorite alternative');
@@ -156,13 +165,23 @@ var SDK = function () {
             throw new Error('Native Promise is missing, set RingCentral.SDK.core.Externals.Promise to your favorite alternative');
         }
 
-        this._cache = new _Cache2.default(Externals.localStorage, options.cachePrefix);
+        this._cache = new _Cache2.default(Externals.localStorage, cachePrefix);
 
-        this._client = options.client || new _Client2.default();
+        this._client = client || new _Client2.default();
 
-        this._platform = new _Platform2.default(this._client, this._cache, options.server, options.appKey, options.appSecret, options.appName, options.appVersion, SDK.version);
+        this._platform = new _Platform2.default({
+            client: this._client,
+            cache: this._cache,
+            version: SDK.version,
+            server: server,
+            appKey: appKey,
+            appSecret: appSecret,
+            appName: appName,
+            appVersion: appVersion,
+            redirectUri: redirectUri
+        });
 
-        this._pubnubFactory = options.pubnubFactory || Externals.PUBNUB;
+        this._pubnubFactory = pubnubFactory || Externals.PUBNUB;
     }
 
     /**
@@ -208,7 +227,7 @@ var SDK = function () {
     return SDK;
 }();
 
-SDK.version =  true ? ("3.0.0-rc1") : 'x.x.x';
+SDK.version =  true ? ("3.0.0-rc2") : 'x.x.x';
 SDK.server = {
     sandbox: 'https://platform.devtest.ringcentral.com',
     production: 'https://platform.ringcentral.com'
@@ -1680,7 +1699,8 @@ var Client = function (_EventEmitter) {
         // Sanity checks
         if (!init.url) throw new Error('Url is not defined');
         if (!init.method) init.method = 'GET';
-        if (init.method && Client._allowedMethods.indexOf(init.method.toUpperCase()) < 0) {
+        init.method = init.method.toUpperCase();
+        if (init.method && Client._allowedMethods.indexOf(init.method) < 0) {
             throw new Error('Method has wrong value: ' + init.method);
         }
 
@@ -1711,7 +1731,12 @@ var Client = function (_EventEmitter) {
 
             // Assign a new encoded body
             if (contentType.indexOf(_ApiResponse2.default._jsonContentType) > -1) {
-                init.body = JSON.stringify(init.body);
+                if ((init.method === 'GET' || init.method === 'HEAD') && !!init.body) {
+                    // oddly setting body to null still result in TypeError in phantomjs
+                    init.body = undefined;
+                } else {
+                    init.body = JSON.stringify(init.body);
+                }
             } else if (contentType.indexOf(_ApiResponse2.default._urlencodedContentType) > -1) {
                 init.body = (0, _Utils.queryStringify)(init.body);
             }
@@ -2386,7 +2411,17 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Platform = function (_EventEmitter) {
     _inherits(Platform, _EventEmitter);
 
-    function Platform(client, cache, server, appKey, appSecret, appName, appVersion, sdkVersion) {
+    function Platform(_ref) {
+        var client = _ref.client;
+        var cache = _ref.cache;
+        var server = _ref.server;
+        var appKey = _ref.appKey;
+        var appSecret = _ref.appSecret;
+        var appName = _ref.appName;
+        var appVersion = _ref.appVersion;
+        var sdkVersion = _ref.sdkVersion;
+        var redirectUri = _ref.redirectUri;
+
         _classCallCheck(this, Platform);
 
         var _this = _possibleConstructorReturn(this, _EventEmitter.call(this));
@@ -2420,6 +2455,8 @@ var Platform = function (_EventEmitter) {
         _this._auth = new _Auth2.default(_this._cache, Platform._cacheId);
 
         _this._userAgent = (appName ? appName + (appVersion ? '/' + appVersion : '') + ' ' : '') + 'RCJSSDK/' + sdkVersion;
+
+        _this._redirectUri = redirectUri || '';
 
         return _this;
     }
@@ -2491,7 +2528,7 @@ var Platform = function (_EventEmitter) {
 
         return this.createUrl(Platform._authorizeEndpoint + '?' + (0, _Utils.queryStringify)({
             'response_type': 'code',
-            'redirect_uri': options.redirectUri || '',
+            'redirect_uri': options.redirectUri || this._redirectUri,
             'client_id': this._appKey,
             'state': options.state || '',
             'brand_id': options.brandId || '',
@@ -2600,7 +2637,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.loggedIn = function () {
-        var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+        var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
             return regeneratorRuntime.wrap(function _callee$(_context) {
                 while (1) {
                     switch (_context.prev = _context.next) {
@@ -2626,7 +2663,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function loggedIn() {
-            return _ref.apply(this, arguments);
+            return _ref2.apply(this, arguments);
         }
 
         return loggedIn;
@@ -2647,7 +2684,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.login = function () {
-        var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(options) {
+        var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(options) {
             var body, apiResponse, json;
             return regeneratorRuntime.wrap(function _callee2$(_context2) {
                 while (1) {
@@ -2673,7 +2710,7 @@ var Platform = function (_EventEmitter) {
 
                                 body.grant_type = 'authorization_code';
                                 body.code = options.code;
-                                body.redirect_uri = options.redirectUri;
+                                body.redirect_uri = options.redirectUri || this._redirectUri;
                                 //body.client_id = this.getCredentials().key; // not needed
                             }
 
@@ -2715,7 +2752,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function login(_x) {
-            return _ref2.apply(this, arguments);
+            return _ref3.apply(this, arguments);
         }
 
         return login;
@@ -2728,7 +2765,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype._refresh = function () {
-        var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+        var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
             var res, json;
             return regeneratorRuntime.wrap(function _callee3$(_context3) {
                 while (1) {
@@ -2810,7 +2847,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function _refresh() {
-            return _ref3.apply(this, arguments);
+            return _ref4.apply(this, arguments);
         }
 
         return _refresh;
@@ -2822,7 +2859,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.refresh = function () {
-        var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+        var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
             var _this3 = this;
 
             return regeneratorRuntime.wrap(function _callee4$(_context4) {
@@ -2864,7 +2901,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function refresh() {
-            return _ref4.apply(this, arguments);
+            return _ref5.apply(this, arguments);
         }
 
         return refresh;
@@ -2876,7 +2913,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.logout = function () {
-        var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+        var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
             var res;
             return regeneratorRuntime.wrap(function _callee5$(_context5) {
                 while (1) {
@@ -2920,7 +2957,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function logout() {
-            return _ref5.apply(this, arguments);
+            return _ref6.apply(this, arguments);
         }
 
         return logout;
@@ -2935,7 +2972,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.inflateRequest = function () {
-        var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(request, options) {
+        var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(request, options) {
             return regeneratorRuntime.wrap(function _callee6$(_context6) {
                 while (1) {
                     switch (_context6.prev = _context6.next) {
@@ -2972,7 +3009,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function inflateRequest(_x2, _x3) {
-            return _ref6.apply(this, arguments);
+            return _ref7.apply(this, arguments);
         }
 
         return inflateRequest;
@@ -2987,7 +3024,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.sendRequest = function () {
-        var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(request, options) {
+        var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(request, options) {
             return regeneratorRuntime.wrap(function _callee7$(_context7) {
                 while (1) {
                     switch (_context7.prev = _context7.next) {
@@ -3034,7 +3071,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function sendRequest(_x4, _x5) {
-            return _ref7.apply(this, arguments);
+            return _ref8.apply(this, arguments);
         }
 
         return sendRequest;
@@ -3053,7 +3090,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.send = function () {
-        var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
+        var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
             var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
             return regeneratorRuntime.wrap(function _callee8$(_context8) {
                 while (1) {
@@ -3078,7 +3115,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function send(_x6) {
-            return _ref8.apply(this, arguments);
+            return _ref9.apply(this, arguments);
         }
 
         return send;
@@ -3095,7 +3132,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.get = function () {
-        var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(url, query, options) {
+        var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(url, query, options) {
             return regeneratorRuntime.wrap(function _callee9$(_context9) {
                 while (1) {
                     switch (_context9.prev = _context9.next) {
@@ -3119,7 +3156,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function get(_x8, _x9, _x10) {
-            return _ref9.apply(this, arguments);
+            return _ref10.apply(this, arguments);
         }
 
         return get;
@@ -3137,7 +3174,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.post = function () {
-        var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(url, body, query, options) {
+        var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(url, body, query, options) {
             return regeneratorRuntime.wrap(function _callee10$(_context10) {
                 while (1) {
                     switch (_context10.prev = _context10.next) {
@@ -3162,7 +3199,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function post(_x11, _x12, _x13, _x14) {
-            return _ref10.apply(this, arguments);
+            return _ref11.apply(this, arguments);
         }
 
         return post;
@@ -3180,7 +3217,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype.put = function () {
-        var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(url, body, query, options) {
+        var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(url, body, query, options) {
             return regeneratorRuntime.wrap(function _callee11$(_context11) {
                 while (1) {
                     switch (_context11.prev = _context11.next) {
@@ -3205,7 +3242,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function put(_x15, _x16, _x17, _x18) {
-            return _ref11.apply(this, arguments);
+            return _ref12.apply(this, arguments);
         }
 
         return put;
@@ -3222,7 +3259,7 @@ var Platform = function (_EventEmitter) {
 
 
     Platform.prototype['delete'] = function () {
-        var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(url, query, options) {
+        var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(url, query, options) {
             return regeneratorRuntime.wrap(function _callee12$(_context12) {
                 while (1) {
                     switch (_context12.prev = _context12.next) {
@@ -3246,14 +3283,14 @@ var Platform = function (_EventEmitter) {
         }));
 
         function _delete(_x19, _x20, _x21) {
-            return _ref12.apply(this, arguments);
+            return _ref13.apply(this, arguments);
         }
 
         return _delete;
     }();
 
     Platform.prototype._tokenRequest = function () {
-        var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(path, body) {
+        var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(path, body) {
             return regeneratorRuntime.wrap(function _callee13$(_context13) {
                 while (1) {
                     switch (_context13.prev = _context13.next) {
@@ -3282,14 +3319,14 @@ var Platform = function (_EventEmitter) {
         }));
 
         function _tokenRequest(_x22, _x23) {
-            return _ref13.apply(this, arguments);
+            return _ref14.apply(this, arguments);
         }
 
         return _tokenRequest;
     }();
 
     Platform.prototype.ensureLoggedIn = function () {
-        var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
+        var _ref15 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
             return regeneratorRuntime.wrap(function _callee14$(_context14) {
                 while (1) {
                     switch (_context14.prev = _context14.next) {
@@ -3317,7 +3354,7 @@ var Platform = function (_EventEmitter) {
         }));
 
         function ensureLoggedIn() {
-            return _ref14.apply(this, arguments);
+            return _ref15.apply(this, arguments);
         }
 
         return ensureLoggedIn;

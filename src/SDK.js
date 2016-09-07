@@ -1,24 +1,18 @@
 import "babel-regenerator-runtime";
-
-import * as Utils from './core/Utils';
-import Cache from './core/Cache';
-import * as Externals from './core/Externals';
-import EventEmitter from 'events';
-
-import Client from './http/Client';
-import ApiResponse from './http/ApiResponse';
-
-import {default as ClientMock} from './mocks/ClientMock';
-import Mock from './mocks/Mock';
-import Registry from './mocks/Registry';
-
-import Platform from './platform/Platform';
-import Auth from './platform/Auth';
-
-import PubnubMockFactory from './pubnub/PubnubFactory';
-
-import Subscription from './subscription/Subscription';
-import CachedSubscription from './subscription/CachedSubscription';
+import * as Utils from "./core/Utils";
+import Cache from "./core/Cache";
+import * as Externals from "./core/Externals";
+import EventEmitter from "events";
+import Client from "./http/Client";
+import ApiResponse from "./http/ApiResponse";
+import {default as ClientMock} from "./mocks/ClientMock";
+import Mock from "./mocks/Mock";
+import Registry from "./mocks/Registry";
+import Platform from "./platform/Platform";
+import Auth from "./platform/Auth";
+import PubnubMockFactory from "./pubnub/PubnubFactory";
+import Subscription from "./subscription/Subscription";
+import CachedSubscription from "./subscription/CachedSubscription";
 
 class SDK {
 
@@ -43,9 +37,7 @@ class SDK {
      * @param {string} [options.client]
      * @param {string} [options.redirectUri]
      */
-    constructor(options) {
-
-        options = options || {};
+    constructor({server, cachePrefix, appSecret, appKey, appName, appVersion, pubnubFactory, client, redirectUri}) {
 
         if (!Externals.fetch) {
             throw new Error('Native Fetch is missing, set RingCentral.SDK.core.Externals.fetch to your favorite alternative');
@@ -55,23 +47,23 @@ class SDK {
             throw new Error('Native Promise is missing, set RingCentral.SDK.core.Externals.Promise to your favorite alternative');
         }
 
-        this._cache = new Cache(Externals.localStorage, options.cachePrefix);
+        this._cache = new Cache(Externals.localStorage, cachePrefix);
 
-        this._client = options.client || new Client();
+        this._client = client || new Client();
 
-        this._platform = new Platform(
-            this._client,
-            this._cache,
-            options.server,
-            options.appKey,
-            options.appSecret,
-            options.appName,
-            options.appVersion,
-            SDK.version,
-            options.redirectUri
-        );
+        this._platform = new Platform({
+            client: this._client,
+            cache: this._cache,
+            version: SDK.version,
+            server,
+            appKey,
+            appSecret,
+            appName,
+            appVersion,
+            redirectUri
+        });
 
-        this._pubnubFactory = options.pubnubFactory || Externals.PUBNUB;
+        this._pubnubFactory = pubnubFactory || Externals.PUBNUB;
 
     }
 

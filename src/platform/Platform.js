@@ -26,7 +26,7 @@ export default class Platform extends EventEmitter {
         logoutError: 'logoutError'
     };
 
-    constructor(client, cache, server, appKey, appSecret, appName, appVersion, sdkVersion, redirectUri) {
+    constructor({client, cache, server, appKey, appSecret, appName, appVersion, sdkVersion, redirectUri}) {
 
         super();
 

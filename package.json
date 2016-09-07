@@ -1,9 +1,10 @@
 {
   "name": "ringcentral",
-  "version": "3.0.0-rc1",
+  "version": "3.0.0-rc2",
   "scripts": {
-    "prepublish": "./node_modules/.bin/webpack --display-modules --progress --colors --bail",
-    "test": "npm run prepublish && npm run istanbul && npm run karma",
+    "clean": "rm -rf build/*",
+    "build": "npm run clean && ./node_modules/.bin/webpack --display-modules --progress --colors --bail",
+    "test": "npm run build && npm run istanbul && npm run karma",
     "mocha": "./node_modules/mocha/bin/mocha ./build/tests/ringcentral-tests.js",
     "mocha-compilers": "./node_modules/mocha/bin/mocha --compilers spec.js:babel-core/register --require=babel-regenerator-runtime ./src/**/*-spec.js",
     "mocha-api": "./node_modules/mocha/bin/mocha --compilers spec.js:babel-core/register --require=babel-regenerator-runtime ./test-api/**/*-spec.js",
@@ -12,7 +13,7 @@
     "karma-watch": "npm run karma -- --no-single-run --auto-watch",
     "istanbul": "./node_modules/.bin/istanbul cover -x build/tests/ringcentral-tests.js --dir=./build/coverage --report=lcov --hook-run-in-context ./node_modules/mocha/bin/_mocha -- --reporter spec build/tests/ringcentral-tests.js",
     "tsd": "tsd reinstall -so",
-    "watch": "npm run prepublish -- --watch"
+    "watch": "npm run build -- --watch"
   },
   "dependencies": {
     "es6-promise": "^3.0.2",
