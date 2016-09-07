@@ -41,6 +41,7 @@ class SDK {
      * @param {string} [options.appVersion]
      * @param {string} [options.pubnubFactory]
      * @param {string} [options.client]
+     * @param {string} [options.redirectUri]
      */
     constructor(options) {
 
@@ -66,7 +67,8 @@ class SDK {
             options.appSecret,
             options.appName,
             options.appVersion,
-            SDK.version
+            SDK.version,
+            options.redirectUri
         );
 
         this._pubnubFactory = options.pubnubFactory || Externals.PUBNUB;

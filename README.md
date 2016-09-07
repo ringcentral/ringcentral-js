@@ -211,6 +211,7 @@ var rcsdk = new RingCentral.SDK({
 //  server: RingCentral.SDK.server.production,
     appKey: 'yourAppKey',
     appSecret: 'yourAppSecret'
+    //redirectUri: '' // optional
 });
 ```
 
