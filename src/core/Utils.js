@@ -30,6 +30,10 @@ export function queryStringify(parameters) {
 
 }
 
+function parseURIPart(s) {
+    return s.trim().replace(/\+/g, ' ');
+}
+
 /**
  * TODO Replace with something better
  * @see https://github.com/joyent/node/blob/master/lib/querystring.js
@@ -46,13 +50,13 @@ export function parseQueryString(queryString) {
 
         if (arg.indexOf('=') == -1) {
 
-            argsParsed[arg.trim()] = true;
+            argsParsed[parseURIPart(arg)] = true;
 
         } else {
 
             var pair = arg.split('='),
-                key = pair[0].trim(),
-                value = pair[1].trim();
+                key = parseURIPart(pair[0]),
+                value = parseURIPart(pair[1]);
 
             if (key in argsParsed) {
                 if (key in argsParsed && !isArray(argsParsed[key])) argsParsed[key] = [argsParsed[key]];

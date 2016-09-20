@@ -103,6 +103,7 @@ export default class Platform extends EventEmitter {
      * @param {string} options.brandId
      * @param {string} options.display
      * @param {string} options.prompt
+     * @param {boolean} options.implicit
      * @param {object} [options]
      * @return {string}
      */
@@ -111,7 +112,7 @@ export default class Platform extends EventEmitter {
         options = options || {};
 
         return this.createUrl(Platform._authorizeEndpoint + '?' + queryStringify({
-                'response_type': 'code',
+                'response_type': options.implicit ? 'token' : 'code',
                 'redirect_uri': options.redirectUri || this._redirectUri,
                 'client_id': this._appKey,
                 'state': options.state || '',
@@ -128,8 +129,22 @@ export default class Platform extends EventEmitter {
      */
     parseLoginRedirectUrl(url) {
 
-        var qs = parseQueryString(url.split('?').reverse()[0]),
-            error = qs.error_description || qs.error;
+        function getParts(url, separator) {
+            return url.split(separator).reverse()[0];
+        }
+
+        var codeResponse = getParts('?');
+        var qs;
+
+        if (codeResponse) {
+            qs = parseQueryString(codeResponse);
+        } else {
+            qs = parseQueryString(getParts('#'));
+        }
+
+        if (!qs) throw new Error('Unable to parse response');
+
+        var error = qs.error_description || qs.error;
 
         if (error) {
             var e = new Error(error);
@@ -240,6 +255,7 @@ export default class Platform extends EventEmitter {
      * @param {string} options.remember
      * @param {string} options.accessTokenTtl
      * @param {string} options.refreshTokenTtl
+     * @param {string} options.token
      * @returns {Promise<ApiResponse>}
      */
     async login(options) {
@@ -268,12 +284,24 @@ export default class Platform extends EventEmitter {
 
             }
 
-            if (options.endpointId) body.endpoint_id = options.endpointId;
-            if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
-            if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+            var apiResponse;
+            var json;
 
-            var apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body),
+            if (options.token) {
+
+                //TODO Potentially make a request to /oauth/tokeninfo
+                json = options;
+
+            } else {
+
+                if (options.endpointId) body.endpoint_id = options.endpointId;
+                if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
+                if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+
+                apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body);
                 json = apiResponse.json();
+
+            }
 
             this._auth.setData(json);
 
