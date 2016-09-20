@@ -1,72 +1,20 @@
 import {Promise} from "./Externals.js";
+import qs from "querystring";
 
 /**
- * TODO Replace with something better
- * @see https://github.com/joyent/node/blob/master/lib/querystring.js
  * @param {object} parameters
  * @returns {string}
  */
 export function queryStringify(parameters) {
-
-    var array = [];
-
-    parameters = parameters || {};
-
-    Object.keys(parameters).forEach((k) => {
-
-        var v = parameters[k];
-
-        if (isArray(v)) {
-            v.forEach((vv) => {
-                array.push(encodeURIComponent(k) + '=' + encodeURIComponent(vv));
-            });
-        } else {
-            array.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
-        }
-
-    });
-
-    return array.join('&');
-
+    return qs.stringify(parameters);
 }
 
 /**
- * TODO Replace with something better
- * @see https://github.com/joyent/node/blob/master/lib/querystring.js
  * @param {string} queryString
  * @returns {object}
  */
 export function parseQueryString(queryString) {
-
-    var argsParsed = {};
-
-    queryString.split('&').forEach((arg) => {
-
-        arg = decodeURIComponent(arg);
-
-        if (arg.indexOf('=') == -1) {
-
-            argsParsed[arg.trim()] = true;
-
-        } else {
-
-            var pair = arg.split('='),
-                key = pair[0].trim(),
-                value = pair[1].trim();
-
-            if (key in argsParsed) {
-                if (key in argsParsed && !isArray(argsParsed[key])) argsParsed[key] = [argsParsed[key]];
-                argsParsed[key].push(value);
-            } else {
-                argsParsed[key] = value;
-            }
-
-        }
-
-    });
-
-    return argsParsed;
-
+    return qs.parse(queryString);
 }
 
 /**

@@ -1,5 +1,5 @@
-import {expect, getSdk, getMock} from '../test/test';
-import SDK from '../SDK';
+import {expect} from "../test/test";
+import SDK from "../SDK";
 
 describe('RingCentral.core.Utils', function() {
 
@@ -11,7 +11,7 @@ describe('RingCentral.core.Utils', function() {
 
             expect(utils.parseQueryString('foo=bar&bar=baz')).to.deep.equal({foo: 'bar', bar: 'baz'});
             expect(utils.parseQueryString('foo=bar&foo=baz')).to.deep.equal({foo: ['bar', 'baz']});
-            expect(utils.parseQueryString('foo')).to.deep.equal({foo: true});
+            expect(utils.parseQueryString('foo')).to.deep.equal({foo: ''});
 
         });
 
@@ -37,5 +37,15 @@ describe('RingCentral.core.Utils', function() {
         });
 
     });
+
+    describe('delay', function() {
+
+        it('delays the promise', async function() {
+            var res = await utils.delay(1);
+            expect(res).to.equal(null);
+        });
+
+    });
+
 
 });

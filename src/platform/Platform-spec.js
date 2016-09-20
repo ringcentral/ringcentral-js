@@ -337,8 +337,22 @@ describe('RingCentral.platform.Platform', function() {
 
     });
 
+    describe('parseLoginRedirect', function() {
+        describe('Authorization Code Flow', function() {
+            it('parses url correctly', function() {
+                var platform = getSdk().platform();
+                expect(platform.parseLoginRedirect('?code=foo')).to.deep.equal({code: 'foo'});
+            });
+        });
+        describe('Implicit Grant Flow', function() {
+            it('parses url correctly', function() {
+                var platform = getSdk().platform();
+                expect(platform.parseLoginRedirect('#access_token=foo')).to.deep.equal({access_token: 'foo'});
+            });
+        });
+    });
+
     //TODO Add tests for this
-    describe.skip('parseAuthRedirectUrl', function() {});
-    describe.skip('getAuthURL', function() {});
+    describe.skip('loginUrl', function() {});
 
 });

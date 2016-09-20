@@ -22,7 +22,7 @@
     <div id="login">
 
         <div class="panel panel-default">
-            <div class="panel-heading"><h3 class="panel-title">3-legged OAuth (popup)</h3></div>
+            <div class="panel-heading"><h3 class="panel-title">Single Sign On (SS) &mdash; 3-legged OAuth Popup</h3></div>
             <div class="panel-body">
 
                 <p><strong>If login form does not appear &mdash;
@@ -38,7 +38,8 @@
 
             </div>
             <div class="panel-footer text-center">
-                <button id="authorize" class="btn btn-primary">Open SSO Window</button>
+                <button id="authorizeCode" class="btn btn-primary">Authorization Code</button>
+                <button id="authorizeImplicit" class="btn btn-primary">Implicit Grant</button>
             </div>
         </div>
 
@@ -116,7 +117,7 @@
         var sdk = getSDK();
         var platform = sdk.platform();
 
-        var REDIRECT_URI = decodeURIComponent(window.location.href.split('login', 1) + 'oauth/redirect.html');
+        var REDIRECT_URI = platform._redirectUri;
 
         document.getElementById('login-username').value = localStorage.getItem('ringcentral-demo-login-username') || '';
         document.getElementById('login-password').value = localStorage.getItem('ringcentral-demo-login-password') || '';
@@ -148,6 +149,21 @@
 
             document.getElementById('welcome').style.display = 'none';
             document.getElementById('login').style.display = '';
+
+        }
+
+        function show3leggedLogin(implicit) {
+
+            platform
+                .loginWindow({
+                    url: platform.loginUrl({implicit: true})
+                })
+                .then(platform.login.bind(platform))
+                .then(showWelcome)
+                .catch(function(e) {
+                    console.error(e.stack || e.message);
+                    alert('Auth error\n\n' + e.message);
+                });
 
         }
 
@@ -187,20 +203,12 @@
 
         });
 
-        document.getElementById('authorize').addEventListener('click', function authorize(e) {
+        document.getElementById('authorizeCode').addEventListener('click', function authorize(e) {
+            show3leggedLogin(false);
+        });
 
-            platform.loginWindow({
-                    url: platform.loginUrl()
-                })
-                .then(function(options) {
-                    options.redirectUri = REDIRECT_URI;
-                    return platform.login(options);
-                })
-                .then(showWelcome)
-                .catch(function(e) {
-                    alert('Auth error\n\n' + e.message);
-                });
-
+        document.getElementById('authorizeImplicit').addEventListener('click', function authorize(e) {
+            show3leggedLogin(true);
         });
 
         platform.ensureLoggedIn().then(showWelcome).catch(showLogin);

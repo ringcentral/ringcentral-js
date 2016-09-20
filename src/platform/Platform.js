@@ -2,6 +2,7 @@ import {Promise} from "../core/Externals";
 import EventEmitter from "events";
 import Auth from "./Auth";
 import {queryStringify, parseQueryString, isBrowser, delay} from "../core/Utils";
+import constants from "../core/Constants";
 
 export default class Platform extends EventEmitter {
 
@@ -45,8 +46,7 @@ export default class Platform extends EventEmitter {
 
         this._auth = new Auth(this._cache, Platform._cacheId);
 
-        this._userAgent = (appName ? (appName + (appVersion ? '/' + appVersion : '')) + ' ' : '') +
-                          'RCJSSDK/' + sdkVersion;
+        this._userAgent = (appName ? (appName + (appVersion ? '/' + appVersion : '')) + ' ' : '') + 'RCJSSDK/' + sdkVersion;
 
         this._redirectUri = redirectUri || '';
 
@@ -103,6 +103,7 @@ export default class Platform extends EventEmitter {
      * @param {string} options.brandId
      * @param {string} options.display
      * @param {string} options.prompt
+     * @param {boolean} options.implicit
      * @param {object} [options]
      * @return {string}
      */
@@ -111,7 +112,7 @@ export default class Platform extends EventEmitter {
         options = options || {};
 
         return this.createUrl(Platform._authorizeEndpoint + '?' + queryStringify({
-                'response_type': 'code',
+                'response_type': options.implicit ? 'token' : 'code',
                 'redirect_uri': options.redirectUri || this._redirectUri,
                 'client_id': this._appKey,
                 'state': options.state || '',
@@ -126,10 +127,23 @@ export default class Platform extends EventEmitter {
      * @param {string} url
      * @return {Object}
      */
-    parseLoginRedirectUrl(url) {
+    parseLoginRedirect(url) {
 
-        var qs = parseQueryString(url.split('?').reverse()[0]),
-            error = qs.error_description || qs.error;
+        function getParts(url, separator) {
+            return url.split(separator).reverse()[0];
+        }
+
+        var response = (url.indexOf('#') === 0 && getParts(url, '#')) ||
+                       (url.indexOf('?') === 0 && getParts(url, '?')) ||
+                       null;
+
+        if (!response) throw new Error('Unable to parse response');
+
+        var qs = parseQueryString(response);
+
+        if (!qs) throw new Error('Unable to parse response');
+
+        var error = qs.error_description || qs.error;
 
         if (error) {
             var e = new Error(error);
@@ -169,7 +183,7 @@ export default class Platform extends EventEmitter {
             options.width = options.width || 400;
             options.height = options.height || 600;
             options.origin = options.origin || window.location.origin;
-            options.property = options.property || 'RCAuthorizationCode';
+            options.property = options.property || constants.authResponseProperty;
             options.target = options.target || '_blank';
 
             var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
@@ -198,9 +212,9 @@ export default class Platform extends EventEmitter {
 
                 try {
 
-                    var loginOptions = this.parseLoginRedirectUrl(e.data[options.property]);
+                    var loginOptions = this.parseLoginRedirect(e.data[options.property]);
 
-                    if (!loginOptions.code) throw new Error('No authorization code');
+                    if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
 
                     resolve(loginOptions);
 
@@ -240,6 +254,7 @@ export default class Platform extends EventEmitter {
      * @param {string} options.remember
      * @param {string} options.accessTokenTtl
      * @param {string} options.refreshTokenTtl
+     * @param {string} options.access_token
      * @returns {Promise<ApiResponse>}
      */
     async login(options) {
@@ -268,12 +283,24 @@ export default class Platform extends EventEmitter {
 
             }
 
-            if (options.endpointId) body.endpoint_id = options.endpointId;
-            if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
-            if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+            var apiResponse;
+            var json;
 
-            var apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body),
+            if (options.access_token) {
+
+                //TODO Potentially make a request to /oauth/tokeninfo
+                json = options;
+
+            } else {
+
+                if (options.endpointId) body.endpoint_id = options.endpointId;
+                if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
+                if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+
+                apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body);
                 json = apiResponse.json();
+
+            }
 
             this._auth.setData(json);
 
@@ -441,9 +468,11 @@ export default class Platform extends EventEmitter {
         } catch (e) {
 
             // Guard is for errors that come from polling
-            if (!e.apiResponse || !e.apiResponse.response() || (e.apiResponse.response().status != 401)) throw e;
+            if (!e.apiResponse || !e.apiResponse.response() || (e.apiResponse.response().status != 401) || options.retry) throw e;
 
             this._auth.cancelAccessToken();
+
+            options.retry = true;
 
             return (await this.sendRequest(request, options));
 

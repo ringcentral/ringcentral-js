@@ -69,7 +69,7 @@ var _Utils = __webpack_require__(3);
 
 var Utils = _interopRequireWildcard(_Utils);
 
-var _Cache = __webpack_require__(8);
+var _Cache = __webpack_require__(11);
 
 var _Cache2 = _interopRequireDefault(_Cache);
 
@@ -77,49 +77,53 @@ var _Externals = __webpack_require__(4);
 
 var Externals = _interopRequireWildcard(_Externals);
 
-var _events = __webpack_require__(9);
+var _events = __webpack_require__(12);
 
 var _events2 = _interopRequireDefault(_events);
 
-var _Client = __webpack_require__(10);
+var _Client = __webpack_require__(13);
 
 var _Client2 = _interopRequireDefault(_Client);
 
-var _ApiResponse = __webpack_require__(11);
+var _ApiResponse = __webpack_require__(14);
 
 var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
 
-var _ClientMock = __webpack_require__(12);
+var _ClientMock = __webpack_require__(15);
 
 var _ClientMock2 = _interopRequireDefault(_ClientMock);
 
-var _Mock = __webpack_require__(14);
+var _Mock = __webpack_require__(17);
 
 var _Mock2 = _interopRequireDefault(_Mock);
 
-var _Registry = __webpack_require__(13);
+var _Registry = __webpack_require__(16);
 
 var _Registry2 = _interopRequireDefault(_Registry);
 
-var _Platform = __webpack_require__(15);
+var _Platform = __webpack_require__(18);
 
 var _Platform2 = _interopRequireDefault(_Platform);
 
-var _Auth = __webpack_require__(16);
+var _Auth = __webpack_require__(19);
 
 var _Auth2 = _interopRequireDefault(_Auth);
 
-var _PubnubFactory = __webpack_require__(17);
+var _PubnubFactory = __webpack_require__(21);
 
 var _PubnubFactory2 = _interopRequireDefault(_PubnubFactory);
 
-var _Subscription = __webpack_require__(19);
+var _Subscription = __webpack_require__(23);
 
 var _Subscription2 = _interopRequireDefault(_Subscription);
 
-var _CachedSubscription = __webpack_require__(20);
+var _CachedSubscription = __webpack_require__(24);
 
 var _CachedSubscription2 = _interopRequireDefault(_CachedSubscription);
+
+var _Constants = __webpack_require__(20);
+
+var _Constants2 = _interopRequireDefault(_Constants);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -221,13 +225,16 @@ var SDK = function () {
     };
 
     SDK.handleLoginRedirect = function handleLoginRedirect(origin) {
-        window.opener.postMessage({ RCAuthorizationCode: window.location.search }, origin || window.location.origin);
+        var _window$opener$postMe;
+
+        var response = window.location.hash ? window.location.hash : window.location.search;
+        window.opener.postMessage((_window$opener$postMe = {}, _window$opener$postMe[_Constants2.default.authResponseProperty] = response, _window$opener$postMe), origin || window.location.origin);
     };
 
     return SDK;
 }();
 
-SDK.version =  true ? ("3.0.0-rc2") : 'x.x.x';
+SDK.version = _Constants2.default.version;
 SDK.server = {
     sandbox: 'https://platform.devtest.ringcentral.com',
     production: 'https://platform.ringcentral.com'
@@ -929,7 +936,7 @@ module.exports = SDK;
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-'use strict';
+"use strict";
 
 exports.__esModule = true;
 
@@ -948,67 +955,26 @@ exports.delay = delay;
 
 var _Externals = __webpack_require__(4);
 
+var _querystring = __webpack_require__(8);
+
+var _querystring2 = _interopRequireDefault(_querystring);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 /**
- * TODO Replace with something better
- * @see https://github.com/joyent/node/blob/master/lib/querystring.js
  * @param {object} parameters
  * @returns {string}
  */
 function queryStringify(parameters) {
-
-    var array = [];
-
-    parameters = parameters || {};
-
-    Object.keys(parameters).forEach(function (k) {
-
-        var v = parameters[k];
-
-        if (isArray(v)) {
-            v.forEach(function (vv) {
-                array.push(encodeURIComponent(k) + '=' + encodeURIComponent(vv));
-            });
-        } else {
-            array.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
-        }
-    });
-
-    return array.join('&');
+    return _querystring2.default.stringify(parameters);
 }
 
 /**
- * TODO Replace with something better
- * @see https://github.com/joyent/node/blob/master/lib/querystring.js
  * @param {string} queryString
  * @returns {object}
  */
 function parseQueryString(queryString) {
-
-    var argsParsed = {};
-
-    queryString.split('&').forEach(function (arg) {
-
-        arg = decodeURIComponent(arg);
-
-        if (arg.indexOf('=') == -1) {
-
-            argsParsed[arg.trim()] = true;
-        } else {
-
-            var pair = arg.split('='),
-                key = pair[0].trim(),
-                value = pair[1].trim();
-
-            if (key in argsParsed) {
-                if (key in argsParsed && !isArray(argsParsed[key])) argsParsed[key] = [argsParsed[key]];
-                argsParsed[key].push(value);
-            } else {
-                argsParsed[key] = value;
-            }
-        }
-    });
-
-    return argsParsed;
+    return _querystring2.default.parse(queryString);
 }
 
 /**
@@ -1028,7 +994,7 @@ function isArray(obj) {
 }
 
 function isObject(o) {
-    return o != null && (typeof o === 'undefined' ? 'undefined' : _typeof(o)) === 'object' && !isArray(o);
+    return o != null && (typeof o === "undefined" ? "undefined" : _typeof(o)) === 'object' && !isArray(o);
 }
 
 function isObjectObject(o) {
@@ -1138,6 +1104,172 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
 
 /***/ },
 /* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.decode = exports.parse = __webpack_require__(9);
+exports.encode = exports.stringify = __webpack_require__(10);
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+'use strict';
+
+// If obj.hasOwnProperty has been overridden, then calling
+// obj.hasOwnProperty(prop) will break.
+// See: https://github.com/joyent/node/issues/1707
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+module.exports = function(qs, sep, eq, options) {
+  sep = sep || '&';
+  eq = eq || '=';
+  var obj = {};
+
+  if (typeof qs !== 'string' || qs.length === 0) {
+    return obj;
+  }
+
+  var regexp = /\+/g;
+  qs = qs.split(sep);
+
+  var maxKeys = 1000;
+  if (options && typeof options.maxKeys === 'number') {
+    maxKeys = options.maxKeys;
+  }
+
+  var len = qs.length;
+  // maxKeys <= 0 means that we should not limit keys count
+  if (maxKeys > 0 && len > maxKeys) {
+    len = maxKeys;
+  }
+
+  for (var i = 0; i < len; ++i) {
+    var x = qs[i].replace(regexp, '%20'),
+        idx = x.indexOf(eq),
+        kstr, vstr, k, v;
+
+    if (idx >= 0) {
+      kstr = x.substr(0, idx);
+      vstr = x.substr(idx + 1);
+    } else {
+      kstr = x;
+      vstr = '';
+    }
+
+    k = decodeURIComponent(kstr);
+    v = decodeURIComponent(vstr);
+
+    if (!hasOwnProperty(obj, k)) {
+      obj[k] = v;
+    } else if (Array.isArray(obj[k])) {
+      obj[k].push(v);
+    } else {
+      obj[k] = [obj[k], v];
+    }
+  }
+
+  return obj;
+};
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+'use strict';
+
+var stringifyPrimitive = function(v) {
+  switch (typeof v) {
+    case 'string':
+      return v;
+
+    case 'boolean':
+      return v ? 'true' : 'false';
+
+    case 'number':
+      return isFinite(v) ? v : '';
+
+    default:
+      return '';
+  }
+};
+
+module.exports = function(obj, sep, eq, name) {
+  sep = sep || '&';
+  eq = eq || '=';
+  if (obj === null) {
+    obj = undefined;
+  }
+
+  if (typeof obj === 'object') {
+    return Object.keys(obj).map(function(k) {
+      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
+      if (Array.isArray(obj[k])) {
+        return obj[k].map(function(v) {
+          return ks + encodeURIComponent(stringifyPrimitive(v));
+        }).join(sep);
+      } else {
+        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
+      }
+    }).join(sep);
+
+  }
+
+  if (!name) return '';
+  return encodeURIComponent(stringifyPrimitive(name)) + eq +
+         encodeURIComponent(stringifyPrimitive(obj));
+};
+
+
+/***/ },
+/* 11 */
 /***/ function(module, exports) {
 
 'use strict';
@@ -1200,7 +1332,7 @@ Cache.defaultPrefix = 'rc-';
 exports.default = Cache;
 
 /***/ },
-/* 9 */
+/* 12 */
 /***/ function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -1508,7 +1640,7 @@ function isUndefined(arg) {
 
 
 /***/ },
-/* 10 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1520,11 +1652,11 @@ var _Externals = __webpack_require__(4);
 
 var _Utils = __webpack_require__(3);
 
-var _events = __webpack_require__(9);
+var _events = __webpack_require__(12);
 
 var _events2 = _interopRequireDefault(_events);
 
-var _ApiResponse = __webpack_require__(11);
+var _ApiResponse = __webpack_require__(14);
 
 var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
 
@@ -1773,7 +1905,7 @@ function findHeaderName(name, headers) {
  */
 
 /***/ },
-/* 11 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -2032,18 +2164,18 @@ ApiResponse._boundarySeparator = '--';
 exports.default = ApiResponse;
 
 /***/ },
-/* 12 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _Registry = __webpack_require__(13);
+var _Registry = __webpack_require__(16);
 
 var _Registry2 = _interopRequireDefault(_Registry);
 
-var _Client = __webpack_require__(10);
+var _Client = __webpack_require__(13);
 
 var _Client2 = _interopRequireDefault(_Client);
 
@@ -2108,14 +2240,14 @@ var Client = function (_HttpClient) {
 exports.default = Client;
 
 /***/ },
-/* 13 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _Mock = __webpack_require__(14);
+var _Mock = __webpack_require__(17);
 
 var _Mock2 = _interopRequireDefault(_Mock);
 
@@ -2285,7 +2417,7 @@ var Registry = function () {
 exports.default = Registry;
 
 /***/ },
-/* 14 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -2294,7 +2426,7 @@ exports.__esModule = true;
 
 var _Externals = __webpack_require__(4);
 
-var _ApiResponse = __webpack_require__(11);
+var _ApiResponse = __webpack_require__(14);
 
 var _ApiResponse2 = _interopRequireDefault(_ApiResponse);
 
@@ -2379,7 +2511,7 @@ var Mock = function () {
 exports.default = Mock;
 
 /***/ },
-/* 15 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2388,15 +2520,19 @@ exports.__esModule = true;
 
 var _Externals = __webpack_require__(4);
 
-var _events = __webpack_require__(9);
+var _events = __webpack_require__(12);
 
 var _events2 = _interopRequireDefault(_events);
 
-var _Auth = __webpack_require__(16);
+var _Auth = __webpack_require__(19);
 
 var _Auth2 = _interopRequireDefault(_Auth);
 
 var _Utils = __webpack_require__(3);
+
+var _Constants = __webpack_require__(20);
+
+var _Constants2 = _interopRequireDefault(_Constants);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2517,6 +2653,7 @@ var Platform = function (_EventEmitter) {
      * @param {string} options.brandId
      * @param {string} options.display
      * @param {string} options.prompt
+     * @param {boolean} options.implicit
      * @param {object} [options]
      * @return {string}
      */
@@ -2527,7 +2664,7 @@ var Platform = function (_EventEmitter) {
         options = options || {};
 
         return this.createUrl(Platform._authorizeEndpoint + '?' + (0, _Utils.queryStringify)({
-            'response_type': 'code',
+            'response_type': options.implicit ? 'token' : 'code',
             'redirect_uri': options.redirectUri || this._redirectUri,
             'client_id': this._appKey,
             'state': options.state || '',
@@ -2543,10 +2680,21 @@ var Platform = function (_EventEmitter) {
      */
 
 
-    Platform.prototype.parseLoginRedirectUrl = function parseLoginRedirectUrl(url) {
+    Platform.prototype.parseLoginRedirect = function parseLoginRedirect(url) {
 
-        var qs = (0, _Utils.parseQueryString)(url.split('?').reverse()[0]),
-            error = qs.error_description || qs.error;
+        function getParts(url, separator) {
+            return url.split(separator).reverse()[0];
+        }
+
+        var response = url.indexOf('#') === 0 && getParts(url, '#') || url.indexOf('?') === 0 && getParts(url, '?') || null;
+
+        if (!response) throw new Error('Unable to parse response');
+
+        var qs = (0, _Utils.parseQueryString)(response);
+
+        if (!qs) throw new Error('Unable to parse response');
+
+        var error = qs.error_description || qs.error;
 
         if (error) {
             var e = new Error(error);
@@ -2588,7 +2736,7 @@ var Platform = function (_EventEmitter) {
             options.width = options.width || 400;
             options.height = options.height || 600;
             options.origin = options.origin || window.location.origin;
-            options.property = options.property || 'RCAuthorizationCode';
+            options.property = options.property || _Constants2.default.authResponseProperty;
             options.target = options.target || '_blank';
 
             var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
@@ -2617,9 +2765,9 @@ var Platform = function (_EventEmitter) {
 
                 try {
 
-                    var loginOptions = _this2.parseLoginRedirectUrl(e.data[options.property]);
+                    var loginOptions = _this2.parseLoginRedirect(e.data[options.property]);
 
-                    if (!loginOptions.code) throw new Error('No authorization code');
+                    if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
 
                     resolve(loginOptions);
                 } catch (e) {
@@ -2679,6 +2827,7 @@ var Platform = function (_EventEmitter) {
      * @param {string} options.remember
      * @param {string} options.accessTokenTtl
      * @param {string} options.refreshTokenTtl
+     * @param {string} options.access_token
      * @returns {Promise<ApiResponse>}
      */
 
@@ -2714,17 +2863,32 @@ var Platform = function (_EventEmitter) {
                                 //body.client_id = this.getCredentials().key; // not needed
                             }
 
+                            if (!options.access_token) {
+                                _context2.next = 9;
+                                break;
+                            }
+
+                            //TODO Potentially make a request to /oauth/tokeninfo
+                            json = options;
+
+                            _context2.next = 16;
+                            break;
+
+                        case 9:
+
                             if (options.endpointId) body.endpoint_id = options.endpointId;
                             if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
                             if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
 
-                            _context2.next = 10;
+                            _context2.next = 14;
                             return this._tokenRequest(Platform._tokenEndpoint, body);
 
-                        case 10:
+                        case 14:
                             apiResponse = _context2.sent;
+
                             json = apiResponse.json();
 
+                        case 16:
 
                             this._auth.setData(json);
 
@@ -2732,8 +2896,8 @@ var Platform = function (_EventEmitter) {
 
                             return _context2.abrupt("return", apiResponse);
 
-                        case 17:
-                            _context2.prev = 17;
+                        case 21:
+                            _context2.prev = 21;
                             _context2.t0 = _context2["catch"](0);
 
 
@@ -2743,12 +2907,12 @@ var Platform = function (_EventEmitter) {
 
                             throw _context2.t0;
 
-                        case 22:
+                        case 26:
                         case "end":
                             return _context2.stop();
                     }
                 }
-            }, _callee2, this, [[0, 17]]);
+            }, _callee2, this, [[0, 21]]);
         }));
 
         function login(_x) {
@@ -3045,7 +3209,7 @@ var Platform = function (_EventEmitter) {
                             _context7.prev = 9;
                             _context7.t0 = _context7["catch"](0);
 
-                            if (!(!_context7.t0.apiResponse || !_context7.t0.apiResponse.response() || _context7.t0.apiResponse.response().status != 401)) {
+                            if (!(!_context7.t0.apiResponse || !_context7.t0.apiResponse.response() || _context7.t0.apiResponse.response().status != 401 || options.retry)) {
                                 _context7.next = 13;
                                 break;
                             }
@@ -3056,13 +3220,15 @@ var Platform = function (_EventEmitter) {
 
                             this._auth.cancelAccessToken();
 
-                            _context7.next = 16;
+                            options.retry = true;
+
+                            _context7.next = 17;
                             return this.sendRequest(request, options);
 
-                        case 16:
+                        case 17:
                             return _context7.abrupt("return", _context7.sent);
 
-                        case 17:
+                        case 18:
                         case "end":
                             return _context7.stop();
                     }
@@ -3388,7 +3554,7 @@ Platform._clearCacheOnRefreshError = false;
 exports.default = Platform;
 
 /***/ },
-/* 16 */
+/* 19 */
 /***/ function(module, exports) {
 
 'use strict';
@@ -3535,14 +3701,26 @@ Auth.forcedTokenType = 'forced';
 exports.default = Auth;
 
 /***/ },
-/* 17 */
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+exports.default = {
+    authResponseProperty: 'RCAuthorizationResponse',
+    version:  true ? ("3.0.0-rc2") : 'x.x.x'
+};
+
+/***/ },
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _PubnubMock = __webpack_require__(18);
+var _PubnubMock = __webpack_require__(22);
 
 var _PubnubMock2 = _interopRequireDefault(_PubnubMock);
 
@@ -3569,14 +3747,14 @@ var PubnubMockFactory = function () {
 exports.default = PubnubMockFactory;
 
 /***/ },
-/* 18 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
 
-var _events = __webpack_require__(9);
+var _events = __webpack_require__(12);
 
 var _events2 = _interopRequireDefault(_events);
 
@@ -3627,14 +3805,14 @@ var PubnubMock = function (_EventEmitter) {
 exports.default = PubnubMock;
 
 /***/ },
-/* 19 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
 exports.__esModule = true;
 
-var _events = __webpack_require__(9);
+var _events = __webpack_require__(12);
 
 var _events2 = _interopRequireDefault(_events);
 
@@ -4149,14 +4327,14 @@ Subscription._pollInterval = 10 * 1000;
 exports.default = Subscription;
 
 /***/ },
-/* 20 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
 
-var _Subscription2 = __webpack_require__(19);
+var _Subscription2 = __webpack_require__(23);
 
 var _Subscription3 = _interopRequireDefault(_Subscription2);
 

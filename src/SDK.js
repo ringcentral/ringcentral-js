@@ -13,10 +13,11 @@ import Auth from "./platform/Auth";
 import PubnubMockFactory from "./pubnub/PubnubFactory";
 import Subscription from "./subscription/Subscription";
 import CachedSubscription from "./subscription/CachedSubscription";
+import constants from "./core/Constants";
 
 class SDK {
 
-    static version = (typeof VERSION !== 'undefined' ? VERSION : 'x.x.x');
+    static version = constants.version;
 
     static server = {
         sandbox: 'https://platform.devtest.ringcentral.com',
@@ -127,7 +128,8 @@ class SDK {
     };
 
     static handleLoginRedirect(origin) {
-        window.opener.postMessage({RCAuthorizationCode: window.location.search}, origin || window.location.origin);
+        var response = window.location.hash ? window.location.hash : window.location.search;
+        window.opener.postMessage({[constants.authResponseProperty]: response}, origin || window.location.origin);
     }
 
 }
