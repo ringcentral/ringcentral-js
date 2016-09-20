@@ -2,6 +2,7 @@ import {Promise} from "../core/Externals";
 import EventEmitter from "events";
 import Auth from "./Auth";
 import {queryStringify, parseQueryString, isBrowser, delay} from "../core/Utils";
+import constants from "../core/Constants";
 
 export default class Platform extends EventEmitter {
 
@@ -45,8 +46,7 @@ export default class Platform extends EventEmitter {
 
         this._auth = new Auth(this._cache, Platform._cacheId);
 
-        this._userAgent = (appName ? (appName + (appVersion ? '/' + appVersion : '')) + ' ' : '') +
-                          'RCJSSDK/' + sdkVersion;
+        this._userAgent = (appName ? (appName + (appVersion ? '/' + appVersion : '')) + ' ' : '') + 'RCJSSDK/' + sdkVersion;
 
         this._redirectUri = redirectUri || '';
 
@@ -127,20 +127,17 @@ export default class Platform extends EventEmitter {
      * @param {string} url
      * @return {Object}
      */
-    parseLoginRedirectUrl(url) {
+    parseLoginRedirect(url) {
 
         function getParts(url, separator) {
             return url.split(separator).reverse()[0];
         }
 
-        var codeResponse = getParts('?');
-        var qs;
+        var response = getParts(url, '#') || getParts(url, '?');
 
-        if (codeResponse) {
-            qs = parseQueryString(codeResponse);
-        } else {
-            qs = parseQueryString(getParts('#'));
-        }
+        if (!response) throw new Error('Unable to parse response');
+
+        var qs = parseQueryString(response);
 
         if (!qs) throw new Error('Unable to parse response');
 
@@ -184,7 +181,7 @@ export default class Platform extends EventEmitter {
             options.width = options.width || 400;
             options.height = options.height || 600;
             options.origin = options.origin || window.location.origin;
-            options.property = options.property || 'RCAuthorizationCode';
+            options.property = options.property || constants.authResponseProperty;
             options.target = options.target || '_blank';
 
             var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
@@ -213,9 +210,9 @@ export default class Platform extends EventEmitter {
 
                 try {
 
-                    var loginOptions = this.parseLoginRedirectUrl(e.data[options.property]);
+                    var loginOptions = this.parseLoginRedirect(e.data[options.property]);
 
-                    if (!loginOptions.code) throw new Error('No authorization code');
+                    if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
 
                     resolve(loginOptions);
 
@@ -255,7 +252,7 @@ export default class Platform extends EventEmitter {
      * @param {string} options.remember
      * @param {string} options.accessTokenTtl
      * @param {string} options.refreshTokenTtl
-     * @param {string} options.token
+     * @param {string} options.access_token
      * @returns {Promise<ApiResponse>}
      */
     async login(options) {
@@ -287,7 +284,7 @@ export default class Platform extends EventEmitter {
             var apiResponse;
             var json;
 
-            if (options.token) {
+            if (options.access_token) {
 
                 //TODO Potentially make a request to /oauth/tokeninfo
                 json = options;
@@ -469,9 +466,11 @@ export default class Platform extends EventEmitter {
         } catch (e) {
 
             // Guard is for errors that come from polling
-            if (!e.apiResponse || !e.apiResponse.response() || (e.apiResponse.response().status != 401)) throw e;
+            if (!e.apiResponse || !e.apiResponse.response() || (e.apiResponse.response().status != 401) || options.retry) throw e;
 
             this._auth.cancelAccessToken();
+
+            options.retry = true;
 
             return (await this.sendRequest(request, options));
 

@@ -20,7 +20,8 @@
             appKey: appKey,
             appSecret: appSecret,
             appName: 'Demo',
-            appVersion: RingCentral.SDK.version
+            appVersion: RingCentral.SDK.version,
+            redirectUri: decodeURIComponent(window.location.href.split('login', 1) + 'oauth/redirect.html')
         });
 
         var platform = sdk.platform();

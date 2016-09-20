@@ -109,17 +109,21 @@ var _Auth = __webpack_require__(16);
 
 var _Auth2 = _interopRequireDefault(_Auth);
 
-var _PubnubFactory = __webpack_require__(17);
+var _PubnubFactory = __webpack_require__(18);
 
 var _PubnubFactory2 = _interopRequireDefault(_PubnubFactory);
 
-var _Subscription = __webpack_require__(19);
+var _Subscription = __webpack_require__(20);
 
 var _Subscription2 = _interopRequireDefault(_Subscription);
 
-var _CachedSubscription = __webpack_require__(20);
+var _CachedSubscription = __webpack_require__(21);
 
 var _CachedSubscription2 = _interopRequireDefault(_CachedSubscription);
+
+var _Constants = __webpack_require__(17);
+
+var _Constants2 = _interopRequireDefault(_Constants);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -221,13 +225,16 @@ var SDK = function () {
     };
 
     SDK.handleLoginRedirect = function handleLoginRedirect(origin) {
-        window.opener.postMessage({ RCAuthorizationCode: window.location.search }, origin || window.location.origin);
+        var _window$opener$postMe;
+
+        var response = window.location.hash ? window.location.hash : window.location.search;
+        window.opener.postMessage((_window$opener$postMe = {}, _window$opener$postMe[_Constants2.default.authResponseProperty] = response, _window$opener$postMe), origin || window.location.origin);
     };
 
     return SDK;
 }();
 
-SDK.version =  true ? ("3.0.0-rc2") : 'x.x.x';
+SDK.version = _Constants2.default.version;
 SDK.server = {
     sandbox: 'https://platform.devtest.ringcentral.com',
     production: 'https://platform.ringcentral.com'
@@ -976,6 +983,10 @@ function queryStringify(parameters) {
     return array.join('&');
 }
 
+function parseURIPart(s) {
+    return s.trim().replace(/\+/g, ' ');
+}
+
 /**
  * TODO Replace with something better
  * @see https://github.com/joyent/node/blob/master/lib/querystring.js
@@ -992,12 +1003,12 @@ function parseQueryString(queryString) {
 
         if (arg.indexOf('=') == -1) {
 
-            argsParsed[arg.trim()] = true;
+            argsParsed[parseURIPart(arg)] = true;
         } else {
 
             var pair = arg.split('='),
-                key = pair[0].trim(),
-                value = pair[1].trim();
+                key = parseURIPart(pair[0]),
+                value = parseURIPart(pair[1]);
 
             if (key in argsParsed) {
                 if (key in argsParsed && !isArray(argsParsed[key])) argsParsed[key] = [argsParsed[key]];
@@ -2398,6 +2409,10 @@ var _Auth2 = _interopRequireDefault(_Auth);
 
 var _Utils = __webpack_require__(3);
 
+var _Constants = __webpack_require__(17);
+
+var _Constants2 = _interopRequireDefault(_Constants);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _Externals.Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _Externals.Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
@@ -2517,6 +2532,7 @@ var Platform = function (_EventEmitter) {
      * @param {string} options.brandId
      * @param {string} options.display
      * @param {string} options.prompt
+     * @param {boolean} options.implicit
      * @param {object} [options]
      * @return {string}
      */
@@ -2527,7 +2543,7 @@ var Platform = function (_EventEmitter) {
         options = options || {};
 
         return this.createUrl(Platform._authorizeEndpoint + '?' + (0, _Utils.queryStringify)({
-            'response_type': 'code',
+            'response_type': options.implicit ? 'token' : 'code',
             'redirect_uri': options.redirectUri || this._redirectUri,
             'client_id': this._appKey,
             'state': options.state || '',
@@ -2543,10 +2559,21 @@ var Platform = function (_EventEmitter) {
      */
 
 
-    Platform.prototype.parseLoginRedirectUrl = function parseLoginRedirectUrl(url) {
+    Platform.prototype.parseLoginRedirect = function parseLoginRedirect(url) {
 
-        var qs = (0, _Utils.parseQueryString)(url.split('?').reverse()[0]),
-            error = qs.error_description || qs.error;
+        function getParts(url, separator) {
+            return url.split(separator).reverse()[0];
+        }
+
+        var response = getParts(url, '#') || getParts(url, '?');
+
+        if (!response) throw new Error('Unable to parse response');
+
+        var qs = (0, _Utils.parseQueryString)(response);
+
+        if (!qs) throw new Error('Unable to parse response');
+
+        var error = qs.error_description || qs.error;
 
         if (error) {
             var e = new Error(error);
@@ -2588,7 +2615,7 @@ var Platform = function (_EventEmitter) {
             options.width = options.width || 400;
             options.height = options.height || 600;
             options.origin = options.origin || window.location.origin;
-            options.property = options.property || 'RCAuthorizationCode';
+            options.property = options.property || _Constants2.default.authResponseProperty;
             options.target = options.target || '_blank';
 
             var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
@@ -2617,9 +2644,9 @@ var Platform = function (_EventEmitter) {
 
                 try {
 
-                    var loginOptions = _this2.parseLoginRedirectUrl(e.data[options.property]);
+                    var loginOptions = _this2.parseLoginRedirect(e.data[options.property]);
 
-                    if (!loginOptions.code) throw new Error('No authorization code');
+                    if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
 
                     resolve(loginOptions);
                 } catch (e) {
@@ -2679,6 +2706,7 @@ var Platform = function (_EventEmitter) {
      * @param {string} options.remember
      * @param {string} options.accessTokenTtl
      * @param {string} options.refreshTokenTtl
+     * @param {string} options.access_token
      * @returns {Promise<ApiResponse>}
      */
 
@@ -2714,17 +2742,32 @@ var Platform = function (_EventEmitter) {
                                 //body.client_id = this.getCredentials().key; // not needed
                             }
 
+                            if (!options.access_token) {
+                                _context2.next = 9;
+                                break;
+                            }
+
+                            //TODO Potentially make a request to /oauth/tokeninfo
+                            json = options;
+
+                            _context2.next = 16;
+                            break;
+
+                        case 9:
+
                             if (options.endpointId) body.endpoint_id = options.endpointId;
                             if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
                             if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
 
-                            _context2.next = 10;
+                            _context2.next = 14;
                             return this._tokenRequest(Platform._tokenEndpoint, body);
 
-                        case 10:
+                        case 14:
                             apiResponse = _context2.sent;
+
                             json = apiResponse.json();
 
+                        case 16:
 
                             this._auth.setData(json);
 
@@ -2732,8 +2775,8 @@ var Platform = function (_EventEmitter) {
 
                             return _context2.abrupt("return", apiResponse);
 
-                        case 17:
-                            _context2.prev = 17;
+                        case 21:
+                            _context2.prev = 21;
                             _context2.t0 = _context2["catch"](0);
 
 
@@ -2743,12 +2786,12 @@ var Platform = function (_EventEmitter) {
 
                             throw _context2.t0;
 
-                        case 22:
+                        case 26:
                         case "end":
                             return _context2.stop();
                     }
                 }
-            }, _callee2, this, [[0, 17]]);
+            }, _callee2, this, [[0, 21]]);
         }));
 
         function login(_x) {
@@ -3045,7 +3088,7 @@ var Platform = function (_EventEmitter) {
                             _context7.prev = 9;
                             _context7.t0 = _context7["catch"](0);
 
-                            if (!(!_context7.t0.apiResponse || !_context7.t0.apiResponse.response() || _context7.t0.apiResponse.response().status != 401)) {
+                            if (!(!_context7.t0.apiResponse || !_context7.t0.apiResponse.response() || _context7.t0.apiResponse.response().status != 401 || options.retry)) {
                                 _context7.next = 13;
                                 break;
                             }
@@ -3056,13 +3099,15 @@ var Platform = function (_EventEmitter) {
 
                             this._auth.cancelAccessToken();
 
-                            _context7.next = 16;
+                            options.retry = true;
+
+                            _context7.next = 17;
                             return this.sendRequest(request, options);
 
-                        case 16:
+                        case 17:
                             return _context7.abrupt("return", _context7.sent);
 
-                        case 17:
+                        case 18:
                         case "end":
                             return _context7.stop();
                     }
@@ -3541,8 +3586,20 @@ exports.default = Auth;
 'use strict';
 
 exports.__esModule = true;
+exports.default = {
+    authResponseProperty: 'RCAuthorizationResponse',
+    version:  true ? ("3.0.0-rc2") : 'x.x.x'
+};
 
-var _PubnubMock = __webpack_require__(18);
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+'use strict';
+
+exports.__esModule = true;
+
+var _PubnubMock = __webpack_require__(19);
 
 var _PubnubMock2 = _interopRequireDefault(_PubnubMock);
 
@@ -3569,7 +3626,7 @@ var PubnubMockFactory = function () {
 exports.default = PubnubMockFactory;
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3627,7 +3684,7 @@ var PubnubMock = function (_EventEmitter) {
 exports.default = PubnubMock;
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 'use strict';
@@ -4149,14 +4206,14 @@ Subscription._pollInterval = 10 * 1000;
 exports.default = Subscription;
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 exports.__esModule = true;
 
-var _Subscription2 = __webpack_require__(19);
+var _Subscription2 = __webpack_require__(20);
 
 var _Subscription3 = _interopRequireDefault(_Subscription2);
 

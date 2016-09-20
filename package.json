@@ -13,7 +13,8 @@
     "karma-watch": "npm run karma -- --no-single-run --auto-watch",
     "istanbul": "./node_modules/.bin/istanbul cover -x build/tests/ringcentral-tests.js --dir=./build/coverage --report=lcov --hook-run-in-context ./node_modules/mocha/bin/_mocha -- --reporter spec build/tests/ringcentral-tests.js",
     "tsd": "tsd reinstall -so",
-    "watch": "npm run build -- --watch"
+    "watch": "npm run build -- --watch",
+    "start": "./node_modules/.bin/http-server -p 3030"
   },
   "dependencies": {
     "es6-promise": "^3.0.2",
@@ -30,6 +31,7 @@
     "babel-regenerator-runtime": "^6.5.0",
     "babel-runtime": "^6.6.1",
     "chai": "^3.5.0",
+    "http-server": "^0.9.0",
     "istanbul": "^0.4.1",
     "karma": "^0.13.22",
     "karma-chai-plugins": "^0.7.0",
@@ -43,7 +45,7 @@
     "karma-sourcemap-loader": "^0.3.5",
     "karma-webpack": "^1.7.0",
     "mocha": "^2.4.5",
-    "phantomjs-prebuilt": "2.1.7",
+    "phantomjs-prebuilt": "^2.1.7",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "soap": "^0.13.0",
