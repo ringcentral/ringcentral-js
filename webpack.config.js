@@ -9,7 +9,7 @@
             {'sinon-chai': createExternal('sinon-chai', 'sinon-chai')},
             {'pubnub': createExternal('pubnub', 'pubnub')},
             {'es6-promise': createExternal('es6-promise')},
-            {'node-fetch': createExternal('node-fetch')}
+            {'fetch-ponyfill': createExternal('fetch-ponyfill')}
         ];
 
     function createExternal(cjs, amd, root) {

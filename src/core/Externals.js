@@ -1,5 +1,5 @@
 import es6Promise from "es6-promise";
-import nodeFetch from "node-fetch";
+import fetchPonyfill from "fetch-ponyfill";
 import pubnub from "pubnub";
 
 var root = (typeof window !== "undefined" && window) ||
@@ -8,10 +8,12 @@ var root = (typeof window !== "undefined" && window) ||
 
 var Promise = (es6Promise && es6Promise.Promise) || root.Promise;
 
-var fetch = (nodeFetch && typeof nodeFetch == 'function')  ? nodeFetch : root.fetch;
-var Request = fetch.Request || root.Request;
-var Response = fetch.Response || root.Response;
-var Headers = fetch.Headers || root.Headers;
+var fetchParts = fetchPonyfill ? fetchPonyfill({Promise: Promise}) : {};
+
+var fetch = fetchParts.fetch || root.fetch;
+var Request = fetchParts.Request || root.Request;
+var Response = fetchParts.Response || root.Response;
+var Headers = fetchParts.Headers || root.Headers;
 
 var PUBNUB = pubnub || root.PUBNUB;
 
