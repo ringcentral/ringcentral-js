@@ -81,7 +81,7 @@ Add the following to your HTML:
 // Add this to your RequireJS configuration file
 require.config({
     paths: {
-        'pubnub': 'path-to-scripts/pubnub/web/pubnub'
+        'pubnub': 'path-to-scripts/pubnub/web/pubnub',
         'ringcentral': 'path-to-scripts/ringcentral/build/ringcentral', // or ringcentral.min
     }
 });
@@ -111,48 +111,8 @@ Make sure that polyfills are added to the page before or together with SDK.
 
 ## Set things up for Browserify or Webpack
 
-**!!! This is experimental !!!**
-
-1. Follow installation steps for NodeJS
-2. Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
-
-    ```js
-    module.exports = {
-        resolve: {
-            alias: {
-                'node-fetch': 'whatwg-fetch',
-                'pubnub': require.resolve('pubnub/modern/pubnub')
-            }
-        }
-    };
-    ```
-
-    For old NPM versions which install packages in a nested way:
-
-    ```sh
-    $ npm instal resolve-from --save
-    ```
-
-    Add the following to your `webpack.config.js`, path should be relative to Webpack configuration file:
-
-    ```js
-    var resolve = require('resolve-from');
-
-    module.exports = {
-        resolve: {
-            alias: {
-                'node-fetch': resolve(require.resolve('ringcentral'), 'whatwg-fetch') ||
-                              resolve(process.cwd(), 'whatwg-fetch'),
-                'pubnub': resolve(require.resolve('ringcentral'), 'pubnub/modern/pubnub') ||
-                          resolve(process.cwd(), 'pubnub/modern/pubnub')
-            }
-        }
-    };
-    ```
-
-To reduce the size of your Webpack bundle it's better to use browser version of dependencies (instead of the ones that
-are installed via NPM along with the SDK). You can get them via Bower or directly download the the source.
-More information can be found in [installation for browser](#1-set-things-up-in-browser).
+Follow installation steps for NodeJS. Don't forget to add `target: 'web'` to your `webpack.config.js` to tell Webpack to
+pick proper `PUNBUB` and `fetch` implementations.
 
 ## Polyfills for old browsers
 

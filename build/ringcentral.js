@@ -1,10 +1,10 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("es6-promise"), require("node-fetch"), require("pubnub"));
+		module.exports = factory(require("es6-promise"), require("fetch-ponyfill"), require("pubnub"));
 	else if(typeof define === 'function' && define.amd)
 		define([, , "pubnub"], factory);
 	else if(typeof exports === 'object')
-		exports["SDK"] = factory(require("es6-promise"), require("node-fetch"), require("pubnub"));
+		exports["SDK"] = factory(require("es6-promise"), require("fetch-ponyfill"), require("pubnub"));
 	else
 		root["RingCentral"] = root["RingCentral"] || {}, root["RingCentral"]["SDK"] = factory(root[undefined], root[undefined], root[undefined]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_7__) {
@@ -1052,9 +1052,9 @@ var _es6Promise = __webpack_require__(5);
 
 var _es6Promise2 = _interopRequireDefault(_es6Promise);
 
-var _nodeFetch = __webpack_require__(6);
+var _fetchPonyfill = __webpack_require__(6);
 
-var _nodeFetch2 = _interopRequireDefault(_nodeFetch);
+var _fetchPonyfill2 = _interopRequireDefault(_fetchPonyfill);
 
 var _pubnub = __webpack_require__(7);
 
@@ -1066,10 +1066,12 @@ var root = typeof window !== "undefined" && window || typeof global !== "undefin
 
 var Promise = _es6Promise2.default && _es6Promise2.default.Promise || root.Promise;
 
-var fetch = _nodeFetch2.default && typeof _nodeFetch2.default == 'function' ? _nodeFetch2.default : root.fetch;
-var Request = fetch.Request || root.Request;
-var Response = fetch.Response || root.Response;
-var Headers = fetch.Headers || root.Headers;
+var fetchParts = _fetchPonyfill2.default ? (0, _fetchPonyfill2.default)({ Promise: Promise }) : {};
+
+var fetch = fetchParts.fetch || root.fetch;
+var Request = fetchParts.Request || root.Request;
+var Response = fetchParts.Response || root.Response;
+var Headers = fetchParts.Headers || root.Headers;
 
 var PUBNUB = _pubnub2.default || root.PUBNUB;
 

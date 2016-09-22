@@ -18,9 +18,8 @@
   },
   "dependencies": {
     "es6-promise": "^3.0.2",
-    "node-fetch": "^1.4.1",
-    "pubnub": "^3.15.0",
-    "whatwg-fetch": "^0.11.1"
+    "fetch-ponyfill": "^3.0.0",
+    "pubnub": "^3.16.3"
   },
   "devDependencies": {
     "babel-core": "^6.7.4",
@@ -49,7 +48,8 @@
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "soap": "^0.13.0",
-    "webpack": "^1.12.14"
+    "webpack": "^1.12.14",
+    "whatwg-fetch": "^1.0.0"
   },
   "preferGlobal": false,
   "private": false,
