@@ -1,14 +1,13 @@
 module.exports = function(config) {
 
-    var webpackConfig = require('./webpack.config')[0];
+    var webpackConfig = require('./webpack.config');
+    var karmaConf = require('./karma.conf');
 
     delete webpackConfig.entry;
-    // delete webpackConfig.externals;
-    // delete webpackConfig.output.library;
-    // delete webpackConfig.output.libraryTarget;
+    webpackConfig.externals = ['sinon', 'chai', 'sinon-chai']; // these are provided by plugins
     webpackConfig.devtool = 'inline-source-map';
 
-    require('./karma.conf')(config);
+    karmaConf(config);
 
     config.set({
 
@@ -18,13 +17,12 @@ module.exports = function(config) {
             noInfo: true
         },
 
-        files: config.files.slice(0, 4).concat([
-            require.resolve('babel-regenerator-runtime'),
-            './src/test/glob.js'
-        ]),
+        files: [
+            require.resolve('whatwg-fetch/fetch') //FIXME We need to add it manually for fetch-mock
+        ].concat(karmaConf.specs),
 
         preprocessors: {
-            './src/test/glob.js': ['webpack', 'sourcemap']
+            './src/test/test.js': ['webpack', 'sourcemap']
         },
 
         plugins: config.plugins.concat([
@@ -33,9 +31,7 @@ module.exports = function(config) {
         ]),
 
         reporters: ['mocha'],
-        browsers: ['PhantomJS'],
-        singleRun: false,
-        autoWatch: true
+        browsers: ['PhantomJS']
 
     });
 

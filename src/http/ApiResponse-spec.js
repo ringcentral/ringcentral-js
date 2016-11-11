@@ -1,14 +1,9 @@
-import {expect, getSdk, getMock} from '../test/test';
-import SDK from '../SDK';
-
 describe('RingCentral.http.ApiResponse', function() {
 
-    var ApiResponse = SDK.http.ApiResponse;
-
-    function createResponse(status, statusText, body, headers) {
-        if (!headers) headers = jsonResponseHeaders;
-        body = headers.trim() + '\n\n' + body;
-        return ApiResponse.create(body, status, statusText);
+    function createResponse(sdk, json, status, statusText, headers) {
+        var path = '/foo' + Date.now();
+        apiCall('GET', '/restapi/v1.0' + path, json, status, statusText, headers);
+        return sdk.platform().get(path);
     }
 
     var goodMultipartMixedResponse =
@@ -88,96 +83,110 @@ describe('RingCentral.http.ApiResponse', function() {
             '}\n' +
             '--Boundary_1245_945802293_1394135045248--\n',
 
-        multipartResponseHeaders = 'content-type: multipart/mixed; boundary=Boundary_1245_945802293_1394135045248',
-        jsonResponseHeaders = 'content-type: application/json; encoding=utf8';
+        multipartResponseHeaders = {'content-type': 'multipart/mixed; boundary=Boundary_1245_945802293_1394135045248'},
+        jsonResponseHeaders = {'content-type': 'application/json; encoding=utf8'};
 
     describe('constructor tests', function() {
 
-        it('parses headers into object', function() {
+        it('parses OK headers into object', asyncTest(function(sdk) {
 
-            expect(createResponse(200, 'OK', '{}', jsonResponseHeaders)['_isJson']()).to.equal(true);
-            expect(createResponse(207, 'Multi-Status', '{}', multipartResponseHeaders)['_isMultipart']()).to.equal(true);
+            return createResponse(sdk, '{}', 200, 'OK', jsonResponseHeaders).then(function(res) {
+                expect(res._isJson()).to.equal(true);
+            });
 
-        });
+        }));
 
-        it('calls the success callback after parsing a good multi-part/mixed response', function() {
+        it('parses Multi-Status headers into object', asyncTest(function(sdk) {
 
-            var response = createResponse(207, 'Multi-Status', goodMultipartMixedResponse, multipartResponseHeaders);
+            return createResponse(sdk, '{}', 207, 'Multi-Status', multipartResponseHeaders).then(function(res) {
+                expect(res._isMultipart()).to.equal(true);
+            });
 
-            expect(()=> {
-                response.multipart();
-            }).to.not.throw(Error);
+        }));
 
-        });
+        it('calls the success callback after parsing a good multi-part/mixed response', asyncTest(function(sdk) {
 
-        it('calls the success callback for all individual parts that are parsed (including errors)', function() {
+            return createResponse(sdk, goodMultipartMixedResponse, 207, 'Multi-Status', multipartResponseHeaders).then(function(res) {
+                return res.multipart();
+            });
 
-            var res = createResponse(207, 'Multi-Status', multipartMixedResponseWithErrorPart, multipartResponseHeaders);
-            expect(res.text()).to.equal(multipartMixedResponseWithErrorPart);
+        }));
 
-            var multipart = res.multipart();
+        it('calls the success callback for all individual parts that are parsed (including errors)', asyncTest(function(sdk) {
 
-            expect(multipart.length).to.equal(3);
+            return createResponse(sdk, multipartMixedResponseWithErrorPart, 207, 'Multi-Status', multipartResponseHeaders).then(function(res) {
 
-            //expect(res.data[0]).to.be.instanceOf(r.Response); //FIXME
-            expect(multipart[0].error()).to.be.equal(null);
-            expect(multipart[0].json().foo).to.be.equal('bar');
-            expect(multipart[0].response().status).to.be.equal(200);
+                expect(res.text()).to.equal(multipartMixedResponseWithErrorPart);
 
-            //expect(res.data[1]).to.be.instanceOf(r.Response); //FIXME
-            expect(multipart[1].error()).to.be.not.equal(null);
+                var multipart = res.multipart();
 
-            //expect(res.data[2]).to.be.instanceOf(r.Response); //FIXME
-            expect(multipart[2].error()).to.be.equal(null);
-            expect(multipart[2].json().baz).to.be.equal('qux');
-            expect(multipart[2].response().status).to.be.equal(200);
+                expect(multipart.length).to.equal(3);
 
-        });
+                //expect(res.data[0]).to.be.instanceOf(r.Response); //FIXME
+                expect(multipart[0].error()).to.be.equal(null);
+                expect(multipart[0].json().foo).to.be.equal('bar');
+                expect(multipart[0].response().status).to.be.equal(200);
 
-        it('calls the error callback if it fails to parse the parts info block', function() {
+                //expect(res.data[1]).to.be.instanceOf(r.Response); //FIXME
+                expect(multipart[1].error()).to.be.not.equal(null);
 
-            var response = createResponse(207, 'Multi-Status', badMultipartMixedResponse, multipartResponseHeaders);
+                //expect(res.data[2]).to.be.instanceOf(r.Response); //FIXME
+                expect(multipart[2].error()).to.be.equal(null);
+                expect(multipart[2].json().baz).to.be.equal('qux');
+                expect(multipart[2].response().status).to.be.equal(200);
 
-            expect(() => {
-                response.multipart();
-            }).to.throw(Error);
+            });
 
-        });
+        }));
 
-        it('calls the error callback if it is unable to parse the JSON data, passing the error object', function() {
+        it('calls the error callback if it fails to parse the parts info block', asyncTest(function(sdk) {
 
-            var response = createResponse(200, 'OK', 'THIS IS JUNK', jsonResponseHeaders);
+            return createResponse(sdk, badMultipartMixedResponse, 207, 'Multi-Status', multipartResponseHeaders).then(function(response) {
+                expect(function() {
+                    response.multipart();
+                }).to.throw(Error);
+            });
 
-            expect(()=>{
-                response.json();
-            }).to.throw(Error);
+        }));
 
-        });
+        it('calls the error callback if it is unable to parse the JSON data, passing the error object', asyncTest(function(sdk) {
 
-        it('uses the error_description property of the JSON data when there is an error but no message property', function() {
+            return createResponse(sdk, 'THIS IS JUNK', 200, 'OK', jsonResponseHeaders).then(function(response) {
+                expect(function() {
+                    response.json();
+                }).to.throw(Error);
+            });
 
-            var response = createResponse(404, 'Error', '{"error_description": "ERROR"}', jsonResponseHeaders);
+        }));
 
-            expect(response.error()).to.equal('ERROR');
+        it('uses the error_description property of the JSON data when there is an error but no message property', asyncTest(function(sdk) {
 
-        });
+            return createResponse(sdk, '{"error_description": "ERROR"}', 404, 'Error', jsonResponseHeaders).then(function(response) {
+                throw new Error('This should never be reached');
+            }).catch(function(e) {
+                expect(e.apiResponse.error()).to.equal('ERROR');
+            });
 
-        it('uses the description property of the JSON data when there is an error but no message or error_description properties', function() {
+        }));
 
-            var response = createResponse(404, 'Error', '{"description": "ERROR"}', jsonResponseHeaders);
+        it('uses the description property of the JSON data when there is an error but no message or error_description properties', asyncTest(function(sdk) {
 
-            expect(response.error()).to.equal('ERROR');
+            return createResponse(sdk, '{"description": "ERROR"}', 404, 'Error', jsonResponseHeaders).then(function(response) {
+                throw new Error('This should never be reached');
+            }).catch(function(e) {
+                expect(e.apiResponse.error()).to.equal('ERROR');
+            });
 
-        });
+        }));
 
-        it('parses empty response', function() {
+        it('parses empty response', asyncTest(function(sdk) {
 
-            var response = createResponse(204, 'No Content', '', jsonResponseHeaders);
+            return createResponse(sdk, undefined, 204, 'No Content', jsonResponseHeaders).then(function(response) {
+                expect(response.error()).to.equal(null);
+                expect(response.json()).to.equal(null);
+            });
 
-            expect(response.error()).to.equal(null);
-            expect(response.json()).to.equal(null);
-
-        });
+        }));
 
     });
 

@@ -1,11 +1,27 @@
-import EventEmitter from "events";
+var EventEmitter = require("events").EventEmitter;
 
-export default class Subscription extends EventEmitter {
+/**
+ * @param {Platform} options.platform
+ * @param {Externals} options.externals
+ * @param {int} [options.pollInterval]
+ * @param {int} [options.renewHandicapMs]
+ * @property {Externals} _externals
+ * @property {Platform} _platform
+ * @property {int} _pollInterval
+ * @property {int} _renewHandicapMs
+ * @property {PUBNUB} _pubnub
+ * @property {string} _pubnubLastChannel
+ * @property {int} _timeout
+ * @property {ISubscription} _subscription
+ * @constructor
+ */
+function Subscription(options) {
 
-    static _renewHandicapMs = 2 * 60 * 1000;
-    static _pollInterval = 10 * 1000;
+    EventEmitter.call(this);
 
-    events = {
+    options = options || {};
+
+    this.events = {
         notification: 'notification',
         removeSuccess: 'removeSuccess',
         removeError: 'removeError',
@@ -15,349 +31,406 @@ export default class Subscription extends EventEmitter {
         subscribeError: 'subscribeError'
     };
 
-    constructor(pubnubFactory, platform) {
+    /** @private */
+    this._externals = options.externals;
 
-        super();
+    /** @private */
+    this._platform = options.platform;
 
-        this._pubnubFactory = pubnubFactory;
-        this._platform = platform;
-        this._pubnub = null;
-        this._pubnubLastChannel = null;
-        this._timeout = null;
-        this._subscription = null;
+    /** @private */
+    this._pollInterval = options.pollInterval || 10 * 1000;
 
-    }
+    /** @private */
+    this._renewHandicapMs = options.renewHandicapMs || 2 * 60 * 1000;
 
-    subscribed() {
+    /** @private */
+    this._pubnub = null;
 
-        var subscription = this.subscription();
+    /** @private */
+    this._pubnubLastChannel = null;
 
-        return !!(subscription.id &&
-                  subscription.deliveryMode &&
-                  subscription.deliveryMode.subscriberKey &&
-                  subscription.deliveryMode.address);
+    /** @private */
+    this._timeout = null;
 
-    }
-
-    /**
-     * @return {boolean}
-     */
-    alive() {
-        return this.subscribed() && Date.now() < this.expirationTime();
-    }
-
-    /**
-     * @return {boolean}
-     */
-    expired() {
-        if (!this.subscribed()) return true;
-        return !this.subscribed() || Date.now() > this.subscription().expirationTime;
-    }
-
-    expirationTime() {
-        return new Date(this.subscription().expirationTime || 0).getTime() - Subscription._renewHandicapMs;
-    }
-
-    setSubscription(subscription) {
-
-        subscription = subscription || {};
-
-        this._clearTimeout();
-        this._setSubscription(subscription);
-        this._subscribeAtPubnub();
-        this._setTimeout();
-
-        return this;
-
-    }
-
-    subscription() {
-        return this._subscription || {};
-    }
-
-    /**
-     * Creates or updates subscription if there is an active one
-     * @returns {Promise<ApiResponse>}
-     */
-    async register() {
-
-        if (this.alive()) {
-            return await this.renew();
-        } else {
-            return await this.subscribe();
-        }
-
-    }
-
-    eventFilters() {
-        return this.subscription().eventFilters || [];
-    }
-
-    /**
-     * @param {string[]} events
-     * @return {Subscription}
-     */
-    addEventFilters(events) {
-        this.setEventFilters(this.eventFilters().concat(events));
-        return this;
-    }
-
-    /**
-     * @param {string[]} events
-     * @return {Subscription}
-     */
-    setEventFilters(events) {
-        var subscription = this.subscription();
-        subscription.eventFilters = events;
-        this._setSubscription(subscription);
-        return this;
-    }
-
-    /**
-     * @returns {Promise<ApiResponse>}
-     */
-    async subscribe() {
-
-        try {
-
-            this._clearTimeout();
-
-            if (!this.eventFilters().length) throw new Error('Events are undefined');
-
-            var response = await this._platform.post('/subscription', {
-                    eventFilters: this._getFullEventFilters(),
-                    deliveryMode: {
-                        transportType: 'PubNub'
-                    }
-                }),
-                json = response.json();
-
-            this.setSubscription(json)
-                .emit(this.events.subscribeSuccess, response);
-
-            return response;
-
-
-        } catch (e) {
-
-            e = this._platform.client().makeError(e);
-
-            this.reset()
-                .emit(this.events.subscribeError, e);
-
-            throw e;
-
-        }
-
-    }
-
-    /**
-     * @returns {Promise<ApiResponse>}
-     */
-    async renew() {
-
-        try {
-
-            this._clearTimeout();
-
-            if (!this.subscribed()) throw new Error('No subscription');
-
-            if (!this.eventFilters().length) throw new Error('Events are undefined');
-
-            var response = await this._platform.put('/subscription/' + this.subscription().id, {
-                eventFilters: this._getFullEventFilters()
-            });
-
-            var json = response.json();
-
-            this.setSubscription(json)
-                .emit(this.events.renewSuccess, response);
-
-            return response;
-
-        } catch (e) {
-
-            e = this._platform.client().makeError(e);
-
-            this.reset()
-                .emit(this.events.renewError, e);
-
-            throw e;
-
-        }
-
-    }
-
-    /**
-     * @returns {Promise<ApiResponse>}
-     */
-    async remove() {
-
-        try {
-
-            if (!this.subscribed()) throw new Error('No subscription');
-
-            var response = await this._platform.delete('/subscription/' + this.subscription().id);
-
-            this.reset()
-                .emit(this.events.removeSuccess, response);
-
-            return response;
-
-        } catch (e) {
-
-            e = this._platform.client().makeError(e);
-
-            this.emit(this.events.removeError, e);
-
-            throw e;
-
-        }
-
-    }
-
-    /**
-     * @returns {Promise<ApiResponse>}
-     */
-    resubscribe() {
-        var filters = this.eventFilters();
-        return this.reset().setEventFilters(filters).subscribe();
-    }
-
-    /**
-     * Remove subscription and disconnect from PUBNUB
-     * This method resets subscription at client side but backend is not notified
-     */
-    reset() {
-        this._clearTimeout();
-        if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({channel: this.subscription().deliveryMode.address});
-        this._setSubscription(null);
-        return this;
-    }
-
-    _setSubscription(subscription) {
-        this._subscription = subscription;
-    }
-
-    _getFullEventFilters() {
-
-        return this.eventFilters().map((event) => {
-            return this._platform.createUrl(event);
-        });
-
-    }
-
-    _setTimeout() {
-
-        this._clearTimeout();
-
-        if (!this.alive()) throw new Error('Subscription is not alive');
-
-        this._timeout = setInterval(()=> {
-
-            if (this.alive()) return;
-
-            if (this.expired()) {
-                this.subscribe();
-            } else {
-                this.renew();
-            }
-
-        }, Subscription._pollInterval);
-
-        return this;
-
-    }
-
-    _clearTimeout() {
-        clearInterval(this._timeout);
-        return this;
-    }
-
-    _decrypt(message) {
-
-        if (!this.subscribed()) throw new Error('No subscription');
-
-        if (this.subscription().deliveryMode.encryptionKey) {
-
-            message = this._pubnubFactory.crypto_obj.decrypt(message, this.subscription().deliveryMode.encryptionKey, {
-                encryptKey: false,
-                keyEncoding: 'base64',
-                keyLength: 128,
-                mode: 'ecb'
-            });
-
-        }
-
-        return message;
-
-    }
-
-    _notify(message) {
-        this.emit(this.events.notification, this._decrypt(message));
-        return this;
-    }
-
-    _subscribeAtPubnub() {
-
-        if (!this.alive()) throw new Error('Subscription is not alive');
-
-        var deliveryMode = this.subscription().deliveryMode;
-
-        if (this._pubnub) {
-
-            if (this._pubnubLastChannel == deliveryMode.address) { // Nothing to update, keep listening to same channel
-                return this;
-            } else if (this._pubnubLastChannel) { // Need to subscribe to new channel
-                this._pubnub.unsubscribe({channel: this._pubnubLastChannel});
-            }
-
-            // Re-init for new data
-            this._pubnub = this._pubnub.init({
-                ssl: true,
-                subscribe_key: deliveryMode.subscriberKey
-            });
-
-        } else {
-
-            // Init from scratch
-            this._pubnub = this._pubnubFactory.init({
-                ssl: true,
-                subscribe_key: deliveryMode.subscriberKey
-            });
-
-            this._pubnub.ready(); //TODO This may be not needed anymore
-
-        }
-
-        this._pubnubLastChannel = deliveryMode.address;
-
-        this._pubnub.subscribe({
-            channel: deliveryMode.address,
-            message: this._notify.bind(this),
-            connect: () => {}
-        });
-
-        return this;
-
-    }
+    /** @private */
+    this._subscription = null;
 
 }
 
-//export interface ISubscription {
-//    id?:string;
-//    uri?: string;
-//    eventFilters?:string[];
-//    expirationTime?:string; // 2014-03-12T19:54:35.613Z
-//    expiresIn?:number;
-//    deliveryMode?: {
-//        transportType?:string;
-//        encryption?:boolean;
-//        address?:string;
-//        subscriberKey?:string;
-//        encryptionKey?:string;
-//        secretKey?:string;
-//    };
-//    creationTime?:string; // 2014-03-12T19:54:35.613Z
-//    status?:string; // Active
-//}
+Subscription.prototype = Object.create(EventEmitter.prototype);
+
+Subscription.prototype.subscribed = function() {
+
+    var subscription = this.subscription();
+
+    return !!(subscription.id &&
+              subscription.deliveryMode &&
+              subscription.deliveryMode.subscriberKey &&
+              subscription.deliveryMode.address);
+
+};
+
+/**
+ * @return {boolean}
+ */
+Subscription.prototype.alive = function() {
+    return this.subscribed() && Date.now() < this.expirationTime();
+};
+
+/**
+ * @return {boolean}
+ */
+Subscription.prototype.expired = function() {
+    if (!this.subscribed()) return true;
+    return !this.subscribed() || Date.now() > this.subscription().expirationTime;
+};
+
+Subscription.prototype.expirationTime = function() {
+    return new Date(this.subscription().expirationTime || 0).getTime() - this._renewHandicapMs;
+};
+
+/**
+ * @param {ISubscription} subscription
+ * @return {Subscription}
+ */
+Subscription.prototype.setSubscription = function(subscription) {
+
+    subscription = subscription || {};
+
+    this._clearTimeout();
+    this._setSubscription(subscription);
+    this._subscribeAtPubnub();
+    this._setTimeout();
+
+    return this;
+
+};
+
+/**
+ * @return {ISubscription}
+ */
+Subscription.prototype.subscription = function() {
+    return this._subscription || {};
+};
+
+/**
+ * Creates or updates subscription if there is an active one
+ * @returns {Promise<ApiResponse>}
+ */
+Subscription.prototype.register = function() {
+
+    if (this.alive()) {
+        return this.renew();
+    } else {
+        return this.subscribe();
+    }
+
+};
+
+/**
+ * @return {string[]}
+ */
+Subscription.prototype.eventFilters = function() {
+    return this.subscription().eventFilters || [];
+};
+
+/**
+ * @param {string[]} events
+ * @return {Subscription}
+ */
+Subscription.prototype.addEventFilters = function(events) {
+    this.setEventFilters(this.eventFilters().concat(events));
+    return this;
+};
+
+/**
+ * @param {string[]} events
+ * @return {Subscription}
+ */
+Subscription.prototype.setEventFilters = function(events) {
+    var subscription = this.subscription();
+    subscription.eventFilters = events;
+    this._setSubscription(subscription);
+    return this;
+};
+
+/**
+ * @returns {Promise<ApiResponse>}
+ */
+Subscription.prototype.subscribe = function() {
+
+    return (new this._externals.Promise(function(resolve) {
+
+        this._clearTimeout();
+
+        if (!this.eventFilters().length) throw new Error('Events are undefined');
+
+        resolve(this._platform.post('/subscription', {
+            eventFilters: this._getFullEventFilters(),
+            deliveryMode: {
+                transportType: 'PubNub'
+            }
+        }));
+
+    }.bind(this))).then(function(response) {
+
+        var json = response.json();
+
+        this.setSubscription(json)
+            .emit(this.events.subscribeSuccess, response);
+
+        return response;
+
+    }.bind(this)).catch(function(e) {
+
+        e = this._platform.client().makeError(e);
+
+        this.reset()
+            .emit(this.events.subscribeError, e);
+
+        throw e;
+
+    }.bind(this));
+
+};
+
+/**
+ * @returns {Promise<ApiResponse>}
+ */
+Subscription.prototype.renew = function() {
+
+    return (new this._externals.Promise(function(resolve) {
+
+        this._clearTimeout();
+
+        if (!this.subscribed()) throw new Error('No subscription');
+
+        if (!this.eventFilters().length) throw new Error('Events are undefined');
+
+        resolve(this._platform.put('/subscription/' + this.subscription().id, {
+            eventFilters: this._getFullEventFilters()
+        }));
+
+    }.bind(this))).then(function(response) {
+
+        var json = response.json();
+
+        this.setSubscription(json)
+            .emit(this.events.renewSuccess, response);
+
+        return response;
+
+    }.bind(this)).catch(function(e) {
+
+        e = this._platform.client().makeError(e);
+
+        this.reset()
+            .emit(this.events.renewError, e);
+
+        throw e;
+
+    }.bind(this));
+
+};
+
+/**
+ * @returns {Promise<ApiResponse>}
+ */
+Subscription.prototype.remove = function() {
+
+    return (new this._externals.Promise(function(resolve) {
+
+        if (!this.subscribed()) throw new Error('No subscription');
+
+        resolve(this._platform.delete('/subscription/' + this.subscription().id));
+
+    })).then(function(response) {
+
+        this.reset()
+            .emit(this.events.removeSuccess, response);
+
+        return response;
+
+    }.bind(this)).catch(function(e) {
+
+        e = this._platform.client().makeError(e);
+
+        this.emit(this.events.removeError, e);
+
+        throw e;
+
+    }.bind(this));
+
+};
+
+/**
+ * @returns {Promise<ApiResponse>}
+ */
+Subscription.prototype.resubscribe = function() {
+    var filters = this.eventFilters();
+    return this.reset().setEventFilters(filters).subscribe();
+};
+
+/**
+ * Remove subscription and disconnect from PUBNUB
+ * This method resets subscription at client side but backend is not notified
+ * @return {Subscription}
+ */
+Subscription.prototype.reset = function() {
+    this._clearTimeout();
+    if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({channel: this.subscription().deliveryMode.address});
+    this._setSubscription(null);
+    return this;
+};
+
+/**
+ * @param subscription
+ * @private
+ */
+Subscription.prototype._setSubscription = function(subscription) {
+    this._subscription = subscription;
+};
+
+/**
+ * @return {string[]}
+ * @private
+ */
+Subscription.prototype._getFullEventFilters = function() {
+
+    return this.eventFilters().map(function(event) {
+        return this._platform.createUrl(event);
+    }.bind(this));
+
+};
+
+/**
+ * @return {Subscription}
+ * @private
+ */
+Subscription.prototype._setTimeout = function() {
+
+    this._clearTimeout();
+
+    if (!this.alive()) throw new Error('Subscription is not alive');
+
+    this._timeout = setInterval(function() {
+
+        if (this.alive()) return;
+
+        if (this.expired()) {
+            this.subscribe();
+        } else {
+            this.renew();
+        }
+
+    }.bind(this), this._pollInterval);
+
+    return this;
+
+};
+
+/**
+ * @return {Subscription}
+ * @private
+ */
+Subscription.prototype._clearTimeout = function() {
+    clearInterval(this._timeout);
+    return this;
+};
+
+Subscription.prototype._decrypt = function(message) {
+
+    if (!this.subscribed()) throw new Error('No subscription');
+
+    if (this.subscription().deliveryMode.encryptionKey) {
+
+        message = this._externals.PUBNUB.crypto_obj.decrypt(message, this.subscription().deliveryMode.encryptionKey, {
+            encryptKey: false,
+            keyEncoding: 'base64',
+            keyLength: 128,
+            mode: 'ecb'
+        });
+
+    }
+
+    return message;
+
+};
+
+/**
+ * @param message
+ * @return {Subscription}
+ * @private
+ */
+Subscription.prototype._notify = function(message) {
+    this.emit(this.events.notification, this._decrypt(message));
+    return this;
+};
+
+/**
+ * @return {Subscription}
+ * @private
+ */
+Subscription.prototype._subscribeAtPubnub = function() {
+
+    if (!this.alive()) throw new Error('Subscription is not alive');
+
+    var deliveryMode = this.subscription().deliveryMode;
+
+    if (this._pubnub) {
+
+        if (this._pubnubLastChannel == deliveryMode.address) { // Nothing to update, keep listening to same channel
+            return this;
+        } else if (this._pubnubLastChannel) { // Need to subscribe to new channel
+            this._pubnub.unsubscribe({channel: this._pubnubLastChannel});
+        }
+
+        // Re-init for new data
+        this._pubnub = this._pubnub.init({
+            ssl: true,
+            subscribe_key: deliveryMode.subscriberKey
+        });
+
+    } else {
+
+        // Init from scratch
+        this._pubnub = this._externals.PUBNUB.init({
+            ssl: true,
+            subscribe_key: deliveryMode.subscriberKey
+        });
+
+        this._pubnub.ready(); //TODO This may be not needed anymore
+
+    }
+
+    this._pubnubLastChannel = deliveryMode.address;
+
+    this._pubnub.subscribe({
+        channel: deliveryMode.address,
+        message: this._notify.bind(this),
+        connect: function() {}
+    });
+
+    return this;
+
+};
+
+module.exports = Subscription;
+
+/**
+ * The complete Triforce, or one or more components of the Triforce.
+ * @typedef {Object} ISubscription
+ * @property {string} [id]
+ * @property {string} [uri]
+ * @property {string[]} [eventFilters]
+ * @property {string} [expirationTime] Format: 2014-03-12T19:54:35.613Z
+ * @property {int} [expiresIn]
+ * @property {string} [deliveryMode.transportType]
+ * @property {boolean} [deliveryMode.encryption]
+ * @property {string} [deliveryMode.address]
+ * @property {string} [deliveryMode.subscriberKey]
+ * @property {string} [deliveryMode.encryptionKey]
+ * @property {string} [deliveryMode.secretKey]
+ * @property {string} [creationTime]
+ * @property {string} [status] Active
+ */

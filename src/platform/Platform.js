@@ -1,21 +1,35 @@
-import {Promise} from "../core/Externals";
-import EventEmitter from "events";
-import Auth from "./Auth";
-import {queryStringify, parseQueryString, isBrowser, delay} from "../core/Utils";
-import constants from "../core/Constants";
+var EventEmitter = require("events").EventEmitter;
+var qs = require("querystring");
+var objectAssign = require('object-assign');
+var Auth = require("./Auth");
+var Constants = require("../core/Constants");
+var ApiResponse = require("../http/ApiResponse");
 
-export default class Platform extends EventEmitter {
+/**
+ * @constructor
+ * @param {string} options.server
+ * @param {string} options.appSecret
+ * @param {string} options.appKey
+ * @param {string} [options.appName]
+ * @param {string} [options.appVersion]
+ * @param {string} [options.redirectUri]
+ * @param {int} [options.refreshDelayMs]
+ * @param {int} [options.refreshHandicapMs]
+ * @param {boolean} [options.clearCacheOnRefreshError]
+ * @param {Externals} options.externals
+ * @param {Cache} options.cache
+ * @param {Client} options.client
+ * @property {Externals} _externals
+ * @property {Cache} _cache
+ * @property {Client} _client
+ * @property {Promise<ApiResponse>} _refreshPromise
+ * @property {Auth} _auth
+ */
+function Platform(options) {
 
-    static _urlPrefix = '/restapi';
-    static _apiVersion = 'v1.0';
-    static _tokenEndpoint = '/restapi/oauth/token';
-    static _revokeEndpoint = '/restapi/oauth/revoke';
-    static _authorizeEndpoint = '/restapi/oauth/authorize';
-    static _refreshDelayMs = 100;
-    static _cacheId = 'platform';
-    static _clearCacheOnRefreshError = false;
+    EventEmitter.call(this);
 
-    events = {
+    this.events = {
         beforeLogin: 'beforeLogin',
         loginSuccess: 'loginSuccess',
         loginError: 'loginError',
@@ -27,182 +41,223 @@ export default class Platform extends EventEmitter {
         logoutError: 'logoutError'
     };
 
-    constructor({client, cache, server, appKey, appSecret, appName, appVersion, sdkVersion, redirectUri}) {
+    options = options || {};
 
-        super();
+    /** @private */
+    this._server = options.server;
 
-        this._server = server;
-        this._appKey = appKey;
-        this._appSecret = appSecret;
+    /** @private */
+    this._appKey = options.appKey;
 
-        /** @type {Cache} */
-        this._cache = cache;
+    /** @private */
+    this._appSecret = options.appSecret;
 
-        /** @type {Client} */
-        this._client = client;
+    /** @private */
+    this._redirectUri = options.redirectUri || '';
 
-        /** @type {Promise<ApiResponse>} */
-        this._refreshPromise = null;
+    /** @private */
+    this._refreshDelayMs = options.refreshDelayMs || 100;
 
-        this._auth = new Auth(this._cache, Platform._cacheId);
+    /** @private */
+    this._clearCacheOnRefreshError = typeof options.clearCacheOnRefreshError !== 'undefined' ?
+                                     options.clearCacheOnRefreshError :
+                                     true;
 
-        this._userAgent = (appName ? (appName + (appVersion ? '/' + appVersion : '')) + ' ' : '') + 'RCJSSDK/' + sdkVersion;
+    /** @private */
+    this._userAgent = (options.appName ?
+                      (options.appName + (options.appVersion ? '/' + options.appVersion : '')) + ' ' :
+                       '') + 'RCJSSDK/' + Constants.version;
 
-        this._redirectUri = redirectUri || '';
+    /** @private */
+    this._externals = options.externals;
 
+    /** @private */
+    this._cache = options.cache;
+
+    /** @private */
+    this._client = options.client;
+
+    /** @private */
+    this._refreshPromise = null;
+
+    /** @private */
+    this._auth = new Auth({
+        cache: this._cache,
+        cacheId: Platform._cacheId,
+        refreshHandicapMs: options.refreshHandicapMs
+    });
+
+}
+
+Platform._urlPrefix = '/restapi';
+Platform._apiVersion = 'v1.0';
+Platform._tokenEndpoint = '/restapi/oauth/token';
+Platform._revokeEndpoint = '/restapi/oauth/revoke';
+Platform._authorizeEndpoint = '/restapi/oauth/authorize';
+Platform._cacheId = 'platform';
+
+Platform.prototype = Object.create(EventEmitter.prototype);
+
+Platform.prototype.delay = function(timeout) {
+    return new this._externals.Promise(function(resolve, reject) {
+        setTimeout(function() {
+            resolve(null);
+        }, timeout);
+    });
+};
+
+/**
+ * @return {Auth}
+ */
+Platform.prototype.auth = function() {
+    return this._auth;
+};
+
+/**
+ * @return {Client}
+ */
+Platform.prototype.client = function() {
+    return this._client;
+};
+
+/**
+ * @param {string} path
+ * @param {object} [options]
+ * @param {boolean} [options.addServer]
+ * @param {string} [options.addMethod]
+ * @param {boolean} [options.addToken]
+ * @return {string}
+ */
+Platform.prototype.createUrl = function(path, options) {
+
+    path = path || '';
+    options = options || {};
+
+    var builtUrl = '',
+        hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
+
+    if (options.addServer && !hasHttp) builtUrl += this._server;
+
+    if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp) builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
+
+    builtUrl += path;
+
+    if (options.addMethod || options.addToken) builtUrl += (path.indexOf('?') > -1 ? '&' : '?');
+
+    if (options.addMethod) builtUrl += '_method=' + options.addMethod;
+    if (options.addToken) builtUrl += (options.addMethod ? '&' : '') + 'access_token=' + this._auth.accessToken();
+
+    return builtUrl;
+
+};
+
+/**
+ * @param {string} [options.redirectUri] Overrides default RedirectURI
+ * @param {string} [options.state]
+ * @param {string} [options.brandId]
+ * @param {string} [options.display]
+ * @param {string} [options.prompt]
+ * @param {boolean} [options.implicit] Use Implicit Grant flow
+ * @return {string}
+ */
+Platform.prototype.loginUrl = function(options) {
+
+    options = options || {};
+
+    return this.createUrl(Platform._authorizeEndpoint + '?' + qs.stringify({
+            'response_type': options.implicit ? 'token' : 'code',
+            'redirect_uri': options.redirectUri || this._redirectUri,
+            'client_id': this._appKey,
+            'state': options.state || '',
+            'brand_id': options.brandId || '',
+            'display': options.display || '',
+            'prompt': options.prompt || ''
+        }), {addServer: true});
+
+};
+
+/**
+ * @param {string} url
+ * @return {Object}
+ */
+Platform.prototype.parseLoginRedirect = function(url) {
+
+    function getParts(url, separator) {
+        return url.split(separator).reverse()[0];
     }
 
-    /**
-     * @return {Auth}
-     */
-    auth() {
-        return this._auth;
+    var response = (url.indexOf('#') === 0 && getParts(url, '#')) ||
+                   (url.indexOf('?') === 0 && getParts(url, '?')) ||
+                   null;
+
+    if (!response) throw new Error('Unable to parse response');
+
+    var queryString = qs.parse(response);
+
+    if (!queryString) throw new Error('Unable to parse response');
+
+    var error = queryString.error_description || queryString.error;
+
+    if (error) {
+        var e = new Error(error);
+        e.error = queryString.error;
+        throw e;
     }
 
-    /**
-     * @return {Client}
-     */
-    client() {
-        return this._client;
-    }
+    return queryString;
 
-    /**
-     * @param {string} path
-     * @param {object} [options]
-     * @param {boolean} [options.addServer]
-     * @param {string} [options.addMethod]
-     * @param {boolean} [options.addToken]
-     * @return {string}
-     */
-    createUrl(path, options) {
+};
 
-        path = path || '';
+/**
+ * Convenience method to handle 3-legged OAuth
+ *
+ * Attention! This is an experimental method and it's signature and behavior may change without notice.
+ *
+ * @experimental
+ * @param {string} options.url
+ * @param {number} [options.width]
+ * @param {number} [options.height]
+ * @param {object} [options.login] additional options for login()
+ * @param {string} [options.origin]
+ * @param {string} [options.property] name of window.postMessage's event data property
+ * @param {string} [options.target] target for window.open()
+ * @return {Promise}
+ */
+Platform.prototype.loginWindow = function(options) {
+
+    return new this._externals.Promise(function(resolve, reject) {
+
+        if (typeof window === 'undefined') throw new Error('This method can be used only in browser');
+
+        if (!options.url) throw new Error('Missing mandatory URL parameter');
+
         options = options || {};
+        options.url = options.url || 400;
+        options.width = options.width || 400;
+        options.height = options.height || 600;
+        options.origin = options.origin || window.location.origin;
+        options.property = options.property || Constants.authResponseProperty;
+        options.target = options.target || '_blank';
 
-        var builtUrl = '',
-            hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
+        var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
+        var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 
-        if (options.addServer && !hasHttp) builtUrl += this._server;
+        var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+        var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
 
-        if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp) builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
+        var left = ((width / 2) - (options.width / 2)) + dualScreenLeft;
+        var top = ((height / 2) - (options.height / 2)) + dualScreenTop;
+        var win = window.open(options.url, '_blank', (options.target == '_blank') ? 'scrollbars=yes, status=yes, width=' + options.width + ', height=' + options.height + ', left=' + left + ', top=' + top : '');
 
-        builtUrl += path;
+        if (win.focus) win.focus();
 
-        if (options.addMethod || options.addToken) builtUrl += (path.indexOf('?') > -1 ? '&' : '?');
+        var eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent';
+        var eventRemoveMethod = eventMethod == 'addEventListener' ? 'removeEventListener' : 'detachEvent';
+        var messageEvent = eventMethod == 'addEventListener' ? 'message' : 'onmessage';
 
-        if (options.addMethod) builtUrl += '_method=' + options.addMethod;
-        if (options.addToken) builtUrl += (options.addMethod ? '&' : '') + 'access_token=' + this._auth.accessToken();
+        var eventListener = function(e) {
 
-        return builtUrl;
-
-    }
-
-    /**
-     * @param {string} options.redirectUri
-     * @param {string} options.state
-     * @param {string} options.brandId
-     * @param {string} options.display
-     * @param {string} options.prompt
-     * @param {boolean} options.implicit
-     * @param {object} [options]
-     * @return {string}
-     */
-    loginUrl(options) {
-
-        options = options || {};
-
-        return this.createUrl(Platform._authorizeEndpoint + '?' + queryStringify({
-                'response_type': options.implicit ? 'token' : 'code',
-                'redirect_uri': options.redirectUri || this._redirectUri,
-                'client_id': this._appKey,
-                'state': options.state || '',
-                'brand_id': options.brandId || '',
-                'display': options.display || '',
-                'prompt': options.prompt || ''
-            }), {addServer: true})
-
-    }
-
-    /**
-     * @param {string} url
-     * @return {Object}
-     */
-    parseLoginRedirect(url) {
-
-        function getParts(url, separator) {
-            return url.split(separator).reverse()[0];
-        }
-
-        var response = (url.indexOf('#') === 0 && getParts(url, '#')) ||
-                       (url.indexOf('?') === 0 && getParts(url, '?')) ||
-                       null;
-
-        if (!response) throw new Error('Unable to parse response');
-
-        var qs = parseQueryString(response);
-
-        if (!qs) throw new Error('Unable to parse response');
-
-        var error = qs.error_description || qs.error;
-
-        if (error) {
-            var e = new Error(error);
-            e.error = qs.error;
-            throw e;
-        }
-
-        return qs;
-
-    }
-
-    /**
-     * Convenience method to handle 3-legged OAuth
-     *
-     * Attention! This is an experimental method and it's signature and behavior may change without notice.
-     *
-     * @experimental
-     * @param {number} [options.width]
-     * @param {number} [options.height]
-     * @param {object} [options.login] additional options for login()
-     * @param {string} [options.origin]
-     * @param {string} [options.property] name of window.postMessage's event data property
-     * @param {string} [options.target] target for window.open()
-     * @param {string} options.url
-     * @return {Promise}
-     */
-    loginWindow(options) {
-
-        return new Promise((resolve, reject) => {
-
-            if (!isBrowser()) throw new Error('This method can be used only in browser');
-
-            if (!options.url) throw new Error('Missing mandatory URL parameter');
-
-            options = options || {};
-            options.url = options.url || 400;
-            options.width = options.width || 400;
-            options.height = options.height || 600;
-            options.origin = options.origin || window.location.origin;
-            options.property = options.property || constants.authResponseProperty;
-            options.target = options.target || '_blank';
-
-            var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
-            var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
-
-            var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-            var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
-
-            var left = ((width / 2) - (options.width / 2)) + dualScreenLeft;
-            var top = ((height / 2) - (options.height / 2)) + dualScreenTop;
-            var win = window.open(options.url, '_blank', (options.target == '_blank') ? 'scrollbars=yes, status=yes, width=' + options.width + ', height=' + options.height + ', left=' + left + ', top=' + top : '');
-
-            if (window.focus) win.focus();
-
-            var eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent';
-            var eventRemoveMethod = eventMethod == 'addEventListener' ? 'removeEventListener' : 'detachEvent';
-            var messageEvent = eventMethod == 'addEventListener' ? 'message' : 'onmessage';
-
-            var eventListener = (e) => {
+            try {
 
                 if (e.origin != options.origin) return;
                 if (!e.data || !e.data[options.property]) return; // keep waiting
@@ -210,230 +265,233 @@ export default class Platform extends EventEmitter {
                 win.close();
                 window[eventRemoveMethod](messageEvent, eventListener);
 
-                try {
 
-                    var loginOptions = this.parseLoginRedirect(e.data[options.property]);
+                var loginOptions = this.parseLoginRedirect(e.data[options.property]);
 
-                    if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
+                if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
 
-                    resolve(loginOptions);
+                resolve(loginOptions);
 
-                } catch (e) {
-                    reject(e);
-                }
-
-            };
-
-            window[eventMethod](messageEvent, eventListener, false);
-
-        });
-
-    }
-
-    /**
-     * @return {Promise<boolean>}
-     */
-    async loggedIn() {
-
-        try {
-            await this.ensureLoggedIn();
-            return true;
-        } catch (e) {
-            return false;
-        }
-
-    }
-
-    /**
-     * @param {string} options.username
-     * @param {string} options.password
-     * @param {string} options.extension
-     * @param {string} options.code
-     * @param {string} options.redirectUri
-     * @param {string} options.endpointId
-     * @param {string} options.remember
-     * @param {string} options.accessTokenTtl
-     * @param {string} options.refreshTokenTtl
-     * @param {string} options.access_token
-     * @returns {Promise<ApiResponse>}
-     */
-    async login(options) {
-
-        try {
-
-            options = options || {};
-
-            this.emit(this.events.beforeLogin);
-
-            var body = {};
-
-            if (!options.code) {
-
-                body.grant_type = 'password';
-                body.username = options.username;
-                body.password = options.password;
-                body.extension = options.extension || '';
-
-            } else if (options.code) {
-
-                body.grant_type = 'authorization_code';
-                body.code = options.code;
-                body.redirect_uri = options.redirectUri || this._redirectUri;
-                //body.client_id = this.getCredentials().key; // not needed
-
+                /* jshint -W002 */
+            } catch (e) {
+                reject(e);
             }
 
-            var apiResponse;
-            var json;
+        }.bind(this);
 
-            if (options.access_token) {
+        window[eventMethod](messageEvent, eventListener, false);
 
-                //TODO Potentially make a request to /oauth/tokeninfo
-                json = options;
+    }.bind(this));
 
-            } else {
+};
 
-                if (options.endpointId) body.endpoint_id = options.endpointId;
-                if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
-                if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+/**
+ * @return {Promise<boolean>}
+ */
+Platform.prototype.loggedIn = function() {
 
-                apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body);
-                json = apiResponse.json();
+    return this.ensureLoggedIn().then(function() {
+        return true;
+    }).catch(function() {
+        return false;
+    });
 
-            }
+};
 
-            this._auth.setData(json);
+/**
+ * @param {string} options.username
+ * @param {string} options.password
+ * @param {string} [options.extension]
+ * @param {string} [options.code]
+ * @param {string} [options.redirectUri]
+ * @param {string} [options.endpointId]
+ * @param {string} [options.accessTokenTtl]
+ * @param {string} [options.refreshTokenTtl]
+ * @param {string} [options.access_token]
+ * @returns {Promise<ApiResponse>}
+ */
+Platform.prototype.login = function(options) {
 
-            this.emit(this.events.loginSuccess, apiResponse);
-
-            return apiResponse;
-
-        } catch (e) {
-
-            this._cache.clean();
-
-            this.emit(this.events.loginError, e);
-
-            throw e;
-
-        }
-
-    }
-
-    /**
-     * @returns {Promise<ApiResponse>}
-     * @private
-     */
-    async _refresh() {
-
-        try {
-
-            this.emit(this.events.beforeRefresh);
-
-            await delay(Platform._refreshDelayMs);
-
-            // Perform sanity checks
-            if (!this._auth.refreshToken()) throw new Error('Refresh token is missing');
-            if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
-
-            /** @type {ApiResponse} */
-            var res = await this._tokenRequest(Platform._tokenEndpoint, {
-                    "grant_type": "refresh_token",
-                    "refresh_token": this._auth.refreshToken(),
-                    "access_token_ttl": this._auth.data().expires_in + 1,
-                    "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
-                }),
-                json = res.json();
-
-            if (!json.access_token) {
-                throw this._client.makeError(new Error('Malformed OAuth response'), res);
-            }
-
-            this._auth.setData(json);
-
-            this.emit(this.events.refreshSuccess, res);
-
-            return res;
-
-        } catch (e) {
-
-            e = this._client.makeError(e);
-
-            if (Platform._clearCacheOnRefreshError) {
-                this._cache.clean();
-            }
-
-            this.emit(this.events.refreshError, e);
-
-            throw e;
-
-        }
-
-    }
-
-    /**
-     * @returns {Promise<ApiResponse>}
-     */
-    refresh() {
-
-        if(!this._refreshPromise) {
-            this._refreshPromise = this._refresh()
-                .then(res => {
-                    this._refreshPromise = null;
-                    return res;
-                })
-                .catch(e => {
-                    this._refreshPromise = null;
-                    throw e;
-                });
-        }
-
-        return this._refreshPromise;
-
-    }
-
-    /**
-     * @returns {Promise<ApiResponse>}
-     */
-    async logout() {
-
-        try {
-
-            this.emit(this.events.beforeLogout);
-
-            var res = await this._tokenRequest(Platform._revokeEndpoint, {
-                token: this._auth.accessToken()
-            });
-
-            this._cache.clean();
-
-            this.emit(this.events.logoutSuccess, res);
-
-            return res;
-
-        } catch (e) {
-
-            this.emit(this.events.logoutError, e);
-
-            throw e;
-
-        }
-
-    }
-
-    /**
-     * @param {Request} request
-     * @param {object} [options]
-     * @param {boolean} [options.skipAuthCheck]
-     * @return {Promise<Request>}
-     */
-    async inflateRequest(request, options) {
+    return (new this._externals.Promise(function(resolve) {
 
         options = options || {};
 
-        if (options.skipAuthCheck) return request;
+        this.emit(this.events.beforeLogin);
 
-        await this.ensureLoggedIn();
+        var body = {};
+
+        if (options.access_token) {
+
+            //TODO Potentially make a request to /oauth/tokeninfo
+            return resolve(options);
+
+        }
+
+        if (!options.code) {
+
+            body.grant_type = 'password';
+            body.username = options.username;
+            body.password = options.password;
+            body.extension = options.extension || '';
+
+        } else if (options.code) {
+
+            body.grant_type = 'authorization_code';
+            body.code = options.code;
+            body.redirect_uri = options.redirectUri || this._redirectUri;
+            //body.client_id = this.getCredentials().key; // not needed
+
+        }
+
+        if (options.endpointId) body.endpoint_id = options.endpointId;
+        if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
+        if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+
+        resolve(this._tokenRequest(Platform._tokenEndpoint, body));
+
+    }.bind(this))).then(function(res) {
+
+        var apiResponse = res.json ? res : null;
+        var json = apiResponse && apiResponse.json() || res;
+
+        this._auth.setData(json);
+
+        this.emit(this.events.loginSuccess, apiResponse);
+
+        return apiResponse;
+
+    }.bind(this)).catch(function(e) {
+
+        if (this._clearCacheOnRefreshError) {
+            this._cache.clean();
+        }
+
+        this.emit(this.events.loginError, e);
+
+        throw e;
+
+    }.bind(this));
+
+};
+
+/**
+ * @returns {Promise<ApiResponse>}
+ * @private
+ */
+Platform.prototype._refresh = function() {
+
+    return this.delay(this._refreshDelayMs).then(function() {
+
+        this.emit(this.events.beforeRefresh);
+
+        // Perform sanity checks
+        if (!this._auth.refreshToken()) throw new Error('Refresh token is missing');
+        if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
+
+        return this._tokenRequest(Platform._tokenEndpoint, {
+            "grant_type": "refresh_token",
+            "refresh_token": this._auth.refreshToken(),
+            "access_token_ttl": this._auth.data().expires_in + 1,
+            "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
+        });
+
+    }.bind(this)).then(function(/** @type {ApiResponse} */ res) {
+
+        var json = res.json();
+
+        if (!json.access_token) {
+            throw this._client.makeError(new Error('Malformed OAuth response'), res);
+        }
+
+        this._auth.setData(json);
+
+        this.emit(this.events.refreshSuccess, res);
+
+        return res;
+
+    }.bind(this)).catch(function(e) {
+
+        e = this._client.makeError(e);
+
+        if (this._clearCacheOnRefreshError) {
+            this._cache.clean();
+        }
+
+        this.emit(this.events.refreshError, e);
+
+        throw e;
+
+    }.bind(this));
+
+};
+
+/**
+ * @returns {Promise<ApiResponse>}
+ */
+Platform.prototype.refresh = function() {
+
+    if (!this._refreshPromise) {
+
+        this._refreshPromise = this._refresh()
+            .then(function(res) {
+                this._refreshPromise = null;
+                return res;
+            }.bind(this))
+            .catch(function(e) {
+                this._refreshPromise = null;
+                throw e;
+            }.bind(this));
+
+    }
+
+    return this._refreshPromise;
+
+};
+
+/**
+ * @returns {Promise<ApiResponse>}
+ */
+Platform.prototype.logout = function() {
+
+    return (new this._externals.Promise(function(resolve) {
+
+        this.emit(this.events.beforeLogout);
+
+        resolve(this._tokenRequest(Platform._revokeEndpoint, {
+            token: this._auth.accessToken()
+        }));
+
+    }.bind(this))).then(function(res) {
+
+        this._cache.clean();
+
+        this.emit(this.events.logoutSuccess, res);
+
+        return res;
+
+    }.bind(this)).catch(function(e) {
+
+        this.emit(this.events.logoutError, e);
+
+        throw e;
+
+    }.bind(this));
+
+};
+
+/**
+ * @param {Request} request
+ * @param {object} [options]
+ * @param {boolean} [options.skipAuthCheck]
+ * @return {Promise<Request>}
+ */
+Platform.prototype.inflateRequest = function(request, options) {
+
+    options = options || {};
+
+    if (options.skipAuthCheck) return this._externals.Promise.resolve(request);
+
+    return this.ensureLoggedIn().then(function() {
 
         request.headers.set('X-User-Agent', this._userAgent);
         request.headers.set('Client-Id', this._appKey);
@@ -442,156 +500,163 @@ export default class Platform extends EventEmitter {
 
         return request;
 
-    }
+    }.bind(this));
 
-    /**
-     * @param {Request} request
-     * @param {object} [options]
-     * @param {boolean} [options.skipAuthCheck]
-     * @return {Promise<ApiResponse>}
-     */
-    async sendRequest(request, options) {
+};
 
-        try {
+/**
+ * @param {Request} request
+ * @param {object} [options]
+ * @param {boolean} [options.skipAuthCheck]
+ * @param {boolean} [options.retry] Will be set by this method if SDK makes second request
+ * @return {Promise<ApiResponse>}
+ */
+Platform.prototype.sendRequest = function(request, options) {
 
-            request = await this.inflateRequest(request, options);
+    return this.inflateRequest(request, options).then(function(request) {
 
-            return (await this._client.sendRequest(request));
+        options = options || {};
 
-        } catch (e) {
+        return this._client.sendRequest(request);
 
-            // Guard is for errors that come from polling
-            if (!e.apiResponse || !e.apiResponse.response() || (e.apiResponse.response().status != 401) || options.retry) throw e;
+    }.bind(this)).catch(function(e) {
 
-            this._auth.cancelAccessToken();
+        // Guard is for errors that come from polling
+        if (!e.apiResponse || !e.apiResponse.response() ||
+            (e.apiResponse.response().status != ApiResponse._unauthorizedStatus) ||
+            options.retry) throw e;
 
-            options.retry = true;
+        this._auth.cancelAccessToken();
 
-            return (await this.sendRequest(request, options));
+        options.retry = true;
 
+        return this.sendRequest(request, options);
+
+    }.bind(this));
+
+};
+
+/**
+ * General purpose function to send anything to server
+ * @param {string} options.url
+ * @param {object} [options.body]
+ * @param {string} [options.method]
+ * @param {object} [options.query]
+ * @param {object} [options.headers]
+ * @param {boolean} [options.skipAuthCheck]
+ * @return {Promise<ApiResponse>}
+ */
+Platform.prototype.send = function(options) {
+
+    options = options || {};
+
+    //FIXME https://github.com/bitinn/node-fetch/issues/43
+    options.url = this.createUrl(options.url, {addServer: true});
+
+    return this.sendRequest(this._client.createRequest(options), options);
+
+};
+
+/**
+ * @param {string} url
+ * @param {object} [query]
+ * @param {object} [options]
+ * @param {object} [options.headers]
+ * @param {boolean} [options.skipAuthCheck]
+ * @return {Promise<ApiResponse>}
+ */
+Platform.prototype.get = function(url, query, options) {
+    return this.send(objectAssign({}, {method: 'GET', url: url, query: query}, options));
+};
+
+/**
+ * @param {string} url
+ * @param {object} body
+ * @param {object} [query]
+ * @param {object} [options]
+ * @param {object} [options.headers]
+ * @param {boolean} [options.skipAuthCheck]
+ * @return {Promise<ApiResponse>}
+ */
+Platform.prototype.post = function(url, body, query, options) {
+    return this.send(objectAssign({}, {method: 'POST', url: url, query: query, body: body}, options));
+};
+
+/**
+ * @param {string} url
+ * @param {object} [body]
+ * @param {object} [query]
+ * @param {object} [options]
+ * @param {object} [options.headers]
+ * @param {boolean} [options.skipAuthCheck]
+ * @return {Promise<ApiResponse>}
+ */
+Platform.prototype.put = function(url, body, query, options) {
+    return this.send(objectAssign({}, {method: 'PUT', url: url, query: query, body: body}, options));
+};
+
+/**
+ * @param {string} url
+ * @param {string} [query]
+ * @param {object} [options]
+ * @param {object} [options.headers]
+ * @param {boolean} [options.skipAuthCheck]
+ * @return {Promise<ApiResponse>}
+ */
+Platform.prototype['delete'] = function(url, query, options) {
+    return this.send(objectAssign({}, {method: 'DELETE', url: url, query: query}, options));
+};
+
+Platform.prototype.ensureLoggedIn = function() {
+    if (this._isAccessTokenValid()) return this._externals.Promise.resolve();
+    return this.refresh();
+};
+
+/**
+ * @param path
+ * @param body
+ * @return {Promise.<ApiResponse>}
+ * @private
+ */
+Platform.prototype._tokenRequest = function(path, body) {
+
+    return this.send({
+        url: path,
+        skipAuthCheck: true,
+        body: body,
+        method: 'POST',
+        headers: {
+            'Authorization': 'Basic ' + this._apiKey(),
+            'Content-Type': ApiResponse._urlencodedContentType
         }
+    });
 
-    }
+};
 
-    /**
-     * General purpose function to send anything to server
-     * @param {string} options.url
-     * @param {object} [options.body]
-     * @param {string} [options.method]
-     * @param {object} [options.query]
-     * @param {object} [options.headers]
-     * @param {boolean} [options.skipAuthCheck]
-     * @return {Promise<ApiResponse>}
-     */
-    async send(options = {}) {
+/**
+ * @return {boolean}
+ * @private
+ */
+Platform.prototype._isAccessTokenValid = function() {
+    return this._auth.accessTokenValid();
+};
 
-        //FIXME https://github.com/bitinn/node-fetch/issues/43
-        options.url = this.createUrl(options.url, {addServer: true});
+/**
+ * @return {string}
+ * @private
+ */
+Platform.prototype._apiKey = function() {
+    var apiKey = this._appKey + ':' + this._appSecret;
+    return (typeof btoa == 'function') ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
+};
 
-        return await this.sendRequest(this._client.createRequest(options), options);
+/**
+ * @return {string}
+ * @private
+ */
+Platform.prototype._authHeader = function() {
+    var token = this._auth.accessToken();
+    return this._auth.tokenType() + (token ? ' ' + token : '');
+};
 
-    }
-
-    /**
-     * @param {string} url
-     * @param {object} [query]
-     * @param {object} [options]
-     * @param {object} [options.headers]
-     * @param {boolean} [options.skipAuthCheck]
-     * @return {Promise<ApiResponse>}
-     */
-    async get(url, query, options) {
-        options = options || {};
-        options.method = 'GET';
-        options.url = url;
-        options.query = query;
-        return await this.send(options);
-    }
-
-    /**
-     * @param {string} url
-     * @param {object} body
-     * @param {object} [query]
-     * @param {object} [options]
-     * @param {object} [options.headers]
-     * @param {boolean} [options.skipAuthCheck]
-     * @return {Promise<ApiResponse>}
-     */
-    async post(url, body, query, options) {
-        options = options || {};
-        options.method = 'POST';
-        options.url = url;
-        options.query = query;
-        options.body = body;
-        return await this.send(options);
-    }
-
-    /**
-     * @param {string} url
-     * @param {object} [body]
-     * @param {object} [query]
-     * @param {object} [options]
-     * @param {object} [options.headers]
-     * @param {boolean} [options.skipAuthCheck]
-     * @return {Promise<ApiResponse>}
-     */
-    async put(url, body, query, options) {
-        options = options || {};
-        options.method = 'PUT';
-        options.url = url;
-        options.query = query;
-        options.body = body;
-        return await this.send(options);
-    }
-
-    /**
-     * @param {string} url
-     * @param {string} [query]
-     * @param {object} [options]
-     * @param {object} [options.headers]
-     * @param {boolean} [options.skipAuthCheck]
-     * @return {Promise<ApiResponse>}
-     */
-    async 'delete'(url, query, options) {
-        options = options || {};
-        options.method = 'DELETE';
-        options.url = url;
-        options.query = query;
-        return await this.send(options);
-    }
-
-    async _tokenRequest(path, body) {
-
-        return await this.send({
-            url: path,
-            skipAuthCheck: true,
-            body: body,
-            method: 'POST',
-            headers: {
-                'Authorization': 'Basic ' + this._apiKey(),
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
-
-    }
-
-    async ensureLoggedIn() {
-        if (this._isAccessTokenValid()) return null;
-        return await this.refresh();
-    }
-
-    _isAccessTokenValid() {
-        return (this._auth.accessTokenValid());
-    }
-
-    _apiKey() {
-        var apiKey = this._appKey + ':' + this._appSecret;
-        return (typeof btoa == 'function') ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
-    }
-
-    _authHeader() {
-        var token = this._auth.accessToken();
-        return this._auth.tokenType() + (token ? ' ' + token : '');
-    }
-
-}
+module.exports = Platform;

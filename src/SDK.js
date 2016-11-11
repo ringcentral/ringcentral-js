@@ -1,137 +1,124 @@
-import "babel-regenerator-runtime";
-import * as Utils from "./core/Utils";
-import Cache from "./core/Cache";
-import * as Externals from "./core/Externals";
-import EventEmitter from "events";
-import Client from "./http/Client";
-import ApiResponse from "./http/ApiResponse";
-import {default as ClientMock} from "./mocks/ClientMock";
-import Mock from "./mocks/Mock";
-import Registry from "./mocks/Registry";
-import Platform from "./platform/Platform";
-import Auth from "./platform/Auth";
-import PubnubMockFactory from "./pubnub/PubnubFactory";
-import Subscription from "./subscription/Subscription";
-import CachedSubscription from "./subscription/CachedSubscription";
-import constants from "./core/Constants";
+/**
+ * @namespace RingCentral
+ */
+var objectAssign = require('object-assign');
+var Cache = require("./core/Cache");
+var Client = require("./http/Client");
+var Externals = require("./core/Externals");
+var Platform = require("./platform/Platform");
+var Subscription = require("./subscription/Subscription");
+var CachedSubscription = require("./subscription/CachedSubscription");
+var Constants = require("./core/Constants");
 
-class SDK {
+/**
+ * @constructor
+ * @param {string} options.server
+ * @param {string} options.appSecret
+ * @param {string} options.appKey
+ * @param {string} [options.cachePrefix]
+ * @param {string} [options.appName]
+ * @param {string} [options.appVersion]
+ * @param {string} [options.redirectUri]
+ * @param {PUBNUB} [options.PUBNUB]
+ * @param {function(new:Promise)} [options.Promise]
+ * @param {Storage} [options.localStorage]
+ * @param {fetch} [options.fetch]
+ * @param {function(new:Request)} [options.Request]
+ * @param {function(new:Response)} [options.Response]
+ * @param {function(new:Headers)} [options.Headers]
+ * @param {int} [options.refreshDelayMs]
+ * @param {int} [options.refreshHandicapMs]
+ * @param {boolean} [options.clearCacheOnRefreshError]
+ * @property {Externals} _externals
+ * @property {Cache} _cache
+ * @property {Client} _client
+ * @property {Platform} _platform
+ */
+function SDK(options) {
 
-    static version = constants.version;
+    /** @private */
+    this._externals = new Externals(options);
 
-    static server = {
-        sandbox: 'https://platform.devtest.ringcentral.com',
-        production: 'https://platform.ringcentral.com'
-    };
+    /** @private */
+    this._cache = new Cache({
+        externals: this._externals,
+        cachePrefix: options.cachePrefix
+    });
 
-    /**
-     * @namespace RingCentral
-     * @constructor
-     * @param {object} [options]
-     * @param {string} [options.server]
-     * @param {string} [options.cachePrefix]
-     * @param {string} [options.appSecret]
-     * @param {string} [options.appKey]
-     * @param {string} [options.appName]
-     * @param {string} [options.appVersion]
-     * @param {string} [options.pubnubFactory]
-     * @param {string} [options.client]
-     * @param {string} [options.redirectUri]
-     */
-    constructor({server, cachePrefix, appSecret, appKey, appName, appVersion, pubnubFactory, client, redirectUri}) {
+    /** @private */
+    this._client = new Client(this._externals);
 
-        if (!Externals.fetch) {
-            throw new Error('Native Fetch is missing, set RingCentral.SDK.core.Externals.fetch to your favorite alternative');
-        }
-
-        if (!Externals.Promise) {
-            throw new Error('Native Promise is missing, set RingCentral.SDK.core.Externals.Promise to your favorite alternative');
-        }
-
-        this._cache = new Cache(Externals.localStorage, cachePrefix);
-
-        this._client = client || new Client();
-
-        this._platform = new Platform({
-            client: this._client,
-            cache: this._cache,
-            version: SDK.version,
-            server,
-            appKey,
-            appSecret,
-            appName,
-            appVersion,
-            redirectUri
-        });
-
-        this._pubnubFactory = pubnubFactory || Externals.PUBNUB;
-
-    }
-
-    /**
-     * @return {Platform}
-     */
-    platform() {
-        return this._platform;
-    }
-
-    /**
-     * @return {Subscription}
-     */
-    createSubscription() {
-        return new Subscription(this._pubnubFactory, this._platform);
-    }
-
-    /**
-     * @return {CachedSubscription}
-     */
-    createCachedSubscription(cacheKey) {
-        return new CachedSubscription(this._pubnubFactory, this._platform, this._cache, cacheKey);
-    }
-
-    /**
-     * @return {Cache}
-     */
-    cache() {
-        return this._cache;
-    }
-
-    static core = {
-        Cache: Cache,
-        EventEmitter: EventEmitter,
-        Utils: Utils,
-        Externals: Externals
-    };
-
-    static http = {
-        Client: Client,
-        ApiResponse: ApiResponse
-    };
-
-    static platform = {
-        Auth: Auth,
-        Platform: Platform
-    };
-
-    static subscription = {
-        Subscription: Subscription
-    };
-
-    static mocks = {
-        Client: ClientMock,
-        Registry: Registry,
-        Mock: Mock
-    };
-
-    static pubnub = {
-        PubnubMockFactory: PubnubMockFactory
-    };
-
-    static handleLoginRedirect(origin) {
-        var response = window.location.hash ? window.location.hash : window.location.search;
-        window.opener.postMessage({[constants.authResponseProperty]: response}, origin || window.location.origin);
-    }
+    /** @private */
+    this._platform = new Platform(objectAssign({}, options, {
+        externals: this._externals,
+        client: this._client,
+        cache: this._cache
+    }));
 
 }
+
+SDK.version = Constants.version;
+
+SDK.server = {
+    sandbox: 'https://platform.devtest.ringcentral.com',
+    production: 'https://platform.ringcentral.com'
+};
+
+/**
+ * @return {Platform}
+ */
+SDK.prototype.platform = function() {
+    return this._platform;
+};
+
+/**
+ * @return {Cache}
+ */
+SDK.prototype.cache = function() {
+    return this._cache;
+};
+
+/**
+ * @param {int} [options.pollInterval]
+ * @param {int} [options.renewHandicapMs]
+ * @return {Subscription}
+ */
+SDK.prototype.createSubscription = function(options) {
+    return new Subscription(objectAssign({}, options, {
+        externals: this._externals,
+        platform: this._platform
+    }));
+};
+
+/**
+ * @param {string} options.cacheKey
+ * @param {int} [options.pollInterval]
+ * @param {int} [options.renewHandicapMs]
+ * @return {CachedSubscription}
+ */
+SDK.prototype.createCachedSubscription = function(options) {
+
+    if (typeof arguments[0] == 'string') {
+        options = {cacheKey: arguments[0].toString()};
+    } else {
+        options = options || {};
+    }
+
+    return new CachedSubscription(objectAssign({}, options, {
+        externals: this._externals,
+        platform: this._platform,
+        cache: this._cache
+    }));
+
+};
+
+SDK.handleLoginRedirect = function(origin) {
+
+    var response = window.location.hash ? window.location.hash : window.location.search;
+    var msg = {};
+    msg[Constants.authResponseProperty] = response;
+    window.opener.postMessage(msg, origin || window.location.origin);
+
+};
 
 module.exports = SDK;
