@@ -374,28 +374,21 @@ export default class Platform extends EventEmitter {
     /**
      * @returns {Promise<ApiResponse>}
      */
-    async refresh() {
+    refresh() {
 
-        if (this._refreshPromise) {
-            return this._refreshPromise;
-        }
-
-        try {
-
+        if(!this._refreshPromise) {
             this._refreshPromise = this._refresh()
-                .then((res) => {
+                .then(res => {
                     this._refreshPromise = null;
                     return res;
+                })
+                .catch(e => {
+                    this._refreshPromise = null;
+                    throw e;
                 });
-
-            return this._refreshPromise;
-
-        } catch (e) {
-
-            this._refreshPromise = null;
-            throw e;
-
         }
+
+        return this._refreshPromise;
 
     }
 
