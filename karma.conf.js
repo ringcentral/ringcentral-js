@@ -1,5 +1,10 @@
 var path = require('path');
 
+var specs = [
+    './src/test/test.js',
+    './src/**/*-spec.js'
+];
+
 module.exports = function(config) {
 
     config.set({
@@ -15,11 +20,12 @@ module.exports = function(config) {
         files: [
             require.resolve('karma-chai-plugins/function-bind-polyfill'),
             require.resolve('whatwg-fetch/fetch'),
+            require.resolve('fetch-mock/es5/client-browserified'),
             require.resolve('es6-promise/dist/es6-promise.js'),
-            require.resolve('pubnub/modern/dist/pubnub.js'),
-            './build/ringcentral.js',
-            './build/tests/ringcentral-tests.js'
-        ],
+            require.resolve('pubnub/modern/dist/pubnub.js')
+        ].concat([
+            './build/ringcentral.js'
+        ]).concat(specs),
 
         reporters: [
             //'html',
@@ -81,3 +87,5 @@ module.exports = function(config) {
     });
 
 };
+
+module.exports.specs = specs;

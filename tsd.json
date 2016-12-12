@@ -22,6 +22,15 @@
     },
     "sinon/sinon.d.ts": {
       "commit": "02a93db66ab297f542db1ec9f91de9935f7ff567"
+    },
+    "fetch-mock/fetch-mock.d.ts": {
+      "commit": "f5ab2df94e1aabf0fc6d783ad01c4c4671760627"
+    },
+    "whatwg-streams/whatwg-streams.d.ts": {
+      "commit": "f5ab2df94e1aabf0fc6d783ad01c4c4671760627"
+    },
+    "whatwg-fetch/whatwg-fetch.d.ts": {
+      "commit": "f5ab2df94e1aabf0fc6d783ad01c4c4671760627"
     }
   }
 }

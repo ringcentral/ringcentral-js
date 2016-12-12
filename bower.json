@@ -8,10 +8,6 @@
     "!build/ringcentral.js.map",
     "!build/ringcentral.min.js",
     "!build/ringcentral.min.js.map",
-    "!build/ringcentral-bundle.js",
-    "!build/ringcentral-bundle.js.map",
-    "!build/ringcentral-bundle.min.js",
-    "!build/ringcentral-bundle.min.js.map",
     "!demo/**/*",
     "!docs/**/*",
     "!src/**/*"

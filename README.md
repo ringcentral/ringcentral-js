@@ -129,14 +129,18 @@ window.Request = whatever;
 window.Response = whatever;
 ```
 
-Also you can manually define SDK internal variables:
+Also you can manually define SDK properties:
 
 ```js
-RingCentral.SDK.core.Externals.Promise = whatever;
-RingCentral.SDK.core.Externals.fetch = whatever;
-RingCentral.SDK.core.Externals.Headers = whatever;
-RingCentral.SDK.core.Externals.Request = whatever;
-RingCentral.SDK.core.Externals.Response = whatever;
+var sdk = new SDK({
+    localStorage: whatever,
+    PUBNUB: whatever,
+    Promise: whatever,
+    fetch: whatever,
+    Headers: whatever,
+    Request: whatever,
+    Response: whatever,
+});
 ```
 
 But taking into account the nature of polyfills, it's better to keep them global as described before.
@@ -155,6 +159,8 @@ DOM Responses: see [full list of migration instructions](CHANGELOG.md).
 ***
 
 # Getting Started
+
+Read [API documentation](API.md) for more information.
 
 ## Instantiate the RingCentral object
 

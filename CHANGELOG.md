@@ -13,6 +13,8 @@ This document contains only major functionality changes in certain versions. Min
 - `Subscription` will not throw an error when it can't renew because it's expired when timeout hits (computer woke up
     after sleep, for example), it will automatically `subscribe` again with the same `eventFilter`s
 - Removed `CachedSubscription` queue-related methods
+- `Cache.setPrefix` has been removed, prefix cannot be changed, create a new instance of SDK with new prefix instead
+- `SDK.*.*` classes are no longer exposed, use appropriate constructor options to alter defaults
 
 ## 2.0
 

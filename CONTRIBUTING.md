@@ -1,69 +1,33 @@
-# Installation
-
-For more info read the [GulpJS Getting Started guide](https://github.com/gulpjs/gulp/blob/master/docs/getting-started.md#getting-started).
-
-## 1. Get [NodeJS](http://nodejs.org/download)
-
-## 2. Install NPM packages
-
-In the directory where a local copy of the SDK is placed:
-
-```
-$ npm install
-```
-
-## 3. Install Bower Dependencies
-
-Bower is needed to run Karma tests.
-
-```
-$ npm run bower
-```
-
-# Building with GulpJS
-
-Build schema:
-
-```
-        ┏━━━━━ webpack ━━━━┳━ version ━ uglify ━━┓
-        ┃                  ┃                     ┃
- clean ━╋━ webpack-bundle ━┛                     ┣━ default
-        ┃                                        ┃
-        ┗━ version ━┛
-```
-
-## Regular build
+# Builds
 
 ```
 $ npm run build
+$ npm run watch
 ```
 
 # Tests
+
+## Full test
 
 ```
 $ npm test
 ```
 
-## Mocha (console)
+## Mocha (NodeJS)
 
 ```
 $ npm run mocha
-$ npm run mocha-compilers
+$ npm run mocha-watch
+$ npm run istanbul
 ```
 
 ## Karma (browser)
 
 ```
-$ npm run karma [-- --no-single-run --auto-watch --log-level warn --browsers Chrome]
-$ npm run karma-webpack [-- --no-single-run --auto-watch --log-level warn --browsers Chrome]
-```
-
-or use short-hands: `$ npm run karma-chrome` and `$ npm run karma-watch`.
-
-## Coverage
-
-```
-$ npm run istanbul
+$ npm run karma
+$ npm run karma-watch
+$ npm run karma-webpack
+$ npm run karma-webpack-watch
 ```
 
 ***
@@ -72,64 +36,12 @@ $ npm run istanbul
 
 ## Branching model
 
-**Attention** Repository follows the [GitFlow branching model](http://nvie.com/posts/a-successful-git-branching-model).
+**Attention** Repository follows the [GitHub Flow](https://guides.github.com/introduction/flow/).
 
-## Always write a plain vanilla TypeScript or JavaScript
+## Always write a plain vanilla JavaScript
 
 The SDK will be used in a variety of different third-party applications, which means it has to be written with the
 lowest amount of dependencies. Please do not include anything external if there is no proper justification.
-
-## Code structure
-
-The SDK can be used in a Browser and NodeJS environment with no changes, so this applies a number of requirements
-to the code base.
-
-1. Every file must begin and end with a special Amdefine-RequireJS hybrid wrapping function
-2. NPM dependencies like CryptoJS and PUBNUB must be included in RequireJS config with appropriate paths matching NPM
-    IDs ("crypto-js" for instance)
-3. Pure prototype-based inheritance only
-4. **Properly defined JSDOC is a strict requirement**
-
-## Model Constructors
-
-Most models may be serialized and de-serialized, and oftentimes the models' constructor will be called without
-arguments, because serialized data will be populated. This means the model must not do anything in the constructor
-(like loading, making AJAX requests, creating timeOut's and so on). The constructor must create only an empty (or almost
-empty) instance.
-
-## Spherical example class in vacuum
-
-    ```js
-    define(function(require, exports, module) {
-    
-        var Observable = require('../path/to/core/Observable').Clas;
-    
-        /**
-         * Class declaration
-         * @constructor
-         * @extends Observable
-         */
-        YourClass() {
-            Observable.call(this);
-        }
-    
-        YourClass.prototype = Object.create(Observable.prototype); // set up inheritance
-    
-        YourClass.prototype.on = function() { // method declaration
-            return Observable.prototype.on.apply(this, arguments); // call to the parent method
-        }
-    
-        // The rest of your code here
-    
-        module.exports = {
-            Class: YourClass,
-            $get: function() { return new YourClass(); }
-        }
-    
-    });
-    ```
-
-***
 
 # Unit-test Guidelines
 
@@ -137,55 +49,6 @@ empty) instance.
 
 1. All AJAX interaction must be mocked
 2. No direct SDK's method overrides in tests
-
-## Mocks usage
-
-Unit tests, that have to interact with Platform API server must have the following expression:
-
-    ```js
-    describe('RCSDK.messages.Filter', function() {
-        Mock.registerHooks(this);
-        // ...
-    });
-    ```
-
-Unit tests, that modify somehow SDK-wide singletons must have the following expression:
-
-    ```js
-    describe('RCSDK.core.Platform', function() {
-        Mock.registerCleanup(this);
-        // ...
-    });
-    ```
-
-In order to mock a certain AJAX request use Mock object:
-
-    ```js
-    rcsdk.getAjaxResponse.add({
-        path: '/restapi/v1.0/account/~/extension/~/sms', // URL that will be substituted
-        /**
-         * This method returns the response from "server"
-         * @param {AjaxMock} ajax
-         * @param request
-         * @returns {Object}
-         */
-        response: function(ajax) {
-    
-            return {...};
-    
-        },
-        /**
-         * This method is called to determine whether this mock is applied for pending request
-         * @param {AjaxMock} ajax
-         * @returns {boolean}
-         */
-        test: function(ajax){ return true; }
-    });
-    ```
-
-## Mock Provider
-
-Test suite includes a number of pre-configured mocks in ```./test/lib/mocks/``` directory. Please see the source.
 
 ## Spies
 

@@ -1,37 +1,39 @@
 {
   "name": "ringcentral",
-  "version": "3.0.0-rc2",
+  "version": "3.0.0-rc3",
   "scripts": {
     "clean": "rm -rf build/*",
     "build": "npm run clean && ./node_modules/.bin/webpack --display-modules --progress --colors --bail",
-    "test": "npm run build && npm run istanbul && npm run karma",
-    "mocha": "./node_modules/mocha/bin/mocha ./build/tests/ringcentral-tests.js",
-    "mocha-compilers": "./node_modules/mocha/bin/mocha --compilers spec.js:babel-core/register --require=babel-regenerator-runtime ./src/**/*-spec.js",
-    "mocha-api": "./node_modules/mocha/bin/mocha --compilers spec.js:babel-core/register --require=babel-regenerator-runtime ./test-api/**/*-spec.js",
-    "karma": "./node_modules/karma/bin/karma start  karma.conf.js",
-    "karma-webpack": "./node_modules/karma/bin/karma start karma.conf.webpack.js",
-    "karma-watch": "npm run karma -- --no-single-run --auto-watch",
-    "istanbul": "./node_modules/.bin/istanbul cover -x build/tests/ringcentral-tests.js --dir=./build/coverage --report=lcov --hook-run-in-context ./node_modules/mocha/bin/_mocha -- --reporter spec build/tests/ringcentral-tests.js",
-    "tsd": "tsd reinstall -so",
     "watch": "npm run build -- --watch",
-    "start": "./node_modules/.bin/http-server -p 3030"
+    "test": "npm run hint && npm run build && npm run istanbul && npm run karma && npm run karma-webpack",
+    "mocha": "mocha --require ./src/test/test.js ./src/**/*-spec.js",
+    "mocha-watch": "npm run mocha -- --watch",
+    "mocha-api": "mocha ./test-api/**/*-spec.js",
+    "karma": "karma start karma.conf.js",
+    "karma-watch": "npm run karma -- --no-single-run --auto-watch",
+    "karma-webpack": "karma start karma.conf.webpack.js",
+    "karma-webpack-watch": "npm run karma-webpack -- --no-single-run --auto-watch",
+    "istanbul": "istanbul cover --dir=./build/coverage --report=lcov _mocha -- --require ./src/test/test.js --reporter spec ./src/**/*-spec.js",
+    "tsd": "tsd reinstall -so",
+    "start": "http-server -p 3030",
+    "docs": "jsdoc2md 'src/**/*!(test).js' > API.md",
+    "hint": "jshint src/**/*.js"
   },
   "dependencies": {
     "es6-promise": "^3.0.2",
     "fetch-ponyfill": "^3.0.0",
+    "is-plain-object": "^2.0.1",
+    "object-assign": "^4.1.0",
     "pubnub": "^3.16.3"
   },
   "devDependencies": {
-    "babel-core": "^6.7.4",
-    "babel-loader": "^6.2.4",
-    "babel-preset-es2015": "^6.6.0",
-    "babel-preset-es2015-loose": "^7.0.0",
-    "babel-preset-stage-0": "^6.5.0",
-    "babel-regenerator-runtime": "^6.5.0",
-    "babel-runtime": "^6.6.1",
     "chai": "^3.5.0",
+    "fetch-mock": "^5.5.0",
     "http-server": "^0.9.0",
     "istanbul": "^0.4.1",
+    "jsdoc-to-markdown": "^2.0.1",
+    "jshint": "^2.9.4",
+    "json-loader": "^0.5.4",
     "karma": "^0.13.22",
     "karma-chai-plugins": "^0.7.0",
     "karma-chrome-launcher": "^0.2.3",
@@ -51,9 +53,21 @@
     "webpack": "^1.12.14",
     "whatwg-fetch": "^1.0.0"
   },
+  "jsdoc2md": {
+    "separators": true,
+    "module-index-format": "grouped",
+    "param-list-format": "table",
+    "property-list-format": "table"
+  },
+  "jshintConfig": {
+    "curly": false,
+    "expr": true,
+    "indent": 4,
+    "latedef": true
+  },
   "preferGlobal": false,
   "private": false,
-  "main": "./build/ringcentral.js",
+  "main": "./src/SDK.js",
   "author": {
     "name": "RingCentral, Inc.",
     "email": "devsupport@ringcentral.com"

@@ -1,28 +1,39 @@
 language: node_js
 node_js:
-  - '0.11'
-  - '0.12'
-  - '4'
-  - '5'
-  - '6'
-  - stable
-env:
-  - CXX=g++-4.8
+- '0.11'
+- '0.12'
+- '4'
+- '5'
+- '6'
+- stable
+cache:
+  directories:
+  - $HOME/.npm
+  - node_modules
 addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-4.8
+  firefox: latest
 deploy:
-  provider: npm
+- provider: npm
   email: kirill.konshin@gmail.com
   api_key:
     secure: wEPdEMw5ZYN1GvFJ50ySov+K8rDHC9w2QCqMKu202ipTU60G44/ktEP/PU5ZLN3BUCpvXeHMx+DbMhwb7S4RxdMP4CkMnju2vaIt94K7WRNHa7kcNgJFm3jUpkg1rkqqfVvcKykHeMKMMUaJNzQUm9nPSTtJex8s7tk3+SQ6bDmsQPmNt4c5r5ihIjxvkjuxgQLk48CRXT98EU9KsZf57Ri93whKbrGAJ9lo4Oq+2oFhXil8fDl3XdRyAZbLaDz5wHq4diDUkKvVnsDzDlW0rkCcYJMDrJUuUnuvD59MYlUv2QWXPzeuEe7m4eLk48AuoK+t9PqjlwLAlJdjU2ZtqaeGIY6KAWkfzpi3QlBPk0XXpUs5Jr6vlCQU8ed4xr+wAZIWQfuPx+v205JlScY3td7I2eZ5nOD8//NJ1RxVnitTm4x7vZnKku+56jCf9kHq/EB+ndMD0rSU5/pyhUYFxCmShdLNp1IV7qcwDud+SejQ3eWQ23eyf9n8e5d+QOvOCoCjENMfQVCt+oOPFGztBnd839VbYXvP1OSk2JpgQ2O1muxRCKVv+hid6d38lnMAXRJWcFIpdNy7bxpySebPIt8w3kxYNGrJm09CrCvBd0pjwNg+HagjT9olz9balAPSGpzZexg2F4C1UgoxSec0/aoKir+91MsqnkLc0E0Q8fE=
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: ringcentral/ringcentral-js
+- provider: releases
+  api_key:
+    secure: fxzvMpV/fAysyoOacCe1GM+zSs9YWIte8lEcLYgFXUbNYdA7L1uMxW1moLas1tOEJUzRdkFW/yJMC4xkoZVqfH6D3hjuue6B3LNzg5R3X10k+QO+i0XAjl5FJ3sF2V4Vb4pSH42TY2VxdMpKfUffesryK2r9z1dJtDm4YA1iDqI=
+  skip_cleanup: true
+  file:
+  - 'build/ringcentral.js'
+  - 'build/ringcentral.js.map'
+  - 'build/ringcentral.js.min'
+  - 'build/ringcentral.js.min.map'
   on:
     tags: true
     repo: ringcentral/ringcentral-js
 before_install:
-  - export CHROME_BIN=chromium-browser
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
