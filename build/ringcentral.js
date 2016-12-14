@@ -98,7 +98,7 @@ function SDK(options) {
     /** @private */
     this._cache = new Cache({
         externals: this._externals,
-        cachePrefix: options.cachePrefix
+        prefix: options.cachePrefix
     });
 
     /** @private */
@@ -416,7 +416,7 @@ Client.prototype.sendRequest = function(request) {
  * @private
  */
 Client.prototype._loadResponse = function(request) {
-    return this._externals.fetch.call(null, request.url, request);
+    return this._externals.fetch.call(null, request);
 };
 
 /**

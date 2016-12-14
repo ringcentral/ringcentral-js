@@ -83,7 +83,7 @@ Client.prototype.sendRequest = function(request) {
  * @private
  */
 Client.prototype._loadResponse = function(request) {
-    return this._externals.fetch.call(null, request.url, request);
+    return this._externals.fetch.call(null, request);
 };
 
 /**

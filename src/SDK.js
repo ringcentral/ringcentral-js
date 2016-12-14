@@ -42,7 +42,7 @@ function SDK(options) {
     /** @private */
     this._cache = new Cache({
         externals: this._externals,
-        cachePrefix: options.cachePrefix
+        prefix: options.cachePrefix
     });
 
     /** @private */

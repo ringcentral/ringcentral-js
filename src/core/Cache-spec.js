@@ -25,4 +25,20 @@ describe('RingCentral.core.Cache', function() {
 
     });
 
+    describe('prefix', function() {
+
+        it('different prefixes dont overlap', asyncTest(function(sdk1, createSdk) {
+
+            var sdk2 = createSdk({cachePrefix: 'foo'});
+
+            var cache1 = sdk1.cache();
+
+            cache1.setItem('foo', {foo: 'bar'});
+
+            expect(sdk2.cache().getItem('foo')).to.equal(null);
+
+        }));
+
+    });
+
 });

@@ -34,6 +34,12 @@
 
     var expect = chai.expect;
     var spy = sinon.spy;
+    var fetchMockOrig = fetchMock.fetchMock;
+
+    //FIXME @see https://github.com/wheresrhys/fetch-mock/issues/156
+    fetchMock.fetchMock = function(req) {
+        return fetchMockOrig(req.url, req);
+    };
 
     function apiCall(method, path, json, status, statusText, headers) {
 
@@ -173,25 +179,39 @@
 
     }
 
+    function createSdk(options) {
+
+        options = options || {};
+
+        var opts = {
+            server: 'http://whatever',
+            appKey: 'whatever',
+            appSecret: 'whatever',
+            Headers: fetchMock.Headers,
+            Request: fetchMock.Request,
+            Response: fetchMock.Response,
+            fetch: fetchMock.fetchMock,
+            refreshDelayMs: 1
+        };
+
+        Object.keys(options).forEach(function(k) {
+            opts[k] = options[k];
+        });
+
+        return new SDK(opts);
+
+    }
+
     /**
      * @global
-     * @param {function(SDK)} fn
+     * @param {function(SDK, function)} fn
      * @return {function()}
      */
     function asyncTest(fn) {
 
         return function() {
 
-            var sdk = new SDK({
-                server: 'http://whatever',
-                appKey: 'whatever',
-                appSecret: 'whatever',
-                Headers: fetchMock.Headers,
-                Request: fetchMock.Request,
-                Response: fetchMock.Response,
-                fetch: fetchMock.fetchMock,
-                refreshDelayMs: 1
-            });
+            var sdk = createSdk();
 
             function clean() {
                 fetchMock.restore();
@@ -212,7 +232,7 @@
                 }));
 
             }).then(function() {
-                return fn(sdk);
+                return fn(sdk, createSdk);
             }).then(function() {
                 expect(fetchMock.done()).to.equal(true);
                 clean();
