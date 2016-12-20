@@ -2208,7 +2208,7 @@ module.exports = Auth;
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-var version = ("3.0.0-rc3");
+var version = ("3.0.0-rc4");
 
 // This will become false during the Webpack build, so no traces of package.json will be there
 if (false) {

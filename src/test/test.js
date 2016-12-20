@@ -36,9 +36,8 @@
     var spy = sinon.spy;
     var fetchMockOrig = fetchMock.fetchMock;
 
-    //FIXME @see https://github.com/wheresrhys/fetch-mock/issues/156
     fetchMock.fetchMock = function(req) {
-        return fetchMockOrig(req.url, req);
+        return fetchMockOrig(req.url, req); // For some reasons that's needed for TravisCI
     };
 
     function apiCall(method, path, json, status, statusText, headers) {

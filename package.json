@@ -1,6 +1,6 @@
 {
   "name": "ringcentral",
-  "version": "3.0.0-rc3",
+  "version": "3.0.0-rc4",
   "scripts": {
     "clean": "rm -rf build/*",
     "build": "npm run clean && ./node_modules/.bin/webpack --display-modules --progress --colors --bail",
