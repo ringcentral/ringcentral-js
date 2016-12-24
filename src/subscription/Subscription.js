@@ -244,7 +244,7 @@ Subscription.prototype.remove = function() {
 
         resolve(this._platform.delete('/subscription/' + this.subscription().id));
 
-    })).then(function(response) {
+    }.bind(this))).then(function(response) {
 
         this.reset()
             .emit(this.events.removeSuccess, response);
