@@ -249,6 +249,10 @@ Platform.prototype.loginWindow = function(options) {
         var top = ((height / 2) - (options.height / 2)) + dualScreenTop;
         var win = window.open(options.url, '_blank', (options.target == '_blank') ? 'scrollbars=yes, status=yes, width=' + options.width + ', height=' + options.height + ', left=' + left + ', top=' + top : '');
 
+        if(!win) {
+            throw new Error('Could not open login window. Please allow popups for this site');
+        }
+
         if (win.focus) win.focus();
 
         var eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent';
