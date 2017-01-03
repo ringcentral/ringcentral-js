@@ -370,7 +370,9 @@ The `on` method accepts an event type as its first argument and a handler functi
 In the NodeJS it might be useful to replace simple built-in storage with something persistent:
 
 ```js
-RingCentral.SDK.core.Externals.localStorage = Anything;
+var sdk = new SDK({
+    localStorage: whatever
+});
 ```
 
 SDK works with `localStorage` as with a simple object.

@@ -1668,6 +1668,10 @@ Platform.prototype.loginWindow = function(options) {
         var top = ((height / 2) - (options.height / 2)) + dualScreenTop;
         var win = window.open(options.url, '_blank', (options.target == '_blank') ? 'scrollbars=yes, status=yes, width=' + options.width + ', height=' + options.height + ', left=' + left + ', top=' + top : '');
 
+        if(!win) {
+            throw new Error('Could not open login window. Please allow popups for this site');
+        }
+
         if (win.focus) win.focus();
 
         var eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent';
@@ -2208,7 +2212,7 @@ module.exports = Auth;
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-var version = ("3.0.0-rc4");
+var version = ("3.0.0");
 
 // This will become false during the Webpack build, so no traces of package.json will be there
 if (false) {
