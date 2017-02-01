@@ -13,9 +13,9 @@
     "!src/**/*"
   ],
   "dependencies": {
-    "es6-promise": "^3.2.1",
-    "fetch": "^0.11.0",
-    "pubnub": "^3.14.4"
+    "es6-promise": "^4.0.5",
+    "fetch": "^2.0.2",
+    "pubnub": "^4.4.2"
   },
   "moduleType": [
     "amd",

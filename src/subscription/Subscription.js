@@ -272,7 +272,7 @@ Subscription.prototype.resubscribe = function() {
 };
 
 /**
- * Remove subscription and disconnect from PUBNUB
+ * Remove subscription and disconnect from PubNub
  * This method resets subscription at client side but backend is not notified
  * @return {Subscription}
  */
@@ -344,7 +344,7 @@ Subscription.prototype._decrypt = function(message) {
 
     if (this.subscription().deliveryMode.encryptionKey) {
 
-        message = this._externals.PUBNUB.crypto_obj.decrypt(message, this.subscription().deliveryMode.encryptionKey, {
+        message = this._pubnub.decrypt(message, this.subscription().deliveryMode.encryptionKey, {
             encryptKey: false,
             keyEncoding: 'base64',
             keyLength: 128,
@@ -394,12 +394,10 @@ Subscription.prototype._subscribeAtPubnub = function() {
     } else {
 
         // Init from scratch
-        this._pubnub = this._externals.PUBNUB.init({
+        this._pubnub = new this._externals.PubNub({
             ssl: true,
             subscribe_key: deliveryMode.subscriberKey
         });
-
-        this._pubnub.ready(); //TODO This may be not needed anymore
 
     }
 

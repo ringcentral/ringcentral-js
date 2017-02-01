@@ -1,0 +1,17 @@
+{
+  "name": "ringcentral",
+  "dependencies": {
+    "chai": "registry:npm/chai#3.5.0+20160723033700",
+    "fetch-mock": "registry:npm/fetch-mock#4.1.1+20160712175252",
+    "sinon": "registry:npm/sinon#1.16.0+20160723033700",
+    "sinon-chai": "registry:npm/sinon-chai#2.8.0+20160310030142"
+  },
+  "resolution": {
+    "main": "src/typings"
+  },
+  "globalDependencies": {
+    "karma": "registry:dt/karma#0.13.9+20160811111312",
+    "mocha": "registry:dt/mocha#2.2.5+20170118061455",
+    "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20161120230953"
+  }
+}

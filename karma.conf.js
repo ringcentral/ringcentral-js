@@ -19,10 +19,10 @@ module.exports = function(config) {
 
         files: [
             require.resolve('karma-chai-plugins/function-bind-polyfill'),
-            require.resolve('whatwg-fetch/fetch'),
+            require.resolve('es6-promise/dist/es6-promise.auto.js'),
+            require.resolve('whatwg-fetch/fetch'), //FIXME We need to add it manually for fetch-mock
             require.resolve('fetch-mock/es5/client-browserified'),
-            require.resolve('es6-promise/dist/es6-promise.js'),
-            require.resolve('pubnub/modern/dist/pubnub.js')
+            require.resolve('pubnub/dist/web/pubnub.js')
         ].concat([
             './build/ringcentral.js'
         ]).concat(specs),

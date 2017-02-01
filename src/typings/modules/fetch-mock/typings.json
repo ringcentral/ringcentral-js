@@ -1,0 +1,9 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/asvetliakov/typings-fetch-mock/308703edebf10abbde727d2d46933b26002da0bb/typings.json",
+    "raw": "registry:npm/fetch-mock#4.1.1+20160712175252",
+    "main": "index.d.ts",
+    "name": "fetch-mock"
+  }
+}

@@ -12,6 +12,8 @@
 
     if (typeof exports === 'object' && typeof exports.nodeName !== 'string') {
 
+        require("es6-promise").polyfill(); //FIXME Needed for Fetch Mock
+
         var chai = require("chai");
         var sinon = require("sinon");
         var SDK = require("../SDK");
@@ -34,11 +36,6 @@
 
     var expect = chai.expect;
     var spy = sinon.spy;
-    var fetchMockOrig = fetchMock.fetchMock;
-
-    fetchMock.fetchMock = function(req) {
-        return fetchMockOrig(req.url, req); // For some reasons that's needed for TravisCI
-    };
 
     function apiCall(method, path, json, status, statusText, headers) {
 
@@ -49,14 +46,16 @@
 
         if (isJson && !headers) headers = {'Content-Type': 'application/json'};
 
-        fetchMock.once('http://whatever' + path, {
+
+        fetchMock.mock('http://whatever' + path, {
             body: isJson ? JSON.stringify(json) : json,
             status: status,
             statusText: statusText,
             headers: headers,
             sendAsJson: false
         }, {
-            method: method
+            method: method,
+            times: 1
         });
 
     }
@@ -186,10 +185,10 @@
             server: 'http://whatever',
             appKey: 'whatever',
             appSecret: 'whatever',
-            Headers: fetchMock.Headers,
-            Request: fetchMock.Request,
-            Response: fetchMock.Response,
-            fetch: fetchMock.fetchMock,
+            Request: fetchMock.constructor.Request,
+            Response: fetchMock.constructor.Response,
+            Headers: fetchMock.constructor.Headers,
+            fetch: fetchMock.fetchMock.bind(fetchMock),
             refreshDelayMs: 1
         };
 
@@ -237,6 +236,7 @@
                 clean();
             }).catch(function(e) {
                 clean();
+                console.error(e.stack);
                 throw e;
             });
 

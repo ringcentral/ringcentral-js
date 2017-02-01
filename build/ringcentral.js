@@ -75,7 +75,7 @@ var Constants = __webpack_require__(17);
  * @param {string} [options.appName]
  * @param {string} [options.appVersion]
  * @param {string} [options.redirectUri]
- * @param {PUBNUB} [options.PUBNUB]
+ * @param {PubNub} [options.PubNub]
  * @param {function(new:Promise)} [options.Promise]
  * @param {Storage} [options.localStorage]
  * @param {fetch} [options.fetch]
@@ -183,8 +183,15 @@ module.exports = SDK;
 /* 1 */
 /***/ function(module, exports) {
 
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
 'use strict';
 /* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
@@ -205,7 +212,7 @@ function shouldUseNative() {
 		// Detect buggy property enumeration order in older V8 versions.
 
 		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
 		test1[5] = 'de';
 		if (Object.getOwnPropertyNames(test1)[0] === '5') {
 			return false;
@@ -234,7 +241,7 @@ function shouldUseNative() {
 		}
 
 		return true;
-	} catch (e) {
+	} catch (err) {
 		// We don't expect any of the above to throw, but better to be safe.
 		return false;
 	}
@@ -254,8 +261,8 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 			}
 		}
 
-		if (Object.getOwnPropertySymbols) {
-			symbols = Object.getOwnPropertySymbols(from);
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
 			for (var i = 0; i < symbols.length; i++) {
 				if (propIsEnumerable.call(from, symbols[i])) {
 					to[symbols[i]] = from[symbols[i]];
@@ -1343,14 +1350,14 @@ var root = (typeof window !== "undefined" && window) ||
 
 /**
  * @constructor
- * @param {PUBNUB} [options.PUBNUB]
+ * @param {PubNub} [options.PubNub]
  * @param {function(new:Promise)} [options.Promise]
  * @param {Storage} [options.localStorage]
  * @param {fetch} [options.fetch]
  * @param {function(new:Request)} [options.Request]
  * @param {function(new:Response)} [options.Response]
  * @param {function(new:Headers)} [options.Headers]
- * @property {PUBNUB} PUBNUB
+ * @property {PubNub} PubNub
  * @property {Storage} localStorage
  * @property {function(new:Promise)} Promise
  * @property {fetch} fetch
@@ -1362,7 +1369,7 @@ function Externals(options) {
 
     options = options || {};
 
-    this.PUBNUB = options.PUBNUB || root.PUBNUB || pubnub;
+    this.PubNub = options.PubNub || root.PubNub || pubnub;
     this.localStorage = options.localStorage || ((typeof root.localStorage !== 'undefined') ? root.localStorage : {});
     this.Promise = options.Promise || root.Promise || (es6Promise && es6Promise.Promise);
 
@@ -1385,8 +1392,8 @@ function Externals(options) {
         throw new Error('LocalStorage is missing');
     }
 
-    if (!this.PUBNUB) {
-        throw new Error('PUBNUB is missing');
+    if (!this.PubNub) {
+        throw new Error('PubNub is missing');
     }
 
 }
@@ -2212,7 +2219,7 @@ module.exports = Auth;
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-var version = ("3.0.0");
+var version = ("3.1.0");
 
 // This will become false during the Webpack build, so no traces of package.json will be there
 if (false) {
@@ -2502,7 +2509,7 @@ Subscription.prototype.resubscribe = function() {
 };
 
 /**
- * Remove subscription and disconnect from PUBNUB
+ * Remove subscription and disconnect from PubNub
  * This method resets subscription at client side but backend is not notified
  * @return {Subscription}
  */
@@ -2574,7 +2581,7 @@ Subscription.prototype._decrypt = function(message) {
 
     if (this.subscription().deliveryMode.encryptionKey) {
 
-        message = this._externals.PUBNUB.crypto_obj.decrypt(message, this.subscription().deliveryMode.encryptionKey, {
+        message = this._pubnub.decrypt(message, this.subscription().deliveryMode.encryptionKey, {
             encryptKey: false,
             keyEncoding: 'base64',
             keyLength: 128,
@@ -2624,12 +2631,10 @@ Subscription.prototype._subscribeAtPubnub = function() {
     } else {
 
         // Init from scratch
-        this._pubnub = this._externals.PUBNUB.init({
+        this._pubnub = new this._externals.PubNub({
             ssl: true,
             subscribe_key: deliveryMode.subscriberKey
         });
-
-        this._pubnub.ready(); //TODO This may be not needed anymore
 
     }
 

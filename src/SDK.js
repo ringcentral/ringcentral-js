@@ -19,7 +19,7 @@ var Constants = require("./core/Constants");
  * @param {string} [options.appName]
  * @param {string} [options.appVersion]
  * @param {string} [options.redirectUri]
- * @param {PUBNUB} [options.PUBNUB]
+ * @param {PubNub} [options.PubNub]
  * @param {function(new:Promise)} [options.Promise]
  * @param {Storage} [options.localStorage]
  * @param {fetch} [options.fetch]
