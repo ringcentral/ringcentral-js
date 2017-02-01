@@ -8,14 +8,14 @@ var root = (typeof window !== "undefined" && window) ||
 
 /**
  * @constructor
- * @param {PUBNUB} [options.PUBNUB]
+ * @param {PubNub} [options.PubNub]
  * @param {function(new:Promise)} [options.Promise]
  * @param {Storage} [options.localStorage]
  * @param {fetch} [options.fetch]
  * @param {function(new:Request)} [options.Request]
  * @param {function(new:Response)} [options.Response]
  * @param {function(new:Headers)} [options.Headers]
- * @property {PUBNUB} PUBNUB
+ * @property {PubNub} PubNub
  * @property {Storage} localStorage
  * @property {function(new:Promise)} Promise
  * @property {fetch} fetch
@@ -27,7 +27,7 @@ function Externals(options) {
 
     options = options || {};
 
-    this.PUBNUB = options.PUBNUB || root.PUBNUB || pubnub;
+    this.PubNub = options.PubNub || root.PubNub || pubnub;
     this.localStorage = options.localStorage || ((typeof root.localStorage !== 'undefined') ? root.localStorage : {});
     this.Promise = options.Promise || root.Promise || (es6Promise && es6Promise.Promise);
 
@@ -50,8 +50,8 @@ function Externals(options) {
         throw new Error('LocalStorage is missing');
     }
 
-    if (!this.PUBNUB) {
-        throw new Error('PUBNUB is missing');
+    if (!this.PubNub) {
+        throw new Error('PubNub is missing');
     }
 
 }

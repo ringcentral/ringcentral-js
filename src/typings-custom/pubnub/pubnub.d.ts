@@ -1,45 +1,45 @@
-interface PUBNUB {
+interface PubNub {
 
-    init(options:PUBNUBInitOptions):PUBNUBInstance;
-    crypto_obj:PUBNUBCryptoObj;
+    init(options:PubNubInitOptions):PubNubInstance;
+    crypto_obj:PubNubCryptoObj;
 
 }
 
-interface PUBNUBInstance {
+interface PubNubInstance {
 
-    crypto_obj:PUBNUBCryptoObj;
+    crypto_obj:PubNubCryptoObj;
 
     ready():void;
 
-    subscribe(options:PUBNUBSubscribeOptions);
+    subscribe(options:PubNubSubscribeOptions);
 
-    unsubscribe(options:PUBNUBUnsubscribeOptions);
+    unsubscribe(options:PubNubUnsubscribeOptions);
 
     receiveMessage(message:string, channel:string); //TODO Remove
 
 }
 
-interface PUBNUBSubscribeOptions {
+interface PubNubSubscribeOptions {
     channel:string;
     message?:(message, env, channel) => any;
     connect?:(...args)=>void
 }
 
-interface PUBNUBUnsubscribeOptions {
+interface PubNubUnsubscribeOptions {
     channel:string;
 }
 
-interface PUBNUBInitOptions {
+interface PubNubInitOptions {
     ssl?:boolean;
     subscribe_key?:string
 }
 
-interface PUBNUBCryptoObj {
-    encrypt:(message:string, key:string, options:PUBNUBCryptoOptions)=>string;
-    decrypt:(message:string, key:string, options:PUBNUBCryptoOptions)=>any;
+interface PubNubCryptoObj {
+    encrypt:(message:string, key:string, options:PubNubCryptoOptions)=>string;
+    decrypt:(message:string, key:string, options:PubNubCryptoOptions)=>any;
 }
 
-interface PUBNUBCryptoOptions {
+interface PubNubCryptoOptions {
     encryptKey?:boolean;
     keyEncoding?:string;
     keyLength?:number|string;
@@ -47,7 +47,7 @@ interface PUBNUBCryptoOptions {
 }
 
 declare module 'pubnub' {
-    var PUBNUB:PUBNUB;
+    var PubNub:PubNub;
 }
 
-declare var PUBNUB:PUBNUB;
+declare var PubNub:PubNub;
