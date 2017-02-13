@@ -9,7 +9,7 @@ var EventEmitter = require("events").EventEmitter;
  * @property {Platform} _platform
  * @property {int} _pollInterval
  * @property {int} _renewHandicapMs
- * @property {PUBNUB} _pubnub
+ * @property {PubNub} _pubnub
  * @property {string} _pubnubLastChannel
  * @property {int} _timeout
  * @property {ISubscription} _subscription
@@ -48,6 +48,9 @@ function Subscription(options) {
 
     /** @private */
     this._pubnubLastChannel = null;
+
+    /** @private */
+    this._pubnubLastSubscribeKey = null;
 
     /** @private */
     this._timeout = null;
@@ -278,7 +281,7 @@ Subscription.prototype.resubscribe = function() {
  */
 Subscription.prototype.reset = function() {
     this._clearTimeout();
-    if (this.subscribed() && this._pubnub) this._pubnub.unsubscribe({channel: this.subscription().deliveryMode.address});
+    this._unsubscribeAtPubnub();
     this._setSubscription(null);
     return this;
 };
@@ -379,35 +382,66 @@ Subscription.prototype._subscribeAtPubnub = function() {
 
     if (this._pubnub) {
 
-        if (this._pubnubLastChannel == deliveryMode.address) { // Nothing to update, keep listening to same channel
+        if (this._pubnubLastChannel === deliveryMode.address) {
+
+            // Nothing to update, keep listening to same channel
             return this;
-        } else if (this._pubnubLastChannel) { // Need to subscribe to new channel
-            this._pubnub.unsubscribe({channel: this._pubnubLastChannel});
+
+        } else if (this._pubnubLastSubscribeKey && this._pubnubLastSubscribeKey !== deliveryMode.subscriberKey) {
+
+            // Subscribe key changed, need to reset everything
+            this._unsubscribeAtPubnub();
+
+        } else if (this._pubnubLastChannel) {
+
+            // Need to subscribe to new channel
+            this._pubnub.unsubscribeAll();
+
         }
 
-        // Re-init for new data
-        this._pubnub = this._pubnub.init({
+    }
+
+    if (!this._pubnub) {
+
+        this._pubnubLastSubscribeKey = deliveryMode.subscriberKey;
+
+        var PubNub = this._externals.PubNub;
+
+        this._pubnub = new PubNub({
             ssl: true,
-            subscribe_key: deliveryMode.subscriberKey
+            subscribeKey: deliveryMode.subscriberKey
         });
 
-    } else {
-
-        // Init from scratch
-        this._pubnub = new this._externals.PubNub({
-            ssl: true,
-            subscribe_key: deliveryMode.subscriberKey
+        this._pubnub.addListener({
+            status: function(statusEvent) {},
+            message: function(m) {
+                this._notify(m.message); // all other props are ignored
+            }.bind(this)
         });
 
     }
 
     this._pubnubLastChannel = deliveryMode.address;
+    this._pubnub.subscribe({channels: [deliveryMode.address]});
 
-    this._pubnub.subscribe({
-        channel: deliveryMode.address,
-        message: this._notify.bind(this),
-        connect: function() {}
-    });
+    return this;
+
+};
+
+/**
+ * @return {Subscription}
+ * @private
+ */
+Subscription.prototype._unsubscribeAtPubnub = function() {
+
+    if (!this.subscribed() || this._pubnub) return this;
+
+    this._pubnub.removeAllListeners();
+    this._pubnub.destroy(); // this will unsubscribe from all
+
+    this._pubnubLastSubscribeKey = null;
+    this._pubnubLastChannel = null;
+    this._pubnub = null;
 
     return this;
 

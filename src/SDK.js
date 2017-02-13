@@ -98,7 +98,7 @@ SDK.prototype.createSubscription = function(options) {
  */
 SDK.prototype.createCachedSubscription = function(options) {
 
-    if (typeof arguments[0] == 'string') {
+    if (typeof arguments[0] === 'string') {
         options = {cacheKey: arguments[0].toString()};
     } else {
         options = options || {};
