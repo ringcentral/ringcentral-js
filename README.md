@@ -448,7 +448,7 @@ call the subscription instance's `remove()` method:
 subscription.remove().then(...);
 ```
 
-## Updating Subsctiptions
+## Updating Subscriptions
 
 You can add more or replace event filters in the existing subscription at any time, by calling the subscription methods
 and then calling the `register()` method to update it on the server:
