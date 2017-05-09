@@ -99,13 +99,17 @@
 
     }
 
-    function subscribeGeneric(expiresIn) {
+    function subscribeGeneric(expiresIn, id, remove) {
 
         expiresIn = expiresIn || 15 * 60 * 60;
 
         var date = new Date();
 
-        apiCall('POST', '/restapi/v1.0/subscription', {
+        var method = 'POST';
+        if (id) method = 'PUT';
+        if (remove) method = 'DELETE';
+
+        apiCall(method, '/restapi/v1.0/subscription' + (id ? '/' + id : ''), remove ? '' : {
             'eventFilters': [
                 '/restapi/v1.0/account/~/extension/~/presence'
             ],
@@ -189,7 +193,8 @@
             Response: fetchMock.constructor.Response,
             Headers: fetchMock.constructor.Headers,
             fetch: fetchMock.fetchMock.bind(fetchMock),
-            refreshDelayMs: 1
+            refreshDelayMs: 1,
+            redirectUri: 'http://foo'
         };
 
         Object.keys(options).forEach(function(k) {

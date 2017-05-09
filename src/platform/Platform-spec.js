@@ -248,14 +248,14 @@ describe('RingCentral.platform.Platform', function() {
 
             return test('get')
                 .then(function() {
-                return test('post');
-            })
+                    return test('post');
+                })
                 .then(function() {
-                return test('put');
-            })
+                    return test('put');
+                })
                 .then(function() {
-                return test('delete');
-            });
+                    return test('delete');
+                });
 
         }));
 
@@ -306,7 +306,120 @@ describe('RingCentral.platform.Platform', function() {
         });
     });
 
-    //TODO Add tests for this
-    describe.skip('loginUrl', function() {});
+    describe('loginUrl', function() {
+
+        it('simple usage', asyncTest(function(sdk) {
+
+            var platform = sdk.platform();
+
+            expect(platform.loginUrl({
+                implicit: true,
+                redirectUri: 'foo',
+                state: 'foo',
+                brandId: 'foo',
+                display: 'foo',
+                prompt: 'foo'
+            })).to.equal('http://whatever/restapi/oauth/authorize?response_type=token&redirect_uri=foo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo');
+
+            expect(platform.loginUrl({
+                implicit: false,
+                redirectUri: 'foo',
+                state: 'foo',
+                brandId: 'foo',
+                display: 'foo',
+                prompt: 'foo'
+            })).to.equal('http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=foo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo');
+
+            expect(platform.loginUrl({
+                implicit: false
+            })).to.equal('http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=');
+
+        }));
+
+    });
+
+    describe('loginWindow', function() {
+
+        var isNode = (typeof window !== 'undefined');
+
+        if (!isNode) {
+            global.window = {
+                screenLeft: 0,
+                screenTop: 0,
+                location: {
+                    origin: ''
+                }
+            };
+            global.screen = {
+                left: 0,
+                top: 0,
+                width: 0,
+                height: 0
+            };
+            global.document = {
+                documentElement: {
+                    clientWidth: 0,
+                    clientHeight: 0
+                }
+            };
+        }
+
+        it('simple usage', asyncTest(function(sdk) {
+
+            var platform = sdk.platform();
+            var close = spy();
+
+            window.open = spy(function() {
+                return {
+                    close: close
+                };
+            });
+
+            window.attachEvent = function(eventName, cb, bubble) {
+                window.triggerEvent = function(mock) {
+                    console.log('TRIGGERED', mock);
+                    cb(mock);
+                };
+            };
+            window.addEventListener = window.attachEvent;
+
+            window.detachEvent = spy();
+            window.removeEventListener = window.detachEvent;
+
+            setTimeout(function() {
+                window.triggerEvent({origin: 'foo', data: {RCAuthorizationResponse: '#access_token=foo'}});
+            }, 10);
+
+            return platform.loginWindow({
+                url: 'foo',
+                origin: 'foo'
+            }).then(function(res) {
+                expect(res.access_token).to.equal('foo');
+                expect(close).to.be.calledOnce;
+            });
+
+        }));
+
+    });
+
+    describe('parseLoginRedirect', function() {
+        it('parses redirect URIs with hash', asyncTest(function(sdk) {
+            var platform = sdk.platform();
+            expect(platform.parseLoginRedirect('#access_token=foo').access_token).to.equal('foo');
+        }));
+        it('parses redirect URIs with query', asyncTest(function(sdk) {
+            var platform = sdk.platform();
+            expect(platform.parseLoginRedirect('?access_token=foo').access_token).to.equal('foo');
+        }));
+        it('parses redirect URIs with errors', asyncTest(function(sdk) {
+            var platform = sdk.platform();
+            expect(function() {
+                platform.parseLoginRedirect('?error_description=foo');
+            }).to.throw('foo');
+            expect(function() {
+                platform.parseLoginRedirect('?error=foo');
+            }).to.throw('foo');
+        }));
+    });
 
 });

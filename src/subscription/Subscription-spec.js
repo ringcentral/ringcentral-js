@@ -28,6 +28,23 @@ describe('RingCentral.subscription.Subscription', function() {
 
     });
 
+    describe('resubscribe', function() {
+
+        it('resets and resubscribes', asyncTest(function(sdk) {
+
+            subscribeGeneric(expiresIn);
+
+            return createSubscription(sdk)
+                .setEventFilters(['foo', 'bar'])
+                .resubscribe()
+                .then(function(res) {
+                    expect(res.json().expiresIn).to.equal(expiresIn);
+                });
+
+        }));
+
+    });
+
     describe('notify', function() {
 
         it('fires a notification event when the notify method is called and passes the message object', asyncTest(function(sdk) {
@@ -94,7 +111,82 @@ describe('RingCentral.subscription.Subscription', function() {
 
         }));
 
-        it.skip('automatically renews when subscription is going to expire');
+        it('renews successfully', asyncTest(function(sdk) {
+
+            subscribeGeneric(expiresIn, 'foo');
+
+            var subscription = createSubscription(sdk);
+
+            subscription.setSubscription({
+                id: 'foo',
+                expirationTime: new Date(Date.now() + expiresIn).toISOString(),
+                eventFilters: ['foo'],
+                deliveryMode: {
+                    subscriberKey: 'foo',
+                    address: 'foo'
+                }
+            });
+
+            return subscription.renew();
+
+        }));
+
+    });
+
+    describe('remove', function() {
+
+        it('fails when no subscription', asyncTest(function(sdk) {
+
+            return createSubscription(sdk)
+                .remove()
+                .then(function() {
+                    throw new Error('This should not be reached');
+                })
+                .catch(function(e) {
+                    expect(e.message).to.equal('No subscription');
+                });
+
+        }));
+
+        it('removes successfully', asyncTest(function(sdk) {
+
+            subscribeGeneric(expiresIn, 'foo', true);
+
+            var subscription = createSubscription(sdk);
+
+            subscription.setSubscription({
+                id: 'foo',
+                expirationTime: new Date(Date.now() + expiresIn).toISOString(),
+                eventFilters: ['foo'],
+                deliveryMode: {
+                    subscriberKey: 'foo',
+                    address: 'foo'
+                }
+            });
+
+            return subscription.remove();
+
+        }));
+
+        it('removes successfully', asyncTest(function(sdk) {
+
+            subscribeGeneric(expiresIn, 'foo', true);
+
+            var subscription = createSubscription(sdk);
+
+            subscription.setSubscription({
+                id: 'foo',
+                expirationTime: new Date(Date.now() + expiresIn).toISOString(),
+                eventFilters: ['foo'],
+                deliveryMode: {
+                    subscriberKey: 'foo',
+                    address: 'foo'
+                }
+            });
+
+            return subscription.remove();
+
+        }));
 
     });
 
