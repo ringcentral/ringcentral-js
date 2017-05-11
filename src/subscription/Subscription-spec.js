@@ -2,7 +2,8 @@ describe('RingCentral.subscription.Subscription', function() {
 
     var pollInterval = 1;
     var renewHandicapMs = 1;
-    var expiresIn = 100;
+    var expiresIn = 100; // 100 seconds
+    var quickExpiresIn = 0.05; // 50 ms
 
     function createSubscription(sdk) {
         return sdk.createSubscription({
@@ -15,13 +16,54 @@ describe('RingCentral.subscription.Subscription', function() {
 
         it('automatically renews subscription', asyncTest(function(sdk) {
 
-            subscribeGeneric(expiresIn);
+            subscribeGeneric(quickExpiresIn);
+            subscribeGeneric(10, 'foo-bar-baz'); // should be a good value for future response
 
-            return createSubscription(sdk)
+            var subscription = createSubscription(sdk);
+
+            return subscription
                 .setEventFilters(['foo', 'bar'])
                 .register()
                 .then(function(res) {
-                    expect(res.json().expiresIn).to.equal(expiresIn);
+
+                    expect(res.json().expiresIn).to.equal(quickExpiresIn);
+
+                    return new Promise(function(resolve, reject) {
+                        subscription.on(subscription.events.automaticRenewError, function(e) {
+                            reject(e);
+                        });
+                        subscription.on(subscription.events.automaticRenewSuccess, function() {
+                            resolve(null);
+                        });
+                    });
+
+                });
+
+        }));
+
+        it('captures automatic subscription renew errors', asyncTest(function(sdk) {
+
+            subscribeGeneric(quickExpiresIn);
+            apiCall('PUT', '/restapi/v1.0/subscription/foo-bar-baz', {'message': 'expected'}, 400, 'Bad Request');
+
+            var subscription = createSubscription(sdk);
+
+            return subscription
+                .setEventFilters(['foo', 'bar'])
+                .register()
+                .then(function(res) {
+
+                    return new Promise(function(resolve, reject) {
+                        subscription.on(subscription.events.automaticRenewError, function(e) {
+                            expect(e.message).to.equal('expected');
+                            resolve(null);
+                        });
+                        subscription.on(subscription.events.automaticRenewSuccess, function() {
+                            reject(new Error('This should not be reached'));
+
+                        });
+                    });
+
                 });
 
         }));

@@ -28,7 +28,9 @@ function Subscription(options) {
         renewSuccess: 'renewSuccess',
         renewError: 'renewError',
         subscribeSuccess: 'subscribeSuccess',
-        subscribeError: 'subscribeError'
+        subscribeError: 'subscribeError',
+        automaticRenewSuccess: 'automaticRenewSuccess',
+        automaticRenewError: 'automaticRenewError'
     };
 
     /** @private */
@@ -318,13 +320,29 @@ Subscription.prototype._setTimeout = function() {
 
     this._timeout = setInterval(function() {
 
-        if (this.alive()) return;
-
-        if (this.expired()) {
-            this.subscribe();
-        } else {
-            this.renew();
+        if (this.alive()) {
+            return;
         }
+
+        this._clearTimeout();
+
+        (new this._externals.Promise(function(resolve) {
+
+            if (this.expired()) {
+                resolve(this.subscribe());
+            } else {
+                resolve(this.renew());
+            }
+
+        }.bind(this))).then(function(res) {
+
+            this.emit(this.events.automaticRenewSuccess, res);
+
+        }.bind(this)).catch(function(e) {
+
+            this.emit(this.events.automaticRenewError, e);
+
+        }.bind(this));
 
     }.bind(this), this._pollInterval);
 
