@@ -21,6 +21,30 @@ describe('RingCentral.core.Cache', function() {
 
             expect(cache.setItem('foo', json).getItem('foo')).to.deep.equal(json);
 
+            cache.removeItem('foo');
+
+            expect(cache.getItem('foo')).to.equal(null);
+
+        }));
+
+    });
+
+    describe('clean', function() {
+
+        it('removes all prefixed entries from cache leaving non-prefixed ones untouched', asyncTest(function(sdk) {
+
+            var cache = sdk.cache();
+
+            cache._externals.localStorage['rc-foo'] = '"foo"';
+            cache._externals.localStorage.foo = '"foo"';
+
+            expect(cache.getItem('foo')).to.equal('foo');
+
+            cache.clean();
+
+            expect(cache.getItem('foo')).to.equal(null);
+            expect(cache._externals.localStorage.foo).to.equal('"foo"');
+
         }));
 
     });

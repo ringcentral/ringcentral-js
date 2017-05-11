@@ -3,7 +3,7 @@ describe('RingCentral.subscription.Subscription', function() {
     var pollInterval = 1;
     var renewHandicapMs = 1;
     var expiresIn = 100; // 100 seconds
-    var quickExpiresIn = 0.05; // 50 ms
+    var quickExpiresIn = 0.1; // 50 ms
 
     function createSubscription(sdk) {
         return sdk.createSubscription({

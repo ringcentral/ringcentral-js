@@ -168,12 +168,14 @@ SDK.prototype.createCachedSubscription = function(options) {
 
 };
 
-SDK.handleLoginRedirect = function(origin) {
+SDK.handleLoginRedirect = function(origin, win) {
 
-    var response = window.location.hash ? window.location.hash : window.location.search;
+    win = win || window;
+
+    var response = win.location.hash ? win.location.hash : win.location.search;
     var msg = {};
     msg[Constants.authResponseProperty] = response;
-    window.opener.postMessage(msg, origin || window.location.origin);
+    win.opener.postMessage(msg, origin || win.location.origin);
 
 };
 
@@ -316,6 +318,7 @@ Cache.prototype.clean = function() {
 
     for (var key in this._externals.localStorage) {
 
+        /* istanbul ignore next */
         if (!this._externals.localStorage.hasOwnProperty(key)) continue;
 
         if (key.indexOf(this._prefix) === 0) {
@@ -1061,7 +1064,13 @@ ApiResponse.prototype.multipart = function() {
 
         if (!text) throw new Error('No response body');
 
-        var boundary = this._getContentType().match(/boundary=([^;]+)/i)[1];
+        var boundary;
+
+        try {
+            boundary = this._getContentType().match(/boundary=([^;]+)/i)[1];
+        } catch (e) {
+            throw new Error('Cannot find boundary');
+        }
 
         if (!boundary) throw new Error('Cannot find boundary');
 
@@ -1381,18 +1390,22 @@ function Externals(options) {
     this.Response = options.Response || root.Response || fetchPonyfill.Response;
     this.Headers = options.Headers || root.Headers || fetchPonyfill.Headers;
 
+    /* istanbul ignore next */
     if (!this.fetch || !this.Response || !this.Request || !this.Headers) {
         throw new Error('Fetch API is missing');
     }
 
+    /* istanbul ignore next */
     if (!this.Promise) {
         throw new Error('Promise is missing');
     }
 
+    /* istanbul ignore next */
     if (!this.localStorage) {
         throw new Error('LocalStorage is missing');
     }
 
+    /* istanbul ignore next */
     if (!this.PubNub) {
         throw new Error('PubNub is missing');
     }
@@ -2722,7 +2735,7 @@ Subscription.prototype._subscribeAtPubnub = function() {
  */
 Subscription.prototype._unsubscribeAtPubnub = function() {
 
-    if (!this.subscribed() || this._pubnub) return this;
+    if (!this.subscribed() || !this._pubnub) return this;
 
     this._pubnub.removeAllListeners();
     this._pubnub.destroy(); // this will unsubscribe from all

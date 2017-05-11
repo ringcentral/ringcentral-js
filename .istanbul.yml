@@ -1,0 +1,8 @@
+instrumentation:
+  excludes:
+  - 'src/**/*-spec.js'
+  - 'src/*-spec.js'
+reporting:
+  dir: ./build/coverage
+  reports:
+  - lcov

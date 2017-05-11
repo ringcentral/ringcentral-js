@@ -4,11 +4,11 @@ describe('RingCentral.http.Client', function() {
 
         it('sets default headers & properties for GET', asyncTest(function(sdk) {
 
-            var request = sdk.platform().client().createRequest({url: 'http://foo/bar'});
+            var request = sdk.platform().client().createRequest({url: 'http://foo/bar', query: {foo: 'foo'}});
 
             expect(request.headers.get('Content-Type')).to.equal('application/json');
             expect(request.headers.get('Accept')).to.equal('application/json');
-            expect(request.url).to.equal('http://foo/bar');
+            expect(request.url).to.equal('http://foo/bar?foo=foo');
             expect(request.method).to.equal('GET');
 
         }));

@@ -56,6 +56,78 @@ describe('RingCentral.platform.Platform', function() {
 
     });
 
+    describe('login', function() {
+
+        it('login with code', asyncTest(function(sdk) {
+
+            var platform = sdk.platform();
+
+            platform.auth().cancelAccessToken();
+
+            authentication();
+
+            return platform.login({
+                code: 'foo',
+                endpointId: 'xxx',
+                accessTokenTtl: 100,
+                refreshTokenTtl: 100
+            }).then(function(res) {
+                expect(platform.auth().accessToken()).to.equal('ACCESS_TOKEN');
+            });
+
+        }));
+
+        it('login with access_token', asyncTest(function(sdk) {
+
+            var platform = sdk.platform();
+
+            platform.auth().cancelAccessToken();
+
+            authentication();
+
+            return platform.login({access_token: 'foo'}).then(function(res) {
+                expect(platform.auth().accessToken()).to.equal('foo');
+            });
+
+        }));
+
+        it('login error', asyncTest(function(sdk) {
+
+            var platform = sdk.platform();
+
+            platform.auth().cancelAccessToken();
+
+            apiCall('POST', '/restapi/oauth/token', {'message': 'expected'}, 400);
+
+            return platform.login({code: 'foo'}).then(function(res) {
+                throw new Error('This should not be called');
+            }).catch(function(e) {
+                expect(e.message).to.equal('expected');
+            });
+
+        }));
+
+    });
+
+    describe('loggedIn', function() {
+
+        it('returns false if refresh failed', asyncTest(function(sdk) {
+
+            var platform = sdk.platform();
+
+            platform.auth().cancelAccessToken();
+
+            apiCall('POST', '/restapi/oauth/token', {'message': 'expected'}, 400);
+
+            return platform.loggedIn().then(function(res) {
+                expect(res).to.equal(false);
+            });
+
+        }));
+
+
+    });
+
     describe('sendRequest', function() {
 
         it('refreshes token when token was expired', asyncTest(function(sdk) {
@@ -416,29 +488,30 @@ describe('RingCentral.platform.Platform', function() {
             };
         }
 
+        window.addEventListener = function(eventName, cb, bubble) {
+            window.triggerEvent = function(mock) {
+                cb(mock);
+            };
+        };
+
         it('simple usage', asyncTest(function(sdk) {
 
             var platform = sdk.platform();
             var close = spy();
+            var focus = spy();
 
             window.open = spy(function() {
                 return {
-                    close: close
+                    close: close,
+                    focus: focus
                 };
             });
 
-            window.attachEvent = function(eventName, cb, bubble) {
-                window.triggerEvent = function(mock) {
-                    console.log('TRIGGERED', mock);
-                    cb(mock);
-                };
-            };
-            window.addEventListener = window.attachEvent;
-
-            window.detachEvent = spy();
-            window.removeEventListener = window.detachEvent;
+            window.removeEventListener = spy();
 
             setTimeout(function() {
+                window.triggerEvent({origin: 'bar'});
+                window.triggerEvent({origin: 'foo', data: {foo: 'bar'}});
                 window.triggerEvent({origin: 'foo', data: {RCAuthorizationResponse: '#access_token=foo'}});
             }, 10);
 
@@ -448,6 +521,66 @@ describe('RingCentral.platform.Platform', function() {
             }).then(function(res) {
                 expect(res.access_token).to.equal('foo');
                 expect(close).to.be.calledOnce;
+                expect(focus).to.be.calledOnce;
+            });
+
+        }));
+
+        it('throws an exception if no code and token', asyncTest(function(sdk) {
+
+            var platform = sdk.platform();
+
+            window.open = spy(function() {
+                return {close: spy()};
+            });
+
+            setTimeout(function() {
+                window.triggerEvent({origin: 'foo', data: {RCAuthorizationResponse: '#bar=foo'}});
+            }, 10);
+
+            return platform.loginWindow({
+                url: 'foo',
+                origin: 'foo'
+            }).then(function(res) {
+                throw new Error('This should not be reached');
+            }).catch(function(e) {
+                expect(e.message).to.equal('No authorization code or token');
+            });
+
+        }));
+
+        it('throws an exception if window cannot be open', asyncTest(function(sdk) {
+
+            var platform = sdk.platform();
+
+            window.open = spy(function() {
+                return null;
+            });
+
+            return platform.loginWindow({
+                url: 'foo',
+                origin: 'foo'
+            }).then(function(res) {
+                throw new Error('This should not be reached');
+            }).catch(function(e) {
+                expect(e.message).to.equal('Could not open login window. Please allow popups for this site');
+            });
+
+        }));
+
+        it('throws an exception if no uri option', asyncTest(function(sdk) {
+
+            var platform = sdk.platform();
+
+            window.open = spy(function() {
+                return null;
+            });
+
+            return platform.loginWindow({
+            }).then(function(res) {
+                throw new Error('This should not be reached');
+            }).catch(function(e) {
+                expect(e.message).to.equal('Missing mandatory URL parameter');
             });
 
         }));
@@ -471,6 +604,9 @@ describe('RingCentral.platform.Platform', function() {
             expect(function() {
                 platform.parseLoginRedirect('?error=foo');
             }).to.throw('foo');
+            expect(function() {
+                platform.parseLoginRedirect('xxx');
+            }).to.throw('Unable to parse response');
         }));
     });
 

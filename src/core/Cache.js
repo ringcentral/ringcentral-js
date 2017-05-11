@@ -35,6 +35,7 @@ Cache.prototype.clean = function() {
 
     for (var key in this._externals.localStorage) {
 
+        /* istanbul ignore next */
         if (!this._externals.localStorage.hasOwnProperty(key)) continue;
 
         if (key.indexOf(this._prefix) === 0) {

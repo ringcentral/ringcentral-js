@@ -190,4 +190,84 @@ describe('RingCentral.http.ApiResponse', function() {
 
     });
 
+    describe('multipart', function() {
+
+        it('throws an error when no body', asyncTest(function(sdk) {
+
+            return createResponse(sdk, '', 207, 'Multi-Status', multipartResponseHeaders).then(function(res) {
+                return res.multipart();
+            }).then(function(){
+                throw new Error('This should not be reached');
+            }).catch(function(e) {
+                expect(e.message).to.equal('No response body');
+            });
+
+        }));
+
+        it('throws an error when not multipart', asyncTest(function(sdk) {
+
+            return createResponse(sdk, '', 207, 'Multi-Status', jsonResponseHeaders).then(function(res) {
+                return res.multipart();
+            }).then(function(){
+                throw new Error('This should not be reached');
+            }).catch(function(e) {
+                expect(e.message).to.equal('Response is not multipart');
+            });
+
+        }));
+
+        it('throws an error when no boundary', asyncTest(function(sdk) {
+
+            return createResponse(sdk, 'foobarbaz', 207, 'Multi-Status', {'content-type': 'multipart/mixed'}).then(function(res) {
+                return res.multipart();
+            }).then(function(){
+                throw new Error('This should not be reached');
+            }).catch(function(e) {
+                expect(e.message).to.equal('Cannot find boundary');
+            });
+
+        }));
+
+    });
+
+    describe('toMultipart', function() {
+
+        it('returns an array with self if not multipart', asyncTest(function(sdk) {
+
+            return createResponse(sdk, '{}', 200, 'OK', jsonResponseHeaders).then(function(res) {
+                expect(res.toMultipart()[0]).to.equal(res);
+            });
+
+        }));
+
+    });
+
+    describe('text', function() {
+
+        it('throws an error if not text', asyncTest(function(sdk) {
+
+            return createResponse(sdk, '{}', 200, 'OK', {'content-type': 'foo'}).then(function(res) {
+                expect(function() {
+                    res.text();
+                }).to.throw('Response is not text');
+            });
+
+        }));
+
+    });
+
+    describe('text', function() {
+
+        it('throws an error if not json', asyncTest(function(sdk) {
+
+            return createResponse(sdk, '{}', 200, 'OK', multipartResponseHeaders).then(function(res) {
+                expect(function() {
+                    res.json();
+                }).to.throw('Response is not JSON');
+            });
+
+        }));
+
+    });
+
 });

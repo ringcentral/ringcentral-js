@@ -38,18 +38,22 @@ function Externals(options) {
     this.Response = options.Response || root.Response || fetchPonyfill.Response;
     this.Headers = options.Headers || root.Headers || fetchPonyfill.Headers;
 
+    /* istanbul ignore next */
     if (!this.fetch || !this.Response || !this.Request || !this.Headers) {
         throw new Error('Fetch API is missing');
     }
 
+    /* istanbul ignore next */
     if (!this.Promise) {
         throw new Error('Promise is missing');
     }
 
+    /* istanbul ignore next */
     if (!this.localStorage) {
         throw new Error('LocalStorage is missing');
     }
 
+    /* istanbul ignore next */
     if (!this.PubNub) {
         throw new Error('PubNub is missing');
     }

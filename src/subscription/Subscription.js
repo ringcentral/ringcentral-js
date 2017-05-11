@@ -452,7 +452,7 @@ Subscription.prototype._subscribeAtPubnub = function() {
  */
 Subscription.prototype._unsubscribeAtPubnub = function() {
 
-    if (!this.subscribed() || this._pubnub) return this;
+    if (!this.subscribed() || !this._pubnub) return this;
 
     this._pubnub.removeAllListeners();
     this._pubnub.destroy(); // this will unsubscribe from all

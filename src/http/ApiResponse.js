@@ -154,7 +154,13 @@ ApiResponse.prototype.multipart = function() {
 
         if (!text) throw new Error('No response body');
 
-        var boundary = this._getContentType().match(/boundary=([^;]+)/i)[1];
+        var boundary;
+
+        try {
+            boundary = this._getContentType().match(/boundary=([^;]+)/i)[1];
+        } catch (e) {
+            throw new Error('Cannot find boundary');
+        }
 
         if (!boundary) throw new Error('Cannot find boundary');
 

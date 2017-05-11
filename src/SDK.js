@@ -112,12 +112,14 @@ SDK.prototype.createCachedSubscription = function(options) {
 
 };
 
-SDK.handleLoginRedirect = function(origin) {
+SDK.handleLoginRedirect = function(origin, win) {
 
-    var response = window.location.hash ? window.location.hash : window.location.search;
+    win = win || window;
+
+    var response = win.location.hash ? win.location.hash : win.location.search;
     var msg = {};
     msg[Constants.authResponseProperty] = response;
-    window.opener.postMessage(msg, origin || window.location.origin);
+    win.opener.postMessage(msg, origin || win.location.origin);
 
 };
 

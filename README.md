@@ -1,3 +1,6 @@
+![Coverage Status](https://coveralls.io/repos/github/ringcentral/ringcentral-js/badge.svg?branch=master)
+![TravisCI Status](https://travis-ci.org/ringcentral/ringcentral-js.svg?branch=master)
+
 # Table of contents
 
 - [Key Benefits](#key-benefits)
