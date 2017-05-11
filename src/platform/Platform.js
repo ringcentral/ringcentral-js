@@ -38,7 +38,8 @@ function Platform(options) {
         refreshError: 'refreshError',
         beforeLogout: 'beforeLogout',
         logoutSuccess: 'logoutSuccess',
-        logoutError: 'logoutError'
+        logoutError: 'logoutError',
+        rateLimitError: 'rateLimitError'
     };
 
     options = options || {};
@@ -249,7 +250,7 @@ Platform.prototype.loginWindow = function(options) {
         var top = ((height / 2) - (options.height / 2)) + dualScreenTop;
         var win = window.open(options.url, '_blank', (options.target == '_blank') ? 'scrollbars=yes, status=yes, width=' + options.width + ', height=' + options.height + ', left=' + left + ', top=' + top : '');
 
-        if(!win) {
+        if (!win) {
             throw new Error('Could not open login window. Please allow popups for this site');
         }
 
@@ -512,6 +513,7 @@ Platform.prototype.inflateRequest = function(request, options) {
  * @param {Request} request
  * @param {object} [options]
  * @param {boolean} [options.skipAuthCheck]
+ * @param {boolean|int} [options.handleRateLimit]
  * @param {boolean} [options.retry] Will be set by this method if SDK makes second request
  * @return {Promise<ApiResponse>}
  */
@@ -526,15 +528,40 @@ Platform.prototype.sendRequest = function(request, options) {
     }.bind(this)).catch(function(e) {
 
         // Guard is for errors that come from polling
-        if (!e.apiResponse || !e.apiResponse.response() ||
-            (e.apiResponse.response().status != ApiResponse._unauthorizedStatus) ||
-            options.retry) throw e;
+        if (!e.apiResponse || !e.apiResponse.response() || options.retry) throw e;
 
-        this._auth.cancelAccessToken();
+        var response = e.apiResponse.response();
+        var status = response.status;
+
+        if ((status != ApiResponse._unauthorizedStatus) &&
+            (status != ApiResponse._rateLimitStatus)) throw e;
 
         options.retry = true;
 
-        return this.sendRequest(request, options);
+        var retryAfter = 0;
+
+        if (status == ApiResponse._unauthorizedStatus) {
+            this._auth.cancelAccessToken();
+        }
+
+        if (status == ApiResponse._rateLimitStatus) {
+
+            var defaultRetryAfter = (!options.handleRateLimit || typeof options.handleRateLimit == 'boolean' ? 60 : options.handleRateLimit);
+
+            // FIXME retry-after is custom header, by default, it can't be retrieved. Server should add header: 'Access-Control-Expose-Headers: retry-after'.
+            retryAfter = parseFloat(response.headers.get('retry-after') || defaultRetryAfter) * 1000;
+
+            e.retryAfter = retryAfter;
+
+            this.emit(this.events.rateLimitError, e);
+
+            if (!options.handleRateLimit) throw e;
+
+        }
+
+        return this.delay(retryAfter).then(function() {
+            return this.sendRequest(request, options);
+        }.bind(this));
 
     }.bind(this));
 
@@ -548,6 +575,7 @@ Platform.prototype.sendRequest = function(request, options) {
  * @param {object} [options.query]
  * @param {object} [options.headers]
  * @param {boolean} [options.skipAuthCheck]
+ * @param {boolean|int} [options.handleRateLimit]
  * @return {Promise<ApiResponse>}
  */
 Platform.prototype.send = function(options) {
@@ -567,6 +595,7 @@ Platform.prototype.send = function(options) {
  * @param {object} [options]
  * @param {object} [options.headers]
  * @param {boolean} [options.skipAuthCheck]
+ * @param {boolean|int} [options.handleRateLimit]
  * @return {Promise<ApiResponse>}
  */
 Platform.prototype.get = function(url, query, options) {
@@ -580,6 +609,7 @@ Platform.prototype.get = function(url, query, options) {
  * @param {object} [options]
  * @param {object} [options.headers]
  * @param {boolean} [options.skipAuthCheck]
+ * @param {boolean|int} [options.handleRateLimit]
  * @return {Promise<ApiResponse>}
  */
 Platform.prototype.post = function(url, body, query, options) {
@@ -593,6 +623,7 @@ Platform.prototype.post = function(url, body, query, options) {
  * @param {object} [options]
  * @param {object} [options.headers]
  * @param {boolean} [options.skipAuthCheck]
+ * @param {boolean|int} [options.handleRateLimit]
  * @return {Promise<ApiResponse>}
  */
 Platform.prototype.put = function(url, body, query, options) {
@@ -605,6 +636,7 @@ Platform.prototype.put = function(url, body, query, options) {
  * @param {object} [options]
  * @param {object} [options.headers]
  * @param {boolean} [options.skipAuthCheck]
+ * @param {boolean|int} [options.handleRateLimit]
  * @return {Promise<ApiResponse>}
  */
 Platform.prototype['delete'] = function(url, query, options) {

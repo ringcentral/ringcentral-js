@@ -352,6 +352,7 @@ The platform provides the following events:
 - `logoutError`
 - `refreshSuccess`
 - `refreshError` &mdash; application may listen to this error and show login page
+- `rateLimitError`
 
 To listen on platform events, you should call the `on` method of the platform object:
 
@@ -420,6 +421,12 @@ rcsdk.platform().delete('/account/~/extension/~', {...query}).then(function(...)
 
 If your `Promise` library supports global error handler it might be useful to log Requests and Responses there.
 
+## Rate Limiting
+
+Platform class emits `rateLimitError` if server returns `429` status. You may supply an option `handleRateLimit` and
+SDK will re-execute the failed request. Please keep in mind that your application should somehow delay/throttle other
+subsequent requests in this case because otherwise all those requests will be postponed too.
+
 # Server-side Subscriptions
 
 Subscriptions are a convenient way to receive updates on server-side events, such as new messages or presence changes.
@@ -445,7 +452,7 @@ Once a subscription has been created, the SDK takes care of renewing it automati
 call the subscription instance's `remove()` method:
 
 ```js
-subscription.remove().then(...);
+subscription.remove().then(...).catch(...);
 ```
 
 ## Updating Subscriptions
@@ -500,7 +507,7 @@ subscription.on([subscription.events.subscribeSuccess, subscription.events.renew
     rcsdk.cache().setItem(cacheKey, subscription.subscription());
 });
 
-subscription.register();
+subscription.register().catch(...);
 ```
 
 With this technique subscription remove request on window/tab closing is no longer needed.
@@ -519,12 +526,21 @@ Recommendation is to listen to `subscription.events.renewError` event and when i
 subscription.on(subscription.events.renewError, function() {
     subscription
         .reset()
-        .setEventFilters('...')
-        .register();
+        .setEventFilters('...') // some default set of event filters
+        .register().catch(...);
 });
 ```
 
 This has to be done in all tabs, application must handle potential race conditions.
+
+When SDK cannot automatically renew subscription it will fire an event `automaticRenewError` so that application can do
+some actions in order to have active subscription again:
+
+```js
+subscription.on(subscription.events.automaticRenewError, function() {
+    subscription.resubscribe().catch(...); // or do manual reset with default event filters as in code snippet before
+});
+```
 
 ## Multiple event filters in one Subscription
 
@@ -550,7 +566,7 @@ The above mentioned things are put together into `CachedSubscription` class and 
 var subscription = rcsdk.createCachedSubscription('cache-key').restore(['/account/~/extension/~/presence']);
 
 // use it as usual
-subscription.register();
+subscription.register().catch(...);
 ```
 
 ***

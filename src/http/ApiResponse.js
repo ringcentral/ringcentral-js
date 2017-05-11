@@ -40,6 +40,7 @@ ApiResponse._headerSeparator = ':';
 ApiResponse._bodySeparator = '\n\n';
 ApiResponse._boundarySeparator = '--';
 ApiResponse._unauthorizedStatus = 401;
+ApiResponse._rateLimitStatus = 429;
 
 /**
  * @param {Response} response

@@ -120,6 +120,58 @@ describe('RingCentral.platform.Platform', function() {
 
         }));
 
+        it('handles rate limit 429', asyncTest(function(sdk) {
+
+            var platform = sdk.platform(),
+                path = '/restapi/xxx',
+                rateLimitSpy = spy(function() {}),
+                response = {foo: 'bar'};
+
+            apiCall('GET', path, {message: 'expected'}, 429, 'Rate Limit Exceeded');
+            apiCall('GET', path, response, 200);
+
+            platform.on(platform.events.rateLimitError, rateLimitSpy);
+
+            return platform.get(path, null, {handleRateLimit: 0.01}).then(function(res) {
+
+                expect(rateLimitSpy).to.be.calledOnce;
+
+                var e = rateLimitSpy.getCalls()[0].args[0];
+                expect(e.message).to.equal('expected');
+                expect(e.retryAfter).to.equal(10);
+
+                expect(res.json()).to.deep.equal(response);
+
+            });
+
+        }));
+
+        it('emits rate limit 429 errors if they are not handled', asyncTest(function(sdk) {
+
+            var platform = sdk.platform(),
+                path = '/restapi/xxx',
+                rateLimitSpy = spy(function() {});
+
+            apiCall('GET', path, {message: 'expected'}, 429, 'Rate Limit Exceeded');
+
+            platform.on(platform.events.rateLimitError, rateLimitSpy);
+
+            return platform.get(path).then(function() {
+                throw new Error('This should not be reached');
+            }).catch(function(err) {
+
+                expect(rateLimitSpy.calledOnce).to.equal(true);
+
+                var e = rateLimitSpy.getCalls()[0].args[0];
+                expect(e.message).to.equal('expected');
+                expect(e.retryAfter).to.equal(60000);
+
+                expect(err).to.equal(e);
+
+            });
+
+        }));
+
     });
 
     describe('refresh', function() {
