@@ -12,6 +12,7 @@
 - [Making telephony calls](#making-telephony-calls)
 - [Call management using JavaScript](#call-management-using-javascript)
 - [SMS](#sms)
+- [MMS](#mms)
 - [Fax](#fax)
 - [Page visibility](#page-visibility)
 - [Tracking network Requests And Responses](#tracking-network-requests-and-responses)
@@ -811,6 +812,55 @@ formData.append('attachment', new File(['some plain text'], 'text.txt', {type: '
 // Send the fax
 rcsdk.platform().post('/account/~/extension/~/fax', formData);
 ```
+
+# MMS
+
+As similar to the fax endpoint, `MMS` understands `multipart/form-data` requests. In order to send an MMS using the API, simply make a POST request to `/account/~/extension/~/sms`:
+
+```js
+var body = {
+        from: {phoneNumber: '+12223334444'}, //// Your mms-enabled phone number
+        to: [{phoneNumber: '123'}], // see all available options on Developer Portal
+        faxResolution: 'High'
+    },
+    formData = new FormData();
+
+// This is the mandatory part, the name and type should always be as follows
+formData.append('json', new File([JSON.stringify(body)], 'request.json', {type: 'application/json'}));
+
+// Find the input[type=file] field on the page
+var fileField = document.getElementById('input-type-file-field');
+
+// Iterate through all currently selected files
+for (var i = 0, file; file = fileField.files[i]; ++i) {
+    formData.append('attachment', file); // you can also use file.name instead of 'attachment'
+}
+
+// Send the mms
+rcsdk.platform().post('/account/~/extension/~/sms', formData);
+```
+
+## MMS-Enabled Phone Number
+
+In order to identify the MMS-Enabled phone numbers on an extension, simply make a GET request to `/account/~/extension/~/phone-number`
+
+```js
+var mmsEnabledNumbers = [];
+            platform
+                    .get('/account/~/extension/~/phone-number', {'perPage': 'max'})
+                    .then(function(res) {
+                        var phoneNumbers = res.json().records;
+                        for (var i = 0; i < phoneNumbers.length; i++ ) {
+                            if (phoneNumbers[i].features.indexOf("MmsSender") != -1 ) {
+                                mmsEnabledNumbers.push(phoneNumbers[i].phoneNumber);
+                            }
+                        }
+                    })
+                    .catch(function(e) {
+                        alert('MMS Enabled Phone Number Population Error:\n\n' + e.message);
+                    });
+```
+
 
 Further reading:
 
