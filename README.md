@@ -5,10 +5,10 @@
 
 - [Key Benefits](#key-benefits)
 - [Installation](#installation)
-- [Migration from previous releases](#migration-from-previous-releases)
 - [Getting Started](#getting-started)
 - [API Calls](#api-calls)
 - [Server-side Subscriptions](#server-side-subscriptions)
+- [Advanced SDK Configuration & Polyfills](#advanced-sdk-configuration--polyfills)
 - [Making telephony calls](#making-telephony-calls)
 - [Call management using JavaScript](#call-management-using-javascript)
 - [SMS](#sms)
@@ -16,6 +16,7 @@
 - [Fax](#fax)
 - [Page visibility](#page-visibility)
 - [Tracking network Requests And Responses](#tracking-network-requests-and-responses)
+- [Migration from previous releases](#migration-from-previous-releases)
 
 ***
 
@@ -33,70 +34,19 @@
 
 # Installation
 
+You will need to configure SDK instance with your unique application key & secret this is provided by RingCentral's
+developer relations team.
+
+This instance will be used later on to perform calls to API.
+
+You can also supply optional polyfills and dependency injections, please read the [polyfills](#advanced-sdk-configuration--polyfills)
+section of this readme.
+
 SDK can be used in 3 environments:
 
-1. [Browser](#set-things-up-in-browser)
-2. [NodeJS](#set-things-up-in-nodejs)
-3. [Browserify or Webpack](#set-things-up-for-browserify-or-webpack)
-
-## Set things up in Browser
-
-### Get the code
-
-Pick the option that works best for you:
-
-- **Preferred way to install SDK is to use Bower**, all dependencies will be downloaded to `bower_components` directory:
-
-    ```sh
-    bower install ringcentral --save
-    ```
-
-- Use CDN **Attention! Versions listed here may be outdated**:
-    - https://cdn.rawgit.com/ringcentral/ringcentral-js/master/build/ringcentral.js
-    - https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.1/fetch.js
-    - https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.js
-    - https://cdn.pubnub.com/pubnub-3.15.2.js
-
-- Donwload everything manually *(not recommended)*:
-    - [ZIP file with source code](https://github.com/ringcentral/ringcentral-js/archive/master.zip)
-    - [Fetch](https://github.com/github/fetch), direct download: [fetch.js](https://raw.githubusercontent.com/github/fetch/master/fetch.js)
-    - [ES6 Promise](https://github.com/jakearchibald/es6-promise), direct download: [es6-promise.js](https://raw.githubusercontent.com/jakearchibald/es6-promise/master/dist/es6-promise.js)
-    - [PUBNUB](https://github.com/pubnub/javascript), direct download: [pubnub.js](https://raw.githubusercontent.com/pubnub/javascript/master/web/pubnub.js)
-
-### Add scripts to HTML page (if you are not using any module loaders)
-
-Add the following to your HTML:
-
-```html
-<script type="text/javascript" src="path-to-scripts/es6-promise/promise.js"></script>
-<script type="text/javascript" src="path-to-scripts/fetch/fetch.js"></script>
-<script type="text/javascript" src="path-to-scripts/pubnub/web/pubnub.js"></script>
-<script type="text/javascript" src="path-to-scripts/ringcentral/build/ringcentral.js"></script><!-- or ringcentral.min.js -->
-<script type="text/javascript">
-
-    var sdk = new RingCentral.SDK(...);
-
-</script>
-```
-
-### If you use RequireJS in your project
-
-```js
-// Add this to your RequireJS configuration file
-require.config({
-    paths: {
-        'pubnub': 'path-to-scripts/pubnub/web/pubnub',
-        'ringcentral': 'path-to-scripts/ringcentral/build/ringcentral', // or ringcentral.min
-    }
-});
-
-// Then you can use the SDK like any other AMD component
-require(['ringcentral'], function(SDK) {
-    var sdk = new SDK(...);
-});
-```
-
-Make sure that polyfills are added to the page before or together with SDK.
+1. [NodeJS](#set-things-up-in-nodejs)
+2. [Browserify or Webpack](#set-things-up-for-browserify-or-webpack)
+3. [Browser](#set-things-up-in-browser)
 
 ## Set things up in NodeJS
 
@@ -110,7 +60,12 @@ Make sure that polyfills are added to the page before or together with SDK.
 
     ```js
     var SDK = require('ringcentral');
-    var sdk = new SDK(...);
+    var rcsdk = new SDK({ 
+        server: SDK.server.sandbox, 
+        appKey: 'yourAppKey',
+        appSecret: 'yourAppSecret',
+        redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
+    });
     ```
 
 ## Set things up for Browserify or Webpack
@@ -118,77 +73,83 @@ Make sure that polyfills are added to the page before or together with SDK.
 Follow installation steps for NodeJS. Don't forget to add `target: 'web'` to your `webpack.config.js` to tell Webpack to
 pick proper `PUNBUB` and `fetch` implementations.
 
-## Polyfills for old browsers
+## Set things up in Browser
 
-You can use any of your favourite `fetch()` and `Promise` polyfills. SDK tries to get them from global scope every
-time new instance is created.
+### Get the code
 
-In rare case when SDK will not detect globals automatically you can set them as follows:
+Pick the option that works best for you:
 
-```js
-window.Promise = whatever;
-window.fetch = whatever;
-window.Headers = whatever;
-window.Request = whatever;
-window.Response = whatever;
+- Use CDN **Attention! Versions listed here may be outdated**:
+    - https://cdn.rawgit.com/ringcentral/ringcentral-js/master/build/ringcentral.js
+    - https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.1/fetch.js
+    - https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.js
+    - https://cdn.pubnub.com/pubnub-3.15.2.js
+
+- Donwload everything manually:
+    - [ZIP file with source code](https://github.com/ringcentral/ringcentral-js/archive/master.zip)
+    - [Fetch](https://github.com/github/fetch), direct download: [fetch.js](https://raw.githubusercontent.com/github/fetch/master/fetch.js)
+    - [ES6 Promise](https://github.com/jakearchibald/es6-promise), direct download: [es6-promise.js](https://raw.githubusercontent.com/jakearchibald/es6-promise/master/dist/es6-promise.js)
+    - [PUBNUB](https://github.com/pubnub/javascript), direct download: [pubnub.js](https://raw.githubusercontent.com/pubnub/javascript/master/web/pubnub.js)
+
+- Use Bower, all dependencies will be downloaded to `bower_components` directory:
+
+    ```sh
+    bower install ringcentral --save
+    ```
+
+### Add scripts to HTML page (if you are not using any module loaders)
+
+The SDK is represented by the global RingCentral constructor. Your application must create an instance of this object:
+
+Add the following to your HTML:
+
+```html
+<script type="text/javascript" src="path-to-scripts/es6-promise/promise.js"></script>
+<script type="text/javascript" src="path-to-scripts/fetch/fetch.js"></script>
+<script type="text/javascript" src="path-to-scripts/pubnub/web/pubnub.js"></script>
+<script type="text/javascript" src="path-to-scripts/ringcentral/build/ringcentral.js"></script><!-- or ringcentral.min.js -->
+<script type="text/javascript">
+
+    var rcsdk = new RingCentral.SDK({
+        server: RingCentral.SDK.server.sandbox, 
+        appKey: 'yourAppKey',
+        appSecret: 'yourAppSecret',
+        redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
+    });
+
+</script>
 ```
 
-Also you can manually define SDK properties:
+### If you use RequireJS in your project
 
 ```js
-var sdk = new SDK({
-    localStorage: whatever,
-    PUBNUB: whatever,
-    Promise: whatever,
-    fetch: whatever,
-    Headers: whatever,
-    Request: whatever,
-    Response: whatever,
+// Add this to your RequireJS configuration file
+require.config({
+    paths: {
+        'pubnub': 'path-to-scripts/pubnub/web/pubnub',
+        'ringcentral': 'path-to-scripts/ringcentral/build/ringcentral' // or ringcentral.min
+    }
+});
+
+// Then you can use the SDK like any other AMD component
+require(['ringcentral'], function(SDK) {
+    var rcsdk = new SDK({
+        server: SDK.server.sandbox, 
+        appKey: 'yourAppKey',
+        appSecret: 'yourAppSecret',
+        redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
+    });
 });
 ```
 
-But taking into account the nature of polyfills, it's better to keep them global as described before.
-
-***
-
-# Migration from previous releases
-
-**!!! Attention !!!**
-
-**In SDK version 2.0 Helpers were moved to separate repository: [ringcentral-js-helpers](https://github.com/ringcentral/ringcentral-js-helpers).**
-
-A lot of code improvements were implemented in order to make SDK compatible with WhatWG Fetch, DOM Requests &
-DOM Responses: see [full list of migration instructions](CHANGELOG.md).
+Make sure that [polyfills](#advanced-sdk-configuration--polyfills) are added to the page before or together with SDK and
+SDK is [configured](#advanced-sdk-configuration--polyfills) to use them.
 
 ***
 
 # Getting Started
 
 Read [API documentation](API.md) for more information.
-
-## Instantiate the RingCentral object
-
-The SDK is represented by the global RingCentral constructor. Your application must create an instance of this object:
-
-In order to bootstrap the RingCentral JavaScript SDK, you have to first get a reference to the Platform object and
-then configure it. Before you can do anything using the Platform object, you need to configure it with the server URL
-(this tells the SDK which server to connect to) and your unique API key (this is provided by RingCentral's developer
-relations team).
-
-```js
-var rcsdk = new RingCentral.SDK({
-    server: RingCentral.SDK.server.sandbox,
-//  server: RingCentral.SDK.server.production,
-    appKey: 'yourAppKey',
-    appSecret: 'yourAppSecret'
-    //redirectUri: '' // optional
-});
-```
-
-This instance will be used later on to perform calls to API.
-
-If you need to use 2 or more RingCentral accounts simultaneously, you need to create an instance of SDK for each account
-and provide some unique `cachePrefix` to SDK constructor (otherwise instances will share authentication).
 
 ## Get the Platform object
 
@@ -338,6 +299,17 @@ If you just need to check whether the user has a valid token, you can call the `
 rcsdk.platform().auth().accessTokenValid(); // returns boolean
 ```
 
+## Retrieveing and setting auth information
+
+You can retrieve save and set back the auth information:
+
+```js
+var authData = rcsdk.platform().auth().data();
+rcsdk.platform().auth().data(authData);
+```
+
+It can be useful on the server if SDK instances are creted and disposed for every HTTP request.
+
 ## Logout
 
 Logging the user out is trivial - just call the `logout` method on the platform object:
@@ -369,18 +341,6 @@ platform.on(platform.events.refreshError, function(e){
 ```
 
 The `on` method accepts an event type as its first argument and a handler function as its second argument.
-
-## Cache
-
-In the NodeJS it might be useful to replace simple built-in storage with something persistent:
-
-```js
-var sdk = new SDK({
-    localStorage: whatever
-});
-```
-
-SDK works with `localStorage` as with a simple object.
 
 # API calls
 
@@ -415,15 +375,86 @@ rcsdk.platform()
 
     });
 
-// Shorthand methods
-
-rcsdk.platform().get('/account/~/extension/~', {...query}).then(...);
-rcsdk.platform().post('/account/~/extension/~', {...body}, {...query}).then(...);
-rcsdk.platform().put('/account/~/extension/~', {...body}, {...query}).then(...);
-rcsdk.platform().delete('/account/~/extension/~', {...query}).then(function(...);
 ```
 
 If your `Promise` library supports global error handler it might be useful to log Requests and Responses there.
+
+## HTTP Verb shorthands
+
+```js
+rcsdk.platform().get('/account/~/extension/~', {...query}).then(...);
+rcsdk.platform().post('/account/~/extension/~', {...body}, {...query}).then(...);
+rcsdk.platform().put('/account/~/extension/~', {...body}, {...query}).then(...);
+rcsdk.platform().delete('/account/~/extension/~', {...query}).then(...);
+```
+
+## Available API response methods
+
+- `json()` &mdash; if response type is JSON returns a plain JS object
+- `text()` &mdash; returns text representation
+- `multipart()` &mdash; for `Content-Type: multipart/mixed` responses returns an array of `ApiResponse`
+- `toMultipart()` &mdash; same as `multipart()` but when response is not `Content-Type: multipart/mixed` it will return an array with one item instead of error
+- `ok()` &mdash; `true` for all `2xx` responses, `false` otherwise
+- `error()` &mdash; error string if any
+- `request()` &mdash; low-level `Request` object
+- `response()` &mdash; low-level `Response` object
+
+## Binary downloads
+
+If you need to download a binary file from API (call recording, fax attachment), you can do it as follows:
+
+### On NodeJS
+
+```js
+var fs = require('fs');
+
+// read as buffer
+rcsdk.platform().get('/account/~/messages/foo/content').then(function(res) {
+    
+    return res.response().buffer(); // we are accessing Node Fetch's Response
+    
+}).then(function(buffer) {
+    
+    fs.writeFileSync('./octocat.png', buffer);
+    
+});
+
+// read as stream
+rcsdk.platform().get('/account/~/messages/foo/content').then(function(res) {
+    
+    res.response().body.pipe(fs.createWriteStream('./octocat.png')); // we are accessing Node Fetch's Response
+    
+});
+```
+
+See more here [https://github.com/bitinn/node-fetch#usage](https://github.com/bitinn/node-fetch#usage).
+
+### In browser
+ 
+```js
+rcsdk.platform().get('/account/~/messages/foo/content').then(function(res) {
+
+    return res.response().blob(); // or arrayBuffer(), we are accessing WhatWG Fetch's Response
+
+}).then(function(blob ){
+    
+    var img = document.createElement('img');
+    img.src = URL.createObjectURL(blob);
+    document.getElementById('container').appendChild(img);
+    
+});
+```
+
+See more here [https://developer.mozilla.org/en-US/docs/Web/API/Response](https://developer.mozilla.org/en-US/docs/Web/API/Response).
+
+### Generic
+
+In any case you always can just add token to known URL of resource and download it using whatever library you want or
+use directly as `<img src="..."/>`:
+
+```js
+var url = rcsdk.platform().createUrl('/account/~/messages/foo/content', {addServer: true, addToken: true});
+```
 
 ## Rate Limiting
 
@@ -571,6 +602,62 @@ var subscription = rcsdk.createCachedSubscription('cache-key').restore(['/accoun
 
 // use it as usual
 subscription.register().catch(...);
+```
+
+***
+
+# Advanced SDK Configuration & Polyfills
+
+You can use any of your favourite `fetch()` and `Promise` polyfills. SDK tries to get them from global scope every
+time new instance is created.
+
+In rare case when SDK will not detect globals automatically you can set them as follows:
+
+```js
+window.Promise = whatever;
+window.fetch = whatever;
+window.Headers = whatever;
+window.Request = whatever;
+window.Response = whatever;
+```
+
+Also you can manually define SDK properties:
+
+```js
+var rcsdk = new SDK({
+    localStorage: whatever,
+    PUBNUB: whatever,
+    Promise: whatever,
+    fetch: whatever,
+    Headers: whatever,
+    Request: whatever,
+    Response: whatever
+});
+```
+
+But taking into account the nature of polyfills, it's better to keep them global as described before.
+
+In the NodeJS it might be useful to replace simple built-in storage with something persistent:
+
+```js
+var sdk = new SDK({
+    localStorage: whatever
+});
+```
+
+SDK works with `localStorage` as with a simple object.
+
+If you need to use 2 or more RingCentral accounts simultaneously, you need to create an instance of SDK for each account
+and provide some unique `cachePrefix` to SDK constructor (otherwise instances will share authentication).
+
+```js
+var rcsdk1 = new SDK({
+    cachePrefix: 'foo-'
+});
+
+var rcsdk2 = new SDK({
+    cachePrefix: 'bar-'
+});
 ```
 
 ***
@@ -846,19 +933,19 @@ In order to identify the MMS-Enabled phone numbers on an extension, simply make 
 
 ```js
 var mmsEnabledNumbers = [];
-            platform
-                    .get('/account/~/extension/~/phone-number', {'perPage': 'max'})
-                    .then(function(res) {
-                        var phoneNumbers = res.json().records;
-                        for (var i = 0; i < phoneNumbers.length; i++ ) {
-                            if (phoneNumbers[i].features.indexOf("MmsSender") != -1 ) {
-                                mmsEnabledNumbers.push(phoneNumbers[i].phoneNumber);
-                            }
-                        }
-                    })
-                    .catch(function(e) {
-                        alert('MMS Enabled Phone Number Population Error:\n\n' + e.message);
-                    });
+    platform
+        .get('/account/~/extension/~/phone-number', {'perPage': 'max'})
+        .then(function(res) {
+            var phoneNumbers = res.json().records;
+            for (var i = 0; i < phoneNumbers.length; i++ ) {
+                if (phoneNumbers[i].features.indexOf("MmsSender") != -1 ) {
+                    mmsEnabledNumbers.push(phoneNumbers[i].phoneNumber);
+                }
+            }
+        })
+        .catch(function(e) {
+            alert('MMS Enabled Phone Number Population Error:\n\n' + e.message);
+        });
 ```
 
 
@@ -934,3 +1021,14 @@ client.on(client.events.beforeRequest, function(apiResponse) {}); // apiResponse
 client.on(client.events.requestSuccess, function(apiResponse) {});
 client.on(client.events.requestError, function(apiError) {});
 ```
+
+***
+
+# Migration from previous releases
+
+**!!! Attention !!!**
+
+**In SDK version 2.0 Helpers were moved to separate repository: [ringcentral-js-helpers](https://github.com/ringcentral/ringcentral-js-helpers).**
+
+A lot of code improvements were implemented in order to make SDK compatible with WhatWG Fetch, DOM Requests &
+DOM Responses: see [full list of migration instructions](CHANGELOG.md).

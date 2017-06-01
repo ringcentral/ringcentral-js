@@ -17,10 +17,7 @@
         var chai = require("chai");
         var sinon = require("sinon");
         var SDK = require("../SDK");
-
-        //FIXME @see https://github.com/wheresrhys/fetch-mock/issues/150
-        //FIXME @see https://github.com/wheresrhys/fetch-mock#environment-doesnt-support-requiring-fetch-mock
-        var fetchMock = require("fetch-mock/es5/server");
+        var fetchMock = require("fetch-mock");
 
         require('sinon-chai');
 

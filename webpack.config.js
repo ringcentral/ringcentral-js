@@ -33,20 +33,6 @@
             chunkFilename: "[id].chunk.js"
         },
 
-        resolve: {
-            extensions: ['', '.js'],
-            alias: {
-                //FIXME @see https://github.com/wheresrhys/fetch-mock/issues/150
-                'fetch-mock/es5/server': 'fetch-mock/es5/client'
-            }
-        },
-
-        module: {
-            loaders: [
-                {test: /\.json$/, loader: 'json'}
-            ]
-        },
-
         node: {
             http: false,
             Buffer: false,
