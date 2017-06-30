@@ -85,7 +85,7 @@ Pick the option that works best for you:
     - https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.js
     - https://cdn.pubnub.com/pubnub-3.15.2.js
 
-- Donwload everything manually:
+- Download everything manually:
     - [ZIP file with source code](https://github.com/ringcentral/ringcentral-js/archive/master.zip)
     - [Fetch](https://github.com/github/fetch), direct download: [fetch.js](https://raw.githubusercontent.com/github/fetch/master/fetch.js)
     - [ES6 Promise](https://github.com/jakearchibald/es6-promise), direct download: [es6-promise.js](https://raw.githubusercontent.com/jakearchibald/es6-promise/master/dist/es6-promise.js)
@@ -142,8 +142,8 @@ require(['ringcentral'], function(SDK) {
 });
 ```
 
-Make sure that [polyfills](#advanced-sdk-configuration--polyfills) are added to the page before or together with SDK and
-SDK is [configured](#advanced-sdk-configuration--polyfills) to use them.
+Make sure that [polyfills](#advanced-sdk-configuration--polyfills) are added to the page before or together with the SDK.
+Make sure SDK is [configured](#advanced-sdk-configuration--polyfills) to use polyfills.
 
 ***
 
@@ -157,8 +157,8 @@ Read [API documentation](API.md) for more information.
 var platform = rcsdk.platform();
 ```
 
-Now that you have your platform object and SDK has been configured with the correct server URL and API key, your
-application can log in so that it can access the features of the API.
+Now that you have your platform object and the SDK has been configured with the correct server URL and API key, your
+application can now log in and access the features of this API.
 
 ## Login
 
@@ -299,7 +299,7 @@ If you just need to check whether the user has a valid token, you can call the `
 rcsdk.platform().auth().accessTokenValid(); // returns boolean
 ```
 
-## Retrieveing and setting auth information
+## Retrieving and setting auth information
 
 You can retrieve save and set back the auth information:
 
@@ -308,7 +308,7 @@ var authData = rcsdk.platform().auth().data();
 rcsdk.platform().auth().data(authData);
 ```
 
-It can be useful on the server if SDK instances are creted and disposed for every HTTP request.
+It can be useful on the server if SDK instances are created and disposed for every HTTP request.
 
 ## Logout
 
@@ -580,7 +580,7 @@ subscription.on(subscription.events.automaticRenewError, function() {
 ## Multiple event filters in one Subscription
 
 The best practice is to have only one subscription object with multiple event filters of different types (messages,
-presence, etc.) instead of having separate subscription for each individual event filter.
+presence, etc.) instead of having a separate subscription for each individual event filter.
 
 In the notification event handler application may have a bunch of if's that will execute appropriate action based on
 `event` property of the incoming message:
@@ -664,7 +664,7 @@ var rcsdk2 = new SDK({
 
 # Making telephony calls
 
-In RingCentral terminology making telephony calls is named as RingOut.
+In RingCentral terminology, making telephony calls is named "RingOut".
 
 This example demonstrates a way to create a flexible RingOut tracking procedure. This is the most complex example with
 maximum fine-tuning - it could be simplified to suit the business requirements.
@@ -995,14 +995,14 @@ Further reading:
 
 # Page visibility
 
-You can use any of the libraties that work with the [Page Visibility API](http://www.w3.org/TR/page-visibility/),
+You can use any of the libraries that work with the [Page Visibility API](http://www.w3.org/TR/page-visibility/),
 such as [visibility.js](https://github.com/ai/visibilityjs).
 
 This allows tracking the visibility of the page/tab/window/frame so that the application can react accordingly.
 Following are some actions that the application may wish to take whenever it becomes visible:
 
 - Check authentication
-- Reload/resync time-sensitinve information from the server
+- Reload/resync time-sensitive information from the server
 - Send heartbeats to the server
 
 Another usage is to reduce the number of Call Log or Messages reloads when the application is not visible. The SDK does
