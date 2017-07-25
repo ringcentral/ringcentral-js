@@ -52,7 +52,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 /**
  * @namespace RingCentral
@@ -181,19 +181,12 @@ SDK.handleLoginRedirect = function(origin, win) {
 
 module.exports = SDK;
 
-/***/ }),
+/***/ },
 /* 1 */
-/***/ (function(module, exports) {
-
-/*
-object-assign
-(c) Sindre Sorhus
-@license MIT
-*/
+/***/ function(module, exports) {
 
 'use strict';
 /* eslint-disable no-unused-vars */
-var getOwnPropertySymbols = Object.getOwnPropertySymbols;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
@@ -214,7 +207,7 @@ function shouldUseNative() {
 		// Detect buggy property enumeration order in older V8 versions.
 
 		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
+		var test1 = new String('abc');  // eslint-disable-line
 		test1[5] = 'de';
 		if (Object.getOwnPropertyNames(test1)[0] === '5') {
 			return false;
@@ -243,7 +236,7 @@ function shouldUseNative() {
 		}
 
 		return true;
-	} catch (err) {
+	} catch (e) {
 		// We don't expect any of the above to throw, but better to be safe.
 		return false;
 	}
@@ -263,8 +256,8 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 			}
 		}
 
-		if (getOwnPropertySymbols) {
-			symbols = getOwnPropertySymbols(from);
+		if (Object.getOwnPropertySymbols) {
+			symbols = Object.getOwnPropertySymbols(from);
 			for (var i = 0; i < symbols.length; i++) {
 				if (propIsEnumerable.call(from, symbols[i])) {
 					to[symbols[i]] = from[symbols[i]];
@@ -277,9 +270,9 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 };
 
 
-/***/ }),
+/***/ },
 /* 2 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 /**
  * @param {Externals} options.externals
@@ -337,9 +330,9 @@ Cache.prototype._prefixKey = function(key) {
 
 module.exports = Cache;
 
-/***/ }),
+/***/ },
 /* 3 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var isPlainObject = __webpack_require__(4);
 var EventEmitter = __webpack_require__(6).EventEmitter;
@@ -534,15 +527,15 @@ Client.prototype.createRequest = function(init) {
 
 module.exports = Client;
 
-/***/ }),
+/***/ },
 /* 4 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 /*!
  * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
  *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
 
 'use strict';
@@ -556,30 +549,30 @@ function isObjectObject(o) {
 
 module.exports = function isPlainObject(o) {
   var ctor,prot;
-
+  
   if (isObjectObject(o) === false) return false;
-
+  
   // If has modified constructor
   ctor = o.constructor;
   if (typeof ctor !== 'function') return false;
-
+  
   // If has modified prototype
   prot = ctor.prototype;
   if (isObjectObject(prot) === false) return false;
-
+  
   // If constructor does not have an Object-specific method
   if (prot.hasOwnProperty('isPrototypeOf') === false) {
     return false;
   }
-
+  
   // Most likely a plain Object
   return true;
 };
 
 
-/***/ }),
+/***/ },
 /* 5 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 /*!
  * isobject <https://github.com/jonschlinkert/isobject>
@@ -591,13 +584,14 @@ module.exports = function isPlainObject(o) {
 'use strict';
 
 module.exports = function isObject(val) {
-  return val != null && typeof val === 'object' && Array.isArray(val) === false;
+  return val != null && typeof val === 'object'
+    && !Array.isArray(val);
 };
 
 
-/***/ }),
+/***/ },
 /* 6 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -903,9 +897,9 @@ function isUndefined(arg) {
 }
 
 
-/***/ }),
+/***/ },
 /* 7 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 /**
  * @param {Externals} options.externals
@@ -1179,9 +1173,9 @@ ApiResponse.prototype._create = function(text, status, statusText) {
 
 module.exports = ApiResponse;
 
-/***/ }),
+/***/ },
 /* 8 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
@@ -1189,9 +1183,9 @@ exports.decode = exports.parse = __webpack_require__(9);
 exports.encode = exports.stringify = __webpack_require__(10);
 
 
-/***/ }),
+/***/ },
 /* 9 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1275,9 +1269,9 @@ module.exports = function(qs, sep, eq, options) {
 };
 
 
-/***/ }),
+/***/ },
 /* 10 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1345,9 +1339,9 @@ module.exports = function(obj, sep, eq, name) {
 };
 
 
-/***/ }),
+/***/ },
 /* 11 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var pubnub = __webpack_require__(12);
 var es6Promise = __webpack_require__(13);
@@ -1415,27 +1409,27 @@ module.exports = Externals;
 
 /* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ }),
+/***/ },
 /* 12 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE_12__;
 
-/***/ }),
+/***/ },
 /* 13 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE_13__;
 
-/***/ }),
+/***/ },
 /* 14 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE_14__;
 
-/***/ }),
+/***/ },
 /* 15 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var EventEmitter = __webpack_require__(6).EventEmitter;
 var qs = __webpack_require__(8);
@@ -2136,9 +2130,9 @@ Platform.prototype._authHeader = function() {
 
 module.exports = Platform;
 
-/***/ }),
+/***/ },
 /* 16 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 /**
  * @param {Cache} options.cache
@@ -2260,9 +2254,9 @@ module.exports = Auth;
 //}
 
 
-/***/ }),
+/***/ },
 /* 17 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var version = ("3.1.2");
 
@@ -2276,9 +2270,9 @@ module.exports = {
     authResponseProperty: 'RCAuthorizationResponse'
 };
 
-/***/ }),
+/***/ },
 /* 18 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var EventEmitter = __webpack_require__(6).EventEmitter;
 
@@ -2361,7 +2355,7 @@ Subscription.prototype.subscribed = function() {
  * @return {boolean}
  */
 Subscription.prototype.alive = function() {
-    return this.subscribed() && Date.now() < this.expirationTime();
+    return this.subscribed() && Date.now() < (this.expirationTime() - this._renewHandicapMs);
 };
 
 /**
@@ -2369,11 +2363,36 @@ Subscription.prototype.alive = function() {
  */
 Subscription.prototype.expired = function() {
     if (!this.subscribed()) return true;
-    return !this.subscribed() || Date.now() > this.subscription().expirationTime;
+    return !this.subscribed() || Date.now() > this.expirationTime();
 };
 
 Subscription.prototype.expirationTime = function() {
-    return new Date(this.subscription().expirationTime || 0).getTime() - this._renewHandicapMs;
+    var expirationTime = this.subscription().expirationTime || 0;
+    // detect timezone string in the form +00, +0000, or +00:00 and
+    // make them ie11 friendly
+    if (/\+[\d]{2}:?([\d]{2})?$/.test(expirationTime)) {
+        var tokens = expirationTime.split('+');
+        switch(tokens[1].length) {
+            case 2:
+                // +00 => +00:00
+                tokens[1] = tokens[1] + ':00';
+                expirationTime = tokens.join('+');
+                break;
+            case 4:
+                // +0000 => +00:00
+                tokens[1] = tokens[1].substr(0, 2) + ':' + tokens[1].substr(2);
+                expirationTime = tokens.join('+');
+                break;
+            case 5:
+                // no change required
+                expirationTime = tokens.join('+');
+                break;
+            default:
+                expirationTime = tokens[0];
+                break;
+        }
+    }
+    return new Date(expirationTime).getTime();
 };
 
 /**
@@ -2755,7 +2774,7 @@ module.exports = Subscription;
  * @property {string} [id]
  * @property {string} [uri]
  * @property {string[]} [eventFilters]
- * @property {string} [expirationTime] Format: 2014-03-12T19:54:35.613Z
+ * @property {string} [expirationTime] Format: 2014-03-12T19:54:35.613+0000
  * @property {int} [expiresIn]
  * @property {string} [deliveryMode.transportType]
  * @property {boolean} [deliveryMode.encryption]
@@ -2767,9 +2786,9 @@ module.exports = Subscription;
  * @property {string} [status] Active
  */
 
-/***/ }),
+/***/ },
 /* 19 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var Subscription = __webpack_require__(18);
 
@@ -2831,7 +2850,7 @@ CachedSubscription.prototype.restore = function(events) {
 
 module.exports = CachedSubscription;
 
-/***/ })
+/***/ }
 /******/ ])
 });
 ;

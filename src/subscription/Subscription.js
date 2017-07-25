@@ -79,7 +79,7 @@ Subscription.prototype.subscribed = function() {
  * @return {boolean}
  */
 Subscription.prototype.alive = function() {
-    return this.subscribed() && Date.now() < this.expirationTime();
+    return this.subscribed() && Date.now() < (this.expirationTime() - this._renewHandicapMs);
 };
 
 /**
@@ -87,11 +87,36 @@ Subscription.prototype.alive = function() {
  */
 Subscription.prototype.expired = function() {
     if (!this.subscribed()) return true;
-    return !this.subscribed() || Date.now() > this.subscription().expirationTime;
+    return !this.subscribed() || Date.now() > this.expirationTime();
 };
 
 Subscription.prototype.expirationTime = function() {
-    return new Date(this.subscription().expirationTime || 0).getTime() - this._renewHandicapMs;
+    var expirationTime = this.subscription().expirationTime || 0;
+    // detect timezone string in the form +00, +0000, or +00:00 and
+    // make them ie11 friendly
+    if (/\+[\d]{2}:?([\d]{2})?$/.test(expirationTime)) {
+        var tokens = expirationTime.split('+');
+        switch(tokens[1].length) {
+            case 2:
+                // +00 => +00:00
+                tokens[1] = tokens[1] + ':00';
+                expirationTime = tokens.join('+');
+                break;
+            case 4:
+                // +0000 => +00:00
+                tokens[1] = tokens[1].substr(0, 2) + ':' + tokens[1].substr(2);
+                expirationTime = tokens.join('+');
+                break;
+            case 5:
+                // no change required
+                expirationTime = tokens.join('+');
+                break;
+            default:
+                expirationTime = tokens[0];
+                break;
+        }
+    }
+    return new Date(expirationTime).getTime();
 };
 
 /**
@@ -473,7 +498,7 @@ module.exports = Subscription;
  * @property {string} [id]
  * @property {string} [uri]
  * @property {string[]} [eventFilters]
- * @property {string} [expirationTime] Format: 2014-03-12T19:54:35.613Z
+ * @property {string} [expirationTime] Format: 2014-03-12T19:54:35.613+0000
  * @property {int} [expiresIn]
  * @property {string} [deliveryMode.transportType]
  * @property {boolean} [deliveryMode.encryption]
