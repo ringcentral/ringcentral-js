@@ -52,7 +52,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 /**
  * @namespace RingCentral
@@ -181,9 +181,9 @@ SDK.handleLoginRedirect = function(origin, win) {
 
 module.exports = SDK;
 
-/***/ }),
+/***/ },
 /* 1 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 /*
 object-assign
@@ -277,9 +277,9 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 };
 
 
-/***/ }),
+/***/ },
 /* 2 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 /**
  * @param {Externals} options.externals
@@ -337,9 +337,9 @@ Cache.prototype._prefixKey = function(key) {
 
 module.exports = Cache;
 
-/***/ }),
+/***/ },
 /* 3 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var isPlainObject = __webpack_require__(4);
 var EventEmitter = __webpack_require__(6).EventEmitter;
@@ -534,9 +534,9 @@ Client.prototype.createRequest = function(init) {
 
 module.exports = Client;
 
-/***/ }),
+/***/ },
 /* 4 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 /*!
  * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
@@ -577,15 +577,15 @@ module.exports = function isPlainObject(o) {
 };
 
 
-/***/ }),
+/***/ },
 /* 5 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 /*!
  * isobject <https://github.com/jonschlinkert/isobject>
  *
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License.
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
  */
 
 'use strict';
@@ -595,9 +595,9 @@ module.exports = function isObject(val) {
 };
 
 
-/***/ }),
+/***/ },
 /* 6 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -903,9 +903,9 @@ function isUndefined(arg) {
 }
 
 
-/***/ }),
+/***/ },
 /* 7 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 /**
  * @param {Externals} options.externals
@@ -1179,9 +1179,9 @@ ApiResponse.prototype._create = function(text, status, statusText) {
 
 module.exports = ApiResponse;
 
-/***/ }),
+/***/ },
 /* 8 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 'use strict';
 
@@ -1189,9 +1189,9 @@ exports.decode = exports.parse = __webpack_require__(9);
 exports.encode = exports.stringify = __webpack_require__(10);
 
 
-/***/ }),
+/***/ },
 /* 9 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1275,9 +1275,9 @@ module.exports = function(qs, sep, eq, options) {
 };
 
 
-/***/ }),
+/***/ },
 /* 10 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1345,9 +1345,9 @@ module.exports = function(obj, sep, eq, name) {
 };
 
 
-/***/ }),
+/***/ },
 /* 11 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var pubnub = __webpack_require__(12);
 var es6Promise = __webpack_require__(13);
@@ -1415,27 +1415,27 @@ module.exports = Externals;
 
 /* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ }),
+/***/ },
 /* 12 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE_12__;
 
-/***/ }),
+/***/ },
 /* 13 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE_13__;
 
-/***/ }),
+/***/ },
 /* 14 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE_14__;
 
-/***/ }),
+/***/ },
 /* 15 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var EventEmitter = __webpack_require__(6).EventEmitter;
 var qs = __webpack_require__(8);
@@ -1832,12 +1832,14 @@ Platform.prototype._refresh = function() {
         if (!this._auth.refreshToken()) throw new Error('Refresh token is missing');
         if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
 
-        return this._tokenRequest(Platform._tokenEndpoint, {
-            "grant_type": "refresh_token",
-            "refresh_token": this._auth.refreshToken(),
-            "access_token_ttl": this._auth.data().expires_in + 1,
-            "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
-        });
+        if (this.appKey && this.appSecret) {
+            return this._tokenRequest(Platform._tokenEndpoint, {
+                "grant_type": "refresh_token",
+                "refresh_token": this._auth.refreshToken(),
+                "access_token_ttl": this._auth.data().expires_in + 1,
+                "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
+            });  
+        }
 
     }.bind(this)).then(function(/** @type {ApiResponse} */ res) {
 
@@ -2136,9 +2138,9 @@ Platform.prototype._authHeader = function() {
 
 module.exports = Platform;
 
-/***/ }),
+/***/ },
 /* 16 */
-/***/ (function(module, exports) {
+/***/ function(module, exports) {
 
 /**
  * @param {Cache} options.cache
@@ -2260,9 +2262,9 @@ module.exports = Auth;
 //}
 
 
-/***/ }),
+/***/ },
 /* 17 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var version = ("3.1.2");
 
@@ -2276,9 +2278,9 @@ module.exports = {
     authResponseProperty: 'RCAuthorizationResponse'
 };
 
-/***/ }),
+/***/ },
 /* 18 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var EventEmitter = __webpack_require__(6).EventEmitter;
 
@@ -2767,9 +2769,9 @@ module.exports = Subscription;
  * @property {string} [status] Active
  */
 
-/***/ }),
+/***/ },
 /* 19 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ function(module, exports, __webpack_require__) {
 
 var Subscription = __webpack_require__(18);
 
@@ -2831,7 +2833,7 @@ CachedSubscription.prototype.restore = function(events) {
 
 module.exports = CachedSubscription;
 
-/***/ })
+/***/ }
 /******/ ])
 });
 ;
