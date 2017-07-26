@@ -89,9 +89,9 @@ Subscription.prototype.subscribed = function() {
     var subscription = this.subscription();
 
     return !!(subscription.id &&
-        subscription.deliveryMode &&
-        subscription.deliveryMode.subscriberKey &&
-        subscription.deliveryMode.address);
+              subscription.deliveryMode &&
+              subscription.deliveryMode.subscriberKey &&
+              subscription.deliveryMode.address);
 
 };
 
@@ -454,7 +454,7 @@ Subscription.prototype._subscribeAtPubnub = function() {
         });
 
         this._pubnub.addListener({
-            status: function(statusEvent) { },
+            status: function(statusEvent) {},
             message: function(m) {
                 this._notify(m.message); // all other props are ignored
             }.bind(this)
@@ -463,7 +463,7 @@ Subscription.prototype._subscribeAtPubnub = function() {
     }
 
     this._pubnubLastChannel = deliveryMode.address;
-    this._pubnub.subscribe({ channels: [deliveryMode.address] });
+    this._pubnub.subscribe({channels: [deliveryMode.address]});
 
     return this;
 

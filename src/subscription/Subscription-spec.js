@@ -71,7 +71,7 @@ describe('RingCentral.subscription.Subscription', function() {
         it('captures automatic subscription renew errors', asyncTest(function(sdk) {
 
             subscribeGeneric(quickExpiresIn);
-            apiCall('PUT', '/restapi/v1.0/subscription/foo-bar-baz', { 'message': 'expected' }, 400, 'Bad Request');
+            apiCall('PUT', '/restapi/v1.0/subscription/foo-bar-baz', {'message': 'expected'}, 400, 'Bad Request');
 
             var subscription = createSubscription(sdk);
 
@@ -132,11 +132,11 @@ describe('RingCentral.subscription.Subscription', function() {
                 });
 
                 subscription.on(subscription.events.notification, function(event) {
-                    expect(event).to.deep.equal({ foo: 'bar' });
+                    expect(event).to.deep.equal({foo: 'bar'});
                     resolve();
                 });
 
-                subscription._notify({ foo: 'bar' }); // using private API
+                subscription._notify({foo: 'bar'}); // using private API
 
             });
 
@@ -292,7 +292,7 @@ describe('RingCentral.subscription.Subscription', function() {
 
         it('calls the error callback and passes the error provided from the platform', asyncTest(function(sdk) {
 
-            apiCall('POST', '/restapi/v1.0/subscription', { 'message': 'Subscription failed' }, 400, 'Bad Request');
+            apiCall('POST', '/restapi/v1.0/subscription', {'message': 'Subscription failed'}, 400, 'Bad Request');
 
             return createSubscription(sdk)
                 .setEventFilters(['foo'])
@@ -318,9 +318,9 @@ describe('RingCentral.subscription.Subscription', function() {
             var subscription = createSubscription(sdk);
 
             var aesMessage = 'gkw8EU4G1SDVa2/hrlv6+0ViIxB7N1i1z5MU/Hu2xkIKzH6yQzhr3vIc27IAN558kTOkacqE5DkLpRdnN1orwtI' +
-                'BsUHmPMkMWTOLDzVr6eRk+2Gcj2Wft7ZKrCD+FCXlKYIoa98tUD2xvoYnRwxiE2QaNywl8UtjaqpTk1+WDImBrt' +
-                '6uabB1WICY/qE0It3DqQ6vdUWISoTfjb+vT5h9kfZxWYUP4ykN2UtUW1biqCjj1Rb6GWGnTx6jPqF77ud0XgV1r' +
-                'k/Q6heSFZWV/GP23/iytDPK1HGJoJqXPx7ErQU=';
+                             'BsUHmPMkMWTOLDzVr6eRk+2Gcj2Wft7ZKrCD+FCXlKYIoa98tUD2xvoYnRwxiE2QaNywl8UtjaqpTk1+WDImBrt' +
+                             '6uabB1WICY/qE0It3DqQ6vdUWISoTfjb+vT5h9kfZxWYUP4ykN2UtUW1biqCjj1Rb6GWGnTx6jPqF77ud0XgV1r' +
+                             'k/Q6heSFZWV/GP23/iytDPK1HGJoJqXPx7ErQU=';
 
             subscription.setSubscription({
                 id: 'foo',
