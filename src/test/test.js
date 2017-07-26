@@ -96,7 +96,7 @@
 
     }
 
-    function subscribeGeneric(expiresIn, id, remove) {
+    function subscribeGeneric(expiresIn, id, remove, timeZoneString) {
 
         expiresIn = expiresIn || 15 * 60 * 60;
 
@@ -106,11 +106,16 @@
         if (id) method = 'PUT';
         if (remove) method = 'DELETE';
 
+        var expirationTime = new Date(date.getTime() + (expiresIn * 1000)).toISOString();
+        if (timeZoneString) {
+            expirationTime = expirationTime.replace('Z', timeZoneString);
+        }
+
         apiCall(method, '/restapi/v1.0/subscription' + (id ? '/' + id : ''), remove ? '' : {
             'eventFilters': [
                 '/restapi/v1.0/account/~/extension/~/presence'
             ],
-            'expirationTime': new Date(date.getTime() + (expiresIn * 1000)).toISOString(),
+            'expirationTime': expirationTime,
             'expiresIn': expiresIn,
             'deliveryMode': {
                 'transportType': 'PubNub',

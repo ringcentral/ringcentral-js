@@ -185,8 +185,15 @@ module.exports = SDK;
 /* 1 */
 /***/ function(module, exports) {
 
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
 'use strict';
 /* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
@@ -207,7 +214,7 @@ function shouldUseNative() {
 		// Detect buggy property enumeration order in older V8 versions.
 
 		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
 		test1[5] = 'de';
 		if (Object.getOwnPropertyNames(test1)[0] === '5') {
 			return false;
@@ -236,7 +243,7 @@ function shouldUseNative() {
 		}
 
 		return true;
-	} catch (e) {
+	} catch (err) {
 		// We don't expect any of the above to throw, but better to be safe.
 		return false;
 	}
@@ -256,8 +263,8 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 			}
 		}
 
-		if (Object.getOwnPropertySymbols) {
-			symbols = Object.getOwnPropertySymbols(from);
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
 			for (var i = 0; i < symbols.length; i++) {
 				if (propIsEnumerable.call(from, symbols[i])) {
 					to[symbols[i]] = from[symbols[i]];
@@ -534,8 +541,8 @@ module.exports = Client;
 /*!
  * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
  *
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License.
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
  */
 
 'use strict';
@@ -549,22 +556,22 @@ function isObjectObject(o) {
 
 module.exports = function isPlainObject(o) {
   var ctor,prot;
-  
+
   if (isObjectObject(o) === false) return false;
-  
+
   // If has modified constructor
   ctor = o.constructor;
   if (typeof ctor !== 'function') return false;
-  
+
   // If has modified prototype
   prot = ctor.prototype;
   if (isObjectObject(prot) === false) return false;
-  
+
   // If constructor does not have an Object-specific method
   if (prot.hasOwnProperty('isPrototypeOf') === false) {
     return false;
   }
-  
+
   // Most likely a plain Object
   return true;
 };
@@ -577,15 +584,14 @@ module.exports = function isPlainObject(o) {
 /*!
  * isobject <https://github.com/jonschlinkert/isobject>
  *
- * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License.
+ * Copyright (c) 2014-2017, Jon Schlinkert.
+ * Released under the MIT License.
  */
 
 'use strict';
 
 module.exports = function isObject(val) {
-  return val != null && typeof val === 'object'
-    && !Array.isArray(val);
+  return val != null && typeof val === 'object' && Array.isArray(val) === false;
 };
 
 
