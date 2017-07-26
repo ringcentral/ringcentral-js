@@ -1,10 +1,10 @@
 var EventEmitter = require("events").EventEmitter;
 
 // detect ISO 8601 format string with +00[:00] timezone notations
-var ISO_REG_EXP = /([\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}\.[\d]{3})(\+[\d]{2}):?([\d]{2})?$/;
+var ISO_REG_EXP = /(\+[\d]{2}):?([\d]{2})?$/;
 
-function buildIEFriendlyString(match, $1, $2, $3) {
-    return $1 + $2 + ':' + ($3 || '00');
+function buildIEFriendlyString(match, $1, $2) {
+    return $1 + ':' + ($2 || '00');
 }
 
 /**
@@ -84,7 +84,7 @@ function Subscription(options) {
 
 Subscription.prototype = Object.create(EventEmitter.prototype);
 
-Subscription.prototype.subscribed = function () {
+Subscription.prototype.subscribed = function() {
 
     var subscription = this.subscription();
 
@@ -98,14 +98,14 @@ Subscription.prototype.subscribed = function () {
 /**
  * @return {boolean}
  */
-Subscription.prototype.alive = function () {
+Subscription.prototype.alive = function() {
     return this.subscribed() && Date.now() < this.expirationTime();
 };
 
 /**
  * @return {boolean}
  */
-Subscription.prototype.expired = function () {
+Subscription.prototype.expired = function() {
     if (!this.subscribed()) return true;
     return !this.subscribed() || Date.now() > parseISOString(this.subscription().expirationTime);
 };
@@ -113,7 +113,7 @@ Subscription.prototype.expired = function () {
 /**
  * @return {number}
  */
-Subscription.prototype.expirationTime = function () {
+Subscription.prototype.expirationTime = function() {
     return parseISOString(this.subscription().expirationTime) - this._renewHandicapMs;
 };
 
@@ -121,7 +121,7 @@ Subscription.prototype.expirationTime = function () {
  * @param {ISubscription} subscription
  * @return {Subscription}
  */
-Subscription.prototype.setSubscription = function (subscription) {
+Subscription.prototype.setSubscription = function(subscription) {
 
     subscription = subscription || {};
 
@@ -137,7 +137,7 @@ Subscription.prototype.setSubscription = function (subscription) {
 /**
  * @return {ISubscription}
  */
-Subscription.prototype.subscription = function () {
+Subscription.prototype.subscription = function() {
     return this._subscription || {};
 };
 
@@ -145,7 +145,7 @@ Subscription.prototype.subscription = function () {
  * Creates or updates subscription if there is an active one
  * @returns {Promise<ApiResponse>}
  */
-Subscription.prototype.register = function () {
+Subscription.prototype.register = function() {
 
     if (this.alive()) {
         return this.renew();
@@ -158,7 +158,7 @@ Subscription.prototype.register = function () {
 /**
  * @return {string[]}
  */
-Subscription.prototype.eventFilters = function () {
+Subscription.prototype.eventFilters = function() {
     return this.subscription().eventFilters || [];
 };
 
@@ -166,7 +166,7 @@ Subscription.prototype.eventFilters = function () {
  * @param {string[]} events
  * @return {Subscription}
  */
-Subscription.prototype.addEventFilters = function (events) {
+Subscription.prototype.addEventFilters = function(events) {
     this.setEventFilters(this.eventFilters().concat(events));
     return this;
 };
@@ -175,7 +175,7 @@ Subscription.prototype.addEventFilters = function (events) {
  * @param {string[]} events
  * @return {Subscription}
  */
-Subscription.prototype.setEventFilters = function (events) {
+Subscription.prototype.setEventFilters = function(events) {
     var subscription = this.subscription();
     subscription.eventFilters = events;
     this._setSubscription(subscription);
@@ -185,9 +185,9 @@ Subscription.prototype.setEventFilters = function (events) {
 /**
  * @returns {Promise<ApiResponse>}
  */
-Subscription.prototype.subscribe = function () {
+Subscription.prototype.subscribe = function() {
 
-    return (new this._externals.Promise(function (resolve) {
+    return (new this._externals.Promise(function(resolve) {
 
         this._clearTimeout();
 
@@ -200,7 +200,7 @@ Subscription.prototype.subscribe = function () {
             }
         }));
 
-    }.bind(this))).then(function (response) {
+    }.bind(this))).then(function(response) {
 
         var json = response.json();
 
@@ -209,7 +209,7 @@ Subscription.prototype.subscribe = function () {
 
         return response;
 
-    }.bind(this)).catch(function (e) {
+    }.bind(this)).catch(function(e) {
 
         e = this._platform.client().makeError(e);
 
@@ -225,9 +225,9 @@ Subscription.prototype.subscribe = function () {
 /**
  * @returns {Promise<ApiResponse>}
  */
-Subscription.prototype.renew = function () {
+Subscription.prototype.renew = function() {
 
-    return (new this._externals.Promise(function (resolve) {
+    return (new this._externals.Promise(function(resolve) {
 
         this._clearTimeout();
 
@@ -239,7 +239,7 @@ Subscription.prototype.renew = function () {
             eventFilters: this._getFullEventFilters()
         }));
 
-    }.bind(this))).then(function (response) {
+    }.bind(this))).then(function(response) {
 
         var json = response.json();
 
@@ -248,7 +248,7 @@ Subscription.prototype.renew = function () {
 
         return response;
 
-    }.bind(this)).catch(function (e) {
+    }.bind(this)).catch(function(e) {
 
         e = this._platform.client().makeError(e);
 
@@ -264,22 +264,22 @@ Subscription.prototype.renew = function () {
 /**
  * @returns {Promise<ApiResponse>}
  */
-Subscription.prototype.remove = function () {
+Subscription.prototype.remove = function() {
 
-    return (new this._externals.Promise(function (resolve) {
+    return (new this._externals.Promise(function(resolve) {
 
         if (!this.subscribed()) throw new Error('No subscription');
 
         resolve(this._platform.delete('/subscription/' + this.subscription().id));
 
-    }.bind(this))).then(function (response) {
+    }.bind(this))).then(function(response) {
 
         this.reset()
             .emit(this.events.removeSuccess, response);
 
         return response;
 
-    }.bind(this)).catch(function (e) {
+    }.bind(this)).catch(function(e) {
 
         e = this._platform.client().makeError(e);
 
@@ -294,7 +294,7 @@ Subscription.prototype.remove = function () {
 /**
  * @returns {Promise<ApiResponse>}
  */
-Subscription.prototype.resubscribe = function () {
+Subscription.prototype.resubscribe = function() {
     var filters = this.eventFilters();
     return this.reset().setEventFilters(filters).subscribe();
 };
@@ -304,7 +304,7 @@ Subscription.prototype.resubscribe = function () {
  * This method resets subscription at client side but backend is not notified
  * @return {Subscription}
  */
-Subscription.prototype.reset = function () {
+Subscription.prototype.reset = function() {
     this._clearTimeout();
     this._unsubscribeAtPubnub();
     this._setSubscription(null);
@@ -315,7 +315,7 @@ Subscription.prototype.reset = function () {
  * @param subscription
  * @private
  */
-Subscription.prototype._setSubscription = function (subscription) {
+Subscription.prototype._setSubscription = function(subscription) {
     this._subscription = subscription;
 };
 
@@ -323,9 +323,9 @@ Subscription.prototype._setSubscription = function (subscription) {
  * @return {string[]}
  * @private
  */
-Subscription.prototype._getFullEventFilters = function () {
+Subscription.prototype._getFullEventFilters = function() {
 
-    return this.eventFilters().map(function (event) {
+    return this.eventFilters().map(function(event) {
         return this._platform.createUrl(event);
     }.bind(this));
 
@@ -335,13 +335,13 @@ Subscription.prototype._getFullEventFilters = function () {
  * @return {Subscription}
  * @private
  */
-Subscription.prototype._setTimeout = function () {
+Subscription.prototype._setTimeout = function() {
 
     this._clearTimeout();
 
     if (!this.alive()) throw new Error('Subscription is not alive');
 
-    this._timeout = setInterval(function () {
+    this._timeout = setInterval(function() {
 
         if (this.alive()) {
             return;
@@ -349,7 +349,7 @@ Subscription.prototype._setTimeout = function () {
 
         this._clearTimeout();
 
-        (new this._externals.Promise(function (resolve) {
+        (new this._externals.Promise(function(resolve) {
 
             if (this.expired()) {
                 resolve(this.subscribe());
@@ -357,11 +357,11 @@ Subscription.prototype._setTimeout = function () {
                 resolve(this.renew());
             }
 
-        }.bind(this))).then(function (res) {
+        }.bind(this))).then(function(res) {
 
             this.emit(this.events.automaticRenewSuccess, res);
 
-        }.bind(this)).catch(function (e) {
+        }.bind(this)).catch(function(e) {
 
             this.emit(this.events.automaticRenewError, e);
 
@@ -377,12 +377,12 @@ Subscription.prototype._setTimeout = function () {
  * @return {Subscription}
  * @private
  */
-Subscription.prototype._clearTimeout = function () {
+Subscription.prototype._clearTimeout = function() {
     clearInterval(this._timeout);
     return this;
 };
 
-Subscription.prototype._decrypt = function (message) {
+Subscription.prototype._decrypt = function(message) {
 
     if (!this.subscribed()) throw new Error('No subscription');
 
@@ -406,7 +406,7 @@ Subscription.prototype._decrypt = function (message) {
  * @return {Subscription}
  * @private
  */
-Subscription.prototype._notify = function (message) {
+Subscription.prototype._notify = function(message) {
     this.emit(this.events.notification, this._decrypt(message));
     return this;
 };
@@ -415,7 +415,7 @@ Subscription.prototype._notify = function (message) {
  * @return {Subscription}
  * @private
  */
-Subscription.prototype._subscribeAtPubnub = function () {
+Subscription.prototype._subscribeAtPubnub = function() {
 
     if (!this.alive()) throw new Error('Subscription is not alive');
 
@@ -454,8 +454,8 @@ Subscription.prototype._subscribeAtPubnub = function () {
         });
 
         this._pubnub.addListener({
-            status: function (statusEvent) { },
-            message: function (m) {
+            status: function(statusEvent) { },
+            message: function(m) {
                 this._notify(m.message); // all other props are ignored
             }.bind(this)
         });
@@ -473,7 +473,7 @@ Subscription.prototype._subscribeAtPubnub = function () {
  * @return {Subscription}
  * @private
  */
-Subscription.prototype._unsubscribeAtPubnub = function () {
+Subscription.prototype._unsubscribeAtPubnub = function() {
 
     if (!this.subscribed() || !this._pubnub) return this;
 
