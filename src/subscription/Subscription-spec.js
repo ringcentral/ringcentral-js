@@ -1,9 +1,9 @@
 describe('RingCentral.subscription.Subscription', function() {
 
     var pollInterval = 1;
-    var renewHandicapMs = 1;
+    var renewHandicapMs = 30;
     var expiresIn = 100; // 100 seconds
-    var quickExpiresIn = 0.1; // 50 ms
+    var quickExpiresIn = 0.5; // 50 ms
 
     function createSubscription(sdk) {
         return sdk.createSubscription({
@@ -17,6 +17,33 @@ describe('RingCentral.subscription.Subscription', function() {
         it('automatically renews subscription', asyncTest(function(sdk) {
 
             subscribeGeneric(quickExpiresIn);
+            subscribeGeneric(10, 'foo-bar-baz'); // should be a good value for future response
+
+            var subscription = createSubscription(sdk);
+
+            return subscription
+                .setEventFilters(['foo', 'bar'])
+                .register()
+                .then(function(res) {
+
+                    expect(res.json().expiresIn).to.equal(quickExpiresIn);
+
+                    return new Promise(function(resolve, reject) {
+                        subscription.on(subscription.events.automaticRenewError, function(e) {
+                            reject(e);
+                        });
+                        subscription.on(subscription.events.automaticRenewSuccess, function() {
+                            resolve(null);
+                        });
+                    });
+
+                });
+
+        }));
+
+        it('automatically renews subscription with +0000 timezone format', asyncTest(function(sdk) {
+
+            subscribeGeneric(quickExpiresIn, null, null, '+0000');
             subscribeGeneric(10, 'foo-bar-baz'); // should be a good value for future response
 
             var subscription = createSubscription(sdk);

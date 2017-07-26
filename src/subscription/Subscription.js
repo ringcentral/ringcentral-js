@@ -1,5 +1,25 @@
 var EventEmitter = require("events").EventEmitter;
 
+// detect ISO 8601 format string with +00[:00] timezone notations
+var ISO_REG_EXP = /(\+[\d]{2}):?([\d]{2})?$/;
+
+function buildIEFriendlyString(match, $1, $2) {
+    return $1 + ':' + ($2 || '00');
+}
+
+/**
+ *
+ * @param {string} time
+ * @return {number}
+ */
+function parseISOString(time) {
+    time = time || 0;
+    if (typeof time === 'string') {
+        return Date.parse(time.replace(ISO_REG_EXP, buildIEFriendlyString));
+    }
+    return time;
+}
+
 /**
  * @param {Platform} options.platform
  * @param {Externals} options.externals
@@ -87,11 +107,14 @@ Subscription.prototype.alive = function() {
  */
 Subscription.prototype.expired = function() {
     if (!this.subscribed()) return true;
-    return !this.subscribed() || Date.now() > this.subscription().expirationTime;
+    return !this.subscribed() || Date.now() > parseISOString(this.subscription().expirationTime);
 };
 
+/**
+ * @return {number}
+ */
 Subscription.prototype.expirationTime = function() {
-    return new Date(this.subscription().expirationTime || 0).getTime() - this._renewHandicapMs;
+    return parseISOString(this.subscription().expirationTime) - this._renewHandicapMs;
 };
 
 /**
@@ -473,7 +496,7 @@ module.exports = Subscription;
  * @property {string} [id]
  * @property {string} [uri]
  * @property {string[]} [eventFilters]
- * @property {string} [expirationTime] Format: 2014-03-12T19:54:35.613Z
+ * @property {string} [expirationTime] Format: 2014-03-12T19:54:35.613+0000
  * @property {int} [expiresIn]
  * @property {string} [deliveryMode.transportType]
  * @property {boolean} [deliveryMode.encryption]
