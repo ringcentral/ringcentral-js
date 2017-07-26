@@ -1,6 +1,7 @@
 var EventEmitter = require("events").EventEmitter;
 
-var ISO_REG_EXP = /(.*)(\+[\d]{2}):?([\d]{2})?$/;
+// detect ISO 8601 format string with +00[:00] timezone notations
+var ISO_REG_EXP = /([\d]{4}-[\d]{2}-[\d]{2}T[\d]{2}:[\d]{2}:[\d]{2}\.[\d]{3})(\+[\d]{2}):?([\d]{2})?$/;
 
 function buildIEFriendlyString(match, $1, $2, $3) {
     return $1 + $2 + ':' + ($3 || '00');
