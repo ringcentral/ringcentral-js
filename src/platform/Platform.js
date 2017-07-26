@@ -392,12 +392,14 @@ Platform.prototype._refresh = function() {
         if (!this._auth.refreshToken()) throw new Error('Refresh token is missing');
         if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
 
-        return this._tokenRequest(Platform._tokenEndpoint, {
-            "grant_type": "refresh_token",
-            "refresh_token": this._auth.refreshToken(),
-            "access_token_ttl": this._auth.data().expires_in + 1,
-            "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
-        });
+        if (this.appKey && this.appSecret) {
+            return this._tokenRequest(Platform._tokenEndpoint, {
+                "grant_type": "refresh_token",
+                "refresh_token": this._auth.refreshToken(),
+                "access_token_ttl": this._auth.data().expires_in + 1,
+                "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
+            });  
+        }
 
     }.bind(this)).then(function(/** @type {ApiResponse} */ res) {
 
