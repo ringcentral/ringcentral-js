@@ -305,7 +305,7 @@ You can retrieve save and set back the auth information:
 
 ```js
 var authData = rcsdk.platform().auth().data();
-rcsdk.platform().auth().data(authData);
+rcsdk.platform().auth().setData(authData);
 ```
 
 It can be useful on the server if SDK instances are created and disposed for every HTTP request.
