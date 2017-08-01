@@ -474,7 +474,7 @@ Subscription.prototype._subscribeAtPubnub = function() {
  */
 Subscription.prototype.subscribeAtPubnub = function() {
     return this._subscribeAtPubnub();
-}
+};
 
 /**
  * @return {Subscription}
@@ -500,7 +500,7 @@ Subscription.prototype._unsubscribeAtPubnub = function() {
  */
 Subscription.prototype.unsubscribeAtPubnub = function() {
     return this._unsubscribeAtPubnub();
-}
+};
 
 module.exports = Subscription;
 
