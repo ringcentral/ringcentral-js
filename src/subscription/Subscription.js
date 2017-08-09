@@ -212,7 +212,8 @@ Subscription.prototype.subscribe = function() {
     }.bind(this)).catch(function(e) {
 
         e = this._platform.client().makeError(e);
-
+        // `reset` will remove pubnub instance.
+        // so if network is broken a long time, pubnub will be removed. And client can not receive notification anymore.
         this.reset()
             .emit(this.events.subscribeError, e);
 
@@ -251,7 +252,8 @@ Subscription.prototype.renew = function() {
     }.bind(this)).catch(function(e) {
 
         e = this._platform.client().makeError(e);
-
+        // `reset` will remove pubnub instance.
+        // so if network is broken a long time, pubnub will be removed. And client can not receive notification anymore.
         this.reset()
             .emit(this.events.renewError, e);
 
@@ -450,6 +452,7 @@ Subscription.prototype._subscribeAtPubnub = function() {
 
         this._pubnub = new PubNub({
             ssl: true,
+            restore: true,
             subscribeKey: deliveryMode.subscriberKey
         });
 

@@ -100,6 +100,16 @@
                 subscription.on(subscription.events.notification, function(msg) {
                     cb(msg.body);
                 });
+                subscription.on(subscription.events.renewError, function() {
+                    subscription.reset();
+                    subscription = null;
+                    getPresenceSubscription(event, cb);
+                });
+                subscription.on(subscription.events.subscribeError, function() {
+                    subscription.reset();
+                    subscription = null;
+                    getPresenceSubscription(event, cb);
+                });
 
                 subscription
                     .restore([event])
