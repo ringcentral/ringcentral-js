@@ -2264,7 +2264,7 @@ module.exports = Auth;
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var version = ("3.1.2");
+var version = ("3.1.3");
 
 // This will become false during the Webpack build, so no traces of package.json will be there
 if (false) {
@@ -2494,7 +2494,8 @@ Subscription.prototype.subscribe = function() {
     }.bind(this)).catch(function(e) {
 
         e = this._platform.client().makeError(e);
-
+        // `reset` will remove pubnub instance.
+        // so if network is broken for a long time, pubnub will be removed. And client can not receive notification anymore.
         this.reset()
             .emit(this.events.subscribeError, e);
 
@@ -2533,7 +2534,8 @@ Subscription.prototype.renew = function() {
     }.bind(this)).catch(function(e) {
 
         e = this._platform.client().makeError(e);
-
+        // `reset` will remove pubnub instance.
+        // so if network is broken for a long time, pubnub will be removed. And client can not receive notification anymore.
         this.reset()
             .emit(this.events.renewError, e);
 
@@ -2732,6 +2734,7 @@ Subscription.prototype._subscribeAtPubnub = function() {
 
         this._pubnub = new PubNub({
             ssl: true,
+            restore: true,
             subscribeKey: deliveryMode.subscriberKey
         });
 
