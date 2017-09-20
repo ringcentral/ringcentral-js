@@ -392,7 +392,7 @@ Platform.prototype._refresh = function() {
         if (!this._auth.refreshToken()) throw new Error('Refresh token is missing');
         if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
 
-        if (this.appKey && this.appSecret) {
+        if (this._appKey && this._appSecret) {
             return this._tokenRequest(Platform._tokenEndpoint, {
                 "grant_type": "refresh_token",
                 "refresh_token": this._auth.refreshToken(),
