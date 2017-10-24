@@ -1032,4 +1032,4 @@ client.on(client.events.requestError, function(apiError) {});
 **In SDK version 2.0 Helpers were moved to separate repository: [ringcentral-js-helpers](https://github.com/ringcentral/ringcentral-js-helpers).**
 
 A lot of code improvements were implemented in order to make SDK compatible with WhatWG Fetch, DOM Requests &
-DOM Responses: see [full list of migration instructions](CHANGELOG.md).
+DOM Responses: see [full list of migration instructions](../../CHANGELOG.md).

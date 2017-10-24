@@ -1,0 +1,10 @@
+{
+	"name": "@ringcentral/sdk-demo",
+	"private": true,
+	"scripts": {
+		"start": "serve .. --port 3030"
+	},
+	"dependencies": {
+		"serve": "6.5.2"
+	}
+}

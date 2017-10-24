@@ -1,4 +1,0 @@
---require ./src/test/test.js
---reporter spec
-./src/**/*-spec.js
-./src/*-spec.js

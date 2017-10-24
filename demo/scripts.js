@@ -1,8 +1,5 @@
 (function() {
 
-    /**
-     * @return {RingCentral.SDK}
-     */
     window.getSDK = function() {
 
         var appKey = localStorage.getItem('ringcentral-demo-appKey');
