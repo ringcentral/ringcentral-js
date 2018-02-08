@@ -139,7 +139,12 @@ Platform.prototype.createUrl = function(path, options) {
 
     if (options.addServer && !hasHttp) builtUrl += this._server;
 
-    if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp) builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
+    if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp) {
+        builtUrl += [
+            (options.urlPrefix || Platform._urlPrefix),
+            (options.apiVersion || Platform._apiVersion)
+        ].join('/');
+    }
 
     builtUrl += path;
 
