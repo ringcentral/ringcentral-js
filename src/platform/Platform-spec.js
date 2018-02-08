@@ -411,6 +411,17 @@ describe('RingCentral.platform.Platform', function() {
                 addMethod: 'POST'
             })).to.equal('http://whatever/restapi/v1.0/foo?bar&_method=POST&access_token=ACCESS_TOKEN');
 
+            expect(platform.createUrl('/foo?bar', {
+                urlPrefix: '/rastapi',
+                apiVersion: 'v2'
+            })).to.equal('/rastapi/v2/foo?bar');
+
+            expect(platform.createUrl('/foo?bar', {
+                addServer: true,
+                addToken: true,
+                urlPrefix: '/rastapi',
+                apiVersion: 'v2'
+            })).to.equal('http://whatever/rastapi/v2/foo?bar&access_token=ACCESS_TOKEN');
         }));
 
     });
