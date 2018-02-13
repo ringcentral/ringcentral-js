@@ -148,7 +148,7 @@ Platform.prototype.createUrl = function(path, options) {
     if (options.addServer && !hasHttp) builtUrl += this._server;
 
     if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp && !alreadyPrefixed) {
-        builtUrl += [Platform._urlPrefix, Platform._apiVersion].join('/');
+        builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
     }
 
     builtUrl += path;
