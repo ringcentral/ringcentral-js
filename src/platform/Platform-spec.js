@@ -411,6 +411,10 @@ describe('RingCentral.platform.Platform', function() {
                 addMethod: 'POST'
             })).to.equal('http://whatever/restapi/v1.0/foo?bar&_method=POST&access_token=ACCESS_TOKEN');
 
+            expect(platform.createUrl('/rcvideo/v1/foo?bar', {
+                addServer: true,
+                addToken: true,
+            })).to.equal('http://whatever/rcvideo/v1/foo?bar&access_token=ACCESS_TOKEN');
         }));
 
     });

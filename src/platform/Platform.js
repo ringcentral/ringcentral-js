@@ -79,6 +79,10 @@ function Platform(options) {
     this._client = options.client;
 
     /** @private */
+    this._knownPrefixes = options.knownPrefixes || Platform._knownPrefixes;
+
+
+    /** @private */
     this._refreshPromise = null;
 
     /** @private */
@@ -92,6 +96,7 @@ function Platform(options) {
 
 Platform._urlPrefix = '/restapi';
 Platform._apiVersion = 'v1.0';
+Platform._knownPrefixes = ['/rcvideo'];
 Platform._tokenEndpoint = '/restapi/oauth/token';
 Platform._revokeEndpoint = '/restapi/oauth/revoke';
 Platform._authorizeEndpoint = '/restapi/oauth/authorize';
@@ -135,11 +140,16 @@ Platform.prototype.createUrl = function(path, options) {
     options = options || {};
 
     var builtUrl = '',
-        hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
+        hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1,
+        alreadyPrefixed = this._knownPrefixes.some(function(prefix) {
+            return path.indexOf(prefix) === 0;
+        });
 
     if (options.addServer && !hasHttp) builtUrl += this._server;
 
-    if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp) builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
+    if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp && !alreadyPrefixed) {
+        builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
+    }
 
     builtUrl += path;
 
