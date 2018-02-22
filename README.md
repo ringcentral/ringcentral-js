@@ -84,7 +84,7 @@ Pick the option that works best for you:
     - https://cdn.rawgit.com/ringcentral/ringcentral-js/master/build/ringcentral.js
     - https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.1/fetch.js
     - https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.js
-    - https://cdn.pubnub.com/pubnub-3.15.2.js
+    - https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.1.js
 
 - Download everything manually:
     - [ZIP file with source code](https://github.com/ringcentral/ringcentral-js/archive/master.zip)
