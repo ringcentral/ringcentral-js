@@ -55,8 +55,7 @@ export class SDK {
             refreshHandicapMs,
             clearCacheOnRefreshError,
             appName,
-            appVersion,
-            knownPrefixes
+            appVersion
         } = options;
 
         this._platform = new Platform({
@@ -69,7 +68,6 @@ export class SDK {
             clearCacheOnRefreshError,
             appName,
             appVersion,
-            knownPrefixes,
             externals: this._externals,
             cache: this._cache,
             client: this._client

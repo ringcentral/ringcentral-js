@@ -1,8 +1,8 @@
 import {apiCall, asyncTest, expect, expectThrows} from "../test/test";
 
 const createResponse = (sdk, json, status, statusText, headers) => {
-    var path = '/foo' + Date.now();
-    apiCall('GET', '/restapi/v1.0' + path, json, status, statusText, headers);
+    var path = '/restapi/v1.0/foo' + Date.now();
+    apiCall('GET', path, json, status, statusText, headers);
     return sdk.platform().get(path);
 };
 

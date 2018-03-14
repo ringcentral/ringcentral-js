@@ -315,9 +315,9 @@ describe('RingCentral.platform.Platform', function() {
             platform.auth().cancelAccessToken();
 
             const res = (await Promise.all([
-                platform.get('/foo/1'),
-                platform.get('/foo/2'),
-                platform.get('/foo/3')
+                platform.get('/restapi/v1.0/foo/1'),
+                platform.get('/restapi/v1.0/foo/2'),
+                platform.get('/restapi/v1.0/foo/3')
             ])).map(r => r.json());
 
             expect(platform.auth().accessToken()).to.equal('ACCESS_TOKEN_FROM_REFRESH');
@@ -337,9 +337,9 @@ describe('RingCentral.platform.Platform', function() {
 
             const test = async (method) => {
 
-                var path = '/foo/' + method;
+                var path = '/restapi/v1.0/foo/' + method;
 
-                apiCall(method, '/restapi/v1.0' + path, {foo: 'bar'});
+                apiCall(method, path, {foo: 'bar'});
 
                 const res = await platform[method](path);
                 expect(res.request().method).to.equal(method.toUpperCase());
@@ -356,27 +356,27 @@ describe('RingCentral.platform.Platform', function() {
 
     });
 
-    describe('apiUrl', function() {
+    describe('createUrl', function() {
 
         it('builds the URL', asyncTest(async sdk => {
 
             var platform = sdk.platform();
 
-            expect(platform.createUrl('/foo')).to.equal('/restapi/v1.0/foo');
+            expect(platform.createUrl('/restapi/v1.0/foo')).to.equal('/restapi/v1.0/foo');
 
-            expect(platform.createUrl('/foo', {addServer: true})).to.equal('http://whatever/restapi/v1.0/foo');
+            expect(platform.createUrl('/restapi/v1.0/foo', {addServer: true})).to.equal('http://whatever/restapi/v1.0/foo');
 
-            expect(platform.createUrl('/foo', {
+            expect(platform.createUrl('/restapi/v1.0/foo', {
                 addServer: true,
                 addToken: true
             })).to.equal('http://whatever/restapi/v1.0/foo?access_token=ACCESS_TOKEN');
 
-            expect(platform.createUrl('/foo?bar', {
+            expect(platform.createUrl('/restapi/v1.0/foo?bar', {
                 addServer: true,
                 addToken: true
             })).to.equal('http://whatever/restapi/v1.0/foo?bar&access_token=ACCESS_TOKEN');
 
-            expect(platform.createUrl('/foo?bar', {
+            expect(platform.createUrl('/restapi/v1.0/foo?bar', {
                 addServer: true,
                 addToken: true,
                 addMethod: 'POST'

@@ -12,7 +12,7 @@ describe('RingCentral', () => {
             appSecret: ''
         });
 
-        const res = await sdk.platform().get('', null, {skipAuthCheck: true});
+        const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
 
         sdk.cache().clean();
 

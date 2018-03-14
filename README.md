@@ -61,8 +61,8 @@ SDK can be used in 3 environments:
 
     ```js
     var SDK = require('ringcentral');
-    var rcsdk = new SDK({ 
-        server: SDK.server.sandbox, 
+    var rcsdk = new SDK({
+        server: SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
@@ -112,7 +112,7 @@ Add the following to your HTML:
 <script type="text/javascript">
 
     var rcsdk = new RingCentral.SDK({
-        server: RingCentral.SDK.server.sandbox, 
+        server: RingCentral.SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
@@ -135,7 +135,7 @@ require.config({
 // Then you can use the SDK like any other AMD component
 require(['ringcentral'], function(SDK) {
     var rcsdk = new SDK({
-        server: SDK.server.sandbox, 
+        server: SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
@@ -351,7 +351,7 @@ To perform an authenticated API call, you should use the one of the methods of t
 rcsdk.platform()
     .send({
         method: 'PUT',
-        url: '/account/~/extension/~',
+        url: '/restapi/v1.0/account/~/extension/~',
         query: {...},
         headers: {...},
         body: {...}
@@ -383,10 +383,10 @@ If your `Promise` library supports global error handler it might be useful to lo
 ## HTTP Verb shorthands
 
 ```js
-rcsdk.platform().get('/account/~/extension/~', {...query}).then(...);
-rcsdk.platform().post('/account/~/extension/~', {...body}, {...query}).then(...);
-rcsdk.platform().put('/account/~/extension/~', {...body}, {...query}).then(...);
-rcsdk.platform().delete('/account/~/extension/~', {...query}).then(...);
+rcsdk.platform().get('/restapi/v1.0/account/~/extension/~', {...query}).then(...);
+rcsdk.platform().post('/restapi/v1.0/account/~/extension/~', {...body}, {...query}).then(...);
+rcsdk.platform().put('/restapi/v1.0/account/~/extension/~', {...body}, {...query}).then(...);
+rcsdk.platform().delete('/restapi/v1.0/account/~/extension/~', {...query}).then(...);
 ```
 
 ## Available API response methods
@@ -410,39 +410,39 @@ If you need to download a binary file from API (call recording, fax attachment),
 var fs = require('fs');
 
 // read as buffer
-rcsdk.platform().get('/account/~/messages/foo/content').then(function(res) {
-    
+rcsdk.platform().get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
+
     return res.response().buffer(); // we are accessing Node Fetch's Response
-    
+
 }).then(function(buffer) {
-    
+
     fs.writeFileSync('./octocat.png', buffer);
-    
+
 });
 
 // read as stream
-rcsdk.platform().get('/account/~/messages/foo/content').then(function(res) {
-    
+rcsdk.platform().get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
+
     res.response().body.pipe(fs.createWriteStream('./octocat.png')); // we are accessing Node Fetch's Response
-    
+
 });
 ```
 
 See more here [https://github.com/bitinn/node-fetch#usage](https://github.com/bitinn/node-fetch#usage).
 
 ### In browser
- 
+
 ```js
-rcsdk.platform().get('/account/~/messages/foo/content').then(function(res) {
+rcsdk.platform().get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
 
     return res.response().blob(); // or arrayBuffer(), we are accessing WhatWG Fetch's Response
 
 }).then(function(blob ){
-    
+
     var img = document.createElement('img');
     img.src = URL.createObjectURL(blob);
     document.getElementById('container').appendChild(img);
-    
+
 });
 ```
 
@@ -454,7 +454,7 @@ In any case you always can just add token to known URL of resource and download 
 use directly as `<img src="..."/>`:
 
 ```js
-var url = rcsdk.platform().createUrl('/account/~/messages/foo/content', {addServer: true, addToken: true});
+var url = rcsdk.platform().createUrl('/restapi/v1.0/account/~/messages/foo/content', {addServer: true, addToken: true});
 ```
 
 ## Rate Limiting
@@ -477,7 +477,7 @@ subscription.on(subscription.events.notification, function(msg) {
 });
 
 subscription
-    .setEventFilters(['/account/~/extension/~/presence']) // a list of server-side events
+    .setEventFilters(['/restapi/v1.0/account/~/extension/~/presence']) // a list of server-side events
     .register()
     .then(...);
 ```
@@ -497,8 +497,8 @@ You can add more or replace event filters in the existing subscription at any ti
 and then calling the `register()` method to update it on the server:
 
 ```js
-subscription.setEventFilters(['/account/~/extension/111/presence']).register();
-subscription.addEventFilters(['/account/~/extension/222/presence']).register();
+subscription.setEventFilters(['/restapi/v1.0/account/~/extension/111/presence']).register();
+subscription.addEventFilters(['/restapi/v1.0/account/~/extension/222/presence']).register();
 ```
 
 ## Subscription reset
@@ -536,7 +536,7 @@ if (cachedSubscriptionData) {
         console.error('Cannot set subscription data', e);
     }
 } else {
-    subscription.setEventFilters(['/account/~/extension/~/presence']); // explicitly set required events
+    subscription.setEventFilters(['/restapi/v1.0/account/~/extension/~/presence']); // explicitly set required events
 }
 
 subscription.on([subscription.events.subscribeSuccess, subscription.events.renewSuccess], function() {
@@ -599,7 +599,7 @@ subscription.on(subscription.events.notification, function(msg) {
 The above mentioned things are put together into `CachedSubscription` class and its `restore(cacheKey)` method:
 
 ```js
-var subscription = rcsdk.createCachedSubscription('cache-key').restore(['/account/~/extension/~/presence']);
+var subscription = rcsdk.createCachedSubscription('cache-key').restore(['/restapi/v1.0/account/~/extension/~/presence']);
 
 // use it as usual
 subscription.register().catch(...);
@@ -695,7 +695,7 @@ function handleError(e) {
 function create(unsavedRingout) {
 
     platform
-        .post('/account/~/extension/~/ringout', unsavedRingout)
+        .post('/restapi/v1.0/account/~/extension/~/ringout', unsavedRingout)
         .then(function(response) {
 
             ringout = response.json();
@@ -791,7 +791,7 @@ First, you need to load the initial Presence status (you can use Underscore or L
 var accountPresence = {};
 
 rcsdk.platform()
-    .get('/account/~/extension/~/presence?detailedTelephonyState=true').then(function(response) {
+    .get('/restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true').then(function(response) {
         _.extend(accountPresence, response.json());
     })
     .catch(function(e) {
@@ -802,7 +802,7 @@ rcsdk.platform()
 In the meantime, you can also set up Subscriptions (you can use Underscore or Lodash to simplify things):
 
 ```js
-var subscription = rcsdk.createSubscription().addEvents(['/account/~/extension/~/presence?detailedTelephonyState=true']);
+var subscription = rcsdk.createSubscription().addEvents(['/restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true']);
 
 subscription.on(subscription.events.notification, function(msg) {
     _.extend(accountPresence, msg);
@@ -821,7 +821,7 @@ return subscription;
 
 ```js
 rcsdk.platform()
-    .get('/account/~/extension/~/active-calls', {query: {page: 1, perPage: 10}})
+    .get('/restapi/v1.0/account/~/extension/~/active-calls', {query: {page: 1, perPage: 10}})
     .then(function(response) {
         activeCalls = response.json().records;
     })
@@ -834,7 +834,7 @@ rcsdk.platform()
 
 ```js
 rcsdk.platform()
-    .get('/account/~/extension/~/call-log', {query: {page: 1, perPage: 10}})
+    .get('/restapi/v1.0/account/~/extension/~/call-log', {query: {page: 1, perPage: 10}})
     .then(function(response) {
         calls = response.json().records;
     })
@@ -852,7 +852,7 @@ In order to send an SMS using the API, simply make a POST request to `/account/~
 
 ```js
 rcsdk.platform()
-    .post('/account/~/extension/~/sms', {
+    .post('/restapi/v1.0/account/~/extension/~/sms', {
         from: {phoneNumber:'+12223334444'}, // Your sms-enabled phone number
         to: [
             {phoneNumber:'+15556667777'} // Second party's phone number
@@ -898,7 +898,7 @@ for (var i = 0, file; file = fileField.files[i]; ++i) {
 formData.append('attachment', new File(['some plain text'], 'text.txt', {type: 'application/octet-stream'}));
 
 // Send the fax
-rcsdk.platform().post('/account/~/extension/~/fax', formData);
+rcsdk.platform().post('/restapi/v1.0/account/~/extension/~/fax', formData);
 ```
 
 # MMS
@@ -925,7 +925,7 @@ for (var i = 0, file; file = fileField.files[i]; ++i) {
 }
 
 // Send the mms
-rcsdk.platform().post('/account/~/extension/~/sms', formData);
+rcsdk.platform().post('/restapi/v1.0/account/~/extension/~/sms', formData);
 ```
 
 ## MMS-Enabled Phone Number
@@ -935,7 +935,7 @@ In order to identify the MMS-Enabled phone numbers on an extension, simply make 
 ```js
 var mmsEnabledNumbers = [];
     platform
-        .get('/account/~/extension/~/phone-number', {'perPage': 'max'})
+        .get('/restapi/v1.0/account/~/extension/~/phone-number', {'perPage': 'max'})
         .then(function(res) {
             var phoneNumbers = res.json().records;
             for (var i = 0; i < phoneNumbers.length; i++ ) {
@@ -985,7 +985,7 @@ formData.append('attachment', new Buffer('some plain text'), {filename: 'text.tx
 formData.append('attachment', require('fs').createReadStream('/foo/bar.jpg'));
 
 // Send the fax
-rcsdk.platform().post('/account/~/extension/~/fax', formData);
+rcsdk.platform().post('/restapi/v1.0/account/~/extension/~/fax', formData);
 ```
 
 Further reading:

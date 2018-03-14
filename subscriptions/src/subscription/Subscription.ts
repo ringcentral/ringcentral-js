@@ -133,7 +133,7 @@ export default class Subscription extends EventEmitter {
 
             if (!this.eventFilters().length) throw new Error('Events are undefined');
 
-            const response = await this._sdk.platform().post('/subscription', {
+            const response = await this._sdk.platform().post('/restapi/v1.0/subscription', {
                 eventFilters: this._getFullEventFilters(),
                 deliveryMode: {
                     transportType: 'PubNub'
@@ -172,7 +172,7 @@ export default class Subscription extends EventEmitter {
 
             if (!this.eventFilters().length) throw new Error('Events are undefined');
 
-            const response = await this._sdk.platform().put('/subscription/' + this.subscription().id, {
+            const response = await this._sdk.platform().put('/restapi/v1.0/subscription/' + this.subscription().id, {
                 eventFilters: this._getFullEventFilters()
             });
 
@@ -205,7 +205,7 @@ export default class Subscription extends EventEmitter {
 
             if (!this.subscribed()) throw new Error('No subscription');
 
-            const response = await this._sdk.platform().delete('/subscription/' + this.subscription().id);
+            const response = await this._sdk.platform().delete('/restapi/v1.0/subscription/' + this.subscription().id);
 
             this.reset()
                 .emit(this.events.removeSuccess, response);

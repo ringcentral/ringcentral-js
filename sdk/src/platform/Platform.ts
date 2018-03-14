@@ -11,8 +11,6 @@ declare const screen: any; //FIXME TS Crap
 
 export default class Platform extends EventEmitter {
 
-    static _urlPrefix = '/restapi';
-    static _apiVersion = 'v1.0';
     static _knownPrefixes = ['/rcvideo'];
     static _tokenEndpoint = '/restapi/oauth/token';
     static _revokeEndpoint = '/restapi/oauth/revoke';
@@ -42,11 +40,10 @@ export default class Platform extends EventEmitter {
     private _externals: Externals;
     private _cache: Cache;
     private _client: Client;
-    private _knownPrefixes: string[];
     private _refreshPromise: Promise<any>;
     private _auth: Auth;
 
-    constructor({server, appKey, appSecret, redirectUri = '', refreshDelayMs = 100, clearCacheOnRefreshError = true, appName = '', appVersion = '', externals, cache, client, knownPrefixes = Platform._knownPrefixes, refreshHandicapMs}: PlatformOptionsConstructor) {
+    constructor({server, appKey, appSecret, redirectUri = '', refreshDelayMs = 100, clearCacheOnRefreshError = true, appName = '', appVersion = '', externals, cache, client, refreshHandicapMs}: PlatformOptionsConstructor) {
 
         super();
 
@@ -63,7 +60,6 @@ export default class Platform extends EventEmitter {
         this._externals = externals;
         this._cache = cache;
         this._client = client;
-        this._knownPrefixes = knownPrefixes;
         this._refreshPromise = null;
         this._auth = new Auth({
             cache: this._cache,
@@ -92,16 +88,9 @@ export default class Platform extends EventEmitter {
     createUrl(path = '', options: CreateUrlOptions = {}) {
 
         var builtUrl = '',
-            hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1,
-            alreadyPrefixed = this._knownPrefixes.some(function(prefix) {
-                return path.indexOf(prefix) === 0;
-            });
+            hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
 
         if (options.addServer && !hasHttp) builtUrl += this._server;
-
-        if (path.indexOf(Platform._urlPrefix) == -1 && !hasHttp && !alreadyPrefixed) {
-            builtUrl += Platform._urlPrefix + '/' + Platform._apiVersion;
-        }
 
         builtUrl += path;
 
@@ -592,7 +581,6 @@ export interface PlatformOptions extends AuthOptions {
     clearCacheOnRefreshError?: boolean;
     appName?: string;
     appVersion?: string;
-    knownPrefixes?: string[];
 }
 
 export interface PlatformOptionsConstructor extends PlatformOptions {
