@@ -1,6 +1,15 @@
+# RingCentral SDK for Node JS
+
 [![TravisCI Status](https://travis-ci.org/ringcentral/ringcentral-js.svg?branch=master)](https://travis-ci.org/ringcentral/ringcentral-js)
 [![Coverage Status](https://coveralls.io/repos/github/ringcentral/ringcentral-js/badge.svg?branch=master)](https://coveralls.io/github/ringcentral/ringcentral-js)
 [![Chat](https://img.shields.io/badge/chat-on%20glip-orange.svg)](https://glipped.herokuapp.com/)
+[![Community](https://img.shields.io/badge/dynamic/json.svg?label=community&colorB=&suffix=%20users&query=$.approximate_people_count&uri=http%3A%2F%2Fapi.getsatisfaction.com%2Fcompanies%2F102909.json)](https://devcommunity.ringcentral.com/ringcentraldev)
+[![Twitter](https://img.shields.io/twitter/follow/ringcentraldevs.svg?style=social&label=follow)](https://twitter.com/RingCentralDevs)
+
+__[RingCentral Developers](https://developer.ringcentral.com/api-products)__ is a cloud communications platform which can be accessed via more than 70 APIs. The platform's main capabilities include technologies that enable:
+__[Voice](https://developer.ringcentral.com/api-products/voice), [SMS/MMS](https://developer.ringcentral.com/api-products/sms), [Fax](https://developer.ringcentral.com/api-products/fax), [Glip Team Messaging](https://developer.ringcentral.com/api-products/team-messaging), [Data and Configurations](https://developer.ringcentral.com/api-products/configuration)__.
+
+[API Reference](https://developer.ringcentral.com/api-docs/latest/index.html) and [APIs Explorer](https://developer.ringcentral.com/api-explorer/latest/index.html).
 
 # Table of contents
 
@@ -61,8 +70,8 @@ SDK can be used in 3 environments:
 
     ```js
     var SDK = require('ringcentral');
-    var rcsdk = new SDK({ 
-        server: SDK.server.sandbox, 
+    var rcsdk = new SDK({
+        server: SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
@@ -112,7 +121,7 @@ Add the following to your HTML:
 <script type="text/javascript">
 
     var rcsdk = new RingCentral.SDK({
-        server: RingCentral.SDK.server.sandbox, 
+        server: RingCentral.SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
@@ -135,7 +144,7 @@ require.config({
 // Then you can use the SDK like any other AMD component
 require(['ringcentral'], function(SDK) {
     var rcsdk = new SDK({
-        server: SDK.server.sandbox, 
+        server: SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
@@ -411,38 +420,38 @@ var fs = require('fs');
 
 // read as buffer
 rcsdk.platform().get('/account/~/messages/foo/content').then(function(res) {
-    
+
     return res.response().buffer(); // we are accessing Node Fetch's Response
-    
+
 }).then(function(buffer) {
-    
+
     fs.writeFileSync('./octocat.png', buffer);
-    
+
 });
 
 // read as stream
 rcsdk.platform().get('/account/~/messages/foo/content').then(function(res) {
-    
+
     res.response().body.pipe(fs.createWriteStream('./octocat.png')); // we are accessing Node Fetch's Response
-    
+
 });
 ```
 
 See more here [https://github.com/bitinn/node-fetch#usage](https://github.com/bitinn/node-fetch#usage).
 
 ### In browser
- 
+
 ```js
 rcsdk.platform().get('/account/~/messages/foo/content').then(function(res) {
 
     return res.response().blob(); // or arrayBuffer(), we are accessing WhatWG Fetch's Response
 
 }).then(function(blob ){
-    
+
     var img = document.createElement('img');
     img.src = URL.createObjectURL(blob);
     document.getElementById('container').appendChild(img);
-    
+
 });
 ```
 
