@@ -113,11 +113,6 @@ export interface SDKOptions extends PlatformOptions, ExternalsOptions {
 
 export default SDK;
 
-namespace RingCentral {
+namespace RingCentral.sdk {
     declare const SDK;
-}
-
-if (typeof window !== 'undefined') {
-    window.RingCentral = window.RingCentral || {};
-    window.RingCentral.SDK = SDK;
 }

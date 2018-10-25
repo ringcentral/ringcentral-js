@@ -22,14 +22,14 @@ deploy:
   api_key: $GITHUB_TOKEN
   skip_cleanup: true
   file:
-  - sdk/build/ringcentral.js
-  - sdk/build/ringcentral.js.map
-  - sdk/build/ringcentral.min.js
-  - sdk/build/ringcentral.min.js.map
-  - subscriptions/build/ringcentral-subscriptions.js
-  - subscriptions/build/ringcentral-subscriptions.js.map
-  - subscriptions/build/ringcentral-subscriptions.min.js
-  - subscriptions/build/ringcentral-subscriptions.min.js.map
+  - sdk/dist/ringcentral.js
+  - sdk/dist/ringcentral.js.map
+  - sdk/dist/ringcentral.min.js
+  - sdk/dist/ringcentral.min.js.map
+  - subscriptions/dist/ringcentral-subscriptions.js
+  - subscriptions/dist/ringcentral-subscriptions.js.map
+  - subscriptions/dist/ringcentral-subscriptions.min.js
+  - subscriptions/dist/ringcentral-subscriptions.min.js.map
   on:
     node: 9
     tags: true

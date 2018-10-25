@@ -13,14 +13,14 @@ export {
 export class Subscriptions {
 
     private _sdk: SDK;
-    private _PubNub:any; // typeof PubNub;
+    private _PubNub: any; // typeof PubNub;
 
-    constructor({sdk, PubNub = PubNubDefault}:SubscriptionsOptions) {
+    constructor({sdk, PubNub = PubNubDefault}: SubscriptionsOptions) {
         this._sdk = sdk;
         this._PubNub = PubNub;
     }
 
-    createSubscription({pollInterval, renewHandicapMs}:SubscriptionOptions) {
+    createSubscription({pollInterval, renewHandicapMs}: SubscriptionOptions) {
         return new Subscription({
             pollInterval,
             renewHandicapMs,
@@ -29,7 +29,7 @@ export class Subscriptions {
         });
     }
 
-    createCachedSubscription({cacheKey, pollInterval, renewHandicapMs}:CachedSubscriptionOptions) {
+    createCachedSubscription({cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptions) {
 
         return new CachedSubscription({
             cacheKey,
@@ -41,6 +41,10 @@ export class Subscriptions {
 
     }
 
+    getPubNub() {
+        return this._PubNub;
+    }
+
 }
 
 export interface SubscriptionsOptions {
@@ -50,11 +54,6 @@ export interface SubscriptionsOptions {
 
 export default Subscriptions;
 
-namespace RingCentral {
+namespace RingCentral.subscriptions {
     declare const Subscriptions;
-}
-
-if (typeof window !== 'undefined') {
-    window.RingCentral = window.RingCentral || {};
-    window.RingCentral.Subscriptions = Subscriptions;
 }

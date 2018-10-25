@@ -12,12 +12,12 @@
             }
         }
 
-        var sdk = new RingCentral.SDK({
+        var sdk = new RingCentral.sdk.SDK({
             server: server,
             appKey: appKey,
             appSecret: appSecret,
             appName: 'Demo',
-            appVersion: RingCentral.SDK.version,
+            appVersion: RingCentral.sdk.SDK.version,
             redirectUri: decodeURIComponent(window.location.href.split('login', 1) + 'oauth/redirect.html')
         });
 

@@ -1,25 +1,30 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noImplicitAny": false,
-    "declaration": true,
-    "preserveConstEnums": true,
     "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "declarationDir": "lib",
     "esModuleInterop": true,
-    "outDir": "build",
-    "declarationDir": "build",
-    "sourceMap": true,
+    "experimentalDecorators": true,
+    "jsx": "react",
     "lib": [
       "dom",
       "es2015"
-    ]
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "outDir": "lib",
+    "preserveConstEnums": true,
+    "pretty": true,
+    "sourceMap": true,
+    "target": "es5"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "lib"
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ]
 }

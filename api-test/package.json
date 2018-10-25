@@ -1,4 +1,5 @@
 {
+  "version": "4.0.0",
 	"name": "@ringcentral/sdk-api-test",
 	"private": true,
 	"dependencies": {

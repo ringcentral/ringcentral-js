@@ -1,11 +1,11 @@
 {
-  "name": "ringcentral-mono",
-  "version": "1.0.0",
+  "name": "@ringcentral/mono",
+  "version": "4.0.0",
   "scripts": {
-    "start": "cd demo && npm run start",
-    "bootstrap": "lerna bootstrap --concurrency 1 && lerna link --force-local",
-    "clean": "lerna exec -- rm -rf node_modules build coverage .nyc_output .rpt2_cache package-lock.json",
-    "build": "lerna run build --scope @ringcentral/sdk && lerna run build --scope @ringcentral/subscriptions",
+    "postinstall": "lerna bootstrap",
+    "clean": "lerna clean && lerna run clean",
+    "start": "lerna run start --parallel",
+    "build": "lerna run build",
     "test": "lerna run test"
   },
   "repository": {
@@ -19,8 +19,6 @@
   },
   "homepage": "https://github.com/ringcentral/ringcentral-js#readme",
   "dependencies": {
-    "babel-runtime": "6.26.0",
-    "lerna": "2.9.0",
-    "node-fetch": "2.1.1"
+    "lerna": "3.4.3"
   }
 }
