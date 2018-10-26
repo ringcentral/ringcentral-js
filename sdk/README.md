@@ -54,14 +54,17 @@ SDK can be used in 3 environments:
 1. Install the NPM package:
 
     ```sh
-    npm install ringcentral --save
+    npm install @ringcentral/sdk --save
     ```
 
 2. Require the SDK:
 
     ```js
-    var SDK = require('ringcentral');
-    var rcsdk = new SDK({
+    import {SDK} from "@ringcentral/sdk";
+    // op
+    const SDK = require('@ringcentral/sdk').SDK;
+ 
+    const rcsdk = new SDK({
         server: SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
@@ -71,8 +74,7 @@ SDK can be used in 3 environments:
 
 ## Set things up for Browserify or Webpack
 
-Follow installation steps for NodeJS. Don't forget to add `target: 'web'` to your `webpack.config.js` to tell Webpack to
-pick proper `PUNBUB` and `fetch` implementations.
+Follow installation steps for NodeJS. Don't forget to add `target: 'web'` to your `webpack.config.js` to tell Webpack.
 
 ## Set things up in Browser
 
@@ -81,22 +83,14 @@ pick proper `PUNBUB` and `fetch` implementations.
 Pick the option that works best for you:
 
 - Use CDN **Attention! Versions listed here may be outdated**:
-    - https://cdn.rawgit.com/ringcentral/ringcentral-js/master/build/ringcentral.js
-    - https://cdnjs.cloudflare.com/ajax/libs/fetch/0.11.1/fetch.js
-    - https://cdnjs.cloudflare.com/ajax/libs/es6-promise/3.2.2/es6-promise.js
-    - https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.1.js
+    - https://unpkg.com/@ringcentral/sdk@latest/dist/ringcentral.js
+    - https://unpkg.com/whatwg-fetch@latest/dist/fetch.umd.js
+    - https://unpkg.com/es6-promise@latest/dist/es6-promise.auto.js
 
 - Download everything manually:
-    - [ZIP file with source code](https://github.com/ringcentral/ringcentral-js/archive/master.zip)
-    - [Fetch](https://github.com/github/fetch), direct download: [fetch.js](https://raw.githubusercontent.com/github/fetch/master/fetch.js)
-    - [ES6 Promise](https://github.com/jakearchibald/es6-promise), direct download: [es6-promise.js](https://raw.githubusercontent.com/jakearchibald/es6-promise/master/dist/es6-promise.js)
-    - [PUBNUB](https://github.com/pubnub/javascript), direct download: [pubnub.js](https://raw.githubusercontent.com/pubnub/javascript/master/web/pubnub.js)
-
-- Use Bower, all dependencies will be downloaded to `bower_components` directory:
-
-    ```sh
-    bower install ringcentral --save
-    ```
+    - [SDK](https://github.com/ringcentral/ringcentral-js/releases/download/latest)
+    - [Fetch](https://github.com/github/fetch/releases/download/latest)
+    - [ES6 Promise](https://github.com/jakearchibald/es6-promise/releases/latest)
 
 ### Add scripts to HTML page (if you are not using any module loaders)
 
@@ -105,14 +99,13 @@ The SDK is represented by the global RingCentral constructor. Your application m
 Add the following to your HTML:
 
 ```html
-<script type="text/javascript" src="path-to-scripts/es6-promise/promise.js"></script>
-<script type="text/javascript" src="path-to-scripts/fetch/fetch.js"></script>
-<script type="text/javascript" src="path-to-scripts/pubnub/web/pubnub.js"></script>
-<script type="text/javascript" src="path-to-scripts/ringcentral/build/ringcentral.js"></script><!-- or ringcentral.min.js -->
+<script type="text/javascript" src="path-to-scripts/promise.auto.js"></script>
+<script type="text/javascript" src="path-to-scripts/fetch.umd.js"></script>
+<script type="text/javascript" src="path-to-scripts/ringcentral.js"></script><!-- or ringcentral.min.js -->
 <script type="text/javascript">
 
-    var rcsdk = new RingCentral.SDK({
-        server: RingCentral.SDK.server.sandbox,
+    var rcsdk = new RingCentral.sdk.SDK({
+        server: RingCentral.sdk.SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
@@ -127,15 +120,14 @@ Add the following to your HTML:
 // Add this to your RequireJS configuration file
 require.config({
     paths: {
-        'pubnub': 'path-to-scripts/pubnub/web/pubnub',
-        'ringcentral': 'path-to-scripts/ringcentral/build/ringcentral' // or ringcentral.min
+        'ringcentral': 'path-to-scripts/ringcentral' // or ringcentral.min
     }
 });
 
 // Then you can use the SDK like any other AMD component
-require(['ringcentral'], function(SDK) {
-    var rcsdk = new SDK({
-        server: SDK.server.sandbox,
+require(['ringcentral'], function(/** @type RingCentral.sdk */ ns) {
+    var rcsdk = new ns.SDK({
+        server: ns.SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
@@ -221,7 +213,7 @@ platform
 In this case your landing page (the one to which Redirect URI points) need to call the following code:
 
 ```js
-RingCentral.SDK.handleLoginRedirect();
+RingCentral.sdk.SDK.handleLoginRedirect();
 ```
 
 #### Difference between Authorization Code and Implicit Grant flows
@@ -462,150 +454,6 @@ var url = rcsdk.platform().createUrl('/restapi/v1.0/account/~/messages/foo/conte
 Platform class emits `rateLimitError` if server returns `429` status. You may supply an option `handleRateLimit` and
 SDK will re-execute the failed request. Please keep in mind that your application should somehow delay/throttle other
 subsequent requests in this case because otherwise all those requests will be postponed too.
-
-# Server-side Subscriptions
-
-Subscriptions are a convenient way to receive updates on server-side events, such as new messages or presence changes.
-
-Subscriptions are created by calling the `getSubscription` method of the RingCentral instance created earlier on.
-
-```js
-var subscription = rcsdk.createSubscription();
-
-subscription.on(subscription.events.notification, function(msg) {
-    console.log(msg, msg.body);
-});
-
-subscription
-    .setEventFilters(['/restapi/v1.0/account/~/extension/~/presence']) // a list of server-side events
-    .register()
-    .then(...);
-```
-
-## Removing Subscriptions from server
-
-Once a subscription has been created, the SDK takes care of renewing it automatically. To cancel a subscription, you can
-call the subscription instance's `remove()` method:
-
-```js
-subscription.remove().then(...).catch(...);
-```
-
-## Updating Subscriptions
-
-You can add more or replace event filters in the existing subscription at any time, by calling the subscription methods
-and then calling the `register()` method to update it on the server:
-
-```js
-subscription.setEventFilters(['/restapi/v1.0/account/~/extension/111/presence']).register();
-subscription.addEventFilters(['/restapi/v1.0/account/~/extension/222/presence']).register();
-```
-
-## Subscription reset
-
-To revert subscription instance to it's prestine state you can use its `reset()` and `off()` methods, this will close
-PUBNUB channel, remove all timers, subscription data and all bindings:
-
-```js
-subscription.reset().off();
-```
-
-## Subscriptions lifecycle
-
-The number of active subscriptions is limited per account (about 20). This means that the application should dispose
-unused subscriptions in the following situations:
-
-- Application should `reset()` subscriptions (on the server they are dead already):
-    - the `Platform` instance emits `logoutSuccess` or `accessViolation` events so the app should `reset()` all subscriptions
-- Application should `remove()` subscriptions or remove no longer needed event filters from them:
-    - the user navigates away from the page or particular view
-    - a subscription becomes unused by the application, based upon the application's business logic
-
-One of very useful techniques to limit the number of active subscriptions is to store subscription data in cache and
-share this data across Subscription instances in multiple tabs:
-
-```js
-var cacheKey = 'some-custom-key';
-var subscription = rcsdk.createSubscription();
-var cachedSubscriptionData = rcsdk.cache().getItem(cacheKey);
-
-if (cachedSubscriptionData) {
-    try { // if subscription is already expired an error will be thrown so we need to capture it
-        subscription.setSubscription(cachedSubscriptionData); // use the cache
-    } catch (e) {
-        console.error('Cannot set subscription data', e);
-    }
-} else {
-    subscription.setEventFilters(['/restapi/v1.0/account/~/extension/~/presence']); // explicitly set required events
-}
-
-subscription.on([subscription.events.subscribeSuccess, subscription.events.renewSuccess], function() {
-    rcsdk.cache().setItem(cacheKey, subscription.subscription());
-});
-
-subscription.register().catch(...);
-```
-
-With this technique subscription remove request on window/tab closing is no longer needed.
-
-In any case if application logic dictates that subscription is not used anymore by any of it's instances, subscription
-can be removed from the server to make sure application stays within limits.
-
-## Stale Subscriptions
-
-There is a known bug when user awakes the computer: subscription tries to renew itself but fails because the
-expiration time has passed (JS was halted while computer was sleeping).
-
-Recommendation is to listen to `subscription.events.renewError` event and when it occurs reset and re-subscribe:
-
-```js
-subscription.on(subscription.events.renewError, function() {
-    subscription
-        .reset()
-        .setEventFilters('...') // some default set of event filters
-        .register().catch(...);
-});
-```
-
-This has to be done in all tabs, application must handle potential race conditions.
-
-When SDK cannot automatically renew subscription it will fire an event `automaticRenewError` so that application can do
-some actions in order to have active subscription again:
-
-```js
-subscription.on(subscription.events.automaticRenewError, function() {
-    subscription.resubscribe().catch(...); // or do manual reset with default event filters as in code snippet before
-});
-```
-
-## Multiple event filters in one Subscription
-
-The best practice is to have only one subscription object with multiple event filters of different types (messages,
-presence, etc.) instead of having a separate subscription for each individual event filter.
-
-In the notification event handler application may have a bunch of if's that will execute appropriate action based on
-`event` property of the incoming message:
-
-```js
-subscription.on(subscription.events.notification, function(msg) {
-    if (msg.event.indexOf('/presence') > -1) { ... }
-    else if (msg.event.indexOf('/message-store') > -1) { ... }
-    else { ... }
-});
-```
-
-## Shorthand
-
-The above mentioned things are put together into `CachedSubscription` class and its `restore(cacheKey)` method:
-
-```js
-var subscription = rcsdk.createCachedSubscription('cache-key').restore(['/restapi/v1.0/account/~/extension/~/presence']);
-
-// use it as usual
-subscription.register().catch(...);
-```
-
-***
 
 # Advanced SDK Configuration & Polyfills
 

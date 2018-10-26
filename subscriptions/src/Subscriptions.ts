@@ -53,7 +53,3 @@ export interface SubscriptionsOptions {
 }
 
 export default Subscriptions;
-
-namespace RingCentral.subscriptions {
-    declare const Subscriptions;
-}
