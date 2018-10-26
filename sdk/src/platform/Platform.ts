@@ -11,7 +11,6 @@ declare const screen: any; //FIXME TS Crap
 
 export default class Platform extends EventEmitter {
 
-    static _knownPrefixes = ['/rcvideo'];
     static _tokenEndpoint = '/restapi/oauth/token';
     static _revokeEndpoint = '/restapi/oauth/revoke';
     static _authorizeEndpoint = '/restapi/oauth/authorize';
@@ -43,7 +42,20 @@ export default class Platform extends EventEmitter {
     private _refreshPromise: Promise<any>;
     private _auth: Auth;
 
-    constructor({server, appKey, appSecret, redirectUri = '', refreshDelayMs = 100, clearCacheOnRefreshError = true, appName = '', appVersion = '', externals, cache, client, refreshHandicapMs}: PlatformOptionsConstructor) {
+    constructor({
+                    server,
+                    appKey,
+                    appSecret,
+                    redirectUri = '',
+                    refreshDelayMs = 100,
+                    clearCacheOnRefreshError = true,
+                    appName = '',
+                    appVersion = '',
+                    externals,
+                    cache,
+                    client,
+                    refreshHandicapMs
+                }: PlatformOptionsConstructor) {
 
         super();
 
@@ -87,8 +99,8 @@ export default class Platform extends EventEmitter {
 
     createUrl(path = '', options: CreateUrlOptions = {}) {
 
-        var builtUrl = '',
-            hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
+        let builtUrl = '';
+        const hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
 
         if (options.addServer && !hasHttp) builtUrl += this._server;
 
@@ -138,17 +150,17 @@ export default class Platform extends EventEmitter {
             return url.split(separator).reverse()[0];
         }
 
-        var response = (url.indexOf('#') === 0 && getParts(url, '#')) ||
+        const response = (url.indexOf('#') === 0 && getParts(url, '#')) ||
                        (url.indexOf('?') === 0 && getParts(url, '?')) ||
                        null;
 
         if (!response) throw new Error('Unable to parse response');
 
-        var queryString = qs.parse(response);
+        const queryString = qs.parse(response);
 
         if (!queryString) throw new Error('Unable to parse response');
 
-        var error = queryString.error_description || queryString.error;
+        const error = queryString.error_description || queryString.error;
 
         if (error) {
             const e: any = new Error(error.toString());
@@ -190,15 +202,21 @@ export default class Platform extends EventEmitter {
             options.property = options.property || Constants.authResponseProperty;
             options.target = options.target || '_blank';
 
-            var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
-            var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
+            const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
+            const dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 
-            var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-            var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+            const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+            const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
 
-            var left = ((width / 2) - (options.width / 2)) + dualScreenLeft;
-            var top = ((height / 2) - (options.height / 2)) + dualScreenTop;
-            var win = window.open(options.url, '_blank', (options.target == '_blank') ? 'scrollbars=yes, status=yes, width=' + options.width + ', height=' + options.height + ', left=' + left + ', top=' + top : '');
+            const left = ((width / 2) - (options.width / 2)) + dualScreenLeft;
+            const top = ((height / 2) - (options.height / 2)) + dualScreenTop;
+            const win = window.open(options.url, '_blank', (options.target == '_blank') ? (
+                'scrollbars=yes, status=yes, ' +
+                'width=' + options.width + ', ' +
+                'height=' + options.height + ', ' +
+                'left=' + left + ', ' +
+                'top=' + top
+            ) : '');
 
             if (!win) {
                 throw new Error('Could not open login window. Please allow popups for this site');
@@ -206,11 +224,7 @@ export default class Platform extends EventEmitter {
 
             if (win.focus) win.focus();
 
-            var eventMethod = window.addEventListener ? 'addEventListener' : 'attachEvent';
-            var eventRemoveMethod = eventMethod == 'addEventListener' ? 'removeEventListener' : 'detachEvent';
-            var messageEvent = eventMethod == 'addEventListener' ? 'message' : 'onmessage';
-
-            var eventListener = (e) => {
+            const eventListener = (e) => {
 
                 try {
 
@@ -218,23 +232,21 @@ export default class Platform extends EventEmitter {
                     if (!e.data || !e.data[options.property]) return; // keep waiting
 
                     win.close();
-                    window[eventRemoveMethod](messageEvent, eventListener);
+                    window.addEventListener('message', eventListener);
 
-
-                    var loginOptions = this.parseLoginRedirect(e.data[options.property]);
+                    const loginOptions = this.parseLoginRedirect(e.data[options.property]);
 
                     if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
 
                     resolve(loginOptions);
 
-                    /* jshint -W002 */
                 } catch (e) {
                     reject(e);
                 }
 
             };
 
-            window[eventMethod](messageEvent, eventListener, false);
+            window.addEventListener('message', eventListener, false);
 
         });
 
@@ -348,7 +360,7 @@ export default class Platform extends EventEmitter {
                 "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
             });
 
-            var json = res.json();
+            const json = res.json();
 
             if (!json.access_token) {
                 throw this._client.makeError(new Error('Malformed OAuth response'), res);
@@ -556,7 +568,7 @@ export default class Platform extends EventEmitter {
      * @private
      */
     _apiKey() {
-        var apiKey = this._appKey + ':' + this._appSecret;
+        const apiKey = this._appKey + ':' + this._appSecret;
         return (typeof btoa == 'function') ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
     }
 
@@ -565,7 +577,7 @@ export default class Platform extends EventEmitter {
      * @private
      */
     _authHeader() {
-        var token = this._auth.accessToken();
+        const token = this._auth.accessToken();
         return this._auth.tokenType() + (token ? ' ' + token : '');
     }
 

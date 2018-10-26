@@ -29,14 +29,14 @@ export default class Cache {
     }
 
     getItem(key) {
-        var item = this._externals.localStorage[this._prefixKey(key)];
+        const item = this._externals.localStorage[this._prefixKey(key)];
         if (!item) return null;
         return JSON.parse(item);
     }
 
     clean() {
 
-        for (var key in this._externals.localStorage) {
+        for (const key in this._externals.localStorage) {
 
             /* istanbul ignore next */
             if (!this._externals.localStorage.hasOwnProperty(key)) continue;

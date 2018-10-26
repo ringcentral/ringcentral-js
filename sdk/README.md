@@ -11,7 +11,6 @@
 - [Fax](#fax)
 - [Page visibility](#page-visibility)
 - [Tracking network Requests And Responses](#tracking-network-requests-and-responses)
-- [Migration from previous releases](#migration-from-previous-releases)
 
 ***
 
@@ -852,14 +851,3 @@ client.on(client.events.beforeRequest, function(apiResponse) {}); // apiResponse
 client.on(client.events.requestSuccess, function(apiResponse) {});
 client.on(client.events.requestError, function(apiError) {});
 ```
-
-***
-
-# Migration from previous releases
-
-**!!! Attention !!!**
-
-**In SDK version 2.0 Helpers were moved to separate repository: [ringcentral-js-helpers](https://github.com/ringcentral/ringcentral-js-helpers).**
-
-A lot of code improvements were implemented in order to make SDK compatible with WhatWG Fetch, DOM Requests &
-DOM Responses: see [full list of migration instructions](../../CHANGELOG.md).

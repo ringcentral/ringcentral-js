@@ -6,7 +6,7 @@ describe('RingCentral.core.Cache', () => {
 
         it('returns null if item not found', asyncTest(sdk => {
 
-            var cache = sdk.cache();
+            const cache = sdk.cache();
 
             expect(cache.getItem('foo')).to.equal(null);
 
@@ -18,8 +18,8 @@ describe('RingCentral.core.Cache', () => {
 
         it('sets an item in storage', asyncTest(sdk => {
 
-            var cache = sdk.cache();
-            var json = {foo: 'bar'};
+            const cache = sdk.cache();
+            const json = {foo: 'bar'};
 
             expect(cache.setItem('foo', json).getItem('foo')).to.deep.equal(json);
 
@@ -35,7 +35,7 @@ describe('RingCentral.core.Cache', () => {
 
         it('removes all prefixed entries from cache leaving non-prefixed ones untouched', asyncTest(sdk => {
 
-            var cache = sdk.cache();
+            const cache = sdk.cache();
 
             cache['_externals'].localStorage['rc-foo'] = '"foo"';
             cache['_externals'].localStorage.foo = '"foo"';
@@ -55,9 +55,9 @@ describe('RingCentral.core.Cache', () => {
 
         it('different prefixes dont overlap', asyncTest(sdk1 => {
 
-            var sdk2 = createSdk({cachePrefix: 'foo'});
+            const sdk2 = createSdk({cachePrefix: 'foo'});
 
-            var cache1 = sdk1.cache();
+            const cache1 = sdk1.cache();
 
             cache1.setItem('foo', {foo: 'bar'});
 

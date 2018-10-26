@@ -6,7 +6,7 @@ describe('RingCentral', () => {
 
         suite.timeout(10000); // Per SLA should be 3 seconds
 
-        var sdk = new SDK({
+        const sdk = new SDK({
             server: server,
             appKey: '',
             appSecret: ''
@@ -34,9 +34,9 @@ describe('RingCentral', () => {
 
         it('handles hash', () => {
 
-            var s = spy();
+            const s = spy();
 
-            var win = {
+            const win = {
                 location: {hash: '#foo', origin: 'foo'},
                 opener: {postMessage: s}
             };
@@ -50,9 +50,9 @@ describe('RingCentral', () => {
 
         it('handles query', () => {
 
-            var s = spy();
+            const s = spy();
 
-            var win = {
+            const win = {
                 location: {search: '?foo'},
                 opener: {postMessage: s}
             };

@@ -7,6 +7,8 @@
 - [SDK](sdk) &mdash; Main SDK package, interacts with RingCentral REST API
 - [Subscriptions SDK](subscriptions) &mdash; Additional SDK which listens to push notifications
 
+***
+
 # Key Benefits
 
 - Automatically handles token lifecycle procedures in multi-tab environment
@@ -15,4 +17,16 @@
 - Parses multipart API responses
 - Restores subscriptions from cache
 - Automatically re-subscribes in case of subscription renewal errors
-- Compatible with latest WhatWG `fetch()` spec (DOM `Request`s and `Response`s)  
+- Compatible with latest WhatWG `fetch()` spec (DOM `Request`s and `Response`s)
+
+***
+
+# Migration from previous releases
+
+**!!! Attention !!!**
+
+**In SDK version 2.0 Helpers were moved to separate repository: [ringcentral-js-helpers](https://github.com/ringcentral/ringcentral-js-helpers).**
+
+A lot of code improvements were implemented in order to make SDK compatible with WhatWG Fetch, DOM Requests &
+DOM Responses: see [full list of migration instructions](../../CHANGELOG.md).
+  

@@ -1,14 +1,14 @@
 import {apiCall, asyncTest, expect, expectThrows} from "../test/test";
 
 const createResponse = (sdk, json, status, statusText, headers) => {
-    var path = '/restapi/v1.0/foo' + Date.now();
+    const path = '/restapi/v1.0/foo' + Date.now();
     apiCall('GET', path, json, status, statusText, headers);
     return sdk.platform().get(path);
 };
 
 describe('RingCentral.http.ApiResponse', () => {
 
-    var goodMultipartMixedResponse =
+    const goodMultipartMixedResponse =
         '--Boundary_1245_945802293_1394135045248\n' +
         'Content-Type: application/json\r\n' +
         '\r\n' +
@@ -117,7 +117,7 @@ describe('RingCentral.http.ApiResponse', () => {
 
             expect(res.text()).to.equal(multipartMixedResponseWithErrorPart);
 
-            var multipart = res.multipart();
+            const multipart = res.multipart();
 
             expect(multipart.length).to.equal(3);
 

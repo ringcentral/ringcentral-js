@@ -19,7 +19,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('is not authenticated when token has expired', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             platform.auth().cancelAccessToken();
 
@@ -31,7 +31,7 @@ describe('RingCentral.platform.Platform', function() {
 
             logout();
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             await platform.logout();
 
@@ -47,7 +47,7 @@ describe('RingCentral.platform.Platform', function() {
 
             tokenRefresh();
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             expect(platform.auth().accessToken()).to.not.equal('ACCESS_TOKEN_FROM_REFRESH');
 
@@ -65,7 +65,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('login with code', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             platform.auth().cancelAccessToken();
 
@@ -84,7 +84,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('login with access_token', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             platform.auth().cancelAccessToken();
 
@@ -98,7 +98,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('login error', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             platform.auth().cancelAccessToken();
 
@@ -114,7 +114,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('returns false if refresh failed', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             platform.auth().cancelAccessToken();
 
@@ -133,7 +133,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('refreshes token when token was expired', asyncTest(async sdk => {
 
-            var platform = sdk.platform(),
+            const platform = sdk.platform(),
                 path = '/restapi/xxx',
                 refreshSpy = spy(function() {});
 
@@ -155,7 +155,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('tries to refresh the token if Platform returns 401 Unauthorized and re-executes the request', asyncTest(async sdk => {
 
-            var platform = sdk.platform(),
+            const platform = sdk.platform(),
                 path = '/restapi/xxx',
                 refreshSpy = spy(function() {
                     apiCall('GET', path, response, 200);
@@ -177,7 +177,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('fails if ajax has status other than 2xx', asyncTest(async sdk => {
 
-            var platform = sdk.platform(),
+            const platform = sdk.platform(),
                 path = '/restapi/xxx';
 
             apiCall('GET', path, {description: 'Fail'}, 400, 'Bad Request');
@@ -188,7 +188,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('handles rate limit 429', asyncTest(async sdk => {
 
-            var platform = sdk.platform(),
+            const platform = sdk.platform(),
                 path = '/restapi/xxx',
                 rateLimitSpy = spy(function() {
                     apiCall('GET', path, response, 200);
@@ -203,7 +203,7 @@ describe('RingCentral.platform.Platform', function() {
 
             expect(rateLimitSpy.calledOnce).to.be.true;
 
-            var e = rateLimitSpy.getCalls()[0].args[0];
+            const e = rateLimitSpy.getCalls()[0].args[0];
             expect(e.message).to.equal('expected');
             expect(e.retryAfter).to.equal(10);
 
@@ -213,7 +213,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('emits rate limit 429 errors if they are not handled', asyncTest(async sdk => {
 
-            var platform = sdk.platform(),
+            const platform = sdk.platform(),
                 path = '/restapi/xxx',
                 rateLimitSpy = spy(function() {});
 
@@ -225,7 +225,7 @@ describe('RingCentral.platform.Platform', function() {
 
                 expect(rateLimitSpy.calledOnce).to.be.true;
 
-                var e = rateLimitSpy.getCalls()[0].args[0];
+                const e = rateLimitSpy.getCalls()[0].args[0];
                 expect(e.message).to.equal('expected');
                 expect(e.retryAfter).to.equal(60000);
 
@@ -241,7 +241,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('handles error in queued AJAX after unsuccessful refresh when token is killed', asyncTest(async sdk => {
 
-            var platform = sdk.platform(),
+            const platform = sdk.platform(),
                 path = '/restapi/xxx',
                 successSpy = spy(function() {}),
                 errorSpy = spy(function() {});
@@ -265,7 +265,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('handles subsequent refreshes', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             tokenRefresh();
             tokenRefresh();
@@ -282,7 +282,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('returns error if response is malformed', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             apiCall('POST', '/restapi/oauth/token', {
                 'message': 'Wrong token',
@@ -310,7 +310,7 @@ describe('RingCentral.platform.Platform', function() {
             apiCall('GET', '/restapi/v1.0/foo/2', {increment: 2});
             apiCall('GET', '/restapi/v1.0/foo/3', {increment: 3});
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             platform.auth().cancelAccessToken();
 
@@ -333,11 +333,11 @@ describe('RingCentral.platform.Platform', function() {
 
         it('sends request using appropriate method', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             const test = async (method) => {
 
-                var path = '/restapi/v1.0/foo/' + method;
+                const path = '/restapi/v1.0/foo/' + method;
 
                 apiCall(method, path, {foo: 'bar'});
 
@@ -360,7 +360,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('builds the URL', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             expect(platform.createUrl('/restapi/v1.0/foo')).to.equal('/restapi/v1.0/foo');
 
@@ -393,13 +393,13 @@ describe('RingCentral.platform.Platform', function() {
     describe('parseLoginRedirect', function() {
         describe('Authorization Code Flow', function() {
             it('parses url correctly', asyncTest(async sdk => {
-                var platform = sdk.platform();
+                const platform = sdk.platform();
                 expect(platform.parseLoginRedirect('?code=foo')).to.deep.equal({code: 'foo'});
             }));
         });
         describe('Implicit Grant Flow', function() {
             it('parses url correctly', asyncTest(async sdk => {
-                var platform = sdk.platform();
+                const platform = sdk.platform();
                 expect(platform.parseLoginRedirect('#access_token=foo')).to.deep.equal({access_token: 'foo'});
             }));
         });
@@ -409,7 +409,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('simple usage', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             expect(platform.loginUrl({
                 implicit: true,
@@ -439,7 +439,7 @@ describe('RingCentral.platform.Platform', function() {
 
     describe('loginWindow', function() {
 
-        var isNode = (typeof window !== 'undefined');
+        const isNode = (typeof window !== 'undefined');
 
         if (!isNode) {
             globalAny.window = {
@@ -471,9 +471,9 @@ describe('RingCentral.platform.Platform', function() {
 
         it('simple usage', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
-            var close = spy();
-            var focus = spy();
+            const platform = sdk.platform();
+            const close = spy();
+            const focus = spy();
 
             window.open = spy(function() {
                 return {
@@ -504,7 +504,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('throws an exception if no code and token', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             window.open = spy(function() {
                 return {close: spy()};
@@ -527,7 +527,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('throws an exception if window cannot be open', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             window.open = spy(function() {
                 return null;
@@ -546,7 +546,7 @@ describe('RingCentral.platform.Platform', function() {
 
         it('throws an exception if no uri option', asyncTest(async sdk => {
 
-            var platform = sdk.platform();
+            const platform = sdk.platform();
 
             window.open = spy(function() {
                 return null;
@@ -562,15 +562,15 @@ describe('RingCentral.platform.Platform', function() {
 
     describe('parseLoginRedirect', function() {
         it('parses redirect URIs with hash', asyncTest(async sdk => {
-            var platform = sdk.platform();
+            const platform = sdk.platform();
             expect(platform.parseLoginRedirect('#access_token=foo').access_token).to.equal('foo');
         }));
         it('parses redirect URIs with query', asyncTest(async sdk => {
-            var platform = sdk.platform();
+            const platform = sdk.platform();
             expect(platform.parseLoginRedirect('?access_token=foo').access_token).to.equal('foo');
         }));
         it('parses redirect URIs with errors', asyncTest(async sdk => {
-            var platform = sdk.platform();
+            const platform = sdk.platform();
             expect(function() {
                 platform.parseLoginRedirect('?error_description=foo');
             }).to.throw('foo');

@@ -2,6 +2,10 @@
 
 This document contains only major functionality changes in certain versions. Minor fixes/updates are omitted.
 
+## 4.0
+
+- SDK was separated into 2 packages: `@ringcentral/sdk` and `@ringcentral/subscriptions`
+
 ## 3.0
 
 - SDK no longer runs refresh queue across multiple tabs

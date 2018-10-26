@@ -1,5 +1,7 @@
 import Cache from "../core/Cache";
 
+const DEFAULT_RENEW_HANDICAP_MS = 60 * 1000; // 1 minute
+
 export interface AuthOptions {
     refreshHandicapMs?: number;
 }
@@ -12,10 +14,10 @@ export interface AuthOptionsConstructor extends AuthOptions{
 export default class Auth {
 
     private _cache: Cache;
-    private _cacheId: string;
-    private _refreshHandicapMs: number;
+    private readonly _cacheId: string;
+    private readonly _refreshHandicapMs: number;
 
-    constructor({cache, cacheId, refreshHandicapMs = 60 * 1000}: AuthOptionsConstructor) { // 1 minute
+    constructor({cache, cacheId, refreshHandicapMs = DEFAULT_RENEW_HANDICAP_MS}: AuthOptionsConstructor) {
 
         this._cache = cache;
         this._cacheId = cacheId;
@@ -49,7 +51,7 @@ export default class Auth {
 
     setData(newData = {}) {
 
-        var data = this.data();
+        const data = this.data();
 
         Object.keys(newData).forEach(function(key) {
             data[key] = newData[key];
@@ -69,7 +71,7 @@ export default class Auth {
      */
     accessTokenValid() {
 
-        var authData = this.data();
+        const authData = this.data();
         return (authData.expire_time - this._refreshHandicapMs > Date.now());
 
     }

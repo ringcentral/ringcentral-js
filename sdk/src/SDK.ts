@@ -13,8 +13,6 @@ import Platform, {
 } from "./platform/Platform";
 import {AuthData} from "./platform/Auth";
 
-declare const window: any; //FIXME TS Crap
-
 export {
     Cache,
     ApiResponse,
@@ -98,8 +96,8 @@ export class SDK {
 
         win = win || window;
 
-        var response = win.location.hash ? win.location.hash : win.location.search;
-        var msg = {};
+        const response = win.location.hash ? win.location.hash : win.location.search;
+        const msg = {};
         msg[Constants.authResponseProperty] = response;
         win.opener.postMessage(msg, origin || win.location.origin);
 

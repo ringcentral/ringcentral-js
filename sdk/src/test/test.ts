@@ -3,7 +3,7 @@ import {expect, spy, fetchMock} from "@ringcentral/sdk-utils/test";
 
 export function apiCall(method, path, json, status = 200, statusText = 'OK', headers = null) {
 
-    var isJson = typeof json !== 'string';
+    const isJson = typeof json !== 'string';
 
     if (isJson && !headers) headers = {'Content-Type': 'application/json'};
 
@@ -88,7 +88,7 @@ export function asyncTest(fn: (sdk: SDK) => any) {
 
     return async () => {
 
-        var sdk = createSdk(); // {cachePrefix: 'prefix-' + Date.now()}
+        const sdk = createSdk(); // {cachePrefix: 'prefix-' + Date.now()}
 
         function clean() {
             fetchMock.restore();
@@ -100,7 +100,7 @@ export function asyncTest(fn: (sdk: SDK) => any) {
 
             authentication();
 
-            var platofrm = sdk.platform();
+            const platofrm = sdk.platform();
 
             await platofrm.login({
                 username: 'whatever',

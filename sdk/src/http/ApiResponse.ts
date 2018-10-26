@@ -76,7 +76,7 @@ export default class ApiResponse {
 
         if (this.ok() && !skipOKCheck) return null;
 
-        var message = (this._response && this._response.status ? this._response.status + ' ' : '') +
+        let message = (this._response && this._response.status ? this._response.status + ' ' : '') +
                       (this._response && this._response.statusText ? this._response.statusText : '');
 
         try {
@@ -107,11 +107,11 @@ export default class ApiResponse {
 
             // Step 1. Split multipart response
 
-            var text = this.text();
+            const text = this.text();
 
             if (!text) throw new Error('No response body');
 
-            var boundary;
+            let boundary;
 
             try {
                 boundary = this._getContentType().match(/boundary=([^;]+)/i)[1];
@@ -121,7 +121,7 @@ export default class ApiResponse {
 
             if (!boundary) throw new Error('Cannot find boundary');
 
-            var parts = text.toString().split(ApiResponse._boundarySeparator + boundary);
+            const parts = text.toString().split(ApiResponse._boundarySeparator + boundary);
 
             if (parts[0].trim() === '') parts.shift();
             if (parts[parts.length - 1].trim() == ApiResponse._boundarySeparator) parts.pop();
@@ -130,13 +130,13 @@ export default class ApiResponse {
 
             // Step 2. Parse status info
 
-            var statusInfo = this._create(parts.shift(), this._response.status, this._response.statusText).json();
+            const statusInfo = this._create(parts.shift(), this._response.status, this._response.statusText).json();
 
             // Step 3. Parse all other parts
 
             this._multipart = parts.map(function(part, i) {
 
-                var status = statusInfo.response[i].status;
+                const status = statusInfo.response[i].status;
 
                 return this._create(part, status);
 
@@ -171,7 +171,7 @@ export default class ApiResponse {
 
         text = text.replace(/\r/g, '');
 
-        var headers = new this._externals.Headers(),
+        const headers = new this._externals.Headers(),
             headersAndBody = text.split(ApiResponse._bodySeparator),
             headersText = (headersAndBody.length > 1) ? headersAndBody.shift() : '';
 
@@ -181,7 +181,7 @@ export default class ApiResponse {
             .split('\n')
             .forEach(header => {
 
-                var split = header.trim().split(ApiResponse._headerSeparator),
+                const split = header.trim().split(ApiResponse._headerSeparator),
                     key = split.shift().trim(),
                     value = split.join(ApiResponse._headerSeparator).trim();
 
@@ -189,7 +189,7 @@ export default class ApiResponse {
 
             });
 
-        var response = new this._externals.Response(text, {
+        const response = new this._externals.Response(text, {
             headers: headers,
             status: status,
             statusText: statusText

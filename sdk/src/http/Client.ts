@@ -123,14 +123,14 @@ export default class Client extends EventEmitter {
         // Serialize body
         if (isPlainObject(init.body) || !init.body) {
 
-            var contentTypeHeaderName = findHeaderName(ApiResponse._contentType, init.headers);
+            let contentTypeHeaderName = findHeaderName(ApiResponse._contentType, init.headers);
 
             if (!contentTypeHeaderName) {
                 contentTypeHeaderName = ApiResponse._contentType;
                 init.headers[contentTypeHeaderName] = ApiResponse._jsonContentType;
             }
 
-            var contentType = init.headers[contentTypeHeaderName];
+            const contentType = init.headers[contentTypeHeaderName];
 
             // Assign a new encoded body
             if (contentType.indexOf(ApiResponse._jsonContentType) > -1) {
@@ -148,7 +148,7 @@ export default class Client extends EventEmitter {
         }
 
         // Create a request with encoded body
-        var req = new this._externals.Request(init.url, init);
+        const req = new this._externals.Request(init.url, init);
 
         // Keep the original body accessible directly (for mocks)
         req.originalBody = init.body;
