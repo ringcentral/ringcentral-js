@@ -16,7 +16,7 @@ function createConfig(config, cwd) {
         ],
 
         files: [
-            require.resolve('fetch-mock/es5/client-bundle'),
+            require.resolve('fetch-mock/dist/es5/client-bundle'),
             require.resolve('karma-chai-plugins/function-bind-polyfill')
         ].concat(specs),
 

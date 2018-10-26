@@ -3,8 +3,11 @@
   "version": "4.0.0",
   "scripts": {
     "clean": "rimraf dist/* lib/* coverage/* .nyc_output .rpt2_cache",
-    "test": "npm run nyc",
+    "test": "npm run mocha",
+    "mocha": "mocha --opts mocha.opts",
+    "mocha:watch": "npm run mocha -- --watch",
     "nyc": "nyc mocha --opts mocha.opts",
+    "prepublishOnly": "npm run nyc",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "build": "npm run clean && npm run build:tsc && npm run build:webpack",
     "build:tsc": "tsc",
@@ -17,8 +20,8 @@
     "pubnub": "4.21.6"
   },
   "devDependencies": {
-    "@ringcentral/sdk": "*",
-    "@ringcentral/sdk-utils": "0.0.0",
+    "@ringcentral/sdk": "^4.0.0",
+    "@ringcentral/sdk-utils": "^4.0.0",
     "@types/mocha": "5.2.5",
     "@types/node": "10.12.0",
     "@types/pubnub": "4.0.2",

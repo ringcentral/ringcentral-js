@@ -1,4 +1,4 @@
-import * as PubNub from "pubnub";
+import * as PubNubDefault from "pubnub";
 import {SDK, ApiResponse, EventEmitter} from "@ringcentral/sdk";
 
 // detect ISO 8601 format string with +00[:00] timezone notations
@@ -31,10 +31,10 @@ export default class Subscription extends EventEmitter {
     };
 
     _sdk: SDK;
-    _PubNub: PubNub;
+    _PubNub: typeof PubNubDefault;
     _pollInterval: number;
     _renewHandicapMs: number;
-    _pubnub: any = null; //FIXME PubNub
+    _pubnub: PubNubDefault = null;
     _pubnubLastChannel: string = null;
     _pubnubLastSubscribeKey: string = null;
     _timeout: any = null;
@@ -53,7 +53,7 @@ export default class Subscription extends EventEmitter {
 
     subscribed() {
 
-        var subscription = this.subscription();
+        const subscription = this.subscription();
 
         return !!(subscription.id &&
                   subscription.deliveryMode &&
@@ -119,7 +119,7 @@ export default class Subscription extends EventEmitter {
      * @return {Subscription}
      */
     setEventFilters(events) {
-        var subscription = this.subscription();
+        const subscription = this.subscription();
         subscription.eventFilters = events;
         this._setSubscription(subscription);
         return this;
@@ -225,7 +225,7 @@ export default class Subscription extends EventEmitter {
     };
 
     resubscribe(): Promise<ApiResponse> {
-        var filters = this.eventFilters();
+        const filters = this.eventFilters();
         return this.reset().setEventFilters(filters).subscribe();
     };
 
@@ -307,7 +307,8 @@ export default class Subscription extends EventEmitter {
 
         if (this.subscription().deliveryMode.encryptionKey) {
 
-            message = this._pubnub.decrypt(message, this.subscription().deliveryMode.encryptionKey, {
+            //FIXME decrypt is not described in DTS
+            message = this._pubnub['decrypt'](message, this.subscription().deliveryMode.encryptionKey, {
                 encryptKey: false,
                 keyEncoding: 'base64',
                 keyLength: 128,
@@ -329,7 +330,7 @@ export default class Subscription extends EventEmitter {
 
         if (!this.alive()) throw new Error('Subscription is not alive');
 
-        var deliveryMode = this.subscription().deliveryMode;
+        const deliveryMode = this.subscription().deliveryMode;
 
         if (this._pubnub) {
 
@@ -365,10 +366,8 @@ export default class Subscription extends EventEmitter {
             });
 
             this._pubnub.addListener({
-                status: function(statusEvent) {},
-                message: function(m) {
-                    this._notify(m.message); // all other props are ignored
-                }.bind(this)
+                status: statusEvent => {},
+                message: m => this._notify(m.message)
             });
 
         }
@@ -384,8 +383,8 @@ export default class Subscription extends EventEmitter {
 
         if (!this.subscribed() || !this._pubnub) return this;
 
-        this._pubnub.removeAllListeners();
-        this._pubnub.destroy(); // this will unsubscribe from all
+        this._pubnub.unsubscribeAll();
+        this._pubnub['removeAllListeners']();
 
         this._pubnubLastSubscribeKey = null;
         this._pubnubLastChannel = null;

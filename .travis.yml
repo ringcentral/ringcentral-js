@@ -50,5 +50,5 @@ before_install:
 before_script:
 - npm run build
 
-after_success:
-- npm run coveralls
+#after_success:
+#- npm run coveralls

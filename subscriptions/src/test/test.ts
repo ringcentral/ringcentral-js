@@ -1,9 +1,12 @@
 import {apiCall} from "@ringcentral/sdk/src/test/test";
 import {Subscriptions} from "../Subscriptions";
+import PubNub from "pubnub";
 
-export const createSubscriptions = (sdk) => {
-    return new Subscriptions({sdk});
-};
+class PubNubMock extends PubNub {
+    subscribe = (params: PubNub.SubscribeParameters) => {} //FIXME Actual subscribe slows down test teardown
+}
+
+export const createSubscriptions = (sdk) => new Subscriptions({sdk, PubNub: PubNubMock});
 
 export function presenceLoad(id) {
 

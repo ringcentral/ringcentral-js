@@ -3,14 +3,14 @@
 	"name": "@ringcentral/sdk-demo",
 	"private": true,
 	"scripts": {
-    "start": "http-server -p 3030"
+		"start": "http-server -p 3030"
 	},
 	"devDependencies": {
 		"http-server": "0.11.1"
 	},
 	"dependencies": {
-		"@ringcentral/sdk": "*",
-		"@ringcentral/subscriptions": "*",
+		"@ringcentral/sdk": "^4.0.0",
+		"@ringcentral/subscriptions": "^4.0.0",
 		"backbone": "1.3.3",
 		"bootstrap": "3.3.7",
 		"es6-promise": "4.2.5",

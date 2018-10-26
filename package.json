@@ -7,6 +7,7 @@
     "start": "lerna run start --parallel",
     "build": "lerna run build",
     "test": "lerna run test",
+    "coveralls": "lerna run coveralls",
     "publish:canary": "lerna publish --yes --canary",
     "publish:fromgit": "lerna publish --yes from-git",
     "publish:version": "lerna version --no-push"
