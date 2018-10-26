@@ -6,7 +6,10 @@
     "clean": "lerna clean && lerna run clean",
     "start": "lerna run start --parallel",
     "build": "lerna run build",
-    "test": "lerna run test"
+    "test": "lerna run test",
+    "publish:canary": "lerna publish --yes --canary",
+    "publish:fromgit": "lerna publish --yes from-git",
+    "publish:version": "lerna version --no-push"
   },
   "repository": {
     "type": "git",

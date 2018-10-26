@@ -1,3 +1,7 @@
+# RingCentral Subscriptions SDK
+
+This package allows to listen to server side events via push notifications.
+
 # Installation
 
 Follow all instructions from [SDK package](../sdk).

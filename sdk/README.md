@@ -1,14 +1,8 @@
-[![TravisCI Status](https://travis-ci.org/ringcentral/ringcentral-js.svg?branch=master)](https://travis-ci.org/ringcentral/ringcentral-js)
-[![Coverage Status](https://coveralls.io/repos/github/ringcentral/ringcentral-js/badge.svg?branch=master)](https://coveralls.io/github/ringcentral/ringcentral-js)
-[![Chat](https://img.shields.io/badge/chat-on%20glip-orange.svg)](https://glipped.herokuapp.com/)
-
 # Table of contents
 
-- [Key Benefits](#key-benefits)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
 - [API Calls](#api-calls)
-- [Server-side Subscriptions](#server-side-subscriptions)
 - [Advanced SDK Configuration & Polyfills](#advanced-sdk-configuration--polyfills)
 - [Making telephony calls](#making-telephony-calls)
 - [Call management using JavaScript](#call-management-using-javascript)
@@ -18,18 +12,6 @@
 - [Page visibility](#page-visibility)
 - [Tracking network Requests And Responses](#tracking-network-requests-and-responses)
 - [Migration from previous releases](#migration-from-previous-releases)
-
-***
-
-# Key Benefits
-
-- Automatically handles token lifecycle procedures in multi-tab environment
-- Re-issues non-authorized requests
-- Decrypts PUBNUB notification messages
-- Parses multipart API responses
-- Restores subscriptions from cache
-- Automatically re-subscribes in case of subscription renewal errors
-- Compatible with latest WhatWG `fetch()` spec (DOM Requests and Responses)
 
 ***
 
