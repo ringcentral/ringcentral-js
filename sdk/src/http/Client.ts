@@ -48,6 +48,7 @@ export default class Client extends EventEmitter {
                 externals: this._externals,
                 request: request
             });
+
             //TODO Stop request if listeners return false
             this.emit(this.events.beforeRequest, apiResponse);
 

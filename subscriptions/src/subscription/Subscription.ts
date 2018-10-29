@@ -149,8 +149,6 @@ export default class Subscription extends EventEmitter {
 
         } catch (e) {
 
-            e = this._sdk.platform().client().makeError(e);
-
             // `reset` will remove pubnub instance.
             // so if network is broken for a long time, pubnub will be removed. And client can not receive notification anymore.
             this.reset()
@@ -172,9 +170,10 @@ export default class Subscription extends EventEmitter {
 
             if (!this.eventFilters().length) throw new Error('Events are undefined');
 
-            const response = await this._sdk.platform().put('/restapi/v1.0/subscription/' + this.subscription().id, {
-                eventFilters: this._getFullEventFilters()
-            });
+            const response = await this._sdk.platform()
+                .put('/restapi/v1.0/subscription/' + this.subscription().id, {
+                    eventFilters: this._getFullEventFilters()
+                });
 
             const json = response.json();
 
@@ -185,8 +184,6 @@ export default class Subscription extends EventEmitter {
 
 
         } catch (e) {
-
-            e = this._sdk.platform().client().makeError(e);
 
             // `reset` will remove pubnub instance.
             // so if network is broken for a long time, pubnub will be removed. And client can not receive notification anymore.
@@ -213,8 +210,6 @@ export default class Subscription extends EventEmitter {
             return response;
 
         } catch (e) {
-
-            e = this._sdk.platform().client().makeError(e);
 
             this.emit(this.events.removeError, e);
 
@@ -253,9 +248,7 @@ export default class Subscription extends EventEmitter {
      * @private
      */
     _getFullEventFilters() {
-
         return this.eventFilters().map(event => this._sdk.platform().createUrl(event));
-
     };
 
     /**
@@ -276,7 +269,7 @@ export default class Subscription extends EventEmitter {
 
                 this._clearTimeout();
 
-                const res = this.expired() ? (await this.subscribe()) : (await this.renew());
+                const res = await (this.expired() ? this.subscribe() : this.renew());
 
                 this.emit(this.events.automaticRenewSuccess, res);
 
@@ -330,16 +323,16 @@ export default class Subscription extends EventEmitter {
 
         if (!this.alive()) throw new Error('Subscription is not alive');
 
-        const deliveryMode = this.subscription().deliveryMode;
+        const {address, subscriberKey} = this.subscription().deliveryMode;
 
         if (this._pubnub) {
 
-            if (this._pubnubLastChannel === deliveryMode.address) {
+            if (this._pubnubLastChannel === address) {
 
                 // Nothing to update, keep listening to same channel
                 return this;
 
-            } else if (this._pubnubLastSubscribeKey && this._pubnubLastSubscribeKey !== deliveryMode.subscriberKey) {
+            } else if (this._pubnubLastSubscribeKey && this._pubnubLastSubscribeKey !== subscriberKey) {
 
                 // Subscribe key changed, need to reset everything
                 this._unsubscribeAtPubNub();
@@ -355,14 +348,14 @@ export default class Subscription extends EventEmitter {
 
         if (!this._pubnub) {
 
-            this._pubnubLastSubscribeKey = deliveryMode.subscriberKey;
+            this._pubnubLastSubscribeKey = subscriberKey;
 
-            var PubNub: any = this._PubNub;
+            const PubNub: any = this._PubNub;
 
             this._pubnub = new PubNub({
                 ssl: true,
                 restore: true,
-                subscribeKey: deliveryMode.subscriberKey
+                subscribeKey: subscriberKey
             });
 
             this._pubnub.addListener({
@@ -372,8 +365,8 @@ export default class Subscription extends EventEmitter {
 
         }
 
-        this._pubnubLastChannel = deliveryMode.address;
-        this._pubnub.subscribe({channels: [deliveryMode.address]});
+        this._pubnubLastChannel = address;
+        this._pubnub.subscribe({channels: [address]});
 
         return this;
 
@@ -403,7 +396,7 @@ export interface SubscriptionOptions {
 
 export interface SubscriptionOptionsConstructor extends SubscriptionOptions {
     sdk: SDK;
-    PubNub: any;
+    PubNub: typeof PubNubDefault;
 }
 
 export interface DeliveryMode {

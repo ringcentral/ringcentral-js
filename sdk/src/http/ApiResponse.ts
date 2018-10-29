@@ -81,9 +81,11 @@ export default class ApiResponse {
 
         try {
 
-            if (this.json().message) message = this.json().message;
-            if (this.json().error_description) message = this.json().error_description;
-            if (this.json().description) message = this.json().description;
+            const json = this.json();
+
+            if (json.message) message = json.message;
+            if (json.error_description) message = json.error_description;
+            if (json.description) message = json.description;
 
         } catch (e) {}
 
@@ -95,8 +97,7 @@ export default class ApiResponse {
      * If it is not known upfront what would be the response, client code can treat any response as multipart
      */
     toMultipart(): ApiResponse[] {
-        if (!this._isMultipart()) return [this];
-        return this.multipart();
+        return this._isMultipart() ? this.multipart() : [this];
     }
 
     multipart(): ApiResponse[] {
@@ -134,13 +135,7 @@ export default class ApiResponse {
 
             // Step 3. Parse all other parts
 
-            this._multipart = parts.map(function(part, i) {
-
-                const status = statusInfo.response[i].status;
-
-                return this._create(part, status);
-
-            }.bind(this));
+            this._multipart = parts.map((part, i) => this._create(part, statusInfo.response[i].status));
 
         }
 
@@ -178,27 +173,27 @@ export default class ApiResponse {
         text = headersAndBody.length > 0 ? headersAndBody.join(ApiResponse._bodySeparator) : null;
 
         (headersText || '')
-            .split('\n')
-            .forEach(header => {
+        .split('\n')
+        .forEach(header => {
 
-                const split = header.trim().split(ApiResponse._headerSeparator),
-                    key = split.shift().trim(),
-                    value = split.join(ApiResponse._headerSeparator).trim();
+            const split = header.trim().split(ApiResponse._headerSeparator),
+                key = split.shift().trim(),
+                value = split.join(ApiResponse._headerSeparator).trim();
 
-                if (key) headers.append(key, value);
+            if (key) headers.append(key, value);
 
-            });
+        });
 
         const response = new this._externals.Response(text, {
-            headers: headers,
-            status: status,
-            statusText: statusText
+            headers,
+            status,
+            statusText
         });
 
         return new ApiResponse({
             externals: this._externals,
             request: null,
-            response: response,
+            response,
             responseText: text
         });
 

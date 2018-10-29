@@ -5,7 +5,6 @@ export default class CachedSubscription extends Subscription {
 
     private _cacheKey:string;
     private _cache:Cache;
-    //private _subscription:undefined; // This is not used in this class
 
     constructor({sdk, PubNub, cacheKey, pollInterval, renewHandicapMs}:CachedSubscriptionOptionsConstructor) {
 

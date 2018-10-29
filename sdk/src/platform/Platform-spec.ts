@@ -544,20 +544,6 @@ describe('RingCentral.platform.Platform', function() {
 
         }));
 
-        it('throws an exception if no uri option', asyncTest(async sdk => {
-
-            const platform = sdk.platform();
-
-            window.open = spy(function() {
-                return null;
-            });
-
-            await expectThrows(async () => {
-                await platform.loginWindow({});
-            }, 'Missing mandatory URL parameter');
-
-        }));
-
     });
 
     describe('parseLoginRedirect', function() {

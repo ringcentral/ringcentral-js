@@ -3,7 +3,6 @@ const root = (typeof window !== "undefined" && window) ||
              (function() { return this; })();
 
 export interface ExternalsOptions {
-    Promise?: typeof Promise,
     fetch?: typeof fetch,
     Request?: typeof Request,
     Response?: typeof Response,
@@ -11,32 +10,31 @@ export interface ExternalsOptions {
     localStorage?: Storage
 }
 
-export default class Externals {
+export default class Externals implements ExternalsOptions {
 
-    Promise: any = root.Promise;
-    fetch: typeof window.fetch = root.fetch;
-    Request: any = root.Request;
-    Response: any = root.Response;
-    Headers: any = root.Headers;
-    localStorage: Storage = ((typeof root.localStorage !== 'undefined') ? root.localStorage : {});
+    fetch = root.fetch;
+    Request = root.Request;
+    Response = root.Response;
+    Headers = root.Headers;
+    localStorage = (typeof root.localStorage !== 'undefined') ? root.localStorage : {};
 
-    constructor({Promise, fetch, Request, Response, Headers, localStorage}: ExternalsOptions = {}) {
+    constructor({
+                    fetch: fetchImpl,
+                    Request: RequestImpl,
+                    Response: ResponseImpl,
+                    Headers: HeadersImpl,
+                    localStorage
+                }: ExternalsOptions = {}) {
 
-        if (Promise) this.Promise = Promise;
-        if (fetch) this.fetch = fetch;
-        if (Request) this.Request = Request;
-        if (Response) this.Response = Response;
-        if (Headers) this.Headers = Headers;
+        if (fetchImpl) this.fetch = fetchImpl;
+        if (RequestImpl) this.Request = RequestImpl;
+        if (ResponseImpl) this.Response = ResponseImpl;
+        if (HeadersImpl) this.Headers = HeadersImpl;
         if (localStorage) this.localStorage = localStorage;
 
         /* istanbul ignore next */
         if (!this.fetch || !this.Response || !this.Request || !this.Headers) {
             throw new Error('Fetch API is missing');
-        }
-
-        /* istanbul ignore next */
-        if (!this.Promise) {
-            throw new Error('Promise is missing');
         }
 
         /* istanbul ignore next */

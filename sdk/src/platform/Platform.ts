@@ -82,7 +82,7 @@ export default class Platform extends EventEmitter {
     }
 
     delay(timeout): Promise<any> {
-        return new this._externals.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             setTimeout(function() {
                 resolve(null);
             }, timeout);
@@ -115,27 +115,23 @@ export default class Platform extends EventEmitter {
 
     }
 
-    /**
-     * @param {string} [options.redirectUri] Overrides default RedirectURI
-     * @param {string} [options.state]
-     * @param {string} [options.brandId]
-     * @param {string} [options.display]
-     * @param {string} [options.prompt]
-     * @param {boolean} [options.implicit] Use Implicit Grant flow
-     * @return {string}
-     */
-    loginUrl(options: LoginUrlOptions) {
-
-        options = options || {};
+    loginUrl({
+                 implicit,
+                 redirectUri,
+                 state,
+                 brandId = '',
+                 display = '',
+                 prompt = ''
+             }: LoginUrlOptions) {
 
         return this.createUrl(Platform._authorizeEndpoint + '?' + qs.stringify({
-            'response_type': options.implicit ? 'token' : 'code',
-            'redirect_uri': options.redirectUri || this._redirectUri,
-            'client_id': this._appKey,
-            'state': options.state || '',
-            'brand_id': options.brandId || '',
-            'display': options.display || '',
-            'prompt': options.prompt || ''
+            response_type: implicit ? 'token' : 'code',
+            redirect_uri: redirectUri || this._redirectUri,
+            client_id: this._appKey,
+            state,
+            brand_id: brandId,
+            display,
+            prompt
         }), {addServer: true});
 
     }
@@ -151,8 +147,8 @@ export default class Platform extends EventEmitter {
         }
 
         const response = (url.indexOf('#') === 0 && getParts(url, '#')) ||
-                       (url.indexOf('?') === 0 && getParts(url, '?')) ||
-                       null;
+                         (url.indexOf('?') === 0 && getParts(url, '?')) ||
+                         null;
 
         if (!response) throw new Error('Unable to parse response');
 
@@ -177,30 +173,29 @@ export default class Platform extends EventEmitter {
      *
      * Attention! This is an experimental method and it's signature and behavior may change without notice.
      *
-     * @experimental
-     * @param {string} options.url
-     * @param {number} [options.width]
-     * @param {number} [options.height]
-     * @param {object} [options.login] additional options for login()
-     * @param {string} [options.origin]
-     * @param {string} [options.property] name of window.postMessage's event data property
-     * @param {string} [options.target] target for window.open()
+     * @param {string} url
+     * @param {number} [width]
+     * @param {number} [height]
+     * @param {object} [login] additional options for login()
+     * @param {string} [origin]
+     * @param {string} [property] name of window.postMessage's event data property
+     * @param {string} [target] target for window.open()
      * @return {Promise}
      */
-    loginWindow(options): Promise<LoginOptions> {
+    loginWindow({
+                    url,
+                    width = 400,
+                    height = 600,
+                    origin = window.location.origin,
+                    property = Constants.authResponseProperty,
+                    target = '_blank'
+                }): Promise<LoginOptions> {
 
-        return new this._externals.Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
             if (typeof window === 'undefined') throw new Error('This method can be used only in browser');
 
-            if (!options.url) throw new Error('Missing mandatory URL parameter');
-
-            options = options || {};
-            options.width = options.width || 400;
-            options.height = options.height || 600;
-            options.origin = options.origin || window.location.origin;
-            options.property = options.property || Constants.authResponseProperty;
-            options.target = options.target || '_blank';
+            if (!url) throw new Error('Missing mandatory URL parameter');
 
             const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
             const dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
@@ -208,12 +203,12 @@ export default class Platform extends EventEmitter {
             const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
             const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
 
-            const left = ((width / 2) - (options.width / 2)) + dualScreenLeft;
-            const top = ((height / 2) - (options.height / 2)) + dualScreenTop;
-            const win = window.open(options.url, '_blank', (options.target == '_blank') ? (
+            const left = ((width / 2) - (width / 2)) + dualScreenLeft;
+            const top = ((height / 2) - (height / 2)) + dualScreenTop;
+            const win = window.open(url, '_blank', (target == '_blank') ? (
                 'scrollbars=yes, status=yes, ' +
-                'width=' + options.width + ', ' +
-                'height=' + options.height + ', ' +
+                'width=' + width + ', ' +
+                'height=' + height + ', ' +
                 'left=' + left + ', ' +
                 'top=' + top
             ) : '');
@@ -228,13 +223,13 @@ export default class Platform extends EventEmitter {
 
                 try {
 
-                    if (e.origin != options.origin) return;
-                    if (!e.data || !e.data[options.property]) return; // keep waiting
+                    if (e.origin != origin) return;
+                    if (!e.data || !e.data[property]) return; // keep waiting
 
                     win.close();
                     window.addEventListener('message', eventListener);
 
-                    const loginOptions = this.parseLoginRedirect(e.data[options.property]);
+                    const loginOptions = this.parseLoginRedirect(e.data[property]);
 
                     if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
 
@@ -266,23 +261,20 @@ export default class Platform extends EventEmitter {
 
     }
 
-    /**
-     * @param {string} options.username
-     * @param {string} options.password
-     * @param {string} [options.extension]
-     * @param {string} [options.code]
-     * @param {string} [options.redirectUri]
-     * @param {string} [options.endpointId]
-     * @param {string} [options.accessTokenTtl]
-     * @param {string} [options.refreshTokenTtl]
-     * @param {string} [options.access_token]
-     * @returns {Promise<ApiResponse>}
-     */
-    async login(options: LoginOptions) {
+    async login({
+                    username,
+                    password,
+                    extension = '',
+                    code,
+                    redirectUri,
+                    endpointId,
+                    accessTokenTtl,
+                    refreshTokenTtl,
+                    access_token,
+                    ...options
+                }: LoginOptions): Promise<ApiResponse> {
 
         try {
-
-            options = options || {};
 
             this.emit(this.events.beforeLogin);
 
@@ -290,32 +282,32 @@ export default class Platform extends EventEmitter {
             let apiResponse = null;
             let json;
 
-            if (options.access_token) {
+            if (access_token) {
 
                 //TODO Potentially make a request to /oauth/tokeninfo
-                json = options;
+                json = {access_token, ...options};
 
             } else {
 
-                if (!options.code) {
+                if (!code) {
 
                     body.grant_type = 'password';
-                    body.username = options.username;
-                    body.password = options.password;
-                    body.extension = options.extension || '';
+                    body.username = username;
+                    body.password = password;
+                    body.extension = extension;
 
-                } else if (options.code) {
+                } else if (code) {
 
                     body.grant_type = 'authorization_code';
-                    body.code = options.code;
-                    body.redirect_uri = options.redirectUri || this._redirectUri;
+                    body.code = code;
+                    body.redirect_uri = redirectUri || this._redirectUri;
                     //body.client_id = this.getCredentials().key; // not needed
 
                 }
 
-                if (options.endpointId) body.endpoint_id = options.endpointId;
-                if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
-                if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+                if (endpointId) body.endpoint_id = endpointId;
+                if (accessTokenTtl) body.accessTokenTtl = accessTokenTtl;
+                if (refreshTokenTtl) body.refreshTokenTtl = refreshTokenTtl;
 
                 apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body);
 
@@ -373,8 +365,6 @@ export default class Platform extends EventEmitter {
             return res;
 
         } catch (e) {
-
-            e = this._client.makeError(e);
 
             if (this._clearCacheOnRefreshError) {
                 this._cache.clean();
@@ -534,13 +524,7 @@ export default class Platform extends EventEmitter {
         return null;
     }
 
-    /**
-     * @param url
-     * @param body
-     * @return {Promise.<ApiResponse>}
-     * @private
-     */
-    async _tokenRequest(url, body) {
+    protected async _tokenRequest(url, body): Promise<ApiResponse> {
 
         return await this.send({
             url,
@@ -555,28 +539,16 @@ export default class Platform extends EventEmitter {
 
     }
 
-    /**
-     * @return {boolean}
-     * @private
-     */
-    _isAccessTokenValid() {
+    protected _isAccessTokenValid() {
         return this._auth.accessTokenValid();
     }
 
-    /**
-     * @return {string}
-     * @private
-     */
-    _apiKey() {
+    protected _apiKey() {
         const apiKey = this._appKey + ':' + this._appSecret;
-        return (typeof btoa == 'function') ? btoa(apiKey) : new Buffer(apiKey).toString('base64');
+        return (typeof btoa == 'function') ? btoa(apiKey) : Buffer.from(apiKey).toString('base64');
     }
 
-    /**
-     * @return {string}
-     * @private
-     */
-    _authHeader() {
+    protected _authHeader() {
         const token = this._auth.accessToken();
         return this._auth.tokenType() + (token ? ' ' + token : '');
     }

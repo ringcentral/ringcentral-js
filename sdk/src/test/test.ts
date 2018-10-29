@@ -1,4 +1,4 @@
-import SDK from '../SDK';
+import SDK, {SDKOptions} from '../SDK';
 import {expect, spy, fetchMock} from "@ringcentral/sdk-utils/test";
 
 export function apiCall(method, path, json, status = 200, statusText = 'OK', headers = null) {
@@ -66,13 +66,12 @@ export function tokenRefresh(failure = false) {
 
 }
 
-export function createSdk(options = {}) {
+export function createSdk(options:SDKOptions = {}) {
 
     return new SDK({
         server: 'http://whatever',
         appKey: 'whatever',
         appSecret: 'whatever',
-        Promise: fetchMock.config.Promise,
         Request: fetchMock.config.Request,
         Response: fetchMock.config.Response,
         Headers: fetchMock.config.Headers,
