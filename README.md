@@ -81,7 +81,7 @@ SDK can be used in 3 environments:
 ## Set things up for Browserify or Webpack
 
 Follow installation steps for NodeJS. Don't forget to add `target: 'web'` to your `webpack.config.js` to tell Webpack to
-pick proper `PUNBUB` and `fetch` implementations.
+pick proper `PUBNUB` and `fetch` implementations.
 
 ## Set things up in Browser
 
