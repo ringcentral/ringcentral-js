@@ -8,8 +8,8 @@ describe('RingCentral', () => {
 
         const sdk = new SDK({
             server: server,
-            appKey: '',
-            appSecret: ''
+            clientId: '',
+            clientSecret: ''
         });
 
         const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});

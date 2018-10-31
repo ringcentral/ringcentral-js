@@ -30,8 +30,8 @@ export default class Platform extends EventEmitter {
     };
 
     private _server: string;
-    private _appKey: string;
-    private _appSecret: string;
+    private _clientId: string;
+    private _clientSecret: string;
     private _redirectUri: string;
     private _refreshDelayMs: number;
     private _clearCacheOnRefreshError: boolean;
@@ -44,8 +44,8 @@ export default class Platform extends EventEmitter {
 
     constructor({
                     server,
-                    appKey,
-                    appSecret,
+                    clientId,
+                    clientSecret,
                     redirectUri = '',
                     refreshDelayMs = 100,
                     clearCacheOnRefreshError = true,
@@ -60,8 +60,8 @@ export default class Platform extends EventEmitter {
         super();
 
         this._server = server;
-        this._appKey = appKey;
-        this._appSecret = appSecret;
+        this._clientId = clientId;
+        this._clientSecret = clientSecret;
         this._redirectUri = redirectUri;
         this._refreshDelayMs = refreshDelayMs;
         this._clearCacheOnRefreshError = clearCacheOnRefreshError;
@@ -127,7 +127,7 @@ export default class Platform extends EventEmitter {
         return this.createUrl(Platform._authorizeEndpoint + '?' + qs.stringify({
             response_type: implicit ? 'token' : 'code',
             redirect_uri: redirectUri || this._redirectUri,
-            client_id: this._appKey,
+            client_id: this._clientId,
             state,
             brand_id: brandId,
             display,
@@ -435,7 +435,7 @@ export default class Platform extends EventEmitter {
         await this.ensureLoggedIn();
 
         request.headers.set('X-User-Agent', this._userAgent);
-        request.headers.set('Client-Id', this._appKey);
+        request.headers.set('Client-Id', this._clientId);
         request.headers.set('Authorization', this._authHeader());
         //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
 
@@ -544,7 +544,7 @@ export default class Platform extends EventEmitter {
     }
 
     protected _apiKey() {
-        const apiKey = this._appKey + ':' + this._appSecret;
+        const apiKey = this._clientId + ':' + this._clientSecret;
         return (typeof btoa == 'function') ? btoa(apiKey) : Buffer.from(apiKey).toString('base64');
     }
 
@@ -557,8 +557,8 @@ export default class Platform extends EventEmitter {
 
 export interface PlatformOptions extends AuthOptions {
     server?: string;
-    appKey?: string;
-    appSecret?: string;
+    clientId?: string;
+    clientSecret?: string;
     redirectUri?: string;
     refreshDelayMs?: number;
     refreshHandicapMs?: number;

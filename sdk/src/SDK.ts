@@ -46,8 +46,8 @@ export class SDK {
         // extract known options
         const {
             server,
-            appKey,
-            appSecret,
+            clientId,
+            clientSecret,
             redirectUri,
             refreshDelayMs,
             refreshHandicapMs,
@@ -58,8 +58,8 @@ export class SDK {
 
         this._platform = new Platform({
             server,
-            appKey,
-            appSecret,
+            clientId,
+            clientSecret,
             redirectUri,
             refreshDelayMs,
             refreshHandicapMs,

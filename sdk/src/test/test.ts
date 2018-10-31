@@ -70,8 +70,8 @@ export function createSdk(options:SDKOptions = {}) {
 
     return new SDK({
         server: 'http://whatever',
-        appKey: 'whatever',
-        appSecret: 'whatever',
+        clientId: 'whatever',
+        clientSecret: 'whatever',
         Request: fetchMock.config.Request,
         Response: fetchMock.config.Response,
         Headers: fetchMock.config.Headers,
