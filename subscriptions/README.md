@@ -2,6 +2,12 @@
 
 This package allows to listen to server side events via push notifications.
 
+**Attention! This package is intended to be used on client side where `SDK.Cache` has synchronous interface.**
+
+On NodeJS it is preferred to have Web Hooks instead of PubNub subscriptions.
+
+If you plan to use this package on NodeJS make sure that if you supply a custom `SDK.Cache` it has synchronous interface. 
+
 # Installation
 
 Follow all instructions from [SDK package](../sdk).
@@ -171,7 +177,7 @@ share this data across Subscription instances in multiple tabs:
 ```js
 var cacheKey = 'some-custom-key';
 var subscription = subscriptions.createSubscription();
-var cachedSubscriptionData = sdk.cache().getItem(cacheKey);
+var cachedSubscriptionData = sdk.cache().getItemSync(cacheKey);
 
 if (cachedSubscriptionData) {
     try { // if subscription is already expired an error will be thrown so we need to capture it
@@ -184,7 +190,7 @@ if (cachedSubscriptionData) {
 }
 
 subscription.on([subscription.events.subscribeSuccess, subscription.events.renewSuccess], function() {
-    sdk.cache().setItem(cacheKey, subscription.subscription());
+    sdk.cache().setItemSync(cacheKey, subscription.subscription());
 });
 
 subscription.register().catch(...);

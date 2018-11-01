@@ -66,7 +66,7 @@ export function tokenRefresh(failure = false) {
 
 }
 
-export function createSdk(options:SDKOptions = {}) {
+export function createSdk(options: SDKOptions = {}) {
 
     return new SDK({
         server: 'http://whatever',
@@ -89,13 +89,13 @@ export function asyncTest(fn: (sdk: SDK) => any) {
 
         const sdk = createSdk(); // {cachePrefix: 'prefix-' + Date.now()}
 
-        function clean() {
+        const clean = async () => {
             fetchMock.restore();
-            sdk.cache().clean();
-        }
+            await sdk.cache().clean();
+        };
 
         try {
-            clean();
+            await clean();
 
             authentication();
 
@@ -110,11 +110,11 @@ export function asyncTest(fn: (sdk: SDK) => any) {
 
             expect(fetchMock.done()).to.equal(true);
 
-            clean();
+            await clean();
 
         } catch (e) {
 
-            clean();
+            await clean();
             console.error(e.stack);
             throw e;
 
@@ -124,7 +124,7 @@ export function asyncTest(fn: (sdk: SDK) => any) {
 
 }
 
-export async function expectThrows(fn, errorText = '', additional = (e?:Error) => {}) {
+export async function expectThrows(fn, errorText = '', additional = (e?: Error) => {}) {
     try {
         await fn();
         throw new Error('This should not be reached');

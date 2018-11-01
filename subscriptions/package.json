@@ -38,7 +38,7 @@
   "preferGlobal": false,
   "private": false,
   "main": "./lib/Subscriptions.js",
-  "x-browser": "./dist/ringcentral-subscriptions.js",
+  "browser": "./dist/ringcentral-subscriptions.js",
   "types": "./lib/Subscriptions.d.ts",
   "author": {
     "name": "RingCentral, Inc.",

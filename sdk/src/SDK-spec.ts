@@ -14,7 +14,7 @@ describe('RingCentral', () => {
 
         const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
 
-        sdk.cache().clean();
+        await sdk.cache().clean();
 
         expect(res.json().uri).to.equal(server + '/restapi/v1.0');
 

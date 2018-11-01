@@ -1,10 +1,8 @@
 import Subscription, {SubscriptionOptions, SubscriptionOptionsConstructor} from "./Subscription";
-import {Cache} from "@ringcentral/sdk";
 
 export default class CachedSubscription extends Subscription {
 
-    private _cacheKey:string;
-    private _cache:Cache;
+    protected _cacheKey:string;
 
     constructor({sdk, PubNub, cacheKey, pollInterval, renewHandicapMs}:CachedSubscriptionOptionsConstructor) {
 
@@ -13,16 +11,16 @@ export default class CachedSubscription extends Subscription {
         if (!cacheKey) throw new Error('Cached Subscription requires cacheKey parameter to be defined');
 
         this._cacheKey = cacheKey;
-        this._cache = sdk.cache();
 
     }
 
     subscription() {
-        return this._cache.getItem(this._cacheKey) || {};
+        return this._sdk.cache().getItemSync(this._cacheKey) || {};
     };
 
     protected _setSubscription(subscription) {
-        return this._cache.setItem(this._cacheKey, subscription);
+        this._sdk.cache().setItemSync(this._cacheKey, subscription);
+        return this;
     };
 
     /**

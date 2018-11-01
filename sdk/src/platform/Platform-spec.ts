@@ -21,9 +21,9 @@ describe('RingCentral.platform.Platform', function() {
 
             const platform = sdk.platform();
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
-            expect(platform['_isAccessTokenValid']()).to.equal(false);
+            expect(await platform.auth().accessTokenValid()).to.equal(false);
 
         }));
 
@@ -35,7 +35,7 @@ describe('RingCentral.platform.Platform', function() {
 
             await platform.logout();
 
-            expect(platform['_isAccessTokenValid']()).to.equal(false);
+            expect(await platform.auth().accessTokenValid()).to.equal(false);
 
         }));
 
@@ -49,13 +49,13 @@ describe('RingCentral.platform.Platform', function() {
 
             const platform = sdk.platform();
 
-            expect(platform.auth().accessToken()).to.not.equal('ACCESS_TOKEN_FROM_REFRESH');
+            expect((await platform.auth().data()).access_token).to.not.equal('ACCESS_TOKEN_FROM_REFRESH');
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
             await platform.loggedIn();
 
-            expect(platform.auth().accessToken()).to.equal('ACCESS_TOKEN_FROM_REFRESH');
+            expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
 
         }));
 
@@ -67,7 +67,7 @@ describe('RingCentral.platform.Platform', function() {
 
             const platform = sdk.platform();
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
             authentication();
 
@@ -78,7 +78,7 @@ describe('RingCentral.platform.Platform', function() {
                 refreshTokenTtl: 100
             });
 
-            expect(platform.auth().accessToken()).to.equal('ACCESS_TOKEN');
+            expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
 
         }));
 
@@ -86,13 +86,13 @@ describe('RingCentral.platform.Platform', function() {
 
             const platform = sdk.platform();
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
             authentication();
 
             await platform.login({access_token: 'foo'});
 
-            expect(platform.auth().accessToken()).to.equal('foo');
+            expect((await platform.auth().data()).access_token).to.equal('foo');
 
         }));
 
@@ -100,7 +100,7 @@ describe('RingCentral.platform.Platform', function() {
 
             const platform = sdk.platform();
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
             apiCall('POST', '/restapi/oauth/token', {'message': 'expected'}, 400);
 
@@ -116,7 +116,7 @@ describe('RingCentral.platform.Platform', function() {
 
             const platform = sdk.platform();
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
             apiCall('POST', '/restapi/oauth/token', {'message': 'expected'}, 400);
 
@@ -140,16 +140,16 @@ describe('RingCentral.platform.Platform', function() {
             tokenRefresh();
             apiCall('GET', path, {});
 
-            expect(platform.auth().accessToken()).to.not.equal('ACCESS_TOKEN_FROM_REFRESH');
+            expect((await platform.auth().data()).access_token).to.not.equal('ACCESS_TOKEN_FROM_REFRESH');
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
             await platform
                 .on(platform.events.refreshSuccess, refreshSpy)
                 .get(path);
 
             expect(refreshSpy.calledOnce).to.be.true;
-            expect(platform.auth().accessToken()).to.equal('ACCESS_TOKEN_FROM_REFRESH');
+            expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
 
         }));
 
@@ -171,7 +171,7 @@ describe('RingCentral.platform.Platform', function() {
 
             expect(refreshSpy.calledOnce).to.be.true;
             expect(res.json()).to.deep.equal(response);
-            expect(platform.auth().accessToken()).to.equal('ACCESS_TOKEN_FROM_REFRESH');
+            expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
 
         }));
 
@@ -248,7 +248,7 @@ describe('RingCentral.platform.Platform', function() {
 
             tokenRefresh(true);
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
             await expectThrows(
                 async () => await platform
@@ -290,7 +290,7 @@ describe('RingCentral.platform.Platform', function() {
                 'description': 'Wrong token'
             }, 240); // This weird status was caught on client's machine
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
             await expectThrows(
                 async () => await platform.refresh(),
@@ -312,7 +312,7 @@ describe('RingCentral.platform.Platform', function() {
 
             const platform = sdk.platform();
 
-            platform.auth().cancelAccessToken();
+            await platform.auth().cancelAccessToken();
 
             const res = (await Promise.all([
                 platform.get('/restapi/v1.0/foo/1'),
@@ -320,7 +320,7 @@ describe('RingCentral.platform.Platform', function() {
                 platform.get('/restapi/v1.0/foo/3')
             ])).map(r => r.json());
 
-            expect(platform.auth().accessToken()).to.equal('ACCESS_TOKEN_FROM_REFRESH');
+            expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
             expect(res[0].increment).to.equal(1);
             expect(res[1].increment).to.equal(2);
             expect(res[2].increment).to.equal(3);
@@ -366,26 +366,22 @@ describe('RingCentral.platform.Platform', function() {
 
             expect(platform.createUrl('/restapi/v1.0/foo', {addServer: true})).to.equal('http://whatever/restapi/v1.0/foo');
 
-            expect(platform.createUrl('/restapi/v1.0/foo', {
-                addServer: true,
-                addToken: true
-            })).to.equal('http://whatever/restapi/v1.0/foo?access_token=ACCESS_TOKEN');
+            expect(await platform.signUrl(platform.createUrl('/restapi/v1.0/foo', {
+                addServer: true
+            }))).to.equal('http://whatever/restapi/v1.0/foo?access_token=ACCESS_TOKEN');
 
-            expect(platform.createUrl('/restapi/v1.0/foo?bar', {
-                addServer: true,
-                addToken: true
-            })).to.equal('http://whatever/restapi/v1.0/foo?bar&access_token=ACCESS_TOKEN');
+            expect(await platform.signUrl(platform.createUrl('/restapi/v1.0/foo?bar', {
+                addServer: true
+            }))).to.equal('http://whatever/restapi/v1.0/foo?bar&access_token=ACCESS_TOKEN');
 
-            expect(platform.createUrl('/restapi/v1.0/foo?bar', {
+            expect(await platform.signUrl(platform.createUrl('/restapi/v1.0/foo?bar', {
                 addServer: true,
-                addToken: true,
                 addMethod: 'POST'
-            })).to.equal('http://whatever/restapi/v1.0/foo?bar&_method=POST&access_token=ACCESS_TOKEN');
+            }))).to.equal('http://whatever/restapi/v1.0/foo?bar&_method=POST&access_token=ACCESS_TOKEN');
 
-            expect(platform.createUrl('/rcvideo/v1/foo?bar', {
-                addServer: true,
-                addToken: true,
-            })).to.equal('http://whatever/rcvideo/v1/foo?bar&access_token=ACCESS_TOKEN');
+            expect(await platform.signUrl(platform.createUrl('/rcvideo/v1/foo?bar', {
+                addServer: true
+            }))).to.equal('http://whatever/rcvideo/v1/foo?bar&access_token=ACCESS_TOKEN');
         }));
 
     });

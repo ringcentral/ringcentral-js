@@ -9,7 +9,7 @@ export default class Cache {
 
     static defaultPrefix = 'rc-';
 
-    private _prefix = null;
+    private readonly _prefix = null;
 
     private _externals = null;
 
@@ -18,34 +18,47 @@ export default class Cache {
         this._externals = externals;
     }
 
-    setItem(key, data) {
-        this._externals.localStorage[this._prefixKey(key)] = JSON.stringify(data);
+    setItemSync(key, data) {
+        this._externals.localStorage.setItem(this._prefixKey(key), JSON.stringify(data));
         return this;
     }
 
-    removeItem(key) {
-        delete this._externals.localStorage[this._prefixKey(key)];
+    async setItem(key, data) {
+        await this.setItemSync(key, data);
+    }
+
+    removeItemSync(key) {
+        this._externals.localStorage.removeItem(this._prefixKey(key));
         return this;
     }
 
-    getItem(key) {
-        const item = this._externals.localStorage[this._prefixKey(key)];
+    async removeItem(key) {
+        await this.removeItemSync(key);
+    }
+
+    getItemSync(key) {
+        const item = this._externals.localStorage.getItem(this._prefixKey(key));
         if (!item) return null;
         return JSON.parse(item);
     }
 
-    clean() {
+    async getItem(key) {
+        return await this.getItemSync(key);
+    }
 
-        for (const key in this._externals.localStorage) {
+    private async _keys(): Promise<string[]> {
+        return ('keys' in this._externals.localStorage)
+               ? await this._externals.localStorage.keys()
+               : Object.keys(this._externals.localStorage);
+    }
 
-            /* istanbul ignore next */
-            if (!this._externals.localStorage.hasOwnProperty(key)) continue;
+    async clean() {
 
+        await Promise.all((await this._keys()).map(async key => {
             if (key.indexOf(this._prefix) === 0) {
-                delete this._externals.localStorage[key];
+                await this._externals.localStorage.removeItem(key);
             }
-
-        }
+        }));
 
         return this;
 

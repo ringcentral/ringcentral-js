@@ -30,15 +30,15 @@ export default class Subscription extends EventEmitter {
         automaticRenewError: 'automaticRenewError'
     };
 
-    _sdk: SDK;
-    _PubNub: typeof PubNubDefault;
-    _pollInterval: number;
-    _renewHandicapMs: number;
-    _pubnub: PubNubDefault = null;
-    _pubnubLastChannel: string = null;
-    _pubnubLastSubscribeKey: string = null;
-    _timeout: any = null;
-    _subscription: ISubscription = null;
+    protected _sdk: SDK;
+    protected _PubNub: typeof PubNubDefault;
+    protected _pollInterval: number;
+    protected _renewHandicapMs: number;
+    protected _pubnub: PubNubDefault = null;
+    protected _pubnubLastChannel: string = null;
+    protected _pubnubLastSubscribeKey: string = null;
+    protected _timeout: any = null;
+    protected _subscription: ISubscription = null;
 
     constructor({sdk, PubNub, pollInterval = 10 * 1000, renewHandicapMs = 2 * 60 * 1000}: SubscriptionOptionsConstructor) {
 
@@ -241,6 +241,7 @@ export default class Subscription extends EventEmitter {
      */
     protected _setSubscription(subscription: ISubscription) {
         this._subscription = subscription;
+        return this;
     };
 
     /**

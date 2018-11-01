@@ -18,6 +18,7 @@
     "watch:webpack": "npm run build:webpack -- --watch"
   },
   "dependencies": {
+    "dom-storage": "2.1.0",
     "is-plain-object": "2.0.4"
   },
   "devDependencies": {
@@ -40,7 +41,7 @@
   "private": false,
   "main": "./lib/SDK.js",
   "types": "./lib/SDK.d.ts",
-  "x-browser": "./dist/ringcentral.js",
+  "browser": "./dist/ringcentral.js",
   "author": {
     "name": "RingCentral, Inc.",
     "email": "devsupport@ringcentral.com"

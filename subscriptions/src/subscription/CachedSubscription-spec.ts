@@ -31,6 +31,8 @@ describe('RingCentral.subscription.CachedSubscription', function() {
             expect(subscription2['_renewHandicapMs']).to.equal(22);
 
             subscription1['_setSubscription'](data);
+            console.log(subscription2.subscription());
+            console.log(data);
             expect(subscription2.subscription()).to.deep.equal(data);
 
         }));

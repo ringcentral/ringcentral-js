@@ -25,21 +25,9 @@ export default class Auth {
 
     }
 
-    accessToken() {
-        return this.data().access_token;
-    }
+    async data():Promise<AuthData> {
 
-    refreshToken() {
-        return this.data().refresh_token;
-    }
-
-    tokenType() {
-        return this.data().token_type;
-    }
-
-    data():AuthData {
-
-        return this._cache.getItem(this._cacheId) || {
+        return await this._cache.getItem(this._cacheId) || {
             token_type: '',
             access_token: '',
             expires_in: 0,
@@ -49,9 +37,9 @@ export default class Auth {
 
     }
 
-    setData(newData = {}) {
+    async setData(newData = {}) {
 
-        const data = this.data();
+        const data = await this.data();
 
         Object.keys(newData).forEach(function(key) {
             data[key] = newData[key];
@@ -69,9 +57,9 @@ export default class Auth {
     /**
      * Check if there is a valid (not expired) access token
      */
-    accessTokenValid() {
+    async accessTokenValid() {
 
-        const authData = this.data();
+        const authData = await this.data();
         return (authData.expire_time - this._refreshHandicapMs > Date.now());
 
     }
@@ -79,15 +67,15 @@ export default class Auth {
     /**
      * Check if there is a valid (not expired) access token
      */
-    refreshTokenValid() {
+    async refreshTokenValid() {
 
-        return (this.data().refresh_token_expire_time > Date.now());
+        return ((await this.data()).refresh_token_expire_time > Date.now());
 
     }
 
-    cancelAccessToken() {
+    async cancelAccessToken() {
 
-        return this.setData({
+        return await this.setData({
             access_token: '',
             expires_in: 0
         });

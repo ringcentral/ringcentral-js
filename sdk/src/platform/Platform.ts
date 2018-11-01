@@ -6,6 +6,7 @@ import * as Constants from "../core/Constants";
 import Cache from "../core/Cache";
 import Client from "../http/Client";
 import Externals from "../core/Externals";
+import {__await} from "tslib";
 
 declare const screen: any; //FIXME TS Crap
 
@@ -106,13 +107,14 @@ export default class Platform extends EventEmitter {
 
         builtUrl += path;
 
-        if (options.addMethod || options.addToken) builtUrl += (path.indexOf('?') > -1 ? '&' : '?');
-
-        if (options.addMethod) builtUrl += '_method=' + options.addMethod;
-        if (options.addToken) builtUrl += (options.addMethod ? '&' : '') + 'access_token=' + this._auth.accessToken();
+        if (options.addMethod) builtUrl += (path.indexOf('?') > -1 ? '&' : '?') + '_method=' + options.addMethod;
 
         return builtUrl;
 
+    }
+
+    async signUrl(path) {
+        return path + (path.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + (await this._auth.data()).access_token;
     }
 
     loginUrl({
@@ -315,7 +317,7 @@ export default class Platform extends EventEmitter {
 
             }
 
-            this._auth.setData(json);
+            await this._auth.setData(json);
 
             this.emit(this.events.loginSuccess, apiResponse);
 
@@ -323,7 +325,7 @@ export default class Platform extends EventEmitter {
 
         } catch (e) {
 
-            if (this._clearCacheOnRefreshError) this._cache.clean();
+            if (this._clearCacheOnRefreshError) await this._cache.clean();
 
             this.emit(this.events.loginError, e);
 
@@ -341,15 +343,17 @@ export default class Platform extends EventEmitter {
 
             await this.delay(this._refreshDelayMs);
 
+            const authData = await this.auth().data();
+
             // Perform sanity checks
-            if (!this._auth.refreshToken()) throw new Error('Refresh token is missing');
+            if (!authData.refresh_token) throw new Error('Refresh token is missing');
             if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
 
             const res = await this._tokenRequest(Platform._tokenEndpoint, {
                 "grant_type": "refresh_token",
-                "refresh_token": this._auth.refreshToken(),
-                "access_token_ttl": this._auth.data().expires_in + 1,
-                "refresh_token_ttl": this._auth.data().refresh_token_expires_in + 1
+                "refresh_token": authData.refresh_token,
+                "access_token_ttl": authData.expires_in + 1,
+                "refresh_token_ttl": authData.refresh_token_expires_in + 1
             });
 
             const json = res.json();
@@ -358,7 +362,7 @@ export default class Platform extends EventEmitter {
                 throw this._client.makeError(new Error('Malformed OAuth response'), res);
             }
 
-            this._auth.setData(json);
+            await this._auth.setData(json);
 
             this.emit(this.events.refreshSuccess, res);
 
@@ -367,7 +371,7 @@ export default class Platform extends EventEmitter {
         } catch (e) {
 
             if (this._clearCacheOnRefreshError) {
-                this._cache.clean();
+                await this._cache.clean();
             }
 
             this.emit(this.events.refreshError, e);
@@ -407,10 +411,10 @@ export default class Platform extends EventEmitter {
             this.emit(this.events.beforeLogout);
 
             const res = await this._tokenRequest(Platform._revokeEndpoint, {
-                token: this._auth.accessToken()
+                token: (await this._auth.data()).access_token
             });
 
-            this._cache.clean();
+            await this._cache.clean();
 
             this.emit(this.events.logoutSuccess, res);
 
@@ -436,7 +440,7 @@ export default class Platform extends EventEmitter {
 
         request.headers.set('X-User-Agent', this._userAgent);
         request.headers.set('Client-Id', this._clientId);
-        request.headers.set('Authorization', this._authHeader());
+        request.headers.set('Authorization', await this._authHeader());
         //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
 
         return request;
@@ -466,7 +470,7 @@ export default class Platform extends EventEmitter {
             let retryAfter = 0;
 
             if (status == ApiResponse._unauthorizedStatus) {
-                this._auth.cancelAccessToken();
+                await this._auth.cancelAccessToken();
             }
 
             if (status == ApiResponse._rateLimitStatus) {
@@ -519,7 +523,7 @@ export default class Platform extends EventEmitter {
     }
 
     async ensureLoggedIn(): Promise<ApiResponse | null> {
-        if (this._isAccessTokenValid()) return null;
+        if (await this._auth.accessTokenValid()) return null;
         await this.refresh();
         return null;
     }
@@ -539,18 +543,14 @@ export default class Platform extends EventEmitter {
 
     }
 
-    protected _isAccessTokenValid() {
-        return this._auth.accessTokenValid();
-    }
-
     protected _apiKey() {
         const apiKey = this._clientId + ':' + this._clientSecret;
         return (typeof btoa == 'function') ? btoa(apiKey) : Buffer.from(apiKey).toString('base64');
     }
 
-    protected _authHeader() {
-        const token = this._auth.accessToken();
-        return this._auth.tokenType() + (token ? ' ' + token : '');
+    protected async _authHeader() {
+        const data = await this._auth.data();
+        return await data.token_type + (data.access_token ? ' ' + data.access_token : '');
     }
 
 }
@@ -608,5 +608,4 @@ export interface LoginUrlOptions {
 export interface CreateUrlOptions {
     addServer?: boolean;
     addMethod?: string;
-    addToken?: boolean;
 }
