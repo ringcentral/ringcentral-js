@@ -24,13 +24,13 @@ describe('RingCentral.subscription.CachedSubscription', () => {
                     }
                 };
 
-                expect(subscription1._cacheKey).to.equal('foo'); // prettier-ignore
-                expect(subscription2._cacheKey).to.equal('foo'); // prettier-ignore
-                expect(subscription2._pollInterval).to.equal(11); // prettier-ignore
-                expect(subscription2._renewHandicapMs).to.equal(22); // prettier-ignore
+                expect(subscription1['_cacheKey']).to.equal('foo');
+                expect(subscription2['_cacheKey']).to.equal('foo');
+                expect(subscription2['_pollInterval']).to.equal(11);
+                expect(subscription2['_renewHandicapMs']).to.equal(22);
 
-                subscription1._setSubscription(data);
-                expect(subscription2.subscription()).to.deep.equal(data); // prettier-ignore
+                subscription1['_setSubscription'](data);
+                expect(subscription2.subscription()).to.deep.equal(data);
             })
         );
     });

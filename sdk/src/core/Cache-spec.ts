@@ -35,15 +35,17 @@ describe('RingCentral.core.Cache', () => {
             asyncTest(async sdk => {
                 const cache = sdk.cache();
 
-                cache._externals.localStorage.setItem('rc-foo', '"foo"'); // prettier-ignore
-                cache._externals.localStorage.setItem('foo', '"foo"'); // prettier-ignore
+                cache['_externals'].localStorage.setItem('rc-foo', '"foo"');
+                cache['_externals'].localStorage.setItem('foo', '"foo"');
 
                 expect(await cache.getItem('foo')).to.equal('foo');
 
                 await cache.clean();
 
                 expect(await cache.getItem('foo')).to.equal(null);
-                expect(cache._externals.localStorage.getItem('foo')).to.equal('"foo"'); // prettier-ignore
+
+                // prettier-ignore
+                expect(cache['_externals'].localStorage.getItem('foo')).to.equal('"foo"');
             })
         );
     });

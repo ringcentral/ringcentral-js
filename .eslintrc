@@ -9,9 +9,10 @@
     "prettier"
   ],
   "rules": {
-    "global-require": 0,
     "camelcase": 0,
     "class-methods-use-this": 0,
+    "dot-notation": 0, // foo['bar'] for private
+    "global-require": 0,
     "indent": 0,
     "import/extensions": [
       ".js",

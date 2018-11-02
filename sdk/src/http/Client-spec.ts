@@ -29,7 +29,7 @@ describe('RingCentral.http.Client', () => {
                 expect(request.headers.get('Content-Type')).to.equal('application/json');
                 expect(request.url).to.equal('http://foo/bar');
                 expect(request.method).to.equal('POST');
-                expect(request.originalBody).to.equal(JSON.stringify({foo: 'bar'})); // prettier-ignore
+                expect(request['originalBody']).to.equal(JSON.stringify({foo: 'bar'}));
             })
         );
 
