@@ -126,7 +126,7 @@ describe('RingCentral.subscription.Subscription', () => {
                             resolve();
                         });
 
-                        subscription._notify({foo: 'bar'}); // prettier-ignore
+                        subscription['_notify']({foo: 'bar'});
 
                         subscription.reset();
                     })

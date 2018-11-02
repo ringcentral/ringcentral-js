@@ -1,3 +1,1 @@
-import AuthGate from './AuthGate';
-
-export {AuthGate};
+export * from './AuthGate';
