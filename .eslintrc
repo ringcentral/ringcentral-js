@@ -1,0 +1,65 @@
+{
+  "extends": [
+    "typescript",
+    "airbnb",
+    "prettier",
+    "prettier/standard"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "global-require": 0,
+    "camelcase": 0,
+    "class-methods-use-this": 0,
+    "indent": 0,
+    "import/extensions": [
+      ".js",
+      ".jsx",
+      ".json",
+      ".ts",
+      ".tsx"
+    ],
+    "import/no-extraneous-dependencies": 0,
+    "import/no-named-as-default": 0,
+    "import/prefer-default-export": 0,
+    "max-len": 0,
+    "no-alert": 0,
+    "no-bitwise": 0,
+    "no-console": 0,
+    "no-class-assign": 0,
+    "no-mixed-operators": 0,
+    "no-nested-ternary": 0,
+    "no-param-reassign": 0,
+    "no-plusplus": 0,
+    "no-return-assign": 0,
+    "no-shadow": 0,
+    "no-underscore-dangle": 0,
+    "no-unused-vars": 0,
+    "no-unused-expressions": 0, // tests
+    "no-undef": 0, //FIXME @see https://github.com/eslint/typescript-eslint-parser/issues/75
+    "spaced-comment": 0,
+    "prettier/prettier": "error",
+    "typescript/explicit-function-return-type": 0,
+    "typescript/explicit-member-accessibility": 0,
+    "typescript/member-ordering": 0,
+    "typescript/no-var-requires": 0 // conditional require in Externals
+  },
+  "env": {
+    "browser": true,
+    "mocha": true,
+    "node": true
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx"
+        ]
+      }
+    }
+  }
+}

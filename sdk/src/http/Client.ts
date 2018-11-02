@@ -1,14 +1,14 @@
-import EventEmitter from "events";
-import * as qs from "querystring";
-import isPlainObject from "is-plain-object";
-import ApiResponse from "./ApiResponse";
-import Externals from "../core/Externals";
+import EventEmitter from 'events';
+import * as qs from 'querystring';
+import isPlainObject from 'is-plain-object';
+import ApiResponse from './ApiResponse';
+import Externals from '../core/Externals';
 
 function findHeaderName(name, headers) {
     name = name.toLowerCase();
     return Object.keys(headers).reduce((res, key) => {
         if (res) return res;
-        if (name == key.toLowerCase()) return key;
+        if (name === key.toLowerCase()) return key;
         return res;
     }, null);
 }
@@ -19,7 +19,6 @@ export interface ApiError extends Error {
 }
 
 export default class Client extends EventEmitter {
-
     static _allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
 
     events = {
@@ -31,22 +30,18 @@ export default class Client extends EventEmitter {
     private _externals: Externals;
 
     constructor(externals: Externals) {
-
         super();
 
         this._externals = externals;
-
     }
 
     async sendRequest(request: Request): Promise<ApiResponse> {
-
         let apiResponse;
 
         try {
-
             apiResponse = new ApiResponse({
                 externals: this._externals,
-                request: request
+                request
             });
 
             //TODO Stop request if listeners return false
@@ -60,44 +55,34 @@ export default class Client extends EventEmitter {
             this.emit(this.events.requestSuccess, apiResponse);
 
             return apiResponse;
-
         } catch (e) {
+            const error = !e.apiResponse ? this.makeError(e, apiResponse) : e;
 
-            if (!e.apiResponse) e = this.makeError(e, apiResponse);
+            this.emit(this.events.requestError, error);
 
-            this.emit(this.events.requestError, e);
-
-            throw e;
-
+            throw error;
         }
-
-
     }
 
     async _loadResponse(request: Request): Promise<Response> {
-        return await this._externals.fetch.call(null, request); // fixed illegal invocation in Chrome
+        return this._externals.fetch.call(null, request); // fixed illegal invocation in Chrome
     }
 
     /**
      * Wraps the JS Error object with transaction information
      */
     makeError(e: any, apiResponse: ApiResponse = null): ApiError {
-
         // Wrap only if regular error
-        if (!e.hasOwnProperty('apiResponse') && !e.hasOwnProperty('originalMessage')) {
-
+        if (!e.apiResponse && !e.originalMessage) {
             e.apiResponse = apiResponse;
             e.originalMessage = e.message;
             e.message = (apiResponse && apiResponse.error(true)) || e.originalMessage;
-
         }
 
         return e;
-
     }
 
     createRequest(init: CreateRequestOptions = {}): Request {
-
         init.headers = init.headers || {};
 
         // Sanity checks
@@ -105,7 +90,7 @@ export default class Client extends EventEmitter {
         if (!init.method) init.method = 'GET';
         init.method = init.method.toUpperCase();
         if (init.method && Client._allowedMethods.indexOf(init.method) < 0) {
-            throw new Error('Method has wrong value: ' + init.method);
+            throw new Error(`Method has wrong value: ${init.method}`);
         }
 
         // Defaults
@@ -117,13 +102,12 @@ export default class Client extends EventEmitter {
             init.url = init.url + (init.url.indexOf('?') > -1 ? '&' : '?') + qs.stringify(init.query);
         }
 
-        if (!(findHeaderName('Accept', init.headers))) {
+        if (!findHeaderName('Accept', init.headers)) {
             init.headers.Accept = ApiResponse._jsonContentType;
         }
 
         // Serialize body
         if (isPlainObject(init.body) || !init.body) {
-
             let contentTypeHeaderName = findHeaderName(ApiResponse._contentType, init.headers);
 
             if (!contentTypeHeaderName) {
@@ -141,11 +125,9 @@ export default class Client extends EventEmitter {
                 } else {
                     init.body = JSON.stringify(init.body);
                 }
-
             } else if (contentType.indexOf(ApiResponse._urlencodedContentType) > -1) {
                 init.body = qs.stringify(init.body);
             }
-
         }
 
         // Create a request with encoded body
@@ -155,14 +137,12 @@ export default class Client extends EventEmitter {
         req.originalBody = init.body;
 
         return req;
-
     }
-
 }
 
 export interface CreateRequestOptions extends RequestInit {
     url?: string;
     body?: any;
-    query?:any;
-    headers?:any;
+    query?: any;
+    headers?: any;
 }

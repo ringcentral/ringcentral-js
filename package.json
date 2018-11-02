@@ -10,7 +10,10 @@
     "coveralls": "lerna run coveralls",
     "publish:canary": "lerna publish --yes --canary",
     "publish:fromgit": "lerna publish --yes from-git",
-    "publish:version": "lerna version --no-push"
+    "publish:version": "lerna version --no-push",
+    "lint": "DEBUG=eslint:cli-engine eslint --cache --cache-location ./node_modules/.cache/eslint --fix",
+    "lint:all": "npm run lint -- ./*/src/**/*.ts*",
+    "lint:staged": "lint-staged"
   },
   "repository": {
     "type": "git",
@@ -23,6 +26,22 @@
   },
   "homepage": "https://github.com/ringcentral/ringcentral-js#readme",
   "dependencies": {
-    "lerna": "3.4.3"
+    "eslint": "4.19.1",
+    "eslint-config-airbnb": "16.1.0",
+    "eslint-config-prettier": "2.9.0",
+    "eslint-config-typescript": "1.1.0",
+    "eslint-plugin-import": "2.11.0",
+    "eslint-plugin-jsx-a11y": "6.0.3",
+    "eslint-plugin-prettier": "2.6.0",
+    "eslint-plugin-react": "7.7.0",
+    "eslint-plugin-typescript": "0.13.0",
+    "husky": "1.1.2",
+    "lint-staged": "8.0.4",
+    "lerna": "3.4.3",
+    "typescript": "3.1.5",
+    "typescript-eslint-parser": "20.1.1"
+  },
+  "devDependencies": {
+    "prettier": "1.14.3"
   }
 }

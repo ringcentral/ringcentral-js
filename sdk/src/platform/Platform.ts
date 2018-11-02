@@ -1,17 +1,22 @@
-import EventEmitter from "events";
-import * as qs from "querystring";
-import ApiResponse from "../http/ApiResponse";
-import Auth, {AuthOptions} from "./Auth";
-import * as Constants from "../core/Constants";
-import Cache from "../core/Cache";
-import Client from "../http/Client";
-import Externals from "../core/Externals";
-import {__await} from "tslib";
+import EventEmitter from 'events';
+import * as qs from 'querystring';
+import ApiResponse from '../http/ApiResponse';
+import Auth, {AuthOptions} from './Auth';
+import * as Constants from '../core/Constants';
+import Cache from '../core/Cache';
+import Client from '../http/Client';
+import Externals from '../core/Externals';
 
 declare const screen: any; //FIXME TS Crap
 
-export default class Platform extends EventEmitter {
+const delay = (timeout): Promise<any> =>
+    new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(null);
+        }, timeout);
+    });
 
+export default class Platform extends EventEmitter {
     static _tokenEndpoint = '/restapi/oauth/token';
     static _revokeEndpoint = '/restapi/oauth/revoke';
     static _authorizeEndpoint = '/restapi/oauth/authorize';
@@ -44,20 +49,19 @@ export default class Platform extends EventEmitter {
     private _auth: Auth;
 
     constructor({
-                    server,
-                    clientId,
-                    clientSecret,
-                    redirectUri = '',
-                    refreshDelayMs = 100,
-                    clearCacheOnRefreshError = true,
-                    appName = '',
-                    appVersion = '',
-                    externals,
-                    cache,
-                    client,
-                    refreshHandicapMs
-                }: PlatformOptionsConstructor) {
-
+        server,
+        clientId,
+        clientSecret,
+        redirectUri = '',
+        refreshDelayMs = 100,
+        clearCacheOnRefreshError = true,
+        appName = '',
+        appVersion = '',
+        externals,
+        cache,
+        client,
+        refreshHandicapMs
+    }: PlatformOptionsConstructor) {
         super();
 
         this._server = server;
@@ -66,9 +70,7 @@ export default class Platform extends EventEmitter {
         this._redirectUri = redirectUri;
         this._refreshDelayMs = refreshDelayMs;
         this._clearCacheOnRefreshError = clearCacheOnRefreshError;
-        this._userAgent = (appName ?
-                          (appName + (appVersion ? '/' + appVersion : '')) + ' ' :
-                           '') + 'RCJSSDK/' + Constants.version;
+        this._userAgent = `${appName ? `${appName + (appVersion ? `/${appVersion}` : '')} ` : ''}RCJSSDK/${Constants.version}`;
 
         this._externals = externals;
         this._cache = cache;
@@ -77,16 +79,7 @@ export default class Platform extends EventEmitter {
         this._auth = new Auth({
             cache: this._cache,
             cacheId: Platform._cacheId,
-            refreshHandicapMs: refreshHandicapMs
-        });
-
-    }
-
-    delay(timeout): Promise<any> {
-        return new Promise((resolve, reject) => {
-            setTimeout(function() {
-                resolve(null);
-            }, timeout);
+            refreshHandicapMs
         });
     }
 
@@ -99,43 +92,35 @@ export default class Platform extends EventEmitter {
     }
 
     createUrl(path = '', options: CreateUrlOptions = {}) {
-
         let builtUrl = '';
-        const hasHttp = path.indexOf('http://') != -1 || path.indexOf('https://') != -1;
+        const hasHttp = path.indexOf('http://') !== -1 || path.indexOf('https://') !== -1;
 
         if (options.addServer && !hasHttp) builtUrl += this._server;
 
         builtUrl += path;
 
-        if (options.addMethod) builtUrl += (path.indexOf('?') > -1 ? '&' : '?') + '_method=' + options.addMethod;
+        if (options.addMethod) builtUrl += `${path.indexOf('?') > -1 ? '&' : '?'}_method=${options.addMethod}`;
 
         return builtUrl;
-
     }
 
     async signUrl(path) {
-        return path + (path.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + (await this._auth.data()).access_token;
+        return `${path + (path.indexOf('?') > -1 ? '&' : '?')}access_token=${(await this._auth.data()).access_token}`;
     }
 
-    loginUrl({
-                 implicit,
-                 redirectUri,
-                 state,
-                 brandId = '',
-                 display = '',
-                 prompt = ''
-             }: LoginUrlOptions) {
-
-        return this.createUrl(Platform._authorizeEndpoint + '?' + qs.stringify({
-            response_type: implicit ? 'token' : 'code',
-            redirect_uri: redirectUri || this._redirectUri,
-            client_id: this._clientId,
-            state,
-            brand_id: brandId,
-            display,
-            prompt
-        }), {addServer: true});
-
+    loginUrl({implicit, redirectUri, state, brandId = '', display = '', prompt = ''}: LoginUrlOptions) {
+        return this.createUrl(
+            `${Platform._authorizeEndpoint}?${qs.stringify({
+                response_type: implicit ? 'token' : 'code',
+                redirect_uri: redirectUri || this._redirectUri,
+                client_id: this._clientId,
+                state,
+                brand_id: brandId,
+                display,
+                prompt
+            })}`,
+            {addServer: true}
+        );
     }
 
     /**
@@ -143,14 +128,11 @@ export default class Platform extends EventEmitter {
      * @return {Object}
      */
     parseLoginRedirect(url) {
-
         function getParts(url, separator) {
             return url.split(separator).reverse()[0];
         }
 
-        const response = (url.indexOf('#') === 0 && getParts(url, '#')) ||
-                         (url.indexOf('?') === 0 && getParts(url, '?')) ||
-                         null;
+        const response = (url.indexOf('#') === 0 && getParts(url, '#')) || (url.indexOf('?') === 0 && getParts(url, '?')) || null;
 
         if (!response) throw new Error('Unable to parse response');
 
@@ -167,7 +149,6 @@ export default class Platform extends EventEmitter {
         }
 
         return queryString;
-
     }
 
     /**
@@ -184,17 +165,8 @@ export default class Platform extends EventEmitter {
      * @param {string} [target] target for window.open()
      * @return {Promise}
      */
-    loginWindow({
-                    url,
-                    width = 400,
-                    height = 600,
-                    origin = window.location.origin,
-                    property = Constants.authResponseProperty,
-                    target = '_blank'
-                }): Promise<LoginOptions> {
-
+    loginWindow({url, width = 400, height = 600, origin = window.location.origin, property = Constants.authResponseProperty, target = '_blank'}): Promise<LoginOptions> {
         return new Promise((resolve, reject) => {
-
             if (typeof window === 'undefined') throw new Error('This method can be used only in browser');
 
             if (!url) throw new Error('Missing mandatory URL parameter');
@@ -205,15 +177,9 @@ export default class Platform extends EventEmitter {
             const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
             const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
 
-            const left = ((width / 2) - (width / 2)) + dualScreenLeft;
-            const top = ((height / 2) - (height / 2)) + dualScreenTop;
-            const win = window.open(url, '_blank', (target == '_blank') ? (
-                'scrollbars=yes, status=yes, ' +
-                'width=' + width + ', ' +
-                'height=' + height + ', ' +
-                'left=' + left + ', ' +
-                'top=' + top
-            ) : '');
+            const left = width / 2 - width / 2 + dualScreenLeft;
+            const top = height / 2 - height / 2 + dualScreenTop;
+            const win = window.open(url, '_blank', target === '_blank' ? `scrollbars=yes, status=yes, width=${width}, height=${height}, left=${left}, top=${top}` : '');
 
             if (!win) {
                 throw new Error('Could not open login window. Please allow popups for this site');
@@ -221,11 +187,9 @@ export default class Platform extends EventEmitter {
 
             if (win.focus) win.focus();
 
-            const eventListener = (e) => {
-
+            const eventListener = e => {
                 try {
-
-                    if (e.origin != origin) return;
+                    if (e.origin !== origin) return;
                     if (!e.data || !e.data[property]) return; // keep waiting
 
                     win.close();
@@ -236,75 +200,60 @@ export default class Platform extends EventEmitter {
                     if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
 
                     resolve(loginOptions);
-
                 } catch (e) {
                     reject(e);
                 }
-
             };
 
             window.addEventListener('message', eventListener, false);
-
         });
-
     }
 
     /**
      * @return {Promise<boolean>}
      */
     async loggedIn() {
-
         try {
             await this.ensureLoggedIn();
             return true;
         } catch (e) {
             return false;
         }
-
     }
 
     async login({
-                    username,
-                    password,
-                    extension = '',
-                    code,
-                    redirectUri,
-                    endpointId,
-                    accessTokenTtl,
-                    refreshTokenTtl,
-                    access_token,
-                    ...options
-                }: LoginOptions): Promise<ApiResponse> {
-
+        username,
+        password,
+        extension = '',
+        code,
+        redirectUri,
+        endpointId,
+        accessTokenTtl,
+        refreshTokenTtl,
+        access_token,
+        ...options
+    }: LoginOptions): Promise<ApiResponse> {
         try {
-
             this.emit(this.events.beforeLogin);
 
-            let body: any = {};
+            const body: any = {};
             let apiResponse = null;
             let json;
 
             if (access_token) {
-
                 //TODO Potentially make a request to /oauth/tokeninfo
                 json = {access_token, ...options};
-
             } else {
-
                 if (!code) {
-
                     body.grant_type = 'password';
                     body.username = username;
                     body.password = password;
                     body.extension = extension;
-
                 } else if (code) {
-
                     body.grant_type = 'authorization_code';
                     body.code = code;
                     body.redirect_uri = redirectUri || this._redirectUri;
                     //body.client_id = this.getCredentials().key; // not needed
-
                 }
 
                 if (endpointId) body.endpoint_id = endpointId;
@@ -314,7 +263,6 @@ export default class Platform extends EventEmitter {
                 apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body);
 
                 json = apiResponse.json();
-
             }
 
             await this._auth.setData(json);
@@ -322,26 +270,20 @@ export default class Platform extends EventEmitter {
             this.emit(this.events.loginSuccess, apiResponse);
 
             return apiResponse;
-
         } catch (e) {
-
             if (this._clearCacheOnRefreshError) await this._cache.clean();
 
             this.emit(this.events.loginError, e);
 
             throw e;
-
         }
-
     }
 
     private async _refresh(): Promise<ApiResponse> {
-
         try {
-
             this.emit(this.events.beforeRefresh);
 
-            await this.delay(this._refreshDelayMs);
+            await delay(this._refreshDelayMs);
 
             const authData = await this.auth().data();
 
@@ -350,10 +292,10 @@ export default class Platform extends EventEmitter {
             if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
 
             const res = await this._tokenRequest(Platform._tokenEndpoint, {
-                "grant_type": "refresh_token",
-                "refresh_token": authData.refresh_token,
-                "access_token_ttl": authData.expires_in + 1,
-                "refresh_token_ttl": authData.refresh_token_expires_in + 1
+                grant_type: 'refresh_token',
+                refresh_token: authData.refresh_token,
+                access_token_ttl: authData.expires_in + 1,
+                refresh_token_ttl: authData.refresh_token_expires_in + 1
             });
 
             const json = res.json();
@@ -367,9 +309,7 @@ export default class Platform extends EventEmitter {
             this.emit(this.events.refreshSuccess, res);
 
             return res;
-
         } catch (e) {
-
             if (this._clearCacheOnRefreshError) {
                 await this._cache.clean();
             }
@@ -377,17 +317,12 @@ export default class Platform extends EventEmitter {
             this.emit(this.events.refreshError, e);
 
             throw e;
-
         }
-
     }
 
     async refresh(): Promise<ApiResponse> {
-
         if (!this._refreshPromise) {
-
             this._refreshPromise = (async () => {
-
                 try {
                     const res = await this._refresh();
                     this._refreshPromise = null;
@@ -397,17 +332,13 @@ export default class Platform extends EventEmitter {
                     throw e;
                 }
             })();
-
         }
 
-        return await this._refreshPromise;
-
+        return this._refreshPromise;
     }
 
     async logout(): Promise<ApiResponse> {
-
         try {
-
             this.emit(this.events.beforeLogout);
 
             const res = await this._tokenRequest(Platform._revokeEndpoint, {
@@ -419,19 +350,14 @@ export default class Platform extends EventEmitter {
             this.emit(this.events.logoutSuccess, res);
 
             return res;
-
         } catch (e) {
-
             this.emit(this.events.logoutError, e);
 
             throw e;
-
         }
-
     }
 
     async inflateRequest(request: Request, options: SendOptions = {}): Promise<Request> {
-
         options = options || {};
 
         if (options.skipAuthCheck) return request;
@@ -440,42 +366,37 @@ export default class Platform extends EventEmitter {
 
         request.headers.set('X-User-Agent', this._userAgent);
         request.headers.set('Client-Id', this._clientId);
-        request.headers.set('Authorization', await this._authHeader());
+        request.headers.set('Authorization', await this.authHeader());
         //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
 
         return request;
-
     }
 
     async sendRequest(request: Request, options: SendOptions = {}): Promise<ApiResponse> {
-
         try {
-
             request = await this.inflateRequest(request, options);
             return await this._client.sendRequest(request);
-
         } catch (e) {
+            const {retry, handleRateLimit} = options;
 
             // Guard is for errors that come from polling
-            if (!e.apiResponse || !e.apiResponse.response() || options.retry) throw e;
+            if (!e.apiResponse || !e.apiResponse.response() || retry) throw e;
 
             const response = e.apiResponse.response();
-            const status = response.status;
+            const {status} = response;
 
-            if ((status != ApiResponse._unauthorizedStatus) &&
-                (status != ApiResponse._rateLimitStatus)) throw e;
+            if (status !== ApiResponse._unauthorizedStatus && status !== ApiResponse._rateLimitStatus) throw e;
 
             options.retry = true;
 
             let retryAfter = 0;
 
-            if (status == ApiResponse._unauthorizedStatus) {
+            if (status === ApiResponse._unauthorizedStatus) {
                 await this._auth.cancelAccessToken();
             }
 
-            if (status == ApiResponse._rateLimitStatus) {
-
-                const defaultRetryAfter = (!options.handleRateLimit || typeof options.handleRateLimit == 'boolean' ? 60 : options.handleRateLimit);
+            if (status === ApiResponse._rateLimitStatus) {
+                const defaultRetryAfter = !handleRateLimit || typeof handleRateLimit === 'boolean' ? 60 : handleRateLimit;
 
                 // FIXME retry-after is custom header, by default, it can't be retrieved. Server should add header: 'Access-Control-Expose-Headers: retry-after'.
                 retryAfter = parseFloat(response.headers.get('retry-after') || defaultRetryAfter) * 1000;
@@ -485,40 +406,35 @@ export default class Platform extends EventEmitter {
                 this.emit(this.events.rateLimitError, e);
 
                 if (!options.handleRateLimit) throw e;
-
             }
 
-            await this.delay(retryAfter);
-            return await this.sendRequest(request, options);
-
+            await delay(retryAfter);
+            return this.sendRequest(request, options);
         }
-
     }
 
     send(options: SendOptions) {
-
         options = options || {};
 
         //FIXME https://github.com/bitinn/node-fetch/issues/43
         options.url = this.createUrl(options.url, {addServer: true});
 
         return this.sendRequest(this._client.createRequest(options), options);
-
     }
 
-    get(url, query?, options?: SendOptions): Promise<ApiResponse> {
+    async get(url, query?, options?: SendOptions): Promise<ApiResponse> {
         return this.send({method: 'GET', url, query, ...options});
     }
 
-    post(url, body?, query?, options?: SendOptions): Promise<ApiResponse> {
+    async post(url, body?, query?, options?: SendOptions): Promise<ApiResponse> {
         return this.send({method: 'POST', url, query, body, ...options});
     }
 
-    put(url, body?, query?, options?: SendOptions): Promise<ApiResponse> {
+    async put(url, body?, query?, options?: SendOptions): Promise<ApiResponse> {
         return this.send({method: 'PUT', url, query, body, ...options});
     }
 
-    'delete'(url, query?, options?: SendOptions): Promise<ApiResponse> {
+    async delete(url, query?, options?: SendOptions): Promise<ApiResponse> {
         return this.send({method: 'DELETE', url, query, ...options});
     }
 
@@ -529,30 +445,27 @@ export default class Platform extends EventEmitter {
     }
 
     protected async _tokenRequest(url, body): Promise<ApiResponse> {
-
-        return await this.send({
+        return this.send({
             url,
             body,
             skipAuthCheck: true,
             method: 'POST',
             headers: {
-                'Authorization': 'Basic ' + this._apiKey(),
+                Authorization: this.basicAuthHeader(),
                 'Content-Type': ApiResponse._urlencodedContentType
             }
         });
-
     }
 
-    protected _apiKey() {
-        const apiKey = this._clientId + ':' + this._clientSecret;
-        return (typeof btoa == 'function') ? btoa(apiKey) : Buffer.from(apiKey).toString('base64');
+    basicAuthHeader(): string {
+        const apiKey = `${this._clientId}:${this._clientSecret}`;
+        return `Basic ${typeof btoa === 'function' ? btoa(apiKey) : Buffer.from(apiKey).toString('base64')}`;
     }
 
-    protected async _authHeader() {
+    async authHeader(): Promise<string> {
         const data = await this._auth.data();
-        return await data.token_type + (data.access_token ? ' ' + data.access_token : '');
+        return (await data.token_type) + (data.access_token ? ` ${data.access_token}` : '');
     }
-
 }
 
 export interface PlatformOptions extends AuthOptions {

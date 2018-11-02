@@ -1,4 +1,4 @@
-import Cache from "../core/Cache";
+import Cache from '../core/Cache';
 
 const DEFAULT_RENEW_HANDICAP_MS = 60 * 1000; // 1 minute
 
@@ -6,82 +6,70 @@ export interface AuthOptions {
     refreshHandicapMs?: number;
 }
 
-export interface AuthOptionsConstructor extends AuthOptions{
+export interface AuthOptionsConstructor extends AuthOptions {
     cache: Cache;
     cacheId: string;
 }
 
 export default class Auth {
-
     private _cache: Cache;
     private readonly _cacheId: string;
     private readonly _refreshHandicapMs: number;
 
     constructor({cache, cacheId, refreshHandicapMs = DEFAULT_RENEW_HANDICAP_MS}: AuthOptionsConstructor) {
-
         this._cache = cache;
         this._cacheId = cacheId;
         this._refreshHandicapMs = refreshHandicapMs;
-
     }
 
-    async data():Promise<AuthData> {
-
-        return await this._cache.getItem(this._cacheId) || {
-            token_type: '',
-            access_token: '',
-            expires_in: 0,
-            refresh_token: '',
-            refresh_token_expires_in: 0
-        };
-
+    async data(): Promise<AuthData> {
+        return (
+            (await this._cache.getItem(this._cacheId)) || {
+                token_type: '',
+                access_token: '',
+                expires_in: 0,
+                refresh_token: '',
+                refresh_token_expires_in: 0
+            }
+        );
     }
 
     async setData(newData = {}) {
-
         const data = await this.data();
 
-        Object.keys(newData).forEach(function(key) {
+        Object.keys(newData).forEach(key => {
             data[key] = newData[key];
         });
 
-        data.expire_time = Date.now() + (data.expires_in * 1000);
-        data.refresh_token_expire_time = Date.now() + (data.refresh_token_expires_in * 1000);
+        data.expire_time = Date.now() + data.expires_in * 1000;
+        data.refresh_token_expire_time = Date.now() + data.refresh_token_expires_in * 1000;
 
         this._cache.setItem(this._cacheId, data);
 
         return this;
-
     }
 
     /**
      * Check if there is a valid (not expired) access token
      */
     async accessTokenValid() {
-
         const authData = await this.data();
-        return (authData.expire_time - this._refreshHandicapMs > Date.now());
-
+        return authData.expire_time - this._refreshHandicapMs > Date.now();
     }
 
     /**
      * Check if there is a valid (not expired) access token
      */
     async refreshTokenValid() {
-
-        return ((await this.data()).refresh_token_expire_time > Date.now());
-
+        return (await this.data()).refresh_token_expire_time > Date.now();
     }
 
     async cancelAccessToken() {
-
-        return await this.setData({
+        return this.setData({
             access_token: '',
             expires_in: 0
         });
-
     }
-
 }
 
 export interface AuthData {

@@ -1,71 +1,65 @@
-import {asyncTest, expect, createSdk} from "../test/test";
+import {asyncTest, expect, createSdk} from '../test/test';
 
 describe('RingCentral.core.Cache', () => {
-
     describe('getItem', () => {
+        it(
+            'returns null if item not found',
+            asyncTest(async sdk => {
+                const cache = sdk.cache();
 
-        it('returns null if item not found', asyncTest(async sdk => {
-
-            const cache = sdk.cache();
-
-            expect(await cache.getItem('foo')).to.equal(null);
-
-        }));
-
+                expect(await cache.getItem('foo')).to.equal(null);
+            })
+        );
     });
 
     describe('setItem', () => {
+        it(
+            'sets an item in storage',
+            asyncTest(async sdk => {
+                const cache = sdk.cache();
+                const json = {foo: 'bar'};
 
-        it('sets an item in storage', asyncTest(async sdk => {
+                await cache.setItem('foo', json);
+                expect(await cache.getItem('foo')).to.deep.equal(json);
 
-            const cache = sdk.cache();
-            const json = {foo: 'bar'};
+                await cache.removeItem('foo');
 
-            await cache.setItem('foo', json);
-            expect(await cache.getItem('foo')).to.deep.equal(json);
-
-            await cache.removeItem('foo');
-
-            expect(await cache.getItem('foo')).to.equal(null);
-
-        }));
-
+                expect(await cache.getItem('foo')).to.equal(null);
+            })
+        );
     });
 
     describe('clean', () => {
+        it(
+            'removes all prefixed entries from cache leaving non-prefixed ones untouched',
+            asyncTest(async sdk => {
+                const cache = sdk.cache();
 
-        it('removes all prefixed entries from cache leaving non-prefixed ones untouched', asyncTest(async sdk => {
+                cache._externals.localStorage.setItem('rc-foo', '"foo"'); // prettier-ignore
+                cache._externals.localStorage.setItem('foo', '"foo"'); // prettier-ignore
 
-            const cache = sdk.cache();
+                expect(await cache.getItem('foo')).to.equal('foo');
 
-            cache['_externals'].localStorage.setItem('rc-foo', '"foo"');
-            cache['_externals'].localStorage.setItem('foo', '"foo"');
+                await cache.clean();
 
-            expect(await cache.getItem('foo')).to.equal('foo');
-
-            await cache.clean();
-
-            expect(await cache.getItem('foo')).to.equal(null);
-            expect(cache['_externals'].localStorage.getItem('foo')).to.equal('"foo"');
-
-        }));
-
+                expect(await cache.getItem('foo')).to.equal(null);
+                expect(cache._externals.localStorage.getItem('foo')).to.equal('"foo"'); // prettier-ignore
+            })
+        );
     });
 
     describe('prefix', () => {
+        it(
+            'different prefixes dont overlap',
+            asyncTest(async sdk1 => {
+                const sdk2 = createSdk({cachePrefix: 'foo'});
 
-        it('different prefixes dont overlap', asyncTest(async sdk1 => {
+                const cache1 = sdk1.cache();
 
-            const sdk2 = createSdk({cachePrefix: 'foo'});
+                await cache1.setItem('foo', {foo: 'bar'});
 
-            const cache1 = sdk1.cache();
-
-            await cache1.setItem('foo', {foo: 'bar'});
-
-            expect(await sdk2.cache().getItem('foo')).to.equal(null);
-
-        }));
-
+                expect(await sdk2.cache().getItem('foo')).to.equal(null);
+            })
+        );
     });
-
 });

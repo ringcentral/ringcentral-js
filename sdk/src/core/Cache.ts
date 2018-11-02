@@ -1,12 +1,11 @@
-import Externals from "./Externals";
+import Externals from './Externals';
 
 export interface CacheOptions {
     prefix?: string;
-    externals: Externals
+    externals: Externals;
 }
 
 export default class Cache {
-
     static defaultPrefix = 'rc-';
 
     private readonly _prefix = null;
@@ -24,7 +23,7 @@ export default class Cache {
     }
 
     async setItem(key, data) {
-        await this.setItemSync(key, data);
+        this.setItemSync(key, data);
     }
 
     removeItemSync(key) {
@@ -43,29 +42,28 @@ export default class Cache {
     }
 
     async getItem(key) {
-        return await this.getItemSync(key);
+        return this.getItemSync(key);
     }
 
     private async _keys(): Promise<string[]> {
-        return ('keys' in this._externals.localStorage)
-               ? await this._externals.localStorage.keys()
-               : Object.keys(this._externals.localStorage);
+        return 'keys' in this._externals.localStorage
+            ? this._externals.localStorage.keys() // could be async
+            : Object.keys(this._externals.localStorage);
     }
 
     async clean() {
-
-        await Promise.all((await this._keys()).map(async key => {
-            if (key.indexOf(this._prefix) === 0) {
-                await this._externals.localStorage.removeItem(key);
-            }
-        }));
+        await Promise.all(
+            (await this._keys()).map(async key => {
+                if (key.indexOf(this._prefix) === 0) {
+                    await this._externals.localStorage.removeItem(key);
+                }
+            })
+        );
 
         return this;
-
     }
 
     private _prefixKey(key: string) {
         return this._prefix + key;
     }
-
 }

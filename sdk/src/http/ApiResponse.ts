@@ -1,14 +1,13 @@
-import Externals from "../core/Externals";
+import Externals from '../core/Externals';
 
 export interface ApiResponseOptions {
-    externals: Externals,
-    request: Request,
-    response?: Response,
-    responseText?: string
+    externals: Externals;
+    request: Request;
+    response?: Response;
+    responseText?: string;
 }
 
 export default class ApiResponse {
-
     static _contentType = 'Content-Type';
     static _jsonContentType = 'application/json';
     static _multipartContentType = 'multipart/mixed';
@@ -27,23 +26,19 @@ export default class ApiResponse {
     _multipart: ApiResponse[] = [];
 
     constructor({externals, request, response = null, responseText = ''}: ApiResponseOptions) {
-
         this._externals = externals;
         this._request = request;
         this._response = response;
         this._text = responseText;
-
     }
 
     async receiveResponse(response: Response): Promise<string> {
-
         this._response = response;
 
         // Ignore if not known textual type
-        this._text = (!this._isMultipart() && !this._isJson()) ? '' : (await this.response().text());
+        this._text = !this._isMultipart() && !this._isJson() ? '' : await this.response().text();
 
         return this._text;
-
     }
 
     response() {
@@ -73,24 +68,19 @@ export default class ApiResponse {
     }
 
     error(skipOKCheck = false): string {
-
         if (this.ok() && !skipOKCheck) return null;
 
-        let message = (this._response && this._response.status ? this._response.status + ' ' : '') +
-                      (this._response && this._response.statusText ? this._response.statusText : '');
+        let msg = (this._response && this._response.status ? `${this._response.status} ` : '') + (this._response && this._response.statusText ? this._response.statusText : '');
 
         try {
+            const {message, error_description, description} = this.json();
 
-            const json = this.json();
+            if (message) msg = message;
+            if (error_description) msg = error_description;
+            if (description) msg = description;
+        } catch (e) {} //eslint-disable-line
 
-            if (json.message) message = json.message;
-            if (json.error_description) message = json.error_description;
-            if (json.description) message = json.description;
-
-        } catch (e) {}
-
-        return message;
-
+        return msg;
     }
 
     /**
@@ -101,11 +91,9 @@ export default class ApiResponse {
     }
 
     multipart(): ApiResponse[] {
-
         if (!this._isMultipart()) throw new Error('Response is not multipart');
 
         if (!this._multipart.length) {
-
             // Step 1. Split multipart response
 
             const text = this.text();
@@ -115,7 +103,7 @@ export default class ApiResponse {
             let boundary;
 
             try {
-                boundary = this._getContentType().match(/boundary=([^;]+)/i)[1];
+                boundary = this._getContentType().match(/boundary=([^;]+)/i)[1]; //eslint-disable-line
             } catch (e) {
                 throw new Error('Cannot find boundary');
             }
@@ -125,7 +113,7 @@ export default class ApiResponse {
             const parts = text.toString().split(ApiResponse._boundarySeparator + boundary);
 
             if (parts[0].trim() === '') parts.shift();
-            if (parts[parts.length - 1].trim() == ApiResponse._boundarySeparator) parts.pop();
+            if (parts[parts.length - 1].trim() === ApiResponse._boundarySeparator) parts.pop();
 
             if (parts.length < 1) throw new Error('No parts in body');
 
@@ -136,11 +124,9 @@ export default class ApiResponse {
             // Step 3. Parse all other parts
 
             this._multipart = parts.map((part, i) => this._create(part, statusInfo.response[i].status));
-
         }
 
         return this._multipart;
-
     }
 
     private _isContentType(contentType) {
@@ -163,25 +149,20 @@ export default class ApiResponse {
      * Method is used to create ApiResponse object from string parts of multipart/mixed response
      */
     private _create(text = '', status = 200, statusText = 'OK'): ApiResponse {
-
         text = text.replace(/\r/g, '');
 
-        const headers = new this._externals.Headers(),
-            headersAndBody = text.split(ApiResponse._bodySeparator),
-            headersText = (headersAndBody.length > 1) ? headersAndBody.shift() : '';
+        const headers = new this._externals.Headers();
+        const headersAndBody = text.split(ApiResponse._bodySeparator);
+        const headersText = headersAndBody.length > 1 ? headersAndBody.shift() : '';
 
         text = headersAndBody.length > 0 ? headersAndBody.join(ApiResponse._bodySeparator) : null;
 
-        (headersText || '')
-        .split('\n')
-        .forEach(header => {
-
-            const split = header.trim().split(ApiResponse._headerSeparator),
-                key = split.shift().trim(),
-                value = split.join(ApiResponse._headerSeparator).trim();
+        (headersText || '').split('\n').forEach(header => {
+            const split = header.trim().split(ApiResponse._headerSeparator);
+            const key = split.shift().trim();
+            const value = split.join(ApiResponse._headerSeparator).trim();
 
             if (key) headers.append(key, value);
-
         });
 
         const response = new this._externals.Response(text, {
@@ -196,7 +177,5 @@ export default class ApiResponse {
             response,
             responseText: text
         });
-
     }
-
 }

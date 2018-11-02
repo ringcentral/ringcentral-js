@@ -1,4 +1,2 @@
-const version = require('../../package.json').version;
-
-export {version};
+export {version} from '../../package.json';
 export const authResponseProperty = 'RCAuthorizationResponse';
