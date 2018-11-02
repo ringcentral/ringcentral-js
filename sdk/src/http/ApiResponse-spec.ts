@@ -106,7 +106,13 @@ describe('RingCentral.http.ApiResponse', () => {
         it(
             'calls the success callback after parsing a good multi-part/mixed response',
             asyncTest(async sdk => {
-                const res = await createResponse(sdk, goodMultipartMixedResponse, 207, 'Multi-Status', multipartResponseHeaders);
+                const res = await createResponse(
+                    sdk,
+                    goodMultipartMixedResponse,
+                    207,
+                    'Multi-Status',
+                    multipartResponseHeaders
+                );
                 return res.multipart();
             })
         );
@@ -114,7 +120,13 @@ describe('RingCentral.http.ApiResponse', () => {
         it(
             'calls the success callback for all individual parts that are parsed (including errors)',
             asyncTest(async sdk => {
-                const res = await createResponse(sdk, multipartMixedResponseWithErrorPart, 207, 'Multi-Status', multipartResponseHeaders);
+                const res = await createResponse(
+                    sdk,
+                    multipartMixedResponseWithErrorPart,
+                    207,
+                    'Multi-Status',
+                    multipartResponseHeaders
+                );
 
                 expect(res.text()).to.equal(multipartMixedResponseWithErrorPart);
 
@@ -140,7 +152,13 @@ describe('RingCentral.http.ApiResponse', () => {
         it(
             'calls the error callback if it fails to parse the parts info block',
             asyncTest(async sdk => {
-                const res = await createResponse(sdk, badMultipartMixedResponse, 207, 'Multi-Status', multipartResponseHeaders);
+                const res = await createResponse(
+                    sdk,
+                    badMultipartMixedResponse,
+                    207,
+                    'Multi-Status',
+                    multipartResponseHeaders
+                );
 
                 expect(() => {
                     res.multipart();

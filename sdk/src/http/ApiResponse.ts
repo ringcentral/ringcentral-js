@@ -70,7 +70,9 @@ export default class ApiResponse {
     error(skipOKCheck = false): string {
         if (this.ok() && !skipOKCheck) return null;
 
-        let msg = (this._response && this._response.status ? `${this._response.status} ` : '') + (this._response && this._response.statusText ? this._response.statusText : '');
+        let msg =
+            (this._response && this._response.status ? `${this._response.status} ` : '') +
+            (this._response && this._response.statusText ? this._response.statusText : '');
 
         try {
             const {message, error_description, description} = this.json();

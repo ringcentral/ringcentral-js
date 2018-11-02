@@ -30,7 +30,13 @@ export default class Externals implements ExternalsOptions {
     Headers = root.Headers;
     localStorage = getStorage();
 
-    constructor({fetch: fetchImpl, Request: RequestImpl, Response: ResponseImpl, Headers: HeadersImpl, localStorage}: ExternalsOptions = {}) {
+    constructor({
+        fetch: fetchImpl,
+        Request: RequestImpl,
+        Response: ResponseImpl,
+        Headers: HeadersImpl,
+        localStorage
+    }: ExternalsOptions = {}) {
         if (fetchImpl) this.fetch = fetchImpl;
         if (RequestImpl) this.Request = RequestImpl;
         if (ResponseImpl) this.Response = ResponseImpl;

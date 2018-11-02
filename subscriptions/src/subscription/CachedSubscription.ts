@@ -36,4 +36,6 @@ export interface CachedSubscriptionOptions extends SubscriptionOptions {
     cacheKey: string;
 }
 
-export interface CachedSubscriptionOptionsConstructor extends SubscriptionOptionsConstructor, CachedSubscriptionOptions {}
+export interface CachedSubscriptionOptionsConstructor
+    extends SubscriptionOptionsConstructor,
+        CachedSubscriptionOptions {}

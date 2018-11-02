@@ -1,17 +1,17 @@
-import EventEmitter from "events";
-import Cache from "./core/Cache";
-import Externals, {ExternalsOptions} from "./core/Externals";
-import * as Constants from "./core/Constants";
-import Client from "./http/Client";
-import ApiResponse from "./http/ApiResponse";
+import EventEmitter from 'events';
+import Cache from './core/Cache';
+import Externals, {ExternalsOptions} from './core/Externals';
+import * as Constants from './core/Constants';
+import Client from './http/Client';
+import ApiResponse from './http/ApiResponse';
 import Platform, {
     CreateUrlOptions,
     LoginOptions,
     LoginUrlOptions,
     PlatformOptions,
     SendOptions
-} from "./platform/Platform";
-import {AuthData} from "./platform/Auth";
+} from './platform/Platform';
+import {AuthData} from './platform/Auth';
 
 export {
     Cache,
@@ -23,17 +23,15 @@ export {
     SendOptions,
     AuthData,
     EventEmitter
-}
+};
 
 export class SDK {
-
     private _externals: Externals;
     private _cache: Cache;
     private _client: Client;
     private _platform: Platform;
 
     constructor(options: SDKOptions = {}) {
-
         this._externals = new Externals(options);
 
         this._cache = new Cache({
@@ -70,7 +68,6 @@ export class SDK {
             cache: this._cache,
             client: this._client
         });
-
     }
 
     static version = Constants.version;
@@ -93,16 +90,13 @@ export class SDK {
     }
 
     static handleLoginRedirect(origin, win) {
-
         win = win || window;
 
         const response = win.location.hash ? win.location.hash : win.location.search;
         const msg = {};
         msg[Constants.authResponseProperty] = response;
         win.opener.postMessage(msg, origin || win.location.origin);
-
     }
-
 }
 
 export interface SDKOptions extends PlatformOptions, ExternalsOptions {

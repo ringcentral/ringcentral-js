@@ -1,17 +1,13 @@
-import PubNubDefault from "pubnub";
-import {SDK} from "@ringcentral/sdk";
-import Subscription, {SubscriptionOptions} from "./subscription/Subscription";
-import CachedSubscription, {CachedSubscriptionOptions} from "./subscription/CachedSubscription";
+import PubNubDefault from 'pubnub';
+import {SDK} from '@ringcentral/sdk';
+import Subscription, {SubscriptionOptions} from './subscription/Subscription';
+import CachedSubscription, {CachedSubscriptionOptions} from './subscription/CachedSubscription';
 
 declare const window: any; //FIXME TS Crap
 
-export {
-    SubscriptionOptions,
-    CachedSubscriptionOptions
-}
+export {SubscriptionOptions, CachedSubscriptionOptions};
 
 export class Subscriptions {
-
     private _sdk: SDK;
     private _PubNub: any; // typeof PubNub;
 
@@ -30,7 +26,6 @@ export class Subscriptions {
     }
 
     createCachedSubscription({cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptions) {
-
         return new CachedSubscription({
             cacheKey,
             pollInterval,
@@ -38,13 +33,11 @@ export class Subscriptions {
             sdk: this._sdk,
             PubNub: this._PubNub
         });
-
     }
 
     getPubNub() {
         return this._PubNub;
     }
-
 }
 
 export interface SubscriptionsOptions {

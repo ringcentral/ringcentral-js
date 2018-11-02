@@ -304,7 +304,11 @@ describe('RingCentral.platform.Platform', () => {
 
                 await platform.auth().cancelAccessToken();
 
-                const res = (await Promise.all([platform.get('/restapi/v1.0/foo/1'), platform.get('/restapi/v1.0/foo/2'), platform.get('/restapi/v1.0/foo/3')])).map(r => r.json());
+                const res = (await Promise.all([
+                    platform.get('/restapi/v1.0/foo/1'),
+                    platform.get('/restapi/v1.0/foo/2'),
+                    platform.get('/restapi/v1.0/foo/3')
+                ])).map(r => r.json());
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
                 expect(res[0].increment).to.equal(1);
@@ -346,7 +350,9 @@ describe('RingCentral.platform.Platform', () => {
 
                 expect(platform.createUrl('/restapi/v1.0/foo')).to.equal('/restapi/v1.0/foo');
 
-                expect(platform.createUrl('/restapi/v1.0/foo', {addServer: true})).to.equal('http://whatever/restapi/v1.0/foo');
+                expect(platform.createUrl('/restapi/v1.0/foo', {addServer: true})).to.equal(
+                    'http://whatever/restapi/v1.0/foo'
+                );
 
                 expect(
                     await platform.signUrl(
@@ -420,7 +426,9 @@ describe('RingCentral.platform.Platform', () => {
                         display: 'foo',
                         prompt: 'foo'
                     })
-                ).to.equal('http://whatever/restapi/oauth/authorize?response_type=token&redirect_uri=foo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo');
+                ).to.equal(
+                    'http://whatever/restapi/oauth/authorize?response_type=token&redirect_uri=foo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo'
+                );
 
                 expect(
                     platform.loginUrl({
@@ -431,13 +439,17 @@ describe('RingCentral.platform.Platform', () => {
                         display: 'foo',
                         prompt: 'foo'
                     })
-                ).to.equal('http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=foo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo');
+                ).to.equal(
+                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=foo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo'
+                );
 
                 expect(
                     platform.loginUrl({
                         implicit: false
                     })
-                ).to.equal('http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=');
+                ).to.equal(
+                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt='
+                );
             })
         );
     });

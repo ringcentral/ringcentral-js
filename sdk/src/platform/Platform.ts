@@ -70,7 +70,9 @@ export default class Platform extends EventEmitter {
         this._redirectUri = redirectUri;
         this._refreshDelayMs = refreshDelayMs;
         this._clearCacheOnRefreshError = clearCacheOnRefreshError;
-        this._userAgent = `${appName ? `${appName + (appVersion ? `/${appVersion}` : '')} ` : ''}RCJSSDK/${Constants.version}`;
+        this._userAgent = `${appName ? `${appName + (appVersion ? `/${appVersion}` : '')} ` : ''}RCJSSDK/${
+            Constants.version
+        }`;
 
         this._externals = externals;
         this._cache = cache;
@@ -132,7 +134,8 @@ export default class Platform extends EventEmitter {
             return url.split(separator).reverse()[0];
         }
 
-        const response = (url.indexOf('#') === 0 && getParts(url, '#')) || (url.indexOf('?') === 0 && getParts(url, '?')) || null;
+        const response =
+            (url.indexOf('#') === 0 && getParts(url, '#')) || (url.indexOf('?') === 0 && getParts(url, '?')) || null;
 
         if (!response) throw new Error('Unable to parse response');
 
@@ -165,7 +168,14 @@ export default class Platform extends EventEmitter {
      * @param {string} [target] target for window.open()
      * @return {Promise}
      */
-    loginWindow({url, width = 400, height = 600, origin = window.location.origin, property = Constants.authResponseProperty, target = '_blank'}): Promise<LoginOptions> {
+    loginWindow({
+        url,
+        width = 400,
+        height = 600,
+        origin = window.location.origin,
+        property = Constants.authResponseProperty,
+        target = '_blank'
+    }): Promise<LoginOptions> {
         return new Promise((resolve, reject) => {
             if (typeof window === 'undefined') throw new Error('This method can be used only in browser');
 
@@ -174,12 +184,26 @@ export default class Platform extends EventEmitter {
             const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
             const dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 
-            const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-            const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+            const width = window.innerWidth
+                ? window.innerWidth
+                : document.documentElement.clientWidth
+                    ? document.documentElement.clientWidth
+                    : screen.width;
+            const height = window.innerHeight
+                ? window.innerHeight
+                : document.documentElement.clientHeight
+                    ? document.documentElement.clientHeight
+                    : screen.height;
 
             const left = width / 2 - width / 2 + dualScreenLeft;
             const top = height / 2 - height / 2 + dualScreenTop;
-            const win = window.open(url, '_blank', target === '_blank' ? `scrollbars=yes, status=yes, width=${width}, height=${height}, left=${left}, top=${top}` : '');
+            const win = window.open(
+                url,
+                '_blank',
+                target === '_blank'
+                    ? `scrollbars=yes, status=yes, width=${width}, height=${height}, left=${left}, top=${top}`
+                    : ''
+            );
 
             if (!win) {
                 throw new Error('Could not open login window. Please allow popups for this site');
@@ -197,7 +221,8 @@ export default class Platform extends EventEmitter {
 
                     const loginOptions = this.parseLoginRedirect(e.data[property]);
 
-                    if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization code or token');
+                    if (!loginOptions.code && !loginOptions.access_token)
+                        throw new Error('No authorization code or token');
 
                     resolve(loginOptions);
                 } catch (e) {
@@ -396,7 +421,8 @@ export default class Platform extends EventEmitter {
             }
 
             if (status === ApiResponse._rateLimitStatus) {
-                const defaultRetryAfter = !handleRateLimit || typeof handleRateLimit === 'boolean' ? 60 : handleRateLimit;
+                const defaultRetryAfter =
+                    !handleRateLimit || typeof handleRateLimit === 'boolean' ? 60 : handleRateLimit;
 
                 // FIXME retry-after is custom header, by default, it can't be retrieved. Server should add header: 'Access-Control-Expose-Headers: retry-after'.
                 retryAfter = parseFloat(response.headers.get('retry-after') || defaultRetryAfter) * 1000;

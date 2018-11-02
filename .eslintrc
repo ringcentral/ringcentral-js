@@ -3,10 +3,12 @@
     "typescript",
     "airbnb",
     "prettier",
+    "prettier/react",
     "prettier/standard"
   ],
   "plugins": [
-    "prettier"
+    "prettier",
+    "react"
   ],
   "rules": {
     "camelcase": 0,
@@ -24,6 +26,10 @@
     "import/no-extraneous-dependencies": 0,
     "import/no-named-as-default": 0,
     "import/prefer-default-export": 0,
+    "jsx-a11y/anchor-is-valid": 0,
+    "jsx-a11y/click-events-have-key-events": 0,
+    "jsx-a11y/label-has-for": 0,
+    "jsx-a11y/no-static-element-interactions": 0,
     "max-len": 0,
     "no-alert": 0,
     "no-bitwise": 0,
@@ -39,6 +45,15 @@
     "no-unused-vars": 0,
     "no-unused-expressions": 0, // tests
     "no-undef": 0, //FIXME @see https://github.com/eslint/typescript-eslint-parser/issues/75
+    "react/forbid-prop-types": 0,
+    "react/jsx-filename-extension": 0,
+    "react/no-array-index-key": 0,
+    "react/no-multi-comp": 0,
+    "react/no-unescaped-entities": 0,
+    "react/no-unused-prop-types": 0,
+    "react/no-unused-state": 0,
+    "react/prop-types": 0,
+    "react/require-default-props": 0,
     "spaced-comment": 0,
     "prettier/prettier": "error",
     "typescript/explicit-function-return-type": 0,

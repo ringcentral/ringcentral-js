@@ -3,6 +3,7 @@
   "packages": [
     "api-test",
     "demo",
+    "react",
     "sdk",
     "subscriptions",
     "utils"

@@ -1,5 +1,5 @@
-import {SDK} from "@ringcentral/sdk";
-import {Subscriptions} from "@ringcentral/subscriptions";
+import {SDK} from '@ringcentral/sdk';
+import {Subscriptions} from '@ringcentral/subscriptions';
 
 const sdk = new SDK({
     appKey: 'foo',

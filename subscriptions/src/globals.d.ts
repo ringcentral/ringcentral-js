@@ -1,4 +1,4 @@
-import * as subscriptions from "./Subscriptions";
+import * as subscriptions from './Subscriptions';
 
 //FIXME https://github.com/Microsoft/TypeScript/issues/20990
 export as namespace RingCentral;

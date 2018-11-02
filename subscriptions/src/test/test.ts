@@ -65,7 +65,9 @@ export function subscribeOnPresence(id = '1', detailed = false) {
     const date = new Date();
 
     apiCall('POST', '/restapi/v1.0/subscription', {
-        eventFilters: [`/restapi/v1.0/account/~/extension/${id}/presence${detailed ? '?detailedTelephonyState=true' : ''}`],
+        eventFilters: [
+            `/restapi/v1.0/account/~/extension/${id}/presence${detailed ? '?detailedTelephonyState=true' : ''}`
+        ],
         expirationTime: new Date(date.getTime() + 15 * 60 * 60 * 1000).toISOString(),
         deliveryMode: {
             transportType: 'PubNub',

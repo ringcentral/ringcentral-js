@@ -1,13 +1,11 @@
-import {expect, SDK, spy} from "./test/test";
+import {expect, SDK, spy} from './test/test';
 
 describe('RingCentral', () => {
-
     const test = async (suite, server) => {
-
         suite.timeout(10000); // Per SLA should be 3 seconds
 
         const sdk = new SDK({
-            server: server,
+            server,
             clientId: '',
             clientSecret: ''
         });
@@ -16,24 +14,21 @@ describe('RingCentral', () => {
 
         await sdk.cache().clean();
 
-        expect(res.json().uri).to.equal(server + '/restapi/v1.0');
-
+        expect(res.json().uri).to.equal(`${server}/restapi/v1.0`);
     };
 
-    it('connects to sandbox', function() {
+    it('connects to sandbox', async function theTest() {
         return test(this, SDK.server.sandbox);
     });
 
-    it('connects to production', function() {
+    it('connects to production', async function theTest() {
         return test(this, SDK.server.production);
     });
 
     describe('handleLoginRedirect', () => {
-
         const sdk = new SDK();
 
         it('handles hash', () => {
-
             const s = spy();
 
             const win = {
@@ -45,11 +40,9 @@ describe('RingCentral', () => {
 
             expect(s.getCalls()[0].args[0]).to.deep.equal({RCAuthorizationResponse: '#foo'});
             expect(s.getCalls()[0].args[1]).to.equal('foo');
-
         });
 
         it('handles query', () => {
-
             const s = spy();
 
             const win = {
@@ -61,9 +54,6 @@ describe('RingCentral', () => {
 
             expect(s.getCalls()[0].args[0]).to.deep.equal({RCAuthorizationResponse: '?foo'});
             expect(s.getCalls()[0].args[1]).to.equal('foo');
-
         });
-
     });
-
 });

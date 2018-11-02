@@ -42,7 +42,12 @@ export default class Subscription extends EventEmitter {
     protected _timeout: any = null;
     protected _subscription: SubscriptionData = null;
 
-    constructor({sdk, PubNub, pollInterval = 10 * 1000, renewHandicapMs = 2 * 60 * 1000}: SubscriptionOptionsConstructor) {
+    constructor({
+        sdk,
+        PubNub,
+        pollInterval = 10 * 1000,
+        renewHandicapMs = 2 * 60 * 1000
+    }: SubscriptionOptionsConstructor) {
         super();
 
         this._sdk = sdk;
@@ -54,7 +59,12 @@ export default class Subscription extends EventEmitter {
     subscribed() {
         const subscription = this.subscription();
 
-        return !!(subscription.id && subscription.deliveryMode && subscription.deliveryMode.subscriberKey && subscription.deliveryMode.address);
+        return !!(
+            subscription.id &&
+            subscription.deliveryMode &&
+            subscription.deliveryMode.subscriberKey &&
+            subscription.deliveryMode.address
+        );
     }
 
     alive() {
