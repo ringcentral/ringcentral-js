@@ -17,9 +17,6 @@ const delay = (timeout): Promise<any> =>
     });
 
 export default class Platform extends EventEmitter {
-    static _tokenEndpoint = '/restapi/oauth/token';
-    static _revokeEndpoint = '/restapi/oauth/revoke';
-    static _authorizeEndpoint = '/restapi/oauth/authorize';
     static _cacheId = 'platform';
 
     events = {
@@ -47,6 +44,9 @@ export default class Platform extends EventEmitter {
     private _client: Client;
     private _refreshPromise: Promise<any>;
     private _auth: Auth;
+    private _tokenEndpoint;
+    private _revokeEndpoint;
+    private _authorizeEndpoint;
 
     constructor({
         server,
@@ -60,7 +60,10 @@ export default class Platform extends EventEmitter {
         externals,
         cache,
         client,
-        refreshHandicapMs
+        refreshHandicapMs,
+        tokenEndpoint = '/restapi/oauth/token',
+        revokeEndpoint = '/restapi/oauth/revoke',
+        authorizeEndpoint = '/restapi/oauth/authorize'
     }: PlatformOptionsConstructor) {
         super();
 
@@ -83,6 +86,9 @@ export default class Platform extends EventEmitter {
             cacheId: Platform._cacheId,
             refreshHandicapMs
         });
+        this._tokenEndpoint = tokenEndpoint;
+        this._revokeEndpoint = revokeEndpoint;
+        this._authorizeEndpoint = authorizeEndpoint;
     }
 
     auth() {
@@ -112,7 +118,7 @@ export default class Platform extends EventEmitter {
 
     loginUrl({implicit, redirectUri, state, brandId = '', display = '', prompt = ''}: LoginUrlOptions) {
         return this.createUrl(
-            `${Platform._authorizeEndpoint}?${qs.stringify({
+            `${this._authorizeEndpoint}?${qs.stringify({
                 response_type: implicit ? 'token' : 'code',
                 redirect_uri: redirectUri || this._redirectUri,
                 client_id: this._clientId,
@@ -278,14 +284,15 @@ export default class Platform extends EventEmitter {
                     body.grant_type = 'authorization_code';
                     body.code = code;
                     body.redirect_uri = redirectUri || this._redirectUri;
-                    //body.client_id = this.getCredentials().key; // not needed
+                    // body.client_secret = this._clientSecret;
+                    // body.client_id = this._clientId; // not needed
                 }
 
                 if (endpointId) body.endpoint_id = endpointId;
                 if (accessTokenTtl) body.accessTokenTtl = accessTokenTtl;
                 if (refreshTokenTtl) body.refreshTokenTtl = refreshTokenTtl;
 
-                apiResponse = await this._tokenRequest(Platform._tokenEndpoint, body);
+                apiResponse = await this._tokenRequest(this._tokenEndpoint, body);
 
                 json = apiResponse.json();
             }
@@ -316,7 +323,7 @@ export default class Platform extends EventEmitter {
             if (!authData.refresh_token) throw new Error('Refresh token is missing');
             if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
 
-            const res = await this._tokenRequest(Platform._tokenEndpoint, {
+            const res = await this._tokenRequest(this._tokenEndpoint, {
                 grant_type: 'refresh_token',
                 refresh_token: authData.refresh_token,
                 access_token_ttl: authData.expires_in + 1,
@@ -366,9 +373,11 @@ export default class Platform extends EventEmitter {
         try {
             this.emit(this.events.beforeLogout);
 
-            const res = await this._tokenRequest(Platform._revokeEndpoint, {
-                token: (await this._auth.data()).access_token
-            });
+            const res = this._revokeEndpoint
+                ? await this._tokenRequest(this._revokeEndpoint, {
+                      token: (await this._auth.data()).access_token
+                  })
+                : null;
 
             await this._cache.clean();
 
@@ -484,13 +493,14 @@ export default class Platform extends EventEmitter {
     }
 
     basicAuthHeader(): string {
+        if (!this._clientSecret) throw new Error('No Client Secret was provided');
         const apiKey = `${this._clientId}:${this._clientSecret}`;
         return `Basic ${typeof btoa === 'function' ? btoa(apiKey) : Buffer.from(apiKey).toString('base64')}`;
     }
 
     async authHeader(): Promise<string> {
         const data = await this._auth.data();
-        return (await data.token_type) + (data.access_token ? ` ${data.access_token}` : '');
+        return (data.token_type || 'Bearer') + (data.access_token ? ` ${data.access_token}` : '');
     }
 }
 
@@ -504,6 +514,9 @@ export interface PlatformOptions extends AuthOptions {
     clearCacheOnRefreshError?: boolean;
     appName?: string;
     appVersion?: string;
+    tokenEndpoint?: string;
+    revokeEndpoint?: string;
+    authorizeEndpoint?: string;
 }
 
 export interface PlatformOptionsConstructor extends PlatformOptions {

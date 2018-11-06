@@ -18,8 +18,17 @@ export interface ApiError extends Error {
     apiResponse?: ApiResponse;
 }
 
+export interface ClientOptions {
+    externals: Externals;
+    defaultRequestInit: CreateRequestOptions;
+}
+
 export default class Client extends EventEmitter {
     static _allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
+    static _defaultRequestInit: CreateRequestOptions = {
+        credentials: 'include',
+        mode: 'cors'
+    };
 
     events = {
         beforeRequest: 'beforeRequest',
@@ -28,10 +37,11 @@ export default class Client extends EventEmitter {
     };
 
     private _externals: Externals;
+    private _defaultRequestInit: CreateRequestOptions = {};
 
-    constructor(externals: Externals) {
+    constructor({externals, defaultRequestInit = {}}: ClientOptions) {
         super();
-
+        this._defaultRequestInit = defaultRequestInit;
         this._externals = externals;
     }
 
@@ -82,7 +92,8 @@ export default class Client extends EventEmitter {
         return e;
     }
 
-    createRequest(init: CreateRequestOptions = {}): Request {
+    createRequest(init: CreateRequestOptions = Client._defaultRequestInit): Request {
+        init = {...this._defaultRequestInit, ...init};
         init.headers = init.headers || {};
 
         // Sanity checks

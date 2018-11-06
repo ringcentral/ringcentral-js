@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Core &mdash; RingCentral&trade; Platform</title>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap-theme.css">
+    <link rel="stylesheet" href="common.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>
+        <a href="index.html" id="logo"></a>
+    </h1>
+
+    <hr>
+
+    <div id="login">
+
+        <form class="panel panel-default form-horizontal">
+            <div class="panel-heading"><h3 class="panel-title">Single Sign On (SS) &mdash; 3-legged OAuth Popup</h3>
+            </div>
+            <div class="panel-body">
+
+                <p>In order to use this demo your application must have:</p>
+
+                <ol>
+                    <li>Appropriate permissions</li>
+                    <li><strong>REDIRECT_URI</strong> that strictly matches this one
+                        <strong><a href="#" id="redirectUri"></a></strong></li>
+                </ol>
+
+                <div class="form-group">
+                    <label for="clientId" class="col-xs-2 control-label">FB Client ID</label>
+
+                    <div class="col-xs-10">
+                        <input type="text" class="form-control" id="clientId" placeholder="APP Key" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="clientSecret" class="col-xs-2 control-label">FB Client Secret</label>
+
+                    <div class="col-xs-10">
+                        <input type="text" class="form-control" id="clientSecret" placeholder="APP Key" required>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-footer text-center">
+                <button id="authorizeCode" class="btn btn-primary">Authorization Code</button>
+                <button id="authorizeImplicit" class="btn btn-primary">Implicit Grant</button>
+            </div>
+        </form>
+
+    </div>
+
+    <div id="welcome">
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><h3 class="panel-title">You are now logged in</h3></div>
+            <div class="panel-body">
+                <pre id="user-info"></pre>
+            </div>
+            <div class="panel-footer text-center">
+                <a href="#" id="logout" class="btn btn-danger">Logout</a>
+                <a href="index.html" class="btn btn-primary">Go to index</a>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <p class="text-center text-muted">
+        &copy; 1999 &ndash; <span id="date"></span> RingCentral&trade;, Inc. All rights reserved.
+        <script> document.getElementById('date').innerHTML = (new Date()).getFullYear().toString(); </script>
+    </p>
+
+</div>
+
+<script type="text/javascript">
+    window.fetch = null; // force to use polyfill
+</script>
+<script type="text/javascript" src="../node_modules/whatwg-fetch/dist/fetch.umd.js"></script>
+<script type="text/javascript" src="../node_modules/es6-promise/dist/es6-promise.auto.js"></script>
+<script src="../node_modules/@ringcentral/sdk/dist/ringcentral.js" type="text/javascript"></script>
+<script src="scripts.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    (function() {
+
+        var sdk;
+        var platform;
+        var REDIRECT_URI = window.location.origin + '/src/oauth/redirect.html';
+
+        var clientIdField = document.getElementById('clientId');
+        var clientSecretField = document.getElementById('clientSecret');
+
+        var onChange = function() {
+            localStorage.setItem('ringcentral-demo-fbClientId', clientIdField.value.trim());
+            localStorage.setItem('ringcentral-demo-fbClientSecret', clientSecretField.value.trim());
+            createSDK();
+        };
+
+        clientIdField.value = localStorage.getItem('ringcentral-demo-fbClientId');
+        clientIdField.onchange = onChange;
+        clientSecretField.onchange = onChange;
+        clientSecretField.value =  localStorage.getItem('ringcentral-demo-fbClientSecret');
+
+        function createSDK() {
+            // https://developers.facebook.com/docs/facebook-login/access-tokens/refreshing/
+            // https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/#exchangecode
+            sdk = new RingCentral.sdk.SDK({
+                server: 'https://graph.facebook.com',
+                authorizeEndpoint: 'https://facebook.com/v3.2/dialog/oauth',
+                tokenEndpoint: '/v3.2/oauth/access_token',
+                revokeEndpoint: null,
+                clientId: clientIdField.value,
+                clientSecret: clientSecretField.value,
+                redirectUri: REDIRECT_URI,
+                defaultRequestInit: {credentials: 'omit'}
+            });
+
+            platform = sdk.platform();
+        }
+
+        createSDK();
+
+        document.getElementById('redirectUri').innerText = REDIRECT_URI;
+        document.getElementById('redirectUri').href = REDIRECT_URI;
+
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('welcome').style.display = 'none';
+
+        function showLogin(e) {
+
+            console.error('Error during automatic login', e);
+
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('login').style.display = '';
+
+        }
+
+        function showWelcome() {
+
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('welcome').style.display = '';
+
+            platform.get('/v3.2/me', {fields: 'id,name'})
+                    .then(function(res) {
+                        document.getElementById('user-info').innerText = JSON.stringify(res.json());
+                    })
+                    .catch(function(e) {
+                        console.error(e);
+                    });
+
+        }
+
+        function show3leggedLogin(implicit) {
+
+            platform
+                    .loginWindow({
+                        url: platform.loginUrl({implicit: implicit, display: 'popup'})
+                    })
+                    .then(platform.login.bind(platform))
+                    .then(showWelcome)
+                    .catch(function(e) {
+                        console.error(e.stack || e.message);
+                        alert('Auth error\n\n' + e.message);
+                    });
+
+        }
+
+        document.getElementById('logout').addEventListener('click', function logout(e) {
+
+            platform.logout().then(function() {
+                location.reload();
+            }).catch(function(e) {
+                alert(e.message);
+            })
+
+        });
+
+        document.getElementById('authorizeCode').addEventListener('click', function authorize(e) {
+            show3leggedLogin(false);
+        });
+
+        document.getElementById('authorizeImplicit').addEventListener('click', function authorize(e) {
+            show3leggedLogin(true);
+        });
+
+        platform.ensureLoggedIn().then(showWelcome).catch(showLogin);
+
+    })();
+
+</script>
+
+</body>
+</html>

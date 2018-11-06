@@ -18,12 +18,12 @@ export default class ApiResponse {
     static _unauthorizedStatus = 401;
     static _rateLimitStatus = 429;
 
-    _externals: Externals;
-    _request: Request;
-    _response: Response;
-    _text: string;
-    _json: any = null;
-    _multipart: ApiResponse[] = [];
+    private _externals: Externals;
+    private _request: Request;
+    private _response: Response;
+    private _text: string;
+    private _json: any = null;
+    private _multipart: ApiResponse[] = [];
 
     constructor({externals, request, response = null, responseText = ''}: ApiResponseOptions) {
         this._externals = externals;

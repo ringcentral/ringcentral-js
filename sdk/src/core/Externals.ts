@@ -13,22 +13,12 @@ export interface ExternalsOptions {
     localStorage?: Storage;
 }
 
-let storage = null;
-
-const getStorage = () => {
-    if (typeof root.localStorage !== 'undefined') return root.localStorage;
-    if (storage) return storage;
-    const DomStorage = require('dom-storage');
-    storage = new DomStorage(null, {strict: true});
-    return storage;
-};
-
 export default class Externals implements ExternalsOptions {
     fetch = root.fetch;
     Request = root.Request;
     Response = root.Response;
     Headers = root.Headers;
-    localStorage = getStorage();
+    localStorage = root.localStorage;
 
     constructor({
         fetch: fetchImpl,
