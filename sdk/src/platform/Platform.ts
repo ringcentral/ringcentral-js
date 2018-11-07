@@ -113,16 +113,19 @@ export default class Platform extends EventEmitter {
         return `${path + (path.indexOf('?') > -1 ? '&' : '?')}access_token=${(await this._auth.data()).access_token}`;
     }
 
-    loginUrl({implicit, redirectUri, state, brandId = '', display = '', prompt = ''}: LoginUrlOptions) {
+    loginUrl({implicit, state, brandId, display, prompt, uiOptions, uiLocales, localeId}: LoginUrlOptions) {
         return this.createUrl(
             `${this._authorizeEndpoint}?${qs.stringify({
                 response_type: implicit ? 'token' : 'code',
-                redirect_uri: redirectUri || this._redirectUri,
+                redirect_uri: this._redirectUri,
                 client_id: this._clientId,
                 state,
                 brand_id: brandId,
                 display,
-                prompt
+                prompt,
+                ui_options: uiOptions,
+                ui_locales: uiLocales,
+                localeId
             })}`,
             {addServer: true}
         );
@@ -241,10 +244,8 @@ export default class Platform extends EventEmitter {
         password,
         extension = '',
         code,
-        redirectUri,
-        endpointId,
-        accessTokenTtl,
-        refreshTokenTtl,
+        access_token_ttl,
+        refresh_token_ttl,
         access_token,
         ...options
     }: LoginOptions): Promise<Response> {
@@ -265,16 +266,14 @@ export default class Platform extends EventEmitter {
                     body.password = password;
                     body.extension = extension;
                 } else if (code) {
+                    //@see https://developers.ringcentral.com/legacy-api-reference/index.html#!#RefAuthorizationCodeFlow
                     body.grant_type = 'authorization_code';
                     body.code = code;
-                    body.redirect_uri = redirectUri || this._redirectUri;
-                    // body.client_secret = this._clientSecret;
-                    // body.client_id = this._clientId; // not needed
+                    body.redirect_uri = this._redirectUri;
                 }
 
-                if (endpointId) body.endpoint_id = endpointId;
-                if (accessTokenTtl) body.accessTokenTtl = accessTokenTtl;
-                if (refreshTokenTtl) body.refreshTokenTtl = refreshTokenTtl;
+                if (access_token_ttl) body.access_token_ttl = access_token_ttl;
+                if (refresh_token_ttl) body.refresh_token_ttl = refresh_token_ttl;
 
                 response = await this._tokenRequest(this._tokenEndpoint, body);
 
@@ -525,20 +524,34 @@ export interface LoginOptions {
     password?: string;
     extension?: string;
     code?: string;
-    redirectUri?: string;
-    endpointId?: string;
-    accessTokenTtl?: number;
-    refreshTokenTtl?: number;
     access_token?: string;
+    access_token_ttl?: number;
+    refresh_token_ttl?: number;
 }
 
 export interface LoginUrlOptions {
-    redirectUri?: string; // Overrides default RedirectURI
     state?: string;
     brandId?: string;
-    display?: string;
-    prompt?: string;
+    display?: LoginUrlDisplay | string;
+    prompt?: LoginUrlPrompt | string;
     implicit?: boolean;
+    uiOptions?: string;
+    uiLocales?: string;
+    localeId?: string;
+}
+
+export enum LoginUrlPrompt {
+    login = 'login',
+    sso = 'sso',
+    consent = 'consent',
+    none = 'none'
+}
+
+export enum LoginUrlDisplay {
+    page = 'page',
+    popup = 'popup',
+    touch = 'touch',
+    mobile = 'mobile'
 }
 
 export interface CreateUrlOptions {

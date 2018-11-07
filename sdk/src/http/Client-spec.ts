@@ -173,7 +173,7 @@ describe('RingCentral.http.Client', () => {
                 expect((await multipart[0].json()).foo).to.be.equal('bar');
                 expect(multipart[0].status).to.be.equal(200);
 
-                expect(sdk.client().error(multipart[1])).to.be.not.equal(null);
+                expect(sdk.client().error(multipart[1])).to.be.not.equal(null); //FIXME
 
                 expect((await multipart[2].json()).baz).to.be.equal('qux');
                 expect(multipart[2].status).to.be.equal(200);

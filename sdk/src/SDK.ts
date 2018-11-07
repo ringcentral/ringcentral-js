@@ -18,6 +18,7 @@ export {
     Externals,
     LoginOptions,
     LoginUrlOptions,
+    LoginWindowOptions,
     CreateUrlOptions,
     SendOptions,
     AuthData,

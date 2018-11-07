@@ -6,9 +6,10 @@ This document contains only major functionality changes in certain versions. Min
 
 - SDK was separated into 2 packages: `@ringcentral/sdk` and `@ringcentral/subscriptions`
 - `appKey` and `appSecret` were replaced with `clientId` and `clientSecret`
-- Added async implementation of `Storage`
+- Async implementation of `Storage`
 - Platform method `createUrl('xxx', {addToken: true})` has been extracted as separate async method `signUrl('xxx')`
 - `ApiResponse` class was removed, all methods return plain `Response` which can be worked on using `Client`
+- Bower was discontinued
 
 ## 3.0
 

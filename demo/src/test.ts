@@ -2,8 +2,8 @@ import {SDK} from '@ringcentral/sdk';
 import {Subscriptions} from '@ringcentral/subscriptions';
 
 const sdk = new SDK({
-    appKey: 'foo',
-    appSecret: 'foo',
+    clientId: 'foo',
+    clientSecret: 'foo',
     server: SDK.server.production
 });
 

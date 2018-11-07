@@ -61,9 +61,8 @@ describe('RingCentral.platform.Platform', () => {
 
                 await platform.login({
                     code: 'foo',
-                    endpointId: 'xxx',
-                    accessTokenTtl: 100,
-                    refreshTokenTtl: 100
+                    access_token_ttl: 100,
+                    refresh_token_ttl: 100
                 });
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
@@ -421,27 +420,25 @@ describe('RingCentral.platform.Platform', () => {
                 expect(
                     platform.loginUrl({
                         implicit: true,
-                        redirectUri: 'foo',
                         state: 'foo',
                         brandId: 'foo',
                         display: 'foo',
                         prompt: 'foo'
                     })
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=token&redirect_uri=foo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo'
+                    'http://whatever/restapi/oauth/authorize?response_type=token&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId='
                 );
 
                 expect(
                     platform.loginUrl({
                         implicit: false,
-                        redirectUri: 'foo',
                         state: 'foo',
                         brandId: 'foo',
                         display: 'foo',
                         prompt: 'foo'
                     })
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=foo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo'
+                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId='
                 );
 
                 expect(
@@ -449,7 +446,7 @@ describe('RingCentral.platform.Platform', () => {
                         implicit: false
                     })
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt='
+                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=&ui_locales=&localeId='
                 );
             })
         );
