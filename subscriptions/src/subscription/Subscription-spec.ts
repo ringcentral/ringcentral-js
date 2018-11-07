@@ -22,9 +22,9 @@ describe('RingCentral.subscription.Subscription', () => {
 
                 const subscription = createSubscription(sdk);
 
-                const res = await subscription.setEventFilters(['foo', 'bar']).register();
+                await subscription.setEventFilters(['foo', 'bar']).register();
 
-                expect(res.json().expiresIn).to.equal(quickExpiresIn);
+                expect(subscription.subscription().expiresIn).to.equal(quickExpiresIn);
 
                 await new Promise((resolve, reject) => {
                     subscription.on(subscription.events.automaticRenewError, e => {
@@ -47,9 +47,9 @@ describe('RingCentral.subscription.Subscription', () => {
 
                 const subscription = createSubscription(sdk);
 
-                const res = await subscription.setEventFilters(['foo', 'bar']).register();
+                await subscription.setEventFilters(['foo', 'bar']).register();
 
-                expect(res.json().expiresIn).to.equal(quickExpiresIn);
+                expect(subscription.subscription().expiresIn).to.equal(quickExpiresIn);
 
                 await new Promise((resolve, reject) => {
                     subscription.on(subscription.events.automaticRenewError, e => {
@@ -97,8 +97,8 @@ describe('RingCentral.subscription.Subscription', () => {
 
                 const s = createSubscription(sdk).setEventFilters(['foo', 'bar']);
 
-                const res = await s.resubscribe();
-                expect(res.json().expiresIn).to.equal(expiresIn);
+                await s.resubscribe();
+                expect(s.subscription().expiresIn).to.equal(expiresIn);
                 s.reset();
             })
         );

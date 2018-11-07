@@ -156,7 +156,7 @@ describe('RingCentral.platform.Platform', () => {
                 const res = await platform.get(path);
 
                 expect(refreshSpy.calledOnce).to.be.true;
-                expect(res.json()).to.deep.equal(response);
+                expect(await res.json()).to.deep.equal(response);
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
             })
         );
@@ -195,7 +195,7 @@ describe('RingCentral.platform.Platform', () => {
                 expect(e.message).to.equal('expected');
                 expect(e.retryAfter).to.equal(10);
 
-                expect(res.json()).to.deep.equal(response);
+                expect(await res.json()).to.deep.equal(response);
             })
         );
 
@@ -304,11 +304,13 @@ describe('RingCentral.platform.Platform', () => {
 
                 await platform.auth().cancelAccessToken();
 
-                const res = (await Promise.all([
-                    platform.get('/restapi/v1.0/foo/1'),
-                    platform.get('/restapi/v1.0/foo/2'),
-                    platform.get('/restapi/v1.0/foo/3')
-                ])).map(r => r.json());
+                const res = await Promise.all(
+                    (await Promise.all([
+                        platform.get('/restapi/v1.0/foo/1'),
+                        platform.get('/restapi/v1.0/foo/2'),
+                        platform.get('/restapi/v1.0/foo/3')
+                    ])).map(r => r.json())
+                );
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
                 expect(res[0].increment).to.equal(1);
@@ -330,8 +332,7 @@ describe('RingCentral.platform.Platform', () => {
                     apiCall(method, path, {foo: 'bar'});
 
                     const res = await platform[method](path);
-                    expect(res.request().method).to.equal(method.toUpperCase());
-                    expect(res.json().foo).to.equal('bar');
+                    expect((await res.json()).foo).to.equal('bar');
                 };
 
                 await test('get');

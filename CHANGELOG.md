@@ -8,6 +8,7 @@ This document contains only major functionality changes in certain versions. Min
 - `appKey` and `appSecret` were replaced with `clientId` and `clientSecret`
 - Added async implementation of `Storage`
 - Platform method `createUrl('xxx', {addToken: true})` has been extracted as separate async method `signUrl('xxx')`
+- `ApiResponse` class was removed, all methods return plain `Response` which can be worked on using `Client`
 
 ## 3.0
 

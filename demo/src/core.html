@@ -60,9 +60,10 @@
             function getExtension(cb) {
 
                 platform.get('/account/~/extension/~')
-                    .then(function(ajax) {
-                        cb(ajax.json());
+                    .then(function(response) {
+                        return response.json();
                     })
+                    .then(cb)
                     .catch(function(e) {
                         console.error(e);
                     });
@@ -72,9 +73,9 @@
             function getPresence(cb) {
 
                 platform.get('/account/~/extension/~/presence', {query: {detailedTelephonyState: true}})
-                    .then(function(ajax) {
-                        cb(ajax.json());
-                    }).catch(function(e) {
+                    .then(function(response) {
+                        return response.json();
+                    }).then(cb).catch(function(e) {
                     console.error(e);
                 });
 
@@ -83,8 +84,11 @@
             function getCallLog(cb) {
 
                 platform.get('/account/~/extension/~/call-log')
+                    .then(function(response) {
+                        return response.json();
+                    })
                     .then(function(data) {
-                        cb(data.json().records);
+                        cb(data.records);
                     })
                     .catch(function(e) {
                         console.error(e);
@@ -116,9 +120,12 @@
                 subscription
                     .restore([event])
                     .register()
-                    .then(function(ajax) {
-                        console.log('Subscribed, renews in', Math.ceil(ajax.json().expiresIn / 60));
-                        console.log(ajax);
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(json) {
+                        console.log('Subscribed, renews in', Math.ceil(json.expiresIn / 60));
+                        console.log(json);
                     })
                     .catch(function(e) {
                         console.error(e);

@@ -2,12 +2,12 @@ import EventEmitter from 'events';
 import Cache from './core/Cache';
 import Externals, {ExternalsOptions} from './core/Externals';
 import * as Constants from './core/Constants';
-import Client, {CreateRequestOptions} from './http/Client';
-import ApiResponse from './http/ApiResponse';
+import Client, {ApiError, CreateRequestOptions} from './http/Client';
 import Platform, {
     CreateUrlOptions,
     LoginOptions,
     LoginUrlOptions,
+    LoginWindowOptions,
     PlatformOptions,
     SendOptions
 } from './platform/Platform';
@@ -15,7 +15,6 @@ import {AuthData} from './platform/Auth';
 
 export {
     Cache,
-    ApiResponse,
     Externals,
     LoginOptions,
     LoginUrlOptions,
@@ -78,17 +77,59 @@ export class SDK {
         });
     }
 
-    externals() {
-        return this._externals;
-    }
-
     platform() {
         return this._platform;
+    }
+
+    client() {
+        return this._client;
     }
 
     cache() {
         return this._cache;
     }
+
+    send = async (options: SendOptions): Promise<Response> => this.platform().send(options);
+
+    get = async (url, query?, options?: SendOptions): Promise<Response> =>
+        this.platform().send({method: 'GET', url, query, ...options});
+
+    post = async (url, body?, query?, options?: SendOptions): Promise<Response> =>
+        this.platform().send({method: 'POST', url, query, body, ...options});
+
+    put = async (url, body?, query?, options?: SendOptions): Promise<Response> =>
+        this.platform().send({method: 'PUT', url, query, body, ...options});
+
+    delete = async (url, query?, options?: SendOptions): Promise<Response> =>
+        this.platform().send({method: 'DELETE', url, query, ...options});
+
+    login = async (options: LoginOptions): Promise<Response> => this.platform().login(options);
+
+    ensureLoggedIn = async (): Promise<Response> => this.platform().ensureLoggedIn();
+
+    loginUrl = (options: LoginUrlOptions): string => this.platform().loginUrl(options);
+
+    createUrl = (path, options: CreateUrlOptions): string => this.platform().createUrl(path, options);
+
+    signUrl = async (path): Promise<string> => this.platform().signUrl(path);
+
+    parseLoginRedirect = (url): any => this.platform().parseLoginRedirect(url);
+
+    logout = async (): Promise<Response> => this.platform().logout();
+
+    loginWindow = async (options: LoginWindowOptions): Promise<LoginOptions> => this.platform().loginWindow(options);
+
+    refresh = async (): Promise<Response> => this.platform().refresh();
+
+    multipart = async (response: Response): Promise<Response[]> => this.client().multipart(response);
+
+    getContentType = (response: Response): string => this.client().getContentType(response);
+
+    isMultipart = (response: Response) => this.client().isMultipart(response);
+
+    isJson = (response: Response) => this.client().isJson(response);
+
+    error = (response: Response): Promise<string> => this.client().error(response);
 }
 
 export interface SDKOptions extends PlatformOptions, ExternalsOptions {

@@ -42,7 +42,7 @@
   "preferGlobal": false,
   "private": false,
   "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "types": "./lib/SDK.d.ts",
   "browser": "./dist/ringcentral.js",
   "author": {
     "name": "RingCentral, Inc.",

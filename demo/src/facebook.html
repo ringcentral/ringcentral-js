@@ -94,7 +94,6 @@
     (function() {
 
         var sdk;
-        var platform;
         var REDIRECT_URI = window.location.origin + '/src/oauth/redirect.html';
 
         var clientIdField = document.getElementById('clientId');
@@ -124,8 +123,6 @@
                 redirectUri: REDIRECT_URI,
                 defaultRequestInit: {credentials: 'omit'}
             });
-
-            platform = sdk.platform();
         }
 
         createSDK();
@@ -150,9 +147,12 @@
             document.getElementById('login').style.display = 'none';
             document.getElementById('welcome').style.display = '';
 
-            platform.get('/v3.2/me', {fields: 'id,name'})
+            sdk.get('/v3.2/me', {fields: 'id,name'})
                     .then(function(res) {
-                        document.getElementById('user-info').innerText = JSON.stringify(res.json());
+                        return res.json();
+                    })
+                    .then(function(json) {
+                        document.getElementById('user-info').innerText = JSON.stringify(json);
                     })
                     .catch(function(e) {
                         console.error(e);
@@ -162,11 +162,11 @@
 
         function show3leggedLogin(implicit) {
 
-            platform
+            sdk
                     .loginWindow({
-                        url: platform.loginUrl({implicit: implicit, display: 'popup'})
+                        url: sdk.loginUrl({implicit: implicit, display: 'popup'})
                     })
-                    .then(platform.login.bind(platform))
+                    .then(sdk.login)
                     .then(showWelcome)
                     .catch(function(e) {
                         console.error(e.stack || e.message);
@@ -177,7 +177,7 @@
 
         document.getElementById('logout').addEventListener('click', function logout(e) {
 
-            platform.logout().then(function() {
+            sdk.logout().then(function() {
                 location.reload();
             }).catch(function(e) {
                 alert(e.message);
@@ -193,7 +193,7 @@
             show3leggedLogin(true);
         });
 
-        platform.ensureLoggedIn().then(showWelcome).catch(showLogin);
+        sdk.ensureLoggedIn().then(showWelcome).catch(showLogin);
 
     })();
 

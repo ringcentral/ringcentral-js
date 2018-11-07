@@ -331,20 +331,27 @@ rcsdk.platform()
     })
     .then(function(apiResponse){
 
-        alert(apiResponse.json().name);
+        return apiResponse.json();
+
+    })
+    .then(function(json){
+
+        alert(json.name);
 
     })
     .catch(function(e){
 
-        alert(e.message);
+        if (e.response || e.request) {
 
-        // please note that ajax property may not be accessible if error occurred before AJAX send
-        if (e.apiResponse && e.apiResponse()) {
+            var request = e.request;
+            var response = e.response;
 
-            var request = e.apiResponse().request();
+            alert('API error ' + e.message + ' for URL' + request.url + ' ' + sdk.error(response));
 
-            alert('Ajax error ' + e.message + ' for URL' + request.url + ' ' + e.apiResponse().error());
-
+        } else {
+         
+            alert(e.message);
+   
         }
 
     });
@@ -525,9 +532,9 @@ function create(unsavedRingout) {
 
     platform
         .post('/restapi/v1.0/account/~/extension/~/ringout', unsavedRingout)
-        .then(function(response) {
+        .then(function(response) { return response.json() })
+        .then(function(ringout) {
 
-            ringout = response.json();
             console.info('First status:', ringout.status.callStatus);
             update();
 
@@ -550,9 +557,9 @@ function update() {
 
         platform
             .get(ringout.uri)
-            .then(function(response) {
-
-                ringout = response.json();
+            .then(function(response) { return response.json() })
+            .then(function(ringout) {
+                
                 console.info('Current status:', ringout.status.callStatus);
                 update();
 
@@ -620,8 +627,10 @@ First, you need to load the initial Presence status (you can use Underscore or L
 var accountPresence = {};
 
 rcsdk.platform()
-    .get('/restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true').then(function(response) {
-        _.extend(accountPresence, response.json());
+    .get('/restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true')
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        _.extend(accountPresence, data);
     })
     .catch(function(e) {
         alert('Load Presence Error: ' + e.message);
@@ -651,8 +660,9 @@ return subscription;
 ```js
 rcsdk.platform()
     .get('/restapi/v1.0/account/~/extension/~/active-calls', {query: {page: 1, perPage: 10}})
-    .then(function(response) {
-        activeCalls = response.json().records;
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        activeCalls = data.records;
     })
     .catch(function(e) {
         alert('Active Calls Error: ' + e.message);
@@ -664,8 +674,9 @@ rcsdk.platform()
 ```js
 rcsdk.platform()
     .get('/restapi/v1.0/account/~/extension/~/call-log', {query: {page: 1, perPage: 10}})
-    .then(function(response) {
-        calls = response.json().records;
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        calls = data.records;
     })
     .catch(function(e) {
         alert('Recent Calls Error: ' + e.message);
@@ -688,8 +699,9 @@ rcsdk.platform()
         ],
         text: 'Message content'
     })
-    .then(function(response) {
-        alert('Success: ' + response.json().id);
+    .then(function(response) { return response.json(); })
+    .then(function(json) {
+        alert('Success: ' + json.id);
     })
     .catch(function(e) {
         alert('Error: ' + e.message);
@@ -765,8 +777,9 @@ In order to identify the MMS-Enabled phone numbers on an extension, simply make 
 var mmsEnabledNumbers = [];
     platform
         .get('/restapi/v1.0/account/~/extension/~/phone-number', {'perPage': 'max'})
-        .then(function(res) {
-            var phoneNumbers = res.json().records;
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            var phoneNumbers = data.records;
             for (var i = 0; i < phoneNumbers.length; i++ ) {
                 if (phoneNumbers[i].features.indexOf("MmsSender") != -1 ) {
                     mmsEnabledNumbers.push(phoneNumbers[i].phoneNumber);

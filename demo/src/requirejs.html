@@ -54,11 +54,12 @@
         var subscription = new Subscriptions({sdk: sdk});
 
         sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true})
-                .then(function(apiResponse) {
+                .then(function(apiResponse) { return apiResponse.json(); })
+                .then(function(data) {
 
                     document.getElementById('report').innerHTML = [
                         'RingCentral version: ' + SDK.version,
-                        'API version: ' + apiResponse.json().versionString,
+                        'API version: ' + data.versionString,
                         'PUBNUB version: ' + subscription.getPubNub().toString(),
                         'Promise native: ' + (Promise.toString().trim() == 'function Promise() { [native code] }'),
                         'Fetch native: ' + (sdk.externals().fetch.toString().trim() == 'function fetch() { [native code] }'),

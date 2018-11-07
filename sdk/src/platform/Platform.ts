@@ -1,6 +1,5 @@
 import EventEmitter from 'events';
 import * as qs from 'querystring';
-import ApiResponse from '../http/ApiResponse';
 import Auth, {AuthOptions} from './Auth';
 import * as Constants from '../core/Constants';
 import Cache from '../core/Cache';
@@ -15,6 +14,8 @@ const delay = (timeout): Promise<any> =>
             resolve(null);
         }, timeout);
     });
+
+const getParts = (url, separator) => url.split(separator).reverse()[0];
 
 export default class Platform extends EventEmitter {
     static _cacheId = 'platform';
@@ -95,10 +96,6 @@ export default class Platform extends EventEmitter {
         return this._auth;
     }
 
-    client() {
-        return this._client;
-    }
-
     createUrl(path = '', options: CreateUrlOptions = {}) {
         let builtUrl = '';
         const hasHttp = path.indexOf('http://') !== -1 || path.indexOf('https://') !== -1;
@@ -136,10 +133,6 @@ export default class Platform extends EventEmitter {
      * @return {Object}
      */
     parseLoginRedirect(url) {
-        function getParts(url, separator) {
-            return url.split(separator).reverse()[0];
-        }
-
         const response =
             (url.indexOf('#') === 0 && getParts(url, '#')) || (url.indexOf('?') === 0 && getParts(url, '?')) || null;
 
@@ -164,15 +157,6 @@ export default class Platform extends EventEmitter {
      * Convenience method to handle 3-legged OAuth
      *
      * Attention! This is an experimental method and it's signature and behavior may change without notice.
-     *
-     * @param {string} url
-     * @param {number} [width]
-     * @param {number} [height]
-     * @param {object} [login] additional options for login()
-     * @param {string} [origin]
-     * @param {string} [property] name of window.postMessage's event data property
-     * @param {string} [target] target for window.open()
-     * @return {Promise}
      */
     loginWindow({
         url,
@@ -181,7 +165,7 @@ export default class Platform extends EventEmitter {
         origin = window.location.origin,
         property = Constants.authResponseProperty,
         target = '_blank'
-    }): Promise<LoginOptions> {
+    }: LoginWindowOptions): Promise<LoginOptions> {
         return new Promise((resolve, reject) => {
             if (typeof window === 'undefined') throw new Error('This method can be used only in browser');
 
@@ -263,12 +247,12 @@ export default class Platform extends EventEmitter {
         refreshTokenTtl,
         access_token,
         ...options
-    }: LoginOptions): Promise<ApiResponse> {
+    }: LoginOptions): Promise<Response> {
         try {
             this.emit(this.events.beforeLogin);
 
             const body: any = {};
-            let apiResponse = null;
+            let response = null;
             let json;
 
             if (access_token) {
@@ -292,16 +276,16 @@ export default class Platform extends EventEmitter {
                 if (accessTokenTtl) body.accessTokenTtl = accessTokenTtl;
                 if (refreshTokenTtl) body.refreshTokenTtl = refreshTokenTtl;
 
-                apiResponse = await this._tokenRequest(this._tokenEndpoint, body);
+                response = await this._tokenRequest(this._tokenEndpoint, body);
 
-                json = apiResponse.json();
+                json = await response.clone().json();
             }
 
             await this._auth.setData(json);
 
-            this.emit(this.events.loginSuccess, apiResponse);
+            this.emit(this.events.loginSuccess, response);
 
-            return apiResponse;
+            return response;
         } catch (e) {
             if (this._clearCacheOnRefreshError) await this._cache.clean();
 
@@ -311,7 +295,7 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    private async _refresh(): Promise<ApiResponse> {
+    private async _refresh(): Promise<Response> {
         try {
             this.emit(this.events.beforeRefresh);
 
@@ -330,10 +314,10 @@ export default class Platform extends EventEmitter {
                 refresh_token_ttl: authData.refresh_token_expires_in + 1
             });
 
-            const json = res.json();
+            const json = await res.clone().json();
 
             if (!json.access_token) {
-                throw this._client.makeError(new Error('Malformed OAuth response'), res);
+                throw await this._client.makeError(new Error('Malformed OAuth response'), res);
             }
 
             await this._auth.setData(json);
@@ -352,7 +336,7 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    async refresh(): Promise<ApiResponse> {
+    async refresh(): Promise<Response> {
         if (!this._refreshPromise) {
             this._refreshPromise = (async () => {
                 try {
@@ -369,7 +353,7 @@ export default class Platform extends EventEmitter {
         return this._refreshPromise;
     }
 
-    async logout(): Promise<ApiResponse> {
+    async logout(): Promise<Response> {
         try {
             this.emit(this.events.beforeLogout);
 
@@ -406,7 +390,7 @@ export default class Platform extends EventEmitter {
         return request;
     }
 
-    async sendRequest(request: Request, options: SendOptions = {}): Promise<ApiResponse> {
+    async sendRequest(request: Request, options: SendOptions = {}): Promise<Response> {
         try {
             request = await this.inflateRequest(request, options);
             return await this._client.sendRequest(request);
@@ -414,22 +398,22 @@ export default class Platform extends EventEmitter {
             const {retry, handleRateLimit} = options;
 
             // Guard is for errors that come from polling
-            if (!e.apiResponse || !e.apiResponse.response() || retry) throw e;
+            if (!e.response || retry) throw e;
 
-            const response = e.apiResponse.response();
+            const {response} = e;
             const {status} = response;
 
-            if (status !== ApiResponse._unauthorizedStatus && status !== ApiResponse._rateLimitStatus) throw e;
+            if (status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) throw e;
 
             options.retry = true;
 
             let retryAfter = 0;
 
-            if (status === ApiResponse._unauthorizedStatus) {
+            if (status === Client._unauthorizedStatus) {
                 await this._auth.cancelAccessToken();
             }
 
-            if (status === ApiResponse._rateLimitStatus) {
+            if (status === Client._rateLimitStatus) {
                 const defaultRetryAfter =
                     !handleRateLimit || typeof handleRateLimit === 'boolean' ? 60 : handleRateLimit;
 
@@ -457,29 +441,29 @@ export default class Platform extends EventEmitter {
         return this.sendRequest(this._client.createRequest(options), options);
     }
 
-    async get(url, query?, options?: SendOptions): Promise<ApiResponse> {
+    async get(url, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'GET', url, query, ...options});
     }
 
-    async post(url, body?, query?, options?: SendOptions): Promise<ApiResponse> {
+    async post(url, body?, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'POST', url, query, body, ...options});
     }
 
-    async put(url, body?, query?, options?: SendOptions): Promise<ApiResponse> {
+    async put(url, body?, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'PUT', url, query, body, ...options});
     }
 
-    async delete(url, query?, options?: SendOptions): Promise<ApiResponse> {
+    async delete(url, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'DELETE', url, query, ...options});
     }
 
-    async ensureLoggedIn(): Promise<ApiResponse | null> {
+    async ensureLoggedIn(): Promise<Response | null> {
         if (await this._auth.accessTokenValid()) return null;
         await this.refresh();
         return null;
     }
 
-    protected async _tokenRequest(url, body): Promise<ApiResponse> {
+    protected async _tokenRequest(url, body): Promise<Response> {
         return this.send({
             url,
             body,
@@ -487,7 +471,7 @@ export default class Platform extends EventEmitter {
             method: 'POST',
             headers: {
                 Authorization: this.basicAuthHeader(),
-                'Content-Type': ApiResponse._urlencodedContentType
+                'Content-Type': Client._urlencodedContentType
             }
         });
     }
@@ -560,4 +544,13 @@ export interface LoginUrlOptions {
 export interface CreateUrlOptions {
     addServer?: boolean;
     addMethod?: string;
+}
+
+export interface LoginWindowOptions {
+    url: string;
+    width?: number;
+    height?: number;
+    origin?: string;
+    property?: string;
+    target?: string;
 }

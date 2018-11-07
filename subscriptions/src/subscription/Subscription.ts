@@ -1,5 +1,5 @@
 import PubNubDefault from 'pubnub';
-import {SDK, ApiResponse, EventEmitter} from '@ringcentral/sdk';
+import {SDK, EventEmitter} from '@ringcentral/sdk';
 
 // detect ISO 8601 format string with +00[:00] timezone notations
 const ISO_REG_EXP = /(\+[\d]{2}):?([\d]{2})?$/;
@@ -98,7 +98,7 @@ export default class Subscription extends EventEmitter {
     /**
      * Creates or updates subscription if there is an active one
      */
-    register(): Promise<ApiResponse> {
+    register(): Promise<Response> {
         if (this.alive()) {
             return this.renew();
         }
@@ -125,7 +125,7 @@ export default class Subscription extends EventEmitter {
         return this;
     }
 
-    async subscribe(): Promise<ApiResponse> {
+    async subscribe(): Promise<Response> {
         try {
             this._clearTimeout();
 
@@ -138,7 +138,7 @@ export default class Subscription extends EventEmitter {
                 }
             });
 
-            const json = response.json();
+            const json = await response.json();
 
             this.setSubscription(json).emit(this.events.subscribeSuccess, response);
 
@@ -152,7 +152,7 @@ export default class Subscription extends EventEmitter {
         }
     }
 
-    async renew(): Promise<ApiResponse> {
+    async renew(): Promise<Response> {
         try {
             this._clearTimeout();
 
@@ -164,7 +164,7 @@ export default class Subscription extends EventEmitter {
                 eventFilters: this._getFullEventFilters()
             });
 
-            const json = response.json();
+            const json = await response.json();
 
             this.setSubscription(json).emit(this.events.renewSuccess, response);
 
@@ -178,7 +178,7 @@ export default class Subscription extends EventEmitter {
         }
     }
 
-    async remove(): Promise<ApiResponse> {
+    async remove(): Promise<Response> {
         try {
             if (!this.subscribed()) throw new Error('No subscription');
 
@@ -194,7 +194,7 @@ export default class Subscription extends EventEmitter {
         }
     }
 
-    resubscribe(): Promise<ApiResponse> {
+    resubscribe(): Promise<Response> {
         const filters = this.eventFilters();
         return this.reset()
             .setEventFilters(filters)

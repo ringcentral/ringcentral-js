@@ -93,7 +93,10 @@
             platform
                     .get('/account/~/extension/~/phone-number', {'perPage': 'max'})
                     .then(function(res) {
-                        var phoneNumbers = res.json().records;
+                        return res.json();
+                    })
+                    .then(function(data) {
+                        var phoneNumbers = data.records;
                         for (var i = 0; i < phoneNumbers.length; i++ ) {
                             if (phoneNumbers[i].features.indexOf("MmsSender") != -1 ) {
                                 fromPhoneNumbers.push(phoneNumbers[i].phoneNumber);

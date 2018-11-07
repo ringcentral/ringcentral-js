@@ -27,9 +27,12 @@ export default class Auth {
             (await this._cache.getItem(this._cacheId)) || {
                 token_type: '',
                 access_token: '',
+                expire_time: 0,
                 expires_in: 0,
                 refresh_token: '',
-                refresh_token_expires_in: 0
+                refresh_token_expires_in: 0,
+                refresh_token_expire_time: 0,
+                scope: ''
             }
         );
     }
@@ -73,7 +76,6 @@ export default class Auth {
 }
 
 export interface AuthData {
-    remember?: boolean;
     token_type?: string;
     access_token?: string;
     expires_in?: number; // actually it's string
