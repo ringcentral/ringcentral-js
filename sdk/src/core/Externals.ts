@@ -15,9 +15,13 @@ export interface ExternalsOptions {
 
 export default class Externals implements ExternalsOptions {
     fetch = root.fetch;
+
     Request = root.Request;
+
     Response = root.Response;
+
     Headers = root.Headers;
+
     localStorage = root.localStorage;
 
     constructor({

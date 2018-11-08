@@ -1,6 +1,12 @@
 import React from 'react';
 import {SDK} from '@ringcentral/sdk';
 
+function getDisplayName(WrappedComponent) {
+    return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+}
+
+const delay = () => new Promise(res => setImmediate(res));
+
 export interface AuthGateState {
     isAuthorized: boolean;
     authorizing: boolean;
@@ -20,13 +26,18 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
         authError: null
     };
 
-    async componentWillMount() {
+    /**
+     * purposely going through antipattern because we can't cancel promises for now
+     * we still cancel subscriptions etc., but we can't guarantee when storage promises will resolve
+     * @type {boolean}
+     */
+    mounted = false;
+
+    async componentDidMount() {
+        this.mounted = true;
         try {
-            const platform = this.props.sdk.platform();
-            this.before();
-            this.setState({
-                isAuthorized: await platform.auth().accessTokenValid()
-            });
+            const {sdk, ensure} = this.props;
+            const platform = sdk.platform();
 
             platform.on(platform.events.beforeRefresh, this.before);
             platform.on(platform.events.beforeLogin, this.before);
@@ -36,7 +47,9 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
             platform.on(platform.events.loginSuccess, this.success);
             platform.on(platform.events.refreshSuccess, this.success);
 
-            if (this.props.ensure) await platform.ensureLoggedIn();
+            if (ensure) {
+                await platform.ensureLoggedIn();
+            }
 
             await this.updateState();
         } catch (e) {
@@ -45,7 +58,9 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
     }
 
     componentWillUnmount() {
-        const platform = this.props.sdk.platform();
+        this.mounted = false;
+        const {sdk} = this.props;
+        const platform = sdk.platform();
         platform.removeListener(platform.events.beforeRefresh, this.before);
         platform.removeListener(platform.events.beforeLogin, this.before);
         platform.removeListener(platform.events.refreshError, this.error);
@@ -55,48 +70,43 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
         platform.removeListener(platform.events.refreshSuccess, this.success);
     }
 
-    before() {
-        return this.setState({authorizing: true});
-    }
+    before = () => this.mounted && this.setState({authorizing: true});
 
-    async error(e) {
-        return this.updateState(e);
-    }
+    error = async e => this.updateState(e);
 
-    async success() {
-        return this.updateState(null);
-    }
+    success = async () => this.updateState(null);
 
-    loginUrl = async options => {
-        const platform = this.props.sdk.platform();
-        return platform.loginUrl(options);
-    };
+    loginUrl = options => this.props.sdk.platform().loginUrl(options);
 
     logout = async () => {
         const platform = this.props.sdk.platform();
         return platform.logout();
     };
 
-    async parseRedirect(search) {
+    parseRedirect = async search => {
         try {
             const platform = this.props.sdk.platform();
             const loginOptions = platform.parseLoginRedirect(search);
             if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization information');
             return platform.login(loginOptions);
         } catch (e) {
-            this.error(e);
+            await this.error(e);
             throw e;
         }
-    }
+    };
 
-    async updateState(authError = null) {
-        const platform = this.props.sdk.platform();
-        return this.setState({
-            isAuthorized: await platform.auth().accessTokenValid(),
-            authorizing: false,
-            authError
-        });
-    }
+    updateState = async (authError = null) => {
+        await delay();
+        this.mounted &&
+            this.setState({
+                isAuthorized: await this.props.sdk
+                    .platform()
+                    .auth()
+                    .accessTokenValid(),
+                authorizing: false,
+                authError
+            });
+    };
 
     render() {
         const {sdk, ensure, children, ...props} = this.props;
@@ -110,8 +120,12 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
     }
 }
 
-export const withAuthGate = ({sdk, ensure = false}: {sdk: SDK; ensure: boolean}) => Cmp => props => (
-    <AuthGate sdk={sdk} ensure={ensure}>
-        {renderProps => <Cmp {...props} {...renderProps} />}
-    </AuthGate>
-);
+export const withAuthGate = ({sdk, ensure = false}: {sdk: SDK; ensure?: boolean}) => Cmp => {
+    const WrappedCmp = props => (
+        <AuthGate sdk={sdk} ensure={ensure}>
+            {renderProps => <Cmp {...props} {...renderProps} />}
+        </AuthGate>
+    );
+    WrappedCmp.displayName = `withAuthGate(${getDisplayName(Cmp)})`;
+    return WrappedCmp;
+};

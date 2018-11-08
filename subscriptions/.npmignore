@@ -1,0 +1,5 @@
+.cache
+.nyc_output
+coverage
+mocha.opts
+webpack.config.js

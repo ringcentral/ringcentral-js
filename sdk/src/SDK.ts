@@ -33,8 +33,11 @@ export const setDefaultExternals = (externals: ExternalsOptions) => (defaultExte
 
 export class SDK {
     private _externals: Externals;
+
     private _cache: Cache;
+
     private _client: Client;
+
     private _platform: Platform;
 
     static version = Constants.version;

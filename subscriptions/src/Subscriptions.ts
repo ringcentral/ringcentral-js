@@ -9,6 +9,7 @@ export {SubscriptionOptions, CachedSubscriptionOptions};
 
 export class Subscriptions {
     private _sdk: SDK;
+
     private _PubNub: any; // typeof PubNub;
 
     constructor({sdk, PubNub = PubNubDefault}: SubscriptionsOptions) {

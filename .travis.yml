@@ -13,13 +13,13 @@ addons:
 
 deploy:
 - provider: script
-  script: bash npm run publish:canary
+  script: bash npm run publish:canary -- --yes
   skip_cleanup: true
   on:
     branch: master
     repo: ringcentral/ringcentral-js
 - provider: script
-  script: bash npm run publish:fromgit
+  script: bash npm run publish:fromgit -- --yes
   skip_cleanup: true
   on:
     tags: true

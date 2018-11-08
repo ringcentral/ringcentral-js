@@ -13,7 +13,9 @@ export interface AuthOptionsConstructor extends AuthOptions {
 
 export default class Auth {
     private _cache: Cache;
+
     private readonly _cacheId: string;
+
     private readonly _refreshHandicapMs: number;
 
     constructor({cache, cacheId, refreshHandicapMs = DEFAULT_RENEW_HANDICAP_MS}: AuthOptionsConstructor) {

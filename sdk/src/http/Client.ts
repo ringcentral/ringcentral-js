@@ -24,15 +24,25 @@ export interface ClientOptions {
 
 export default class Client extends EventEmitter {
     static _contentType = 'Content-Type';
+
     static _jsonContentType = 'application/json';
+
     static _multipartContentType = 'multipart/mixed';
+
     static _urlencodedContentType = 'application/x-www-form-urlencoded';
+
     static _headerSeparator = ':';
+
     static _bodySeparator = '\n\n';
+
     static _boundarySeparator = '--';
+
     static _unauthorizedStatus = 401;
+
     static _rateLimitStatus = 429;
+
     static _allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
+
     static _defaultRequestInit: CreateRequestOptions = {
         credentials: 'include',
         mode: 'cors'
@@ -45,6 +55,7 @@ export default class Client extends EventEmitter {
     };
 
     private _externals: Externals;
+
     private _defaultRequestInit: CreateRequestOptions = {};
 
     constructor({externals, defaultRequestInit = {}}: ClientOptions) {

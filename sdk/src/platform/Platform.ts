@@ -34,19 +34,33 @@ export default class Platform extends EventEmitter {
     };
 
     private _server: string;
+
     private _clientId: string;
+
     private _clientSecret: string;
+
     private _redirectUri: string;
+
     private _refreshDelayMs: number;
+
     private _clearCacheOnRefreshError: boolean;
+
     private _userAgent: string;
+
     private _externals: Externals;
+
     private _cache: Cache;
+
     private _client: Client;
+
     private _refreshPromise: Promise<any>;
+
     private _auth: Auth;
+
     private _tokenEndpoint;
+
     private _revokeEndpoint;
+
     private _authorizeEndpoint;
 
     constructor({
@@ -113,7 +127,7 @@ export default class Platform extends EventEmitter {
         return `${path + (path.indexOf('?') > -1 ? '&' : '?')}access_token=${(await this._auth.data()).access_token}`;
     }
 
-    loginUrl({implicit, state, brandId, display, prompt, uiOptions, uiLocales, localeId}: LoginUrlOptions) {
+    loginUrl({implicit, state, brandId, display, prompt, uiOptions, uiLocales, localeId}: LoginUrlOptions = {}) {
         return this.createUrl(
             `${this._authorizeEndpoint}?${qs.stringify({
                 response_type: implicit ? 'token' : 'code',
@@ -180,13 +194,13 @@ export default class Platform extends EventEmitter {
             const width = window.innerWidth
                 ? window.innerWidth
                 : document.documentElement.clientWidth
-                    ? document.documentElement.clientWidth
-                    : screen.width;
+                ? document.documentElement.clientWidth
+                : screen.width;
             const height = window.innerHeight
                 ? window.innerHeight
                 : document.documentElement.clientHeight
-                    ? document.documentElement.clientHeight
-                    : screen.height;
+                ? document.documentElement.clientHeight
+                : screen.height;
 
             const left = width / 2 - width / 2 + dualScreenLeft;
             const top = height / 2 - height / 2 + dualScreenTop;
@@ -248,7 +262,7 @@ export default class Platform extends EventEmitter {
         refresh_token_ttl,
         access_token,
         ...options
-    }: LoginOptions): Promise<Response> {
+    }: LoginOptions = {}): Promise<Response> {
         try {
             this.emit(this.events.beforeLogin);
 
@@ -431,9 +445,7 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    send(options: SendOptions) {
-        options = options || {};
-
+    send(options: SendOptions = {}) {
         //FIXME https://github.com/bitinn/node-fetch/issues/43
         options.url = this.createUrl(options.url, {addServer: true});
 
@@ -476,8 +488,7 @@ export default class Platform extends EventEmitter {
     }
 
     basicAuthHeader(): string {
-        if (!this._clientSecret) throw new Error('No Client Secret was provided');
-        const apiKey = `${this._clientId}:${this._clientSecret}`;
+        const apiKey = this._clientId + this._clientSecret ? `:${this._clientSecret}` : '';
         return `Basic ${typeof btoa === 'function' ? btoa(apiKey) : Buffer.from(apiKey).toString('base64')}`;
     }
 

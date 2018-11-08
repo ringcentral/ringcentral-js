@@ -1,20 +1,28 @@
 {
   "name": "@ringcentral/react",
-  "version": "4.0.0",
+  "version": "4.0.0-alpha.0",
   "scripts": {
-    "clean": "rimraf dist/* lib/*",
+    "clean": "rimraf dist/* lib/* .cache",
     "build": "npm run clean && npm run build:tsc",
     "build:tsc": "tsc",
     "start": "npm run watch:tsc",
-    "watch:tsc": "npm run build:tsc -- --watch --preserveWatchOutput"
+    "watch:tsc": "npm run build:tsc -- --watch --preserveWatchOutput",
+    "demo": "parcel demo/index.html -p 8080",
+    "prepublishOnly": "npm run build"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@ringcentral/sdk": "^4.0.0",
-    "@ringcentral/sdk-utils": "^4.0.0",
+    "@babel/core": "7.1.5",
+    "@babel/polyfill": "7.0.0",
+    "@babel/runtime": "7.1.5",
+    "@ringcentral/sdk": "^4.0.0-alpha.0",
+    "@ringcentral/sdk-utils": "^4.0.0-alpha.0",
     "@types/react": "^16.4.18",
     "@types/react-dom": "^16.0.9",
+    "@types/react-router-dom": "4.3.1",
+    "parcel-bundler": "1.10.3",
     "react": "16.6.0",
+    "react-dom": "16.6.1",
+    "react-router-dom": "4.3.1",
     "rimraf": "2.6.2",
     "ts-loader": "5.2.2",
     "tslib": "1.9.3",
@@ -23,12 +31,10 @@
     "webpack-cli": "3.1.2"
   },
   "peerDependencies": {
+    "@ringcentral/sdk": ">=4",
     "react": "*",
-    "react-dom": "*",
-    "@ringcentral/sdk": ">=4"
+    "react-dom": "*"
   },
-  "preferGlobal": false,
-  "private": false,
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "author": {
@@ -51,5 +57,8 @@
   "engines": {
     "node": ">=4"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }

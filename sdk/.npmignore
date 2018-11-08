@@ -1,0 +1,6 @@
+.cache
+.nyc_output
+coverage
+karma.conf.js
+mocha.opts
+webpack.config.js

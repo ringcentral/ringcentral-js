@@ -16,6 +16,7 @@ const parseISOString = (time: string | number) => {
 
 declare class ActualPubNub extends PubNubDefault {
     removeAllListeners: any;
+
     decrypt: any;
 }
 
@@ -33,13 +34,21 @@ export default class Subscription extends EventEmitter {
     };
 
     protected _sdk: SDK;
+
     protected _PubNub: typeof ActualPubNub;
+
     protected _pollInterval: number;
+
     protected _renewHandicapMs: number;
+
     protected _pubnub: ActualPubNub = null;
+
     protected _pubnubLastChannel: string = null;
+
     protected _pubnubLastSubscribeKey: string = null;
+
     protected _timeout: any = null;
+
     protected _subscription: SubscriptionData = null;
 
     constructor({
@@ -294,7 +303,8 @@ export default class Subscription extends EventEmitter {
             if (this._pubnubLastChannel === address) {
                 // Nothing to update, keep listening to same channel
                 return this;
-            } else if (this._pubnubLastSubscribeKey && this._pubnubLastSubscribeKey !== subscriberKey) {
+            }
+            if (this._pubnubLastSubscribeKey && this._pubnubLastSubscribeKey !== subscriberKey) {
                 // Subscribe key changed, need to reset everything
                 this._unsubscribeAtPubNub();
             } else if (this._pubnubLastChannel) {

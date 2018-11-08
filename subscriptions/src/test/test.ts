@@ -1,4 +1,4 @@
-import {apiCall} from '@ringcentral/sdk/src/test/test';
+import {apiCall} from '@ringcentral/sdk/lib/test/test';
 import PubNub from 'pubnub';
 import {Subscriptions} from '../Subscriptions';
 

@@ -4,6 +4,7 @@
 .vscode
 .rpt2_cache
 .nyc_output
+*/.env
 build
 coverage
 dist
