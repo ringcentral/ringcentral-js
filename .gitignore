@@ -9,6 +9,7 @@ build
 coverage
 dist
 lib
+es6
 npm-debug.*
 node_modules
 lerna-debug.*

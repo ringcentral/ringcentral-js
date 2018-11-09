@@ -2,9 +2,10 @@
   "name": "@ringcentral/react",
   "version": "4.0.0-alpha.0",
   "scripts": {
-    "clean": "rimraf dist/* lib/* .cache",
-    "build": "npm run clean && npm run build:tsc",
-    "build:tsc": "tsc",
+    "clean": "rimraf lib/* es6/* .cache",
+    "build": "npm run clean && npm run build:tsc:es5 && npm run build:tsc:es6",
+    "build:tsc:es5": "tsc",
+    "build:tsc:es6": "tsc --project tsconfig.es6.json",
     "start": "npm run watch:tsc",
     "watch:tsc": "npm run build:tsc -- --watch --preserveWatchOutput",
     "demo": "parcel demo/index.html -p 8080",
@@ -36,6 +37,7 @@
     "react-dom": "*"
   },
   "main": "./lib/index.js",
+  "module": "./es6/index.js",
   "types": "./lib/index.d.ts",
   "author": {
     "name": "RingCentral, Inc.",

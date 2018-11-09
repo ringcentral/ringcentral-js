@@ -1,8 +1,8 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../tsconfig.es6.json",
   "compilerOptions": {
-    "declarationDir": "lib",
-    "outDir": "lib"
+    "declarationDir": "es6",
+    "outDir": "es6"
   },
   "include": [
     "src/**/*.ts",

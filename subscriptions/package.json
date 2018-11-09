@@ -2,15 +2,16 @@
   "name": "@ringcentral/subscriptions",
   "version": "4.0.0-alpha.0",
   "scripts": {
-    "clean": "rimraf dist/* lib/* coverage/* .nyc_output .rpt2_cache",
+    "clean": "rimraf dist/* lib/* es6/* coverage/* .nyc_output .rpt2_cache",
     "test": "npm run mocha",
     "mocha": "mocha --opts mocha.opts",
     "mocha:watch": "npm run mocha -- --watch",
     "nyc": "nyc mocha --opts mocha.opts",
     "prepublishOnly": "npm run build && npm run nyc",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "build": "npm run clean && npm run build:tsc && npm run build:webpack",
-    "build:tsc": "tsc",
+    "build": "npm run clean && npm run build:tsc:es5 && npm run build:tsc:es6 && npm run build:webpack",
+    "build:tsc:es5": "tsc",
+    "build:tsc:es6": "tsc --project tsconfig.es6.json",
     "build:webpack": "webpack",
     "start": "npm-run-all -p watch:tsc watch:webpack",
     "watch:tsc": "npm run build:tsc -- --watch --preserveWatchOutput",
@@ -37,6 +38,7 @@
     "webpack-cli": "3.1.2"
   },
   "main": "./lib/Subscriptions.js",
+  "module": "./es6/Subscriptions.js",
   "browser": "./dist/ringcentral-subscriptions.js",
   "types": "./lib/Subscriptions.d.ts",
   "author": {
