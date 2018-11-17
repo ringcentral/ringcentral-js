@@ -6,8 +6,9 @@
     "build": "npm run clean && npm run build:tsc:es5 && npm run build:tsc:es6",
     "build:tsc:es5": "tsc",
     "build:tsc:es6": "tsc --project tsconfig.es6.json",
-    "start": "npm run watch:tsc",
-    "watch:tsc": "npm run build:tsc -- --watch --preserveWatchOutput",
+    "start": "npm-run-all -p watch:tsc:es5 watch:tsc:es6",
+    "watch:tsc:es5": "npm run build:tsc:es5 -- --watch --preserveWatchOutput",
+    "watch:tsc:es6": "npm run build:tsc:es6 -- --watch --preserveWatchOutput",
     "demo": "parcel demo/index.html -p 8080",
     "prepublishOnly": "npm run build"
   },
@@ -62,5 +63,8 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "npm-run-all": "4.1.3"
   }
 }

@@ -30,28 +30,24 @@ export default class Auth {
                 token_type: '',
                 access_token: '',
                 expire_time: 0,
-                expires_in: 0,
+                expires_in: '',
                 refresh_token: '',
-                refresh_token_expires_in: 0,
+                refresh_token_expires_in: '',
                 refresh_token_expire_time: 0,
                 scope: ''
             }
         );
     }
 
-    async setData(newData = {}) {
+    async setData(newData: AuthData = {}) {
         const data = await this.data();
 
-        Object.keys(newData).forEach(key => {
-            data[key] = newData[key];
+        await this._cache.setItem(this._cacheId, {
+            ...data,
+            ...newData,
+            expire_time: Date.now() + parseInt(newData.expires_in, 10) * 1000,
+            refresh_token_expire_time: Date.now() + parseInt(newData.refresh_token_expires_in, 10) * 1000
         });
-
-        data.expire_time = Date.now() + data.expires_in * 1000;
-        data.refresh_token_expire_time = Date.now() + data.refresh_token_expires_in * 1000;
-
-        this._cache.setItem(this._cacheId, data);
-
-        return this;
     }
 
     /**
@@ -72,7 +68,7 @@ export default class Auth {
     async cancelAccessToken() {
         return this.setData({
             access_token: '',
-            expires_in: 0
+            expires_in: '-1'
         });
     }
 }
@@ -80,10 +76,10 @@ export default class Auth {
 export interface AuthData {
     token_type?: string;
     access_token?: string;
-    expires_in?: number; // actually it's string
+    expires_in?: string;
     expire_time?: number;
     refresh_token?: string;
-    refresh_token_expires_in?: number; // actually it's string
+    refresh_token_expires_in?: string;
     refresh_token_expire_time?: number;
     scope?: string;
 }

@@ -14,8 +14,9 @@
     "build:tsc:es5": "tsc",
     "build:tsc:es6": "tsc --project tsconfig.es6.json",
     "build:webpack": "webpack",
-    "start": "npm-run-all -p watch:tsc watch:webpack",
-    "watch:tsc": "npm run build:tsc -- --watch --preserveWatchOutput",
+    "start": "npm-run-all -p watch:tsc:es5 watch:tsc:es6 watch:webpack",
+    "watch:tsc:es5": "npm run build:tsc:es5 -- --watch --preserveWatchOutput",
+    "watch:tsc:es6": "npm run build:tsc:es6 -- --watch --preserveWatchOutput",
     "watch:webpack": "npm run build:webpack -- --watch"
   },
   "dependencies": {

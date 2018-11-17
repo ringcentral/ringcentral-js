@@ -370,11 +370,14 @@ export default class Platform extends EventEmitter {
         try {
             this.emit(this.events.beforeLogout);
 
-            const res = this._revokeEndpoint
-                ? await this._tokenRequest(this._revokeEndpoint, {
-                      token: (await this._auth.data()).access_token
-                  })
-                : null;
+            let res = null;
+
+            //FIXME https://developers.ringcentral.com/legacy-api-reference/index.html#!#RefRevokeToken.html requires secret
+            if (this._revokeEndpoint && this._clientSecret) {
+                res = await this._tokenRequest(this._revokeEndpoint, {
+                    token: (await this._auth.data()).access_token
+                });
+            }
 
             await this._cache.clean();
 

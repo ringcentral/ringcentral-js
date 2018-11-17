@@ -12,7 +12,7 @@
     "publish:fromgit": "lerna publish from-git",
     "prepare:release": "lerna version --tag-version-prefix=\"\" --force-publish=\"*\"",
     "prepare:prerelease": "npm run publish:version -- prerelease --preid alpha",
-    "lint": "DEBUG=eslint:cli-engine eslint --cache --cache-location ./node_modules/.cache/eslint --fix",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix --quiet",
     "lint:all": "npm run lint -- ./*/src/**/*.ts* ./*/src/*.ts*",
     "lint:staged": "lint-staged"
   },
