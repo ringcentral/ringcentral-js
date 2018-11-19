@@ -261,6 +261,7 @@ export default class Platform extends EventEmitter {
         access_token_ttl,
         refresh_token_ttl,
         access_token,
+        endpoint_id,
         ...options
     }: LoginOptions = {}): Promise<Response> {
         try {
@@ -288,6 +289,7 @@ export default class Platform extends EventEmitter {
 
                 if (access_token_ttl) body.access_token_ttl = access_token_ttl;
                 if (refresh_token_ttl) body.refresh_token_ttl = refresh_token_ttl;
+                if (endpoint_id) body.endpoint_id = endpoint_id;
 
                 response = await this._tokenRequest(this._tokenEndpoint, body);
 
@@ -541,6 +543,7 @@ export interface LoginOptions {
     access_token?: string;
     access_token_ttl?: number;
     refresh_token_ttl?: number;
+    endpoint_id?: string;
 }
 
 export interface LoginUrlOptions {
