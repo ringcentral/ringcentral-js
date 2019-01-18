@@ -493,7 +493,7 @@ export default class Platform extends EventEmitter {
     }
 
     basicAuthHeader(): string {
-        const apiKey = this._clientId + this._clientSecret ? `:${this._clientSecret}` : '';
+        const apiKey = this._clientId + (this._clientSecret ? `:${this._clientSecret}` : '');
         return `Basic ${typeof btoa === 'function' ? btoa(apiKey) : Buffer.from(apiKey).toString('base64')}`;
     }
 
