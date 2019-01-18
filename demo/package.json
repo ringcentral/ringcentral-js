@@ -1,5 +1,5 @@
 {
-	"version": "4.0.0-alpha.3",
+	"version": "4.0.0-alpha.4",
 	"name": "@ringcentral/sdk-demo",
 	"private": true,
 	"scripts": {
@@ -9,8 +9,8 @@
 		"http-server": "0.11.1"
 	},
 	"dependencies": {
-		"@ringcentral/sdk": "^4.0.0-alpha.3",
-		"@ringcentral/subscriptions": "^4.0.0-alpha.3",
+		"@ringcentral/sdk": "^4.0.0-alpha.4",
+		"@ringcentral/subscriptions": "^4.0.0-alpha.4",
 		"backbone": "1.3.3",
 		"bootstrap": "3.3.7",
 		"es6-promise": "4.2.5",
