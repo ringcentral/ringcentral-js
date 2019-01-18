@@ -191,19 +191,19 @@ export default class Platform extends EventEmitter {
             const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
             const dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 
-            const width = window.innerWidth
+            const screenWidth = window.innerWidth
                 ? window.innerWidth
                 : document.documentElement.clientWidth
                 ? document.documentElement.clientWidth
                 : screen.width;
-            const height = window.innerHeight
+            const screenHeight = window.innerHeight
                 ? window.innerHeight
                 : document.documentElement.clientHeight
                 ? document.documentElement.clientHeight
                 : screen.height;
 
-            const left = width / 2 - width / 2 + dualScreenLeft;
-            const top = height / 2 - height / 2 + dualScreenTop;
+            const left = screenWidth / 2 - width / 2 + dualScreenLeft;
+            const top = screenHeight / 2 - height / 2 + dualScreenTop;
             const win = window.open(
                 url,
                 '_blank',
