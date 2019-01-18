@@ -188,22 +188,15 @@ export default class Platform extends EventEmitter {
 
             if (!url) throw new Error('Missing mandatory URL parameter');
 
-            const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
-            const dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
+            const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : 0;
+            const dualScreenTop = window.screenTop !== undefined ? window.screenTop : 0;
 
-            const screenWidth = window.innerWidth
-                ? window.innerWidth
-                : document.documentElement.clientWidth
-                ? document.documentElement.clientWidth
-                : screen.width;
-            const screenHeight = window.innerHeight
-                ? window.innerHeight
-                : document.documentElement.clientHeight
-                ? document.documentElement.clientHeight
-                : screen.height;
+            const screenWidth = screen.width;
+            const screenHeight = screen.height;
 
             const left = screenWidth / 2 - width / 2 + dualScreenLeft;
             const top = screenHeight / 2 - height / 2 + dualScreenTop;
+
             const win = window.open(
                 url,
                 '_blank',
