@@ -1,6 +1,6 @@
 {
   "name": "@ringcentral/react",
-  "version": "4.0.0-alpha.2",
+  "version": "4.0.0-alpha.3",
   "scripts": {
     "clean": "rimraf lib/* es6/* .cache",
     "build": "npm run clean && npm run build:tsc:es5 && npm run build:tsc:es6",
@@ -16,8 +16,8 @@
     "@babel/core": "7.1.5",
     "@babel/polyfill": "7.0.0",
     "@babel/runtime": "7.1.5",
-    "@ringcentral/sdk": "^4.0.0-alpha.2",
-    "@ringcentral/sdk-utils": "^4.0.0-alpha.2",
+    "@ringcentral/sdk": "^4.0.0-alpha.3",
+    "@ringcentral/sdk-utils": "^4.0.0-alpha.3",
     "@types/react": "^16.4.18",
     "@types/react-dom": "^16.0.9",
     "@types/react-router-dom": "4.3.1",
