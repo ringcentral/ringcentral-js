@@ -18,9 +18,9 @@ const delay = (timeout): Promise<any> =>
 const getParts = (url, separator) => url.split(separator).reverse()[0];
 
 export default class Platform extends EventEmitter {
-    static _cacheId = 'platform';
+    public static _cacheId = 'platform';
 
-    events = {
+    public events = {
         beforeLogin: 'beforeLogin',
         loginSuccess: 'loginSuccess',
         loginError: 'loginError',
@@ -30,7 +30,7 @@ export default class Platform extends EventEmitter {
         beforeLogout: 'beforeLogout',
         logoutSuccess: 'logoutSuccess',
         logoutError: 'logoutError',
-        rateLimitError: 'rateLimitError'
+        rateLimitError: 'rateLimitError',
     };
 
     private _server: string;
@@ -63,7 +63,7 @@ export default class Platform extends EventEmitter {
 
     private _authorizeEndpoint;
 
-    constructor({
+    public constructor({
         server,
         clientId,
         clientSecret,
@@ -78,7 +78,7 @@ export default class Platform extends EventEmitter {
         refreshHandicapMs,
         tokenEndpoint = '/restapi/oauth/token',
         revokeEndpoint = '/restapi/oauth/revoke',
-        authorizeEndpoint = '/restapi/oauth/authorize'
+        authorizeEndpoint = '/restapi/oauth/authorize',
     }: PlatformOptionsConstructor) {
         super();
 
@@ -99,18 +99,18 @@ export default class Platform extends EventEmitter {
         this._auth = new Auth({
             cache: this._cache,
             cacheId: Platform._cacheId,
-            refreshHandicapMs
+            refreshHandicapMs,
         });
         this._tokenEndpoint = tokenEndpoint;
         this._revokeEndpoint = revokeEndpoint;
         this._authorizeEndpoint = authorizeEndpoint;
     }
 
-    auth() {
+    public auth() {
         return this._auth;
     }
 
-    createUrl(path = '', options: CreateUrlOptions = {}) {
+    public createUrl(path = '', options: CreateUrlOptions = {}) {
         let builtUrl = '';
         const hasHttp = path.indexOf('http://') !== -1 || path.indexOf('https://') !== -1;
 
@@ -123,11 +123,11 @@ export default class Platform extends EventEmitter {
         return builtUrl;
     }
 
-    async signUrl(path) {
+    public async signUrl(path) {
         return `${path + (path.indexOf('?') > -1 ? '&' : '?')}access_token=${(await this._auth.data()).access_token}`;
     }
 
-    loginUrl({implicit, state, brandId, display, prompt, uiOptions, uiLocales, localeId}: LoginUrlOptions = {}) {
+    public loginUrl({implicit, state, brandId, display, prompt, uiOptions, uiLocales, localeId}: LoginUrlOptions = {}) {
         return this.createUrl(
             `${this._authorizeEndpoint}?${qs.stringify({
                 response_type: implicit ? 'token' : 'code',
@@ -139,9 +139,9 @@ export default class Platform extends EventEmitter {
                 prompt,
                 ui_options: uiOptions,
                 ui_locales: uiLocales,
-                localeId
+                localeId,
             })}`,
-            {addServer: true}
+            {addServer: true},
         );
     }
 
@@ -149,7 +149,7 @@ export default class Platform extends EventEmitter {
      * @param {string} url
      * @return {Object}
      */
-    parseLoginRedirect(url) {
+    public parseLoginRedirect(url) {
         const response =
             (url.indexOf('#') === 0 && getParts(url, '#')) || (url.indexOf('?') === 0 && getParts(url, '?')) || null;
 
@@ -175,13 +175,13 @@ export default class Platform extends EventEmitter {
      *
      * Attention! This is an experimental method and it's signature and behavior may change without notice.
      */
-    loginWindow({
+    public loginWindow({
         url,
         width = 400,
         height = 600,
         origin = window.location.origin,
         property = Constants.authResponseProperty,
-        target = '_blank'
+        target = '_blank',
     }: LoginWindowOptions): Promise<LoginOptions> {
         return new Promise((resolve, reject) => {
             if (typeof window === 'undefined') throw new Error('This method can be used only in browser');
@@ -202,7 +202,7 @@ export default class Platform extends EventEmitter {
                 '_blank',
                 target === '_blank'
                     ? `scrollbars=yes, status=yes, width=${width}, height=${height}, left=${left}, top=${top}`
-                    : ''
+                    : '',
             );
 
             if (!win) {
@@ -237,7 +237,7 @@ export default class Platform extends EventEmitter {
     /**
      * @return {Promise<boolean>}
      */
-    async loggedIn() {
+    public async loggedIn() {
         try {
             await this.ensureLoggedIn();
             return true;
@@ -246,7 +246,7 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    async login({
+    public async login({
         username,
         password,
         extension = '',
@@ -319,7 +319,7 @@ export default class Platform extends EventEmitter {
                 grant_type: 'refresh_token',
                 refresh_token: authData.refresh_token,
                 access_token_ttl: authData.expires_in + 1,
-                refresh_token_ttl: authData.refresh_token_expires_in + 1
+                refresh_token_ttl: authData.refresh_token_expires_in + 1,
             });
 
             const json = await res.clone().json();
@@ -344,7 +344,7 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    async refresh(): Promise<Response> {
+    public async refresh(): Promise<Response> {
         if (!this._refreshPromise) {
             this._refreshPromise = (async () => {
                 try {
@@ -361,7 +361,7 @@ export default class Platform extends EventEmitter {
         return this._refreshPromise;
     }
 
-    async logout(): Promise<Response> {
+    public async logout(): Promise<Response> {
         try {
             this.emit(this.events.beforeLogout);
 
@@ -370,7 +370,7 @@ export default class Platform extends EventEmitter {
             //FIXME https://developers.ringcentral.com/legacy-api-reference/index.html#!#RefRevokeToken.html requires secret
             if (this._revokeEndpoint && this._clientSecret) {
                 res = await this._tokenRequest(this._revokeEndpoint, {
-                    token: (await this._auth.data()).access_token
+                    token: (await this._auth.data()).access_token,
                 });
             }
 
@@ -386,7 +386,7 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    async inflateRequest(request: Request, options: SendOptions = {}): Promise<Request> {
+    public async inflateRequest(request: Request, options: SendOptions = {}): Promise<Request> {
         options = options || {};
 
         if (options.skipAuthCheck) return request;
@@ -401,7 +401,7 @@ export default class Platform extends EventEmitter {
         return request;
     }
 
-    async sendRequest(request: Request, options: SendOptions = {}): Promise<Response> {
+    public async sendRequest(request: Request, options: SendOptions = {}): Promise<Response> {
         try {
             request = await this.inflateRequest(request, options);
             return await this._client.sendRequest(request);
@@ -443,30 +443,30 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    send(options: SendOptions = {}) {
+    public send(options: SendOptions = {}) {
         //FIXME https://github.com/bitinn/node-fetch/issues/43
         options.url = this.createUrl(options.url, {addServer: true});
 
         return this.sendRequest(this._client.createRequest(options), options);
     }
 
-    async get(url, query?, options?: SendOptions): Promise<Response> {
+    public async get(url, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'GET', url, query, ...options});
     }
 
-    async post(url, body?, query?, options?: SendOptions): Promise<Response> {
+    public async post(url, body?, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'POST', url, query, body, ...options});
     }
 
-    async put(url, body?, query?, options?: SendOptions): Promise<Response> {
+    public async put(url, body?, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'PUT', url, query, body, ...options});
     }
 
-    async delete(url, query?, options?: SendOptions): Promise<Response> {
+    public async delete(url, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'DELETE', url, query, ...options});
     }
 
-    async ensureLoggedIn(): Promise<Response | null> {
+    public async ensureLoggedIn(): Promise<Response | null> {
         if (await this._auth.accessTokenValid()) return null;
         await this.refresh();
         return null;
@@ -480,17 +480,17 @@ export default class Platform extends EventEmitter {
             method: 'POST',
             headers: {
                 Authorization: this.basicAuthHeader(),
-                'Content-Type': Client._urlencodedContentType
-            }
+                'Content-Type': Client._urlencodedContentType,
+            },
         });
     }
 
-    basicAuthHeader(): string {
+    public basicAuthHeader(): string {
         const apiKey = this._clientId + (this._clientSecret ? `:${this._clientSecret}` : '');
         return `Basic ${typeof btoa === 'function' ? btoa(apiKey) : Buffer.from(apiKey).toString('base64')}`;
     }
 
-    async authHeader(): Promise<string> {
+    public async authHeader(): Promise<string> {
         const data = await this._auth.data();
         return (data.token_type || 'Bearer') + (data.access_token ? ` ${data.access_token}` : '');
     }
@@ -554,14 +554,14 @@ export enum LoginUrlPrompt {
     login = 'login',
     sso = 'sso',
     consent = 'consent',
-    none = 'none'
+    none = 'none',
 }
 
 export enum LoginUrlDisplay {
     page = 'page',
     popup = 'popup',
     touch = 'touch',
-    mobile = 'mobile'
+    mobile = 'mobile',
 }
 
 export interface CreateUrlOptions {

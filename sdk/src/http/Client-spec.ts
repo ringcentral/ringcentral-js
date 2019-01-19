@@ -17,7 +17,7 @@ describe('RingCentral.http.Client', () => {
                 expect(request.headers.get('Accept')).to.equal('application/json');
                 expect(request.url).to.equal('http://foo/bar?foo=foo');
                 expect(request.method).to.equal('GET');
-            })
+            }),
         );
 
         it(
@@ -30,7 +30,7 @@ describe('RingCentral.http.Client', () => {
                 expect(request.url).to.equal('http://foo/bar');
                 expect(request.method).to.equal('POST');
                 expect(request['originalBody']).to.equal(JSON.stringify({foo: 'bar'}));
-            })
+            }),
         );
 
         it(
@@ -39,7 +39,7 @@ describe('RingCentral.http.Client', () => {
                 expect(() => {
                     sdk.client().createRequest({url: 'http://foo/bar', method: 'foo'});
                 }).to.throw();
-            })
+            }),
         );
     });
 
@@ -118,7 +118,7 @@ describe('RingCentral.http.Client', () => {
         '}\n' +
         '--Boundary_1245_945802293_1394135045248--\n';
     const multipartResponseHeaders = {
-        'content-type': 'multipart/mixed; boundary=Boundary_1245_945802293_1394135045248'
+        'content-type': 'multipart/mixed; boundary=Boundary_1245_945802293_1394135045248',
     };
     const jsonResponseHeaders = {'content-type': 'application/json; encoding=utf8'};
 
@@ -128,7 +128,7 @@ describe('RingCentral.http.Client', () => {
             asyncTest(async sdk => {
                 const res = await createResponse(sdk, '{}', 200, 'OK', jsonResponseHeaders);
                 expect(sdk.client().isJson(res)).to.equal(true);
-            })
+            }),
         );
 
         it(
@@ -136,7 +136,7 @@ describe('RingCentral.http.Client', () => {
             asyncTest(async sdk => {
                 const res = await createResponse(sdk, '{}', 207, 'Multi-Status', multipartResponseHeaders);
                 expect(sdk.client().isMultipart(res)).to.equal(true);
-            })
+            }),
         );
     });
 
@@ -149,10 +149,10 @@ describe('RingCentral.http.Client', () => {
                     goodMultipartMixedResponse,
                     207,
                     'Multi-Status',
-                    multipartResponseHeaders
+                    multipartResponseHeaders,
                 );
                 await sdk.client().multipart(res);
-            })
+            }),
         );
 
         it(
@@ -163,7 +163,7 @@ describe('RingCentral.http.Client', () => {
                     multipartMixedResponseWithErrorPart,
                     207,
                     'Multi-Status',
-                    multipartResponseHeaders
+                    multipartResponseHeaders,
                 );
 
                 const multipart = await sdk.client().multipart(res);
@@ -177,7 +177,7 @@ describe('RingCentral.http.Client', () => {
 
                 expect((await multipart[2].json()).baz).to.be.equal('qux');
                 expect(multipart[2].status).to.be.equal(200);
-            })
+            }),
         );
 
         it(
@@ -188,13 +188,13 @@ describe('RingCentral.http.Client', () => {
                     badMultipartMixedResponse,
                     207,
                     'Multi-Status',
-                    multipartResponseHeaders
+                    multipartResponseHeaders,
                 );
 
                 await expectThrows(async () => {
                     await sdk.client().multipart(res);
                 });
-            })
+            }),
         );
 
         it(
@@ -204,7 +204,7 @@ describe('RingCentral.http.Client', () => {
                 await expectThrows(async () => {
                     await res.json();
                 });
-            })
+            }),
         );
 
         it(
@@ -213,7 +213,7 @@ describe('RingCentral.http.Client', () => {
                 await expectThrows(async () => {
                     await createResponse(sdk, '{"error_description": "ERROR"}', 404, 'Error', jsonResponseHeaders);
                 }, 'ERROR');
-            })
+            }),
         );
 
         it(
@@ -222,7 +222,7 @@ describe('RingCentral.http.Client', () => {
                 await expectThrows(async () => {
                     await await createResponse(sdk, '{"description": "ERROR"}', 404, 'Error', jsonResponseHeaders);
                 }, 'ERROR');
-            })
+            }),
         );
 
         it(
@@ -232,7 +232,7 @@ describe('RingCentral.http.Client', () => {
                     const res = await createResponse(sdk, '', 207, 'Multi-Status', multipartResponseHeaders);
                     await sdk.client().multipart(res);
                 }, 'No response body');
-            })
+            }),
         );
 
         it(
@@ -242,7 +242,7 @@ describe('RingCentral.http.Client', () => {
                     const res = await createResponse(sdk, '', 207, 'Multi-Status', jsonResponseHeaders);
                     await sdk.client().multipart(res);
                 }, 'Response is not multipart');
-            })
+            }),
         );
 
         it(
@@ -250,11 +250,11 @@ describe('RingCentral.http.Client', () => {
             asyncTest(async sdk => {
                 await expectThrows(async () => {
                     const res = await createResponse(sdk, 'foobarbaz', 207, 'Multi-Status', {
-                        'content-type': 'multipart/mixed'
+                        'content-type': 'multipart/mixed',
                     });
                     await sdk.client().multipart(res);
                 }, 'Cannot find boundary');
-            })
+            }),
         );
     });
 
@@ -264,7 +264,7 @@ describe('RingCentral.http.Client', () => {
             asyncTest(async sdk => {
                 const res = await createResponse(sdk, '{}', 200, 'OK', jsonResponseHeaders);
                 expect((await sdk.client().toMultipart(res))[0]).to.equal(res);
-            })
+            }),
         );
     });
 });

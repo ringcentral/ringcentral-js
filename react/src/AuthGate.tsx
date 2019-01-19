@@ -20,10 +20,10 @@ export interface AuthGateProps {
 }
 
 export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
-    state = {
+    public state = {
         isAuthorized: false,
         authorizing: true,
-        authError: null
+        authError: null,
     };
 
     /**
@@ -31,9 +31,9 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
      * we still cancel subscriptions etc., but we can't guarantee when storage promises will resolve
      * @type {boolean}
      */
-    mounted = false;
+    public mounted = false;
 
-    async componentDidMount() {
+    public async componentDidMount() {
         this.mounted = true;
         try {
             const {sdk, ensure} = this.props;
@@ -57,7 +57,7 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
         }
     }
 
-    componentWillUnmount() {
+    public componentWillUnmount() {
         this.mounted = false;
         const {sdk} = this.props;
         const platform = sdk.platform();
@@ -70,20 +70,20 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
         platform.removeListener(platform.events.refreshSuccess, this.success);
     }
 
-    before = () => this.mounted && this.setState({authorizing: true});
+    public before = () => this.mounted && this.setState({authorizing: true});
 
-    error = async e => this.updateState(e);
+    public error = async e => this.updateState(e);
 
-    success = async () => this.updateState(null);
+    public success = async () => this.updateState(null);
 
-    loginUrl = options => this.props.sdk.platform().loginUrl(options);
+    public loginUrl = options => this.props.sdk.platform().loginUrl(options);
 
-    logout = async () => {
+    public logout = async () => {
         const platform = this.props.sdk.platform();
         return platform.logout();
     };
 
-    parseRedirect = async search => {
+    public parseRedirect = async search => {
         try {
             const platform = this.props.sdk.platform();
             const loginOptions = platform.parseLoginRedirect(search);
@@ -95,7 +95,7 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
         }
     };
 
-    updateState = async (authError = null) => {
+    public updateState = async (authError = null) => {
         await delay();
         this.mounted &&
             this.setState({
@@ -104,18 +104,18 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
                     .auth()
                     .accessTokenValid(),
                 authorizing: false,
-                authError
+                authError,
             });
     };
 
-    render() {
+    public render() {
         const {sdk, ensure, children, ...props} = this.props;
         return children({
             ...this.state,
             ...props,
             loginUrl: this.loginUrl,
             parseRedirect: this.parseRedirect,
-            logout: this.logout
+            logout: this.logout,
         });
     }
 }

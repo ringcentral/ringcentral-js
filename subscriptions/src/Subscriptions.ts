@@ -3,8 +3,6 @@ import {SDK} from '@ringcentral/sdk';
 import Subscription, {SubscriptionOptions} from './subscription/Subscription';
 import CachedSubscription, {CachedSubscriptionOptions} from './subscription/CachedSubscription';
 
-declare const window: any; //FIXME TS Crap
-
 export {SubscriptionOptions, CachedSubscriptionOptions};
 
 export class Subscriptions {
@@ -12,31 +10,31 @@ export class Subscriptions {
 
     private _PubNub: any; // typeof PubNub;
 
-    constructor({sdk, PubNub = PubNubDefault}: SubscriptionsOptions) {
+    public constructor({sdk, PubNub = PubNubDefault}: SubscriptionsOptions) {
         this._sdk = sdk;
         this._PubNub = PubNub;
     }
 
-    createSubscription({pollInterval, renewHandicapMs}: SubscriptionOptions) {
+    public createSubscription({pollInterval, renewHandicapMs}: SubscriptionOptions) {
         return new Subscription({
             pollInterval,
             renewHandicapMs,
             sdk: this._sdk,
-            PubNub: this._PubNub
+            PubNub: this._PubNub,
         });
     }
 
-    createCachedSubscription({cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptions) {
+    public createCachedSubscription({cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptions) {
         return new CachedSubscription({
             cacheKey,
             pollInterval,
             renewHandicapMs,
             sdk: this._sdk,
-            PubNub: this._PubNub
+            PubNub: this._PubNub,
         });
     }
 
-    getPubNub() {
+    public getPubNub() {
         return this._PubNub;
     }
 }

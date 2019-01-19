@@ -3,7 +3,7 @@ import Subscription, {SubscriptionOptions, SubscriptionOptionsConstructor} from 
 export default class CachedSubscription extends Subscription {
     protected _cacheKey: string;
 
-    constructor({sdk, PubNub, cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptionsConstructor) {
+    public constructor({sdk, PubNub, cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptionsConstructor) {
         super({sdk, PubNub, pollInterval, renewHandicapMs});
 
         if (!cacheKey) throw new Error('Cached Subscription requires cacheKey parameter to be defined');
@@ -11,7 +11,7 @@ export default class CachedSubscription extends Subscription {
         this._cacheKey = cacheKey;
     }
 
-    subscription() {
+    public subscription() {
         return this._sdk.cache().getItemSync(this._cacheKey) || {};
     }
 
@@ -23,7 +23,7 @@ export default class CachedSubscription extends Subscription {
     /**
      * This function checks whether there are any pre-defined eventFilters in cache and if not -- uses provided as defaults
      */
-    restore(events: string[]) {
+    public restore(events: string[]) {
         if (!this.eventFilters().length) {
             this.setEventFilters(events);
         }

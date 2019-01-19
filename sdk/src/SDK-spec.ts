@@ -7,7 +7,7 @@ describe('RingCentral.sdk.SDK', () => {
         const sdk = new SDK({
             server,
             clientId: '',
-            clientSecret: ''
+            clientSecret: '',
         });
 
         const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
@@ -33,7 +33,7 @@ describe('RingCentral.sdk.SDK', () => {
 
             const win = {
                 location: {hash: '#foo', origin: 'foo'},
-                opener: {postMessage: s}
+                opener: {postMessage: s},
             };
 
             SDK.handleLoginRedirect(null, win);
@@ -47,7 +47,7 @@ describe('RingCentral.sdk.SDK', () => {
 
             const win = {
                 location: {search: '?foo'},
-                opener: {postMessage: s}
+                opener: {postMessage: s},
             };
 
             SDK.handleLoginRedirect('foo', win);

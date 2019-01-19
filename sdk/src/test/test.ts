@@ -1,5 +1,5 @@
 import {expect, spy, fetchMock} from '@ringcentral/sdk-utils/test';
-import SDK, {SDKOptions} from '../SDK';
+import {SDK, SDKOptions} from '../SDK';
 
 export function apiCall(method, path, json, status = 200, statusText = 'OK', headers = null) {
     const isJson = typeof json !== 'string';
@@ -14,8 +14,8 @@ export function apiCall(method, path, json, status = 200, statusText = 'OK', hea
         response: new fetchMock.config.Response(isJson ? JSON.stringify(json) : json, {
             status,
             statusText,
-            headers
-        })
+            headers,
+        }),
     });
 }
 
@@ -27,7 +27,7 @@ export function authentication() {
         refresh_token: 'REFRESH_TOKEN',
         refresh_token_expires_in: 60480,
         scope: 'SMS RCM Foo Boo',
-        expireTime: new Date().getTime() + 3600000
+        expireTime: new Date().getTime() + 3600000,
     });
 }
 
@@ -43,7 +43,7 @@ export function tokenRefresh(failure = false) {
             expires_in: 3600,
             refresh_token: 'REFRESH_TOKEN_FROM_REFRESH',
             refresh_token_expires_in: 60480,
-            scope: 'SMS RCM Foo Boo'
+            scope: 'SMS RCM Foo Boo',
         });
     } else {
         apiCall(
@@ -52,9 +52,9 @@ export function tokenRefresh(failure = false) {
             {
                 message: 'Wrong token',
                 error_description: 'Wrong token',
-                description: 'Wrong token'
+                description: 'Wrong token',
             },
-            400
+            400,
         );
     }
 }
@@ -70,7 +70,7 @@ export function createSdk(options: SDKOptions = {}) {
         fetch: fetchMock.fetchHandler,
         refreshDelayMs: 1,
         redirectUri: 'http://foo',
-        ...options
+        ...options,
     });
 }
 
@@ -92,7 +92,7 @@ export function asyncTest(fn: (sdk: SDK) => any) {
 
             await platofrm.login({
                 username: 'whatever',
-                password: 'whatever'
+                password: 'whatever',
             });
 
             await fn(sdk);
@@ -102,7 +102,7 @@ export function asyncTest(fn: (sdk: SDK) => any) {
             await clean();
         } catch (e) {
             await clean();
-            console.error(e.stack);
+            console.error(e.stack); //eslint-disable-line
             throw e;
         }
     };

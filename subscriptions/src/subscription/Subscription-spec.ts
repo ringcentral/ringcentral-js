@@ -9,7 +9,7 @@ const quickExpiresIn = 0.1; // s
 const createSubscription = sdk =>
     createSubscriptions(sdk).createSubscription({
         pollInterval,
-        renewHandicapMs
+        renewHandicapMs,
     });
 
 describe('RingCentral.subscription.Subscription', () => {
@@ -36,7 +36,7 @@ describe('RingCentral.subscription.Subscription', () => {
                 });
 
                 subscription.reset();
-            })
+            }),
         );
 
         it(
@@ -61,7 +61,7 @@ describe('RingCentral.subscription.Subscription', () => {
                 });
 
                 subscription.reset();
-            })
+            }),
         );
 
         it(
@@ -85,7 +85,7 @@ describe('RingCentral.subscription.Subscription', () => {
                 });
 
                 subscription.reset();
-            })
+            }),
         );
     });
 
@@ -100,7 +100,7 @@ describe('RingCentral.subscription.Subscription', () => {
                 await s.resubscribe();
                 expect(s.subscription().expiresIn).to.equal(expiresIn);
                 s.reset();
-            })
+            }),
         );
     });
 
@@ -117,8 +117,8 @@ describe('RingCentral.subscription.Subscription', () => {
                             expirationTime: new Date(Date.now() + expiresIn * 1000).toISOString(),
                             deliveryMode: {
                                 subscriberKey: 'foo',
-                                address: 'foo'
-                            }
+                                address: 'foo',
+                            },
                         });
 
                         subscription.on(subscription.events.notification, event => {
@@ -129,8 +129,8 @@ describe('RingCentral.subscription.Subscription', () => {
                         subscription['_notify']({foo: 'bar'});
 
                         subscription.reset();
-                    })
-            )
+                    }),
+            ),
         );
     });
 
@@ -144,7 +144,7 @@ describe('RingCentral.subscription.Subscription', () => {
                     await s.renew();
                 }, 'No subscription');
                 s.reset();
-            })
+            }),
         );
 
         it(
@@ -159,14 +159,14 @@ describe('RingCentral.subscription.Subscription', () => {
                             expirationTime: new Date(Date.now() + expiresIn * 1000).toISOString(),
                             deliveryMode: {
                                 subscriberKey: 'foo',
-                                address: 'foo'
-                            }
+                                address: 'foo',
+                            },
                         })
                         .renew();
                 }, 'Events are undefined');
 
                 s.reset();
-            })
+            }),
         );
 
         it(
@@ -182,13 +182,13 @@ describe('RingCentral.subscription.Subscription', () => {
                     eventFilters: ['foo'],
                     deliveryMode: {
                         subscriberKey: 'foo',
-                        address: 'foo'
-                    }
+                        address: 'foo',
+                    },
                 });
 
                 await subscription.renew();
                 subscription.reset();
-            })
+            }),
         );
     });
 
@@ -202,7 +202,7 @@ describe('RingCentral.subscription.Subscription', () => {
                     await s.remove();
                 }, 'No subscription');
                 s.reset();
-            })
+            }),
         );
 
         it(
@@ -218,13 +218,13 @@ describe('RingCentral.subscription.Subscription', () => {
                     eventFilters: ['foo'],
                     deliveryMode: {
                         subscriberKey: 'foo',
-                        address: 'foo'
-                    }
+                        address: 'foo',
+                    },
                 });
 
                 await subscription.remove();
                 subscription.reset();
-            })
+            }),
         );
 
         it(
@@ -240,13 +240,13 @@ describe('RingCentral.subscription.Subscription', () => {
                     eventFilters: ['foo'],
                     deliveryMode: {
                         subscriberKey: 'foo',
-                        address: 'foo'
-                    }
+                        address: 'foo',
+                    },
                 });
 
                 await subscription.remove();
                 subscription.reset();
-            })
+            }),
         );
     });
 
@@ -260,7 +260,7 @@ describe('RingCentral.subscription.Subscription', () => {
                     await s.subscribe();
                 }, 'Events are undefined');
                 s.reset();
-            })
+            }),
         );
 
         it(
@@ -274,7 +274,7 @@ describe('RingCentral.subscription.Subscription', () => {
                 await subscription.setEventFilters([event]).subscribe();
                 expect(subscription.subscription().eventFilters.length).to.equal(1);
                 subscription.reset();
-            })
+            }),
         );
 
         it(
@@ -288,7 +288,7 @@ describe('RingCentral.subscription.Subscription', () => {
                     await s.setEventFilters(['foo']).subscribe();
                 }, 'Subscription failed');
                 s.reset();
-            })
+            }),
         );
     });
 
@@ -310,22 +310,22 @@ describe('RingCentral.subscription.Subscription', () => {
                     deliveryMode: {
                         encryptionKey: 'e0bMTqmumPfFUbwzppkSbA==',
                         subscriberKey: 'foo',
-                        address: 'foo'
-                    }
+                        address: 'foo',
+                    },
                 });
 
                 expect(subscription._decrypt(aesMessage)).to.deep.equal({
                     timestamp: '2014-03-12T20:47:54.712+0000',
                     body: {
                         extensionId: 402853446008,
-                        telephonyStatus: 'OnHold'
+                        telephonyStatus: 'OnHold',
                     },
                     event: '/restapi/v1.0/account/~/extension/402853446008/presence',
-                    uuid: 'db01e7de-5f3c-4ee5-ab72-f8bd3b77e308'
+                    uuid: 'db01e7de-5f3c-4ee5-ab72-f8bd3b77e308',
                 });
 
                 subscription.reset();
-            })
+            }),
         );
     });
 });

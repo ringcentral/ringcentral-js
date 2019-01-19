@@ -6,42 +6,42 @@ export interface CacheOptions {
 }
 
 export default class Cache {
-    static defaultPrefix = 'rc-';
+    public static defaultPrefix = 'rc-';
 
     private readonly _prefix = null;
 
     private _externals = null;
 
-    constructor({prefix = Cache.defaultPrefix, externals}: CacheOptions) {
+    public constructor({prefix = Cache.defaultPrefix, externals}: CacheOptions) {
         this._prefix = prefix;
         this._externals = externals;
     }
 
-    setItemSync(key, data) {
+    public setItemSync(key, data) {
         this._externals.localStorage.setItem(this._prefixKey(key), JSON.stringify(data));
         return this;
     }
 
-    async setItem(key, data) {
+    public async setItem(key, data) {
         this.setItemSync(key, data);
     }
 
-    removeItemSync(key) {
+    public removeItemSync(key) {
         this._externals.localStorage.removeItem(this._prefixKey(key));
         return this;
     }
 
-    async removeItem(key) {
+    public async removeItem(key) {
         await this.removeItemSync(key);
     }
 
-    getItemSync(key) {
+    public getItemSync(key) {
         const item = this._externals.localStorage.getItem(this._prefixKey(key));
         if (!item) return null;
         return JSON.parse(item);
     }
 
-    async getItem(key) {
+    public async getItem(key) {
         return this.getItemSync(key);
     }
 
@@ -51,13 +51,13 @@ export default class Cache {
             : Object.keys(this._externals.localStorage);
     }
 
-    async clean() {
+    public async clean() {
         await Promise.all(
             (await this._keys()).map(async key => {
                 if (key.indexOf(this._prefix) === 0) {
                     await this._externals.localStorage.removeItem(key);
                 }
-            })
+            }),
         );
 
         return this;

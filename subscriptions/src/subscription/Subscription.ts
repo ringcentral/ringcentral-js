@@ -15,13 +15,13 @@ const parseISOString = (time: string | number) => {
 };
 
 declare class ActualPubNub extends PubNubDefault {
-    removeAllListeners: any;
+    public removeAllListeners: any;
 
-    decrypt: any;
+    public decrypt: any;
 }
 
 export default class Subscription extends EventEmitter {
-    events = {
+    public events = {
         notification: 'notification',
         removeSuccess: 'removeSuccess',
         removeError: 'removeError',
@@ -30,7 +30,7 @@ export default class Subscription extends EventEmitter {
         subscribeSuccess: 'subscribeSuccess',
         subscribeError: 'subscribeError',
         automaticRenewSuccess: 'automaticRenewSuccess',
-        automaticRenewError: 'automaticRenewError'
+        automaticRenewError: 'automaticRenewError',
     };
 
     protected _sdk: SDK;
@@ -51,11 +51,11 @@ export default class Subscription extends EventEmitter {
 
     protected _subscription: SubscriptionData = null;
 
-    constructor({
+    public constructor({
         sdk,
         PubNub,
         pollInterval = 10 * 1000,
-        renewHandicapMs = 2 * 60 * 1000
+        renewHandicapMs = 2 * 60 * 1000,
     }: SubscriptionOptionsConstructor) {
         super();
 
@@ -65,7 +65,7 @@ export default class Subscription extends EventEmitter {
         this._renewHandicapMs = renewHandicapMs;
     }
 
-    subscribed() {
+    public subscribed() {
         const subscription = this.subscription();
 
         return !!(
@@ -76,20 +76,20 @@ export default class Subscription extends EventEmitter {
         );
     }
 
-    alive() {
+    public alive() {
         return this.subscribed() && Date.now() < this.expirationTime();
     }
 
-    expired() {
+    public expired() {
         if (!this.subscribed()) return true;
         return !this.subscribed() || Date.now() > parseISOString(this.subscription().expirationTime);
     }
 
-    expirationTime() {
+    public expirationTime() {
         return parseISOString(this.subscription().expirationTime) - this._renewHandicapMs;
     }
 
-    setSubscription(subscription: SubscriptionData) {
+    public setSubscription(subscription: SubscriptionData) {
         subscription = subscription || {};
 
         this._clearTimeout();
@@ -100,25 +100,25 @@ export default class Subscription extends EventEmitter {
         return this;
     }
 
-    subscription() {
+    public subscription() {
         return this._subscription || {};
     }
 
     /**
      * Creates or updates subscription if there is an active one
      */
-    register(): Promise<Response> {
+    public async register(): Promise<Response> {
         if (this.alive()) {
             return this.renew();
         }
         return this.subscribe();
     }
 
-    eventFilters() {
+    public eventFilters() {
         return this.subscription().eventFilters || [];
     }
 
-    addEventFilters(events: string[]) {
+    public addEventFilters(events: string[]) {
         this.setEventFilters(this.eventFilters().concat(events));
         return this;
     }
@@ -127,14 +127,14 @@ export default class Subscription extends EventEmitter {
      * @param {string[]} events
      * @return {Subscription}
      */
-    setEventFilters(events) {
+    public setEventFilters(events) {
         const subscription = this.subscription();
         subscription.eventFilters = events;
         this._setSubscription(subscription);
         return this;
     }
 
-    async subscribe(): Promise<Response> {
+    public async subscribe(): Promise<Response> {
         try {
             this._clearTimeout();
 
@@ -143,8 +143,8 @@ export default class Subscription extends EventEmitter {
             const response = await this._sdk.platform().post('/restapi/v1.0/subscription', {
                 eventFilters: this._getFullEventFilters(),
                 deliveryMode: {
-                    transportType: 'PubNub'
-                }
+                    transportType: 'PubNub',
+                },
             });
 
             const json = await response.json();
@@ -161,7 +161,7 @@ export default class Subscription extends EventEmitter {
         }
     }
 
-    async renew(): Promise<Response> {
+    public async renew(): Promise<Response> {
         try {
             this._clearTimeout();
 
@@ -170,7 +170,7 @@ export default class Subscription extends EventEmitter {
             if (!this.eventFilters().length) throw new Error('Events are undefined');
 
             const response = await this._sdk.platform().put(`/restapi/v1.0/subscription/${this.subscription().id}`, {
-                eventFilters: this._getFullEventFilters()
+                eventFilters: this._getFullEventFilters(),
             });
 
             const json = await response.json();
@@ -187,7 +187,7 @@ export default class Subscription extends EventEmitter {
         }
     }
 
-    async remove(): Promise<Response> {
+    public async remove(): Promise<Response> {
         try {
             if (!this.subscribed()) throw new Error('No subscription');
 
@@ -203,7 +203,7 @@ export default class Subscription extends EventEmitter {
         }
     }
 
-    resubscribe(): Promise<Response> {
+    public resubscribe(): Promise<Response> {
         const filters = this.eventFilters();
         return this.reset()
             .setEventFilters(filters)
@@ -214,7 +214,7 @@ export default class Subscription extends EventEmitter {
      * Remove subscription and disconnect from PubNub
      * This method resets subscription at client side but backend is not notified
      */
-    reset() {
+    public reset() {
         this._clearTimeout();
         this._unsubscribeAtPubNub();
         this._setSubscription(null);
@@ -234,7 +234,7 @@ export default class Subscription extends EventEmitter {
      * @return {string[]}
      * @private
      */
-    _getFullEventFilters() {
+    public _getFullEventFilters() {
         return this.eventFilters().map(event => this._sdk.platform().createUrl(event));
     }
 
@@ -242,7 +242,7 @@ export default class Subscription extends EventEmitter {
      * @return {Subscription}
      * @private
      */
-    _setTimeout() {
+    public _setTimeout() {
         this._clearTimeout();
 
         if (!this.alive()) throw new Error('Subscription is not alive');
@@ -268,12 +268,12 @@ export default class Subscription extends EventEmitter {
      * @return {Subscription}
      * @private
      */
-    _clearTimeout() {
+    public _clearTimeout() {
         clearInterval(this._timeout);
         return this;
     }
 
-    _decrypt(message) {
+    public _decrypt(message) {
         if (!this.subscribed()) throw new Error('No subscription');
 
         if (this.subscription().deliveryMode.encryptionKey) {
@@ -282,7 +282,7 @@ export default class Subscription extends EventEmitter {
                 encryptKey: false,
                 keyEncoding: 'base64',
                 keyLength: 128,
-                mode: 'ecb'
+                mode: 'ecb',
             });
         }
 
@@ -321,12 +321,12 @@ export default class Subscription extends EventEmitter {
             this._pubnub = new PubNub({
                 ssl: true,
                 restore: true,
-                subscribeKey: subscriberKey
+                subscribeKey: subscriberKey,
             });
 
             this._pubnub.addListener({
                 status: statusEvent => {},
-                message: m => this._notify(m.message)
+                message: m => this._notify(m.message),
             });
         }
 

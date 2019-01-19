@@ -18,13 +18,13 @@ export default class Auth {
 
     private readonly _refreshHandicapMs: number;
 
-    constructor({cache, cacheId, refreshHandicapMs = DEFAULT_RENEW_HANDICAP_MS}: AuthOptionsConstructor) {
+    public constructor({cache, cacheId, refreshHandicapMs = DEFAULT_RENEW_HANDICAP_MS}: AuthOptionsConstructor) {
         this._cache = cache;
         this._cacheId = cacheId;
         this._refreshHandicapMs = refreshHandicapMs;
     }
 
-    async data(): Promise<AuthData> {
+    public async data(): Promise<AuthData> {
         return (
             (await this._cache.getItem(this._cacheId)) || {
                 token_type: '',
@@ -34,26 +34,26 @@ export default class Auth {
                 refresh_token: '',
                 refresh_token_expires_in: '',
                 refresh_token_expire_time: 0,
-                scope: ''
+                scope: '',
             }
         );
     }
 
-    async setData(newData: AuthData = {}) {
+    public async setData(newData: AuthData = {}) {
         const data = await this.data();
 
         await this._cache.setItem(this._cacheId, {
             ...data,
             ...newData,
             expire_time: Date.now() + parseInt(newData.expires_in, 10) * 1000,
-            refresh_token_expire_time: Date.now() + parseInt(newData.refresh_token_expires_in, 10) * 1000
+            refresh_token_expire_time: Date.now() + parseInt(newData.refresh_token_expires_in, 10) * 1000,
         });
     }
 
     /**
      * Check if there is a valid (not expired) access token
      */
-    async accessTokenValid() {
+    public async accessTokenValid() {
         const authData = await this.data();
         return authData.expire_time - this._refreshHandicapMs > Date.now();
     }
@@ -61,14 +61,14 @@ export default class Auth {
     /**
      * Check if there is a valid (not expired) access token
      */
-    async refreshTokenValid() {
+    public async refreshTokenValid() {
         return (await this.data()).refresh_token_expire_time > Date.now();
     }
 
-    async cancelAccessToken() {
+    public async cancelAccessToken() {
         return this.setData({
             access_token: '',
-            expires_in: '-1'
+            expires_in: '-1',
         });
     }
 }

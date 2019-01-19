@@ -14,22 +14,22 @@ export interface ExternalsOptions {
 }
 
 export default class Externals implements ExternalsOptions {
-    fetch = root.fetch;
+    public fetch = root.fetch;
 
-    Request = root.Request;
+    public Request = root.Request;
 
-    Response = root.Response;
+    public Response = root.Response;
 
-    Headers = root.Headers;
+    public Headers = root.Headers;
 
-    localStorage = root.localStorage;
+    public localStorage = root.localStorage;
 
-    constructor({
+    public constructor({
         fetch: fetchImpl,
         Request: RequestImpl,
         Response: ResponseImpl,
         Headers: HeadersImpl,
-        localStorage
+        localStorage,
     }: ExternalsOptions = {}) {
         if (fetchImpl) this.fetch = fetchImpl;
         if (RequestImpl) this.Request = RequestImpl;

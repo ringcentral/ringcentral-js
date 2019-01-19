@@ -4,7 +4,7 @@ import {Subscriptions} from '@ringcentral/subscriptions';
 const sdk = new SDK({
     clientId: 'foo',
     clientSecret: 'foo',
-    server: SDK.server.production
+    server: SDK.server.production,
 });
 
 const subscriptions = new Subscriptions({sdk});

@@ -17,13 +17,13 @@ export default class StoreConnector {
 
     public actions: Actions;
 
-    constructor({sdk, root = 'rcAuth'}: StoreConnectorOptions) {
+    public constructor({sdk, root = 'rcAuth'}: StoreConnectorOptions) {
         this.sdk = sdk;
         this.root = root;
         this.actions = new Actions({sdk});
     }
 
-    connectToStore = async (store: Store) => {
+    public connectToStore = async (store: Store) => {
         this.store = store;
         const {dispatch} = store;
         const platform = this.sdk.platform();
@@ -41,20 +41,22 @@ export default class StoreConnector {
             } else {
                 await platform.refresh();
             }
-        } catch (e) {} // can be empty because error is caught by event listener
+        } catch (e) { //eslint-disable-line
+            // can be empty because error is caught by event listener
+        }
     };
 
-    reducer = combineReducers({
+    public reducer = combineReducers({
         status,
         error,
-        loading
+        loading,
     });
 
-    getAuth = state => state[this.root];
+    public getAuth = state => state[this.root];
 
-    getAuthStatus = state => this.getAuth(state).status;
+    public getAuthStatus = state => this.getAuth(state).status;
 
-    getAuthError = state => this.getAuth(state).error;
+    public getAuthError = state => this.getAuth(state).error;
 
-    getAuthLoading = state => this.getAuth(state).loading;
+    public getAuthLoading = state => this.getAuth(state).loading;
 }

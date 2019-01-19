@@ -12,7 +12,7 @@ describe('RingCentral.subscription.CachedSubscription', () => {
                 const subscription2 = sub.createCachedSubscription({
                     cacheKey: 'foo',
                     pollInterval: 11,
-                    renewHandicapMs: 22
+                    renewHandicapMs: 22,
                 });
 
                 const data = {
@@ -20,8 +20,8 @@ describe('RingCentral.subscription.CachedSubscription', () => {
                     expirationTime: new Date(Date.now() + 10000).toISOString(),
                     deliveryMode: {
                         subscriberKey: 'foo',
-                        address: 'foo'
-                    }
+                        address: 'foo',
+                    },
                 };
 
                 expect(subscription1['_cacheKey']).to.equal('foo');
@@ -31,7 +31,7 @@ describe('RingCentral.subscription.CachedSubscription', () => {
 
                 subscription1['_setSubscription'](data);
                 expect(subscription2.subscription()).to.deep.equal(data);
-            })
+            }),
         );
     });
 
@@ -43,7 +43,7 @@ describe('RingCentral.subscription.CachedSubscription', () => {
                 const s = sub.createCachedSubscription({cacheKey: 'foo'});
                 s.restore(['foo']);
                 expect(s.eventFilters()).to.deep.equal(['foo']);
-            })
+            }),
         );
 
         it(
@@ -54,7 +54,7 @@ describe('RingCentral.subscription.CachedSubscription', () => {
                 s.restore(['bar']);
                 s.restore(['foo']);
                 expect(s.eventFilters()).to.deep.equal(['bar']);
-            })
+            }),
         );
 
         it.skip('sets appropriate event filters if subscription is not alive', () => {});

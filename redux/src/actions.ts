@@ -6,34 +6,34 @@ export interface ActionsOptions {
 }
 
 export default class Actions {
-    sdk: SDK;
+    public sdk: SDK;
 
-    constructor({sdk}: ActionsOptions) {
+    public constructor({sdk}: ActionsOptions) {
         this.sdk = sdk;
     }
 
-    login = query => {
+    public login = query => {
         if (query.error_description) return this.authError(new Error(query.error_description));
         this.sdk.login(query); // we ignore promise result because we listen to all events already
         return {type: LOGIN};
     };
 
-    logout = () => {
+    public logout = () => {
         this.sdk.logout(); // we ignore promise result because we listen to all events already
         return {type: LOGOUT};
     };
 
-    loginSuccess = () => ({
-        type: LOGIN_SUCCESS
+    public loginSuccess = () => ({
+        type: LOGIN_SUCCESS,
     });
 
-    authError = error => ({
+    public authError = error => ({
         type: AUTH_ERROR,
         payload: error,
-        error: true
+        error: true,
     });
 
-    logoutSuccess = () => ({
-        type: LOGOUT_SUCCESS
+    public logoutSuccess = () => ({
+        type: LOGOUT_SUCCESS,
     });
 }

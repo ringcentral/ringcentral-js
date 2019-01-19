@@ -14,7 +14,7 @@ const AuthGate = ({loading, error, status, children}) => children({loading, erro
 const ConnectedAuthGate = connect((state, {storeConnector}: LoginGateProps) => ({
     loading: storeConnector.getAuthLoading(state),
     error: storeConnector.getAuthError(state),
-    status: storeConnector.getAuthStatus(state)
+    status: storeConnector.getAuthStatus(state),
 }))(AuthGate);
 
 export default ConnectedAuthGate;

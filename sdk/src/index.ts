@@ -11,5 +11,5 @@ setDefaultExternals({
     fetch,
     Request,
     Response,
-    Headers
+    Headers,
 });

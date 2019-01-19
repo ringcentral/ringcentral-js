@@ -8,7 +8,7 @@ describe('RingCentral.core.Cache', () => {
                 const cache = sdk.cache();
 
                 expect(await cache.getItem('foo')).to.equal(null);
-            })
+            }),
         );
     });
 
@@ -25,7 +25,7 @@ describe('RingCentral.core.Cache', () => {
                 await cache.removeItem('foo');
 
                 expect(await cache.getItem('foo')).to.equal(null);
-            })
+            }),
         );
     });
 
@@ -46,7 +46,7 @@ describe('RingCentral.core.Cache', () => {
 
                 // prettier-ignore
                 expect(cache['_externals'].localStorage.getItem('foo')).to.equal('"foo"');
-            })
+            }),
         );
     });
 
@@ -61,7 +61,7 @@ describe('RingCentral.core.Cache', () => {
                 await cache1.setItem('foo', {foo: 'bar'});
 
                 expect(await sdk2.cache().getItem('foo')).to.equal(null);
-            })
+            }),
         );
     });
 });

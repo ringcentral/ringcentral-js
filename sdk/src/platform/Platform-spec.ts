@@ -13,7 +13,7 @@ describe('RingCentral.platform.Platform', () => {
                 await platform.auth().cancelAccessToken();
 
                 expect(await platform.auth().accessTokenValid()).to.equal(false);
-            })
+            }),
         );
 
         it(
@@ -26,7 +26,7 @@ describe('RingCentral.platform.Platform', () => {
                 await platform.logout();
 
                 expect(await platform.auth().accessTokenValid()).to.equal(false);
-            })
+            }),
         );
     });
 
@@ -45,7 +45,7 @@ describe('RingCentral.platform.Platform', () => {
                 await platform.loggedIn();
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
-            })
+            }),
         );
     });
 
@@ -62,11 +62,11 @@ describe('RingCentral.platform.Platform', () => {
                 await platform.login({
                     code: 'foo',
                     access_token_ttl: 100,
-                    refresh_token_ttl: 100
+                    refresh_token_ttl: 100,
                 });
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
-            })
+            }),
         );
 
         it(
@@ -81,7 +81,7 @@ describe('RingCentral.platform.Platform', () => {
                 await platform.login({access_token: 'foo'});
 
                 expect((await platform.auth().data()).access_token).to.equal('foo');
-            })
+            }),
         );
 
         it(
@@ -94,7 +94,7 @@ describe('RingCentral.platform.Platform', () => {
                 apiCall('POST', '/restapi/oauth/token', {message: 'expected'}, 400);
 
                 await expectThrows(async () => platform.login({code: 'foo'}), 'expected');
-            })
+            }),
         );
     });
 
@@ -111,7 +111,7 @@ describe('RingCentral.platform.Platform', () => {
                 const res = await platform.loggedIn();
 
                 expect(res).to.equal(false);
-            })
+            }),
         );
     });
 
@@ -134,7 +134,7 @@ describe('RingCentral.platform.Platform', () => {
 
                 expect(refreshSpy.calledOnce).to.be.true;
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
-            })
+            }),
         );
 
         it(
@@ -157,7 +157,7 @@ describe('RingCentral.platform.Platform', () => {
                 expect(refreshSpy.calledOnce).to.be.true;
                 expect(await res.json()).to.deep.equal(response);
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
-            })
+            }),
         );
 
         it(
@@ -169,7 +169,7 @@ describe('RingCentral.platform.Platform', () => {
                 apiCall('GET', path, {description: 'Fail'}, 400, 'Bad Request');
 
                 await expectThrows(async () => platform.get(path), 'Fail');
-            })
+            }),
         );
 
         it(
@@ -195,7 +195,7 @@ describe('RingCentral.platform.Platform', () => {
                 expect(e.retryAfter).to.equal(10);
 
                 expect(await res.json()).to.deep.equal(response);
-            })
+            }),
         );
 
         it(
@@ -218,7 +218,7 @@ describe('RingCentral.platform.Platform', () => {
 
                     expect(err).to.equal(e);
                 });
-            })
+            }),
         );
     });
 
@@ -241,12 +241,12 @@ describe('RingCentral.platform.Platform', () => {
                             .on(platform.events.refreshSuccess, successSpy)
                             .on(platform.events.refreshError, errorSpy)
                             .get(path),
-                    'Wrong token'
+                    'Wrong token',
                 );
 
                 expect(errorSpy.calledOnce).to.be.true;
                 expect(successSpy.calledOnce).to.be.false;
-            })
+            }),
         );
 
         it(
@@ -262,9 +262,9 @@ describe('RingCentral.platform.Platform', () => {
                 await platform.refresh(); // second
                 await Promise.all([
                     platform.refresh(), // third combined for two
-                    platform.refresh()
+                    platform.refresh(),
                 ]);
-            })
+            }),
         );
 
         it(
@@ -278,9 +278,9 @@ describe('RingCentral.platform.Platform', () => {
                     {
                         message: 'Wrong token',
                         error_description: 'Wrong token',
-                        description: 'Wrong token'
+                        description: 'Wrong token',
                     },
-                    240
+                    240,
                 ); // This weird status was caught on client's machine
 
                 await platform.auth().cancelAccessToken();
@@ -288,7 +288,7 @@ describe('RingCentral.platform.Platform', () => {
                 await expectThrows(async () => platform.refresh(), 'Wrong token', (e: any) => {
                     expect(e.originalMessage).to.equal('Malformed OAuth response');
                 });
-            })
+            }),
         );
 
         it(
@@ -307,15 +307,15 @@ describe('RingCentral.platform.Platform', () => {
                     (await Promise.all([
                         platform.get('/restapi/v1.0/foo/1'),
                         platform.get('/restapi/v1.0/foo/2'),
-                        platform.get('/restapi/v1.0/foo/3')
-                    ])).map(r => r.json())
+                        platform.get('/restapi/v1.0/foo/3'),
+                    ])).map(r => r.json()),
                 );
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
                 expect(res[0].increment).to.equal(1);
                 expect(res[1].increment).to.equal(2);
                 expect(res[2].increment).to.equal(3);
-            })
+            }),
         );
     });
 
@@ -338,7 +338,7 @@ describe('RingCentral.platform.Platform', () => {
                 await test('post');
                 await test('put');
                 await test('delete');
-            })
+            }),
         );
     });
 
@@ -351,42 +351,42 @@ describe('RingCentral.platform.Platform', () => {
                 expect(platform.createUrl('/restapi/v1.0/foo')).to.equal('/restapi/v1.0/foo');
 
                 expect(platform.createUrl('/restapi/v1.0/foo', {addServer: true})).to.equal(
-                    'http://whatever/restapi/v1.0/foo'
+                    'http://whatever/restapi/v1.0/foo',
                 );
 
                 expect(
                     await platform.signUrl(
                         platform.createUrl('/restapi/v1.0/foo', {
-                            addServer: true
-                        })
-                    )
+                            addServer: true,
+                        }),
+                    ),
                 ).to.equal('http://whatever/restapi/v1.0/foo?access_token=ACCESS_TOKEN');
 
                 expect(
                     await platform.signUrl(
                         platform.createUrl('/restapi/v1.0/foo?bar', {
-                            addServer: true
-                        })
-                    )
+                            addServer: true,
+                        }),
+                    ),
                 ).to.equal('http://whatever/restapi/v1.0/foo?bar&access_token=ACCESS_TOKEN');
 
                 expect(
                     await platform.signUrl(
                         platform.createUrl('/restapi/v1.0/foo?bar', {
                             addServer: true,
-                            addMethod: 'POST'
-                        })
-                    )
+                            addMethod: 'POST',
+                        }),
+                    ),
                 ).to.equal('http://whatever/restapi/v1.0/foo?bar&_method=POST&access_token=ACCESS_TOKEN');
 
                 expect(
                     await platform.signUrl(
                         platform.createUrl('/rcvideo/v1/foo?bar', {
-                            addServer: true
-                        })
-                    )
+                            addServer: true,
+                        }),
+                    ),
                 ).to.equal('http://whatever/rcvideo/v1/foo?bar&access_token=ACCESS_TOKEN');
-            })
+            }),
         );
     });
 
@@ -397,7 +397,7 @@ describe('RingCentral.platform.Platform', () => {
                 asyncTest(async sdk => {
                     const platform = sdk.platform();
                     expect(platform.parseLoginRedirect('?code=foo')).to.deep.equal({code: 'foo'});
-                })
+                }),
             );
         });
         describe('Implicit Grant Flow', () => {
@@ -406,7 +406,7 @@ describe('RingCentral.platform.Platform', () => {
                 asyncTest(async sdk => {
                     const platform = sdk.platform();
                     expect(platform.parseLoginRedirect('#access_token=foo')).to.deep.equal({access_token: 'foo'});
-                })
+                }),
             );
         });
     });
@@ -423,10 +423,10 @@ describe('RingCentral.platform.Platform', () => {
                         state: 'foo',
                         brandId: 'foo',
                         display: 'foo',
-                        prompt: 'foo'
-                    })
+                        prompt: 'foo',
+                    }),
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=token&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId='
+                    'http://whatever/restapi/oauth/authorize?response_type=token&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId=',
                 );
 
                 expect(
@@ -435,20 +435,20 @@ describe('RingCentral.platform.Platform', () => {
                         state: 'foo',
                         brandId: 'foo',
                         display: 'foo',
-                        prompt: 'foo'
-                    })
+                        prompt: 'foo',
+                    }),
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId='
+                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId=',
                 );
 
                 expect(
                     platform.loginUrl({
-                        implicit: false
-                    })
+                        implicit: false,
+                    }),
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=&ui_locales=&localeId='
+                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=&ui_locales=&localeId=',
                 );
-            })
+            }),
         );
     });
 
@@ -460,20 +460,20 @@ describe('RingCentral.platform.Platform', () => {
                 screenLeft: 0,
                 screenTop: 0,
                 location: {
-                    origin: ''
-                }
+                    origin: '',
+                },
             };
             globalAny.screen = {
                 left: 0,
                 top: 0,
                 width: 0,
-                height: 0
+                height: 0,
             };
             globalAny.document = {
                 documentElement: {
                     clientWidth: 0,
-                    clientHeight: 0
-                }
+                    clientHeight: 0,
+                },
             };
         }
 
@@ -491,7 +491,7 @@ describe('RingCentral.platform.Platform', () => {
                 const focus = spy();
                 const openSpy = spy(() => ({
                     close,
-                    focus
+                    focus,
                 }));
 
                 window.open = openSpy;
@@ -506,14 +506,14 @@ describe('RingCentral.platform.Platform', () => {
 
                 const res = await platform.loginWindow({
                     url: 'foo',
-                    origin: 'foo'
+                    origin: 'foo',
                 });
 
                 expect(res.access_token).to.equal('foo');
                 expect(close.calledOnce).to.be.true;
                 expect(focus.calledOnce).to.be.true;
                 expect(openSpy.calledOnce).to.be.true;
-            })
+            }),
         );
 
         it(
@@ -531,12 +531,12 @@ describe('RingCentral.platform.Platform', () => {
                 await expectThrows(async () => {
                     await platform.loginWindow({
                         url: 'foo',
-                        origin: 'foo'
+                        origin: 'foo',
                     });
                 }, 'No authorization code or token');
 
                 expect(openSpy.calledOnce).to.be.true;
-            })
+            }),
         );
 
         it(
@@ -550,12 +550,12 @@ describe('RingCentral.platform.Platform', () => {
                 await expectThrows(async () => {
                     await platform.loginWindow({
                         url: 'foo',
-                        origin: 'foo'
+                        origin: 'foo',
                     });
                 }, 'Could not open login window. Please allow popups for this site');
 
                 expect(openSpy.calledOnce).to.be.true;
-            })
+            }),
         );
     });
 
@@ -565,14 +565,14 @@ describe('RingCentral.platform.Platform', () => {
             asyncTest(async sdk => {
                 const platform = sdk.platform();
                 expect(platform.parseLoginRedirect('#access_token=foo').access_token).to.equal('foo');
-            })
+            }),
         );
         it(
             'parses redirect URIs with query',
             asyncTest(async sdk => {
                 const platform = sdk.platform();
                 expect(platform.parseLoginRedirect('?access_token=foo').access_token).to.equal('foo');
-            })
+            }),
         );
         it(
             'parses redirect URIs with errors',
@@ -587,7 +587,7 @@ describe('RingCentral.platform.Platform', () => {
                 expect(() => {
                     platform.parseLoginRedirect('xxx');
                 }).to.throw('Unable to parse response');
-            })
+            }),
         );
     });
 });

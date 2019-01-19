@@ -23,48 +23,48 @@ export interface ClientOptions {
 }
 
 export default class Client extends EventEmitter {
-    static _contentType = 'Content-Type';
+    public static _contentType = 'Content-Type';
 
-    static _jsonContentType = 'application/json';
+    public static _jsonContentType = 'application/json';
 
-    static _multipartContentType = 'multipart/mixed';
+    public static _multipartContentType = 'multipart/mixed';
 
-    static _urlencodedContentType = 'application/x-www-form-urlencoded';
+    public static _urlencodedContentType = 'application/x-www-form-urlencoded';
 
-    static _headerSeparator = ':';
+    public static _headerSeparator = ':';
 
-    static _bodySeparator = '\n\n';
+    public static _bodySeparator = '\n\n';
 
-    static _boundarySeparator = '--';
+    public static _boundarySeparator = '--';
 
-    static _unauthorizedStatus = 401;
+    public static _unauthorizedStatus = 401;
 
-    static _rateLimitStatus = 429;
+    public static _rateLimitStatus = 429;
 
-    static _allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
+    public static _allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
 
-    static _defaultRequestInit: CreateRequestOptions = {
+    public static _defaultRequestInit: CreateRequestOptions = {
         credentials: 'include',
-        mode: 'cors'
+        mode: 'cors',
     };
 
-    events = {
+    public events = {
         beforeRequest: 'beforeRequest',
         requestSuccess: 'requestSuccess',
-        requestError: 'requestError'
+        requestError: 'requestError',
     };
 
     private _externals: Externals;
 
     private _defaultRequestInit: CreateRequestOptions = {};
 
-    constructor({externals, defaultRequestInit = {}}: ClientOptions) {
+    public constructor({externals, defaultRequestInit = {}}: ClientOptions) {
         super();
         this._defaultRequestInit = defaultRequestInit;
         this._externals = externals;
     }
 
-    async sendRequest(request: Request): Promise<Response> {
+    public async sendRequest(request: Request): Promise<Response> {
         let response;
         try {
             //TODO Stop request if listeners return false
@@ -86,14 +86,14 @@ export default class Client extends EventEmitter {
         }
     }
 
-    async _loadResponse(request: Request): Promise<Response> {
+    public async _loadResponse(request: Request): Promise<Response> {
         return this._externals.fetch.call(null, request); // fixed illegal invocation in Chrome
     }
 
     /**
      * Wraps the JS Error object with transaction information
      */
-    async makeError(e: any, response: Response = null, request: Request = null): Promise<ApiError> {
+    public async makeError(e: any, response: Response = null, request: Request = null): Promise<ApiError> {
         // Wrap only if regular error
         if (!e.response && !e.originalMessage) {
             e.response = response;
@@ -105,7 +105,7 @@ export default class Client extends EventEmitter {
         return e;
     }
 
-    createRequest(init: CreateRequestOptions = Client._defaultRequestInit): Request {
+    public createRequest(init: CreateRequestOptions = Client._defaultRequestInit): Request {
         init = {...this._defaultRequestInit, ...init};
         init.headers = init.headers || {};
 
@@ -163,27 +163,27 @@ export default class Client extends EventEmitter {
         return req;
     }
 
-    private _isContentType(contentType, response) {
+    public _isContentType(contentType, response) {
         return !!~this.getContentType(response).indexOf(contentType);
     }
 
-    getContentType(response) {
+    public getContentType(response) {
         return response.headers.get(Client._contentType) || '';
     }
 
-    isMultipart(response) {
+    public isMultipart(response) {
         return this._isContentType(Client._multipartContentType, response);
     }
 
-    isJson(response) {
+    public isJson(response) {
         return this._isContentType(Client._jsonContentType, response);
     }
 
-    async toMultipart(response: Response): Promise<Response[]> {
+    public async toMultipart(response: Response): Promise<Response[]> {
         return this.isMultipart(response) ? this.multipart(response) : [response];
     }
 
-    async multipart(response: Response): Promise<Response[]> {
+    public async multipart(response: Response): Promise<Response[]> {
         if (!this.isMultipart(response)) throw new Error('Response is not multipart');
 
         // Step 1. Split multipart response
@@ -241,11 +241,11 @@ export default class Client extends EventEmitter {
         return new this._externals.Response(text, {
             headers,
             status,
-            statusText
+            statusText,
         });
     }
 
-    async error(response: Response, skipOKCheck = false): Promise<string> {
+    public async error(response: Response, skipOKCheck = false): Promise<string> {
         if (response.ok && !skipOKCheck) return null;
 
         let msg = (response.status ? `${response.status} ` : '') + (response.statusText ? response.statusText : '');
