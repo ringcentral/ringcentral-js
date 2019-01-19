@@ -2,7 +2,8 @@
   "name": "@ringcentral/mono",
   "version": "4.0.0",
   "scripts": {
-    "postinstall": "lerna bootstrap --no-ci --hoist",
+    "postinstall": "npm run bootstrap && npm run build",
+    "bootstrap": "lerna bootstrap --no-ci --hoist",
     "clean": "lerna run clean && lerna clean --yes && rm -rf node_modules",
     "start": "dotenv lerna run start -- --parallel",
     "build": "lerna run build --concurrency=1 --stream",

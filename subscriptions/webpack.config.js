@@ -11,13 +11,13 @@ module.exports = createConfig({
             commonjs: '@ringcentral/sdk',
             commonjs2: '@ringcentral/sdk',
             amd: 'ringcentral',
-            root: ['RingCentral', 'sdk']
+            root: ['RingCentral', 'sdk'],
         },
-        'pubnub': {
+        pubnub: {
             commonjs: 'pubnub',
             commonjs2: 'pubnub',
             amd: 'pubnub',
-            root: 'PubNub' // indicates global variable
-        }
-    }
+            root: 'PubNub',
+        },
+    },
 });
