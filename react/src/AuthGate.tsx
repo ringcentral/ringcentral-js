@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import {SDK} from '@ringcentral/sdk';
 
 function getDisplayName(WrappedComponent) {
@@ -10,16 +10,22 @@ const delay = () => new Promise(res => setImmediate(res));
 export interface AuthGateState {
     isAuthorized: boolean;
     authorizing: boolean;
-    authError?: Error;
+    authError: null | Error;
+}
+
+export interface AuthGateRenderProps extends AuthGateState {
+    loginUrl: (options: any) => string;
+    parseRedirect: (search: string) => Promise<any>;
+    logout: () => Promise<any>;
 }
 
 export interface AuthGateProps {
     sdk: SDK;
     ensure?: boolean;
-    children?: any;
+    children: (props: AuthGateRenderProps) => any;
 }
 
-export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
+export class AuthGate extends Component<AuthGateProps, AuthGateState> {
     public state = {
         isAuthorized: false,
         authorizing: true,
@@ -120,6 +126,7 @@ export class AuthGate extends React.Component<AuthGateProps, AuthGateState> {
     }
 }
 
+//TODO Definition
 export const withAuthGate = ({sdk, ensure = false}: {sdk: SDK; ensure?: boolean}) => Cmp => {
     const WrappedCmp = props => (
         <AuthGate sdk={sdk} ensure={ensure}>

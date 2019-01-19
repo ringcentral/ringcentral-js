@@ -3,7 +3,7 @@ import {applyMiddleware, createStore as createReduxStore, combineReducers, Store
 import locationHelperBuilder from 'redux-auth-wrapper/history4/locationHelper';
 import {connectedRouterRedirect} from 'redux-auth-wrapper/history4/redirect';
 import SDK from '@ringcentral/sdk';
-import StoreConnector from '../lib';
+import StoreConnector from '@ringcentral/redux';
 import {version} from '../package.json';
 
 const locationHelper = locationHelperBuilder({});
@@ -15,9 +15,9 @@ export const redirectUri = window.location.origin + redirectPath;
 export const sdk = new SDK({
     appName: 'ReduxDemo',
     appVersion: version,
-    server: process.env.API_SERVER,
-    clientId: process.env.API_CLIENT_ID,
-    redirectUri
+    server: process.env.REACT_APP_API_SERVER,
+    clientId: process.env.REACT_APP_API_CLIENT_ID,
+    redirectUri,
 });
 
 export const storeConnector = new StoreConnector({sdk});
@@ -25,16 +25,16 @@ export const storeConnector = new StoreConnector({sdk});
 export const createStore = () => {
     const store = createReduxStore(
         combineReducers({
-            [storeConnector.root]: storeConnector.reducer
+            [storeConnector.root]: storeConnector.reducer,
         }),
         undefined,
         applyMiddleware(
             createLogger({
                 level: process.env.NODE_ENV !== 'production' ? 'log' : 'error',
                 collapsed: (getState, action, logEntry) => !logEntry.error,
-                diff: true
-            })
-        )
+                diff: true,
+            }),
+        ),
     );
 
     storeConnector.connectToStore(store);
@@ -47,7 +47,7 @@ export const openLogin = pathname => window.location.assign(sdk.loginUrl({state:
 export const authenticated = connectedRouterRedirect({
     redirectPath,
     authenticatedSelector: storeConnector.getAuthStatus,
-    wrapperDisplayName: 'UserIsAuthenticated'
+    wrapperDisplayName: 'UserIsAuthenticated',
 });
 
 export const notAuthenticated = connectedRouterRedirect({
@@ -58,5 +58,5 @@ export const notAuthenticated = connectedRouterRedirect({
     },
     allowRedirectBack: false,
     authenticatedSelector: state => !storeConnector.getAuthStatus(state),
-    wrapperDisplayName: 'UserIsNotAuthenticated'
+    wrapperDisplayName: 'UserIsNotAuthenticated',
 });

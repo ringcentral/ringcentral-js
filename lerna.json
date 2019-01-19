@@ -4,7 +4,9 @@
     "api-test",
     "demo",
     "react",
+    "react-demo",
     "redux",
+    "redux-demo",
     "sdk",
     "subscriptions",
     "utils"

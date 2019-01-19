@@ -1,18 +1,26 @@
-import React from 'react';
-import {Redirect, Route, Switch} from 'react-router-dom';
-import {withAuthGate} from '../lib'; // change to @ringcentral/react
+import React, {FunctionComponent} from 'react';
+import {Redirect, Route, Switch, RouteComponentProps} from 'react-router-dom';
+import {withAuthGate, AuthGateRenderProps} from '@ringcentral/react';
 import OauthRedirect from './OauthRedirect';
 import Login from './Login';
 import {sdk} from './lib';
 
-const LoggedOutWrapper = ({isAuthorized, authorizing, authError, match, location}) => {
+interface LoggedOutWrapperProps extends RouteComponentProps, AuthGateRenderProps {}
+
+const LoggedOutWrapper: FunctionComponent<LoggedOutWrapperProps> = ({
+    isAuthorized,
+    authorizing,
+    authError,
+    match,
+    location,
+}) => {
     if (authorizing) {
         return <div>Loading</div>;
     }
 
     if (isAuthorized) {
         const {from} = location.state || {from: {pathname: '/'}};
-        console.log('Redirecting to', from);
+        console.log('Redirecting to', from); //eslint-disable-line
         return <Redirect to={from} />;
     }
 

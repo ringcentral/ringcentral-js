@@ -8,9 +8,9 @@
 build
 coverage
 dist
-lib
 es6
-npm-debug.*
-node_modules
+lib
 lerna-debug.*
+node_modules
+npm-debug.*
 package.json.lerna_backup

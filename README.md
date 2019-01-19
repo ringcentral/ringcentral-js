@@ -32,6 +32,24 @@ You are viewing documentation for upcoming `4.0.0` release. Follow [this link to
 
 ***
 
+# Demos
+
+Don't forget to create `.env` file with the following keys:
+
+```
+BROWSER=false
+SKIP_PREFLIGHT_CHECK=true
+
+DEMO_PORT=3000
+REACT_DEMO_PORT=3030
+REDUX_DEMO_PORT=3033
+
+REACT_APP_API_SERVER=https://platform.devtest.ringcentral.com
+REACT_APP_API_CLIENT_ID=XXX
+```
+
+***
+
 # Migration from previous releases
 
 **!!! Attention !!!**

@@ -6,7 +6,7 @@ const redirectUri = `${window.location.origin}/api/oauth2Callback`; // make sure
 export const sdk = new SDK({
     appName: 'ReactDemo',
     appVersion: version,
-    server: process.env.API_SERVER,
-    clientId: process.env.API_CLIENT_ID,
-    redirectUri
+    server: process.env.REACT_APP_API_SERVER,
+    clientId: process.env.REACT_APP_API_CLIENT_ID,
+    redirectUri,
 });

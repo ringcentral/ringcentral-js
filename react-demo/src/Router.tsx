@@ -1,14 +1,16 @@
 import React from 'react';
-import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
+import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
 import LoggedInWrapper from './LoggedInWrapper';
 import LoggedOutWrapper from './LoggedOutWrapper';
 
-export default () => (
-    <Router>
+const Router = () => (
+    <BrowserRouter>
         <Switch>
             <Route path="/app" component={LoggedInWrapper} />
             <Route path="/api" component={LoggedOutWrapper} />
             <Redirect from="/" to="/app" />
         </Switch>
-    </Router>
+    </BrowserRouter>
 );
+
+export default Router;

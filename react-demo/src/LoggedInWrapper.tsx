@@ -1,10 +1,18 @@
-import React from 'react';
-import {Redirect, Route, Switch} from 'react-router-dom';
-import {withAuthGate} from '../lib'; // change to @ringcentral/react
+import React, {FunctionComponent} from 'react';
+import {Redirect, Route, Switch, RouteComponentProps} from 'react-router-dom';
+import {withAuthGate, AuthGateRenderProps} from '@ringcentral/react';
 import Dashboard from './Dashboard';
 import {sdk} from './lib';
 
-const LoggedInWrapper = ({isAuthorized, authorizing, logout, match, location}) => {
+interface LoggedInWrapperProps extends RouteComponentProps, AuthGateRenderProps {}
+
+const LoggedInWrapper: FunctionComponent<LoggedInWrapperProps> = ({
+    isAuthorized,
+    authorizing,
+    logout,
+    match,
+    location,
+}) => {
     if (authorizing) {
         return <div>Loading...</div>;
     }
@@ -15,8 +23,8 @@ const LoggedInWrapper = ({isAuthorized, authorizing, logout, match, location}) =
                 to={{
                     pathname: '/api/login',
                     state: {
-                        from: location
-                    }
+                        from: location,
+                    },
                 }}
             />
         );

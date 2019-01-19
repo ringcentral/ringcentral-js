@@ -1,11 +1,16 @@
-import React from 'react';
+import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {sdk, storeConnector} from '../lib';
 
 const {logout} = storeConnector.actions;
 
-class Index extends React.Component {
-    constructor(props) {
+export interface IndexState {
+    user: any;
+    error: any;
+}
+
+class Index extends Component<any, IndexState> {
+    public constructor(props) {
         super(props);
         this.state = {user: null, error: null};
     }
@@ -14,7 +19,7 @@ class Index extends React.Component {
      * Here we can make an authorized request since this page is opened only when user is authorized
      * This can be wrapped in Redux Action
      */
-    async componentDidMount() {
+    public async componentDidMount() {
         try {
             const user = await (await sdk.get('/restapi/v1.0/account/~/extension/~')).json();
             this.setState({user});
@@ -23,7 +28,7 @@ class Index extends React.Component {
         }
     }
 
-    render() {
+    public render() {
         const {error, user} = this.state;
 
         if (error) return <div>Error: {error.toString()}</div>;
@@ -43,5 +48,5 @@ class Index extends React.Component {
 
 export default connect(
     null,
-    {logout}
+    {logout},
 )(Index);

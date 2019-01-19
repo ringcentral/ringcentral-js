@@ -1,0 +1,6 @@
+{
+  "extends": "../tsconfig.cra",
+  "include": [
+    "src"
+  ]
+}

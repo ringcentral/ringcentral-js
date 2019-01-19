@@ -1,8 +1,8 @@
 import React from 'react';
-import {withAuthGate} from '../lib'; // change to @ringcentral/react
+import {withAuthGate} from '@ringcentral/react';
 import {sdk} from './lib';
 
-const Login = ({authError, loginUrl, authorizing}) => {
+const Login = ({authError, loginUrl, authorizing}: any) => {
     if (authorizing) return <div>Loading...</div>;
 
     const login = () => window.location.assign(loginUrl({implicit: true}));
