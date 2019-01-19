@@ -5,7 +5,7 @@
     "outDir": "lib"
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
+    "src",
+    "node_modules/@ringcentral/sdk/src"
   ]
 }

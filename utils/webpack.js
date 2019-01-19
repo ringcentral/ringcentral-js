@@ -1,5 +1,4 @@
 function createConfig({entry, filename, outputPath, libraryName, externals}) {
-
     const common = {
         mode: 'production',
         devtool: '#source-map',
@@ -9,19 +8,19 @@ function createConfig({entry, filename, outputPath, libraryName, externals}) {
                 {
                     test: /\.tsx?$/,
                     use: 'ts-loader',
-                    exclude: /node_modules/
-                }
-            ]
+                    exclude: /node_modules/,
+                },
+            ],
         },
         resolve: {
-            extensions: ['.tsx', '.ts', '.js']
+            extensions: ['.tsx', '.ts', '.js'],
         },
         output: {
             path: outputPath,
             library: ['RingCentral', libraryName],
             libraryTarget: 'umd',
         },
-        externals
+        externals,
     };
 
     return [
@@ -32,18 +31,17 @@ function createConfig({entry, filename, outputPath, libraryName, externals}) {
                 filename: filename + '.js'
             },
             optimization: {
-                minimize: false
-            }
+                minimize: false,
+            },
         },
         {
             ...common,
             output: {
                 ...common.output,
-                filename: filename + '.min.js'
-            }
-        }
+                filename: filename + '.min.js',
+            },
+        },
     ];
-
 }
 
 module.exports = createConfig;
