@@ -112,17 +112,17 @@ $ RCSDK_API_KEY=YOUR_API_KEY (...) RCSDK_AGS_DBNAME=database npm run test-api
     ```bash
     $ npm run prepare:prerelease [-- --yes --no-git-tag-version --no-push]
     ```
-    These commands will update versions and push to git with appropriate tag, tag will be picked up by CI and actual
-    publish will happen (`lerna run publish`). You may omit some actions and do them all manually.
+    This command will run `lerna version prerelease` to update versions and push to git with appropriate tag, tag will
+    be picked up by CI and actual publish will happen (`lerna publish`).
     
-2. *Versioned release*:
+3. *Versioned release*:
     ```bash
-    $ npm run prepare:prerelease [-- --yes --no-git-tag-version --no-push]
+    $ npm run prepare:release [-- --yes --no-git-tag-version --no-push]
     ```
-    These commands will update versions and push to git with appropriate tag, tag will be picked up by CI and actual
-    publish will happen (`lerna run publish`). You may omit some actions and do them all manually.
+    This command will run `lerna version` to update versions and push to git with appropriate tag, tag will be picked up
+    by CI and actual publish will happen (`lerna publish`).
     
-3. *Manual publish* — run publishing locally, it assumes you already prepared your release:
+4. *Manual publish* — run publishing locally, it assumes you already prepared your release:
     ```bash
     $ npm run publish:fromgit
     ```
