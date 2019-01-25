@@ -7,5 +7,4 @@ const fetchMock = require('fetch-mock/es5/server');
 
 exports.expect = chai.expect;
 exports.spy = sinon.spy;
-exports.fetchMock = (typeof window !== 'undefined') ? window['fetchMock'] : fetchMock;
-
+exports.fetchMock = typeof window !== 'undefined' ? window['fetchMock'] : fetchMock;

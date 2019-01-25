@@ -28,7 +28,7 @@ function createConfig({entry, filename, outputPath, libraryName, externals}) {
             ...common,
             output: {
                 ...common.output,
-                filename: filename + '.js'
+                filename: filename + '.js',
             },
             optimization: {
                 minimize: false,

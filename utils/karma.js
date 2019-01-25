@@ -1,50 +1,34 @@
 function createConfig(config, cwd) {
-
-    var specs = [
-        {pattern: './src/**/!(env).ts', watched: false}
-    ];
+    let specs = [{pattern: './src/**/!(env).ts', watched: false}];
 
     return {
-
         basePath: '.',
 
-        frameworks: [
-            'mocha',
-            'chai',
-            'sinon-chai',
-            'karma-typescript'
-        ],
+        frameworks: ['mocha', 'chai', 'sinon-chai', 'karma-typescript'],
 
         files: [
             require.resolve('fetch-mock/dist/es5/client-bundle'),
-            require.resolve('karma-chai-plugins/function-bind-polyfill')
+            require.resolve('karma-chai-plugins/function-bind-polyfill'),
         ].concat(specs),
 
-        reporters: [
-            'karma-typescript',
-            'mocha'
-        ],
+        reporters: ['karma-typescript', 'mocha'],
 
         htmlReporter: {
-            outputDir: './coverage/karma'
+            outputDir: './coverage/karma',
         },
 
         coverageReporter: {
             type: 'lcov',
-            dir: './coverage/karma'
+            dir: './coverage/karma',
         },
 
         logLevel: config.LOG_WARN,
 
         preprocessors: {
-            './src/**/*.ts': ['karma-typescript']
+            './src/**/*.ts': ['karma-typescript'],
         },
 
-        browsers: [
-            process.env.CI || process.env.TRAVIS ? 'ChromeTravis' : 'Chrome',
-            'Firefox',
-            'Headless'
-        ],
+        browsers: [process.env.CI || process.env.TRAVIS ? 'ChromeTravis' : 'Chrome', 'Firefox', 'Headless'],
 
         plugins: [
             require.resolve('karma-chai-plugins'),
@@ -52,18 +36,18 @@ function createConfig(config, cwd) {
             require.resolve('karma-firefox-launcher'),
             require.resolve('karma-mocha'),
             require.resolve('karma-mocha-reporter'),
-            require.resolve('karma-typescript')
+            require.resolve('karma-typescript'),
         ],
 
         customLaunchers: {
             Headless: {
                 base: 'ChromeHeadless',
-                flags: ['--no-sandbox']
+                flags: ['--no-sandbox'],
             },
             ChromeTravis: {
                 base: 'Chrome',
-                flags: ['--no-sandbox']
-            }
+                flags: ['--no-sandbox'],
+            },
         },
 
         client: {
@@ -71,28 +55,22 @@ function createConfig(config, cwd) {
             showDebugMessages: true,
             mocha: {
                 ui: 'bdd',
-                timeout: 5000
-
-            }
+                timeout: 5000,
+            },
         },
 
         karmaTypescriptConfig: {
-            tsconfig: './tsconfig.json',
+            tsconfig: 'tsconfig.json',
             bundlerOptions: {
                 ignore: ['fetch-mock/es5/server'],
                 resolve: {
-                    directories: [
-                        __dirname + '/node_modules',
-                        cwd + '/node_modules'
-                    ]
-                }
-            }
+                    directories: [__dirname + '/node_modules', __dirname + '/../node_modules', cwd + '/node_modules'],
+                },
+            },
         },
 
-        singleRun: true
-
+        singleRun: true,
     };
-
 }
 
 module.exports = createConfig;

@@ -11,12 +11,23 @@ cache:
 addons:
   firefox: latest
 
+before_install:
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
+
+before_script:
+- DEBUG=eslint:cli-engine npm run lint:all
+- npm run build
+
 deploy:
 - provider: script
   script: bash npm run publish:canary -- --yes
   skip_cleanup: true
   on:
     branch: master
+    tags: false
     repo: ringcentral/ringcentral-js
 - provider: script
   script: bash npm run publish:fromgit -- --yes
@@ -37,18 +48,8 @@ deploy:
   - subscriptions/dist/ringcentral-subscriptions.min.js
   - subscriptions/dist/ringcentral-subscriptions.min.js.map
   on:
-    node: 9
     tags: true
     repo: ringcentral/ringcentral-js
 
-before_install:
-- export CHROME_BIN=chromium-browser
-- export DISPLAY=:99.0
-- sh -e /etc/init.d/xvfb start
-- echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
-
-before_script:
-- npm run build
-
-#after_success:
-#- npm run coveralls
+after_success:
+- npm run test:coverage
