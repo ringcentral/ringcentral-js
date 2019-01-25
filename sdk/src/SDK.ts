@@ -93,47 +93,66 @@ export class SDK {
         return this._cache;
     }
 
+    /* istanbul ignore next */
     public send = async (options: SendOptions): Promise<Response> => this.platform().send(options);
 
+    /* istanbul ignore next */
     public get = async (url, query?, options?: SendOptions): Promise<Response> =>
         this.platform().send({method: 'GET', url, query, ...options});
 
+    /* istanbul ignore next */
     public post = async (url, body?, query?, options?: SendOptions): Promise<Response> =>
         this.platform().send({method: 'POST', url, query, body, ...options});
 
+    /* istanbul ignore next */
     public put = async (url, body?, query?, options?: SendOptions): Promise<Response> =>
         this.platform().send({method: 'PUT', url, query, body, ...options});
 
+    /* istanbul ignore next */
     public delete = async (url, query?, options?: SendOptions): Promise<Response> =>
         this.platform().send({method: 'DELETE', url, query, ...options});
 
+    /* istanbul ignore next */
     public login = async (options: LoginOptions): Promise<Response> => this.platform().login(options);
 
+    /* istanbul ignore next */
     public ensureLoggedIn = async (): Promise<Response> => this.platform().ensureLoggedIn();
 
+    /* istanbul ignore next */
     public loginUrl = (options: LoginUrlOptions): string => this.platform().loginUrl(options);
 
+    /* istanbul ignore next */
     public createUrl = (path, options: CreateUrlOptions): string => this.platform().createUrl(path, options);
 
+    /* istanbul ignore next */
     public signUrl = async (path): Promise<string> => this.platform().signUrl(path);
 
+    /* istanbul ignore next */
     public parseLoginRedirect = (url): any => this.platform().parseLoginRedirect(url);
 
+    /* istanbul ignore next */
     public logout = async (): Promise<Response> => this.platform().logout();
 
+    /* istanbul ignore next */
     public loginWindow = async (options: LoginWindowOptions): Promise<LoginOptions> =>
         this.platform().loginWindow(options);
 
+    /* istanbul ignore next */
     public refresh = async (): Promise<Response> => this.platform().refresh();
 
+    /* istanbul ignore next */
     public multipart = async (response: Response): Promise<Response[]> => this.client().multipart(response);
 
+    /* istanbul ignore next */
     public getContentType = (response: Response): string => this.client().getContentType(response);
 
+    /* istanbul ignore next */
     public isMultipart = (response: Response) => this.client().isMultipart(response);
 
+    /* istanbul ignore next */
     public isJson = (response: Response) => this.client().isJson(response);
 
+    /* istanbul ignore next */
     public error = (response: Response): Promise<string> => this.client().error(response);
 }
 
