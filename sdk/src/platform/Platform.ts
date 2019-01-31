@@ -439,7 +439,7 @@ export default class Platform extends EventEmitter {
             }
 
             await delay(retryAfter);
-            return this.sendRequest(request, options);
+            return this.sendRequest(this._client.createRequest(options), options);
         }
     }
 
