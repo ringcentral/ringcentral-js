@@ -569,7 +569,7 @@ Platform.prototype.sendRequest = function(request, options) {
         }
 
         return this.delay(retryAfter).then(function() {
-            return this.sendRequest(request, options);
+            return this.sendRequest(this._client.createRequest(options), options);
         }.bind(this));
 
     }.bind(this));
