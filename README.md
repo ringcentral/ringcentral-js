@@ -985,10 +985,10 @@ var FormData = require('form-data'),
     formData = new FormData();
 
 // This is the mandatory part, the name and type should always be as follows
-formData.append('json', new Buffer(JSON.stringify(body)), {filename: 'request.json', contentType: 'application/json'});
+formData.append('json', Buffer(JSON.stringify(body)), {filename: 'request.json', contentType: 'application/json'});
 
 // To send a plain text
-formData.append('attachment', new Buffer('some plain text'), {filename: 'text.txt', contentType: 'text/plain'});
+formData.append('attachment', Buffer('some plain text'), {filename: 'text.txt', contentType: 'text/plain'});
 
 // To send a file from file system
 formData.append('attachment', require('fs').createReadStream('/foo/bar.jpg'));
