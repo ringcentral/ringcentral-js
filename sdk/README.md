@@ -85,8 +85,8 @@ Add the following to your HTML:
 <script type="text/javascript" src="path-to-scripts/ringcentral.js"></script><!-- or ringcentral.min.js -->
 <script type="text/javascript">
 
-    var rcsdk = new RingCentral.sdk.SDK({
-        server: RingCentral.sdk.SDK.server.sandbox,
+    var rcsdk = new RingCentral.SDK({
+        server: RingCentral.SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
@@ -184,7 +184,7 @@ rcsdk
 In this case your landing page (the one to which Redirect URI points) need to call the following code:
 
 ```js
-RingCentral.sdk.SDK.handleLoginRedirect();
+RingCentral.SDK.handleLoginRedirect();
 ```
 
 #### Difference between Authorization Code and Implicit Grant flows
@@ -803,10 +803,10 @@ var FormData = require('form-data'),
     formData = new FormData();
 
 // This is the mandatory part, the name and type should always be as follows
-formData.append('json', new Buffer(JSON.stringify(body)), {filename: 'request.json', contentType: 'application/json'});
+formData.append('json', Buffer(JSON.stringify(body)), {filename: 'request.json', contentType: 'application/json'});
 
 // To send a plain text
-formData.append('attachment', new Buffer('some plain text'), {filename: 'text.txt', contentType: 'text/plain'});
+formData.append('attachment', Buffer('some plain text'), {filename: 'text.txt', contentType: 'text/plain'});
 
 // To send a file from file system
 formData.append('attachment', require('fs').createReadStream('/foo/bar.jpg'));

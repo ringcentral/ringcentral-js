@@ -12,7 +12,7 @@ const createSubscription = sdk =>
         renewHandicapMs,
     });
 
-describe('RingCentral.subscription.Subscription', () => {
+describe('Subscription', () => {
     describe('register', () => {
         it(
             'automatically renews subscription',

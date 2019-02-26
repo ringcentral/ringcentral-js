@@ -5,5 +5,5 @@ module.exports = createConfig({
     filename: 'ringcentral',
     entry: './src/SDK.ts',
     outputPath: path.resolve(__dirname, 'dist'),
-    libraryName: 'sdk',
+    libraryName: 'SDK',
 });

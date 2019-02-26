@@ -1,6 +1,6 @@
 {
   "name": "@ringcentral/redux",
-  "version": "4.0.0-alpha.4",
+  "version": "4.0.0-alpha.5",
   "scripts": {
     "clean": "rimraf lib/* es6/* .cache",
     "build": "npm run clean && npm run build:tsc:es5 && npm run build:tsc:es6",
@@ -11,8 +11,8 @@
     "start:tsc:es6": "npm run build:tsc:es6 -- --watch --preserveWatchOutput"
   },
   "devDependencies": {
-    "@ringcentral/sdk": "^4.0.0-alpha.4",
-    "@ringcentral/sdk-utils": "^4.0.0-alpha.4",
+    "@ringcentral/sdk": "^4.0.0-alpha.5",
+    "@ringcentral/sdk-utils": "^4.0.0-alpha.5",
     "@types/react": "16.7.20",
     "@types/react-redux": "6.0.9",
     "@types/redux": "3.6.0",

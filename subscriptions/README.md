@@ -73,14 +73,14 @@ Add the following to your HTML:
 <script type="text/javascript" src="path-to-scripts/ringcentral-subscriptions.js"></script>
 <script type="text/javascript">
 
-    var sdk = new RingCentral.sdk.SDK({
-        server: RingCentral.sdk.SDK.server.sandbox,
+    var sdk = new RingCentral.SDK({
+        server: RingCentral.SDK.server.sandbox,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
     
-    var subscriptions = new RingCentral.subscriptions.Subscriptions({
+    var subscriptions = new RingCentral.Subscriptions({
        sdk: sdk
     });
 

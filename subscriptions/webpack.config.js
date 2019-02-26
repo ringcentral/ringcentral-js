@@ -5,7 +5,7 @@ module.exports = createConfig({
     filename: 'ringcentral-subscriptions',
     entry: './src/Subscriptions.ts',
     outputPath: path.resolve(__dirname, 'dist'),
-    libraryName: 'subscriptions',
+    libraryName: 'Subscriptions',
     externals: {
         '@ringcentral/sdk': {
             commonjs: '@ringcentral/sdk',

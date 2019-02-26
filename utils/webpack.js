@@ -19,6 +19,7 @@ function createConfig({entry, filename, outputPath, libraryName, externals}) {
             path: outputPath,
             library: ['RingCentral', libraryName],
             libraryTarget: 'umd',
+            libraryExport: 'default',
         },
         externals,
     };

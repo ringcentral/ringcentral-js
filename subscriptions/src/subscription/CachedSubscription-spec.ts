@@ -1,7 +1,7 @@
 import {asyncTest, expect} from '@ringcentral/sdk/lib/test/test';
 import {createSubscriptions} from '../test/test';
 
-describe('RingCentral.subscription.CachedSubscription', () => {
+describe('CachedSubscription', () => {
     describe('create', () => {
         it(
             'supports legacy definition',

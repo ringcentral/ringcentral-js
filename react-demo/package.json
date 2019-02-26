@@ -1,20 +1,20 @@
 {
   "name": "@ringcentral/react-demo",
-  "version": "4.0.0-alpha.4",
+  "version": "4.0.0-alpha.5",
   "private": true,
   "scripts": {
     "clean": "rimraf build",
     "start": "PORT=$REACT_DEMO_PORT react-scripts start"
   },
   "dependencies": {
-    "@ringcentral/sdk": "^4.0.0-alpha.4",
-    "@ringcentral/react": "^4.0.0-alpha.4",
+    "@ringcentral/react": "^4.0.0-alpha.5",
+    "@ringcentral/sdk": "^4.0.0-alpha.5",
     "react": "16.6.0",
     "react-dom": "16.6.1",
     "react-router-dom": "4.3.1"
   },
   "devDependencies": {
-    "@ringcentral/sdk-utils": "^4.0.0-alpha.4",
+    "@ringcentral/sdk-utils": "^4.0.0-alpha.5",
     "@types/react": "16.7.20",
     "@types/react-dom": "16.0.11",
     "@types/react-router-dom": "4.3.1",

@@ -1,14 +1,14 @@
 {
   "name": "@ringcentral/redux-demo",
-  "version": "4.0.0-alpha.4",
+  "version": "4.0.0-alpha.5",
   "private": true,
   "scripts": {
     "clean": "rimraf build",
     "start": "PORT=$REDUX_DEMO_PORT react-scripts start"
   },
   "dependencies": {
-    "@ringcentral/sdk": "^4.0.0-alpha.4",
-    "@ringcentral/redux": "^4.0.0-alpha.4",
+    "@ringcentral/redux": "^4.0.0-alpha.5",
+    "@ringcentral/sdk": "^4.0.0-alpha.5",
     "react": "16.6.0",
     "react-dom": "16.6.1",
     "react-redux": "5.1.1",
@@ -18,7 +18,7 @@
     "redux-logger": "3.0.6"
   },
   "devDependencies": {
-    "@ringcentral/sdk-utils": "^4.0.0-alpha.4",
+    "@ringcentral/sdk-utils": "^4.0.0-alpha.5",
     "@types/react": "16.7.20",
     "@types/react-dom": "16.0.11",
     "@types/react-redux": "6.0.9",
