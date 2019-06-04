@@ -358,8 +358,8 @@ Platform.prototype.login = function(options) {
         }
 
         if (options.endpointId) body.endpoint_id = options.endpointId;
-        if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
-        if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+        if (options.accessTokenTtl) body.access_token_ttl = options.accessTokenTtl;
+        if (options.refreshTokenTtl) body.refresh_token_ttl = options.refreshTokenTtl;
 
         resolve(this._tokenRequest(Platform._tokenEndpoint, body));
 
