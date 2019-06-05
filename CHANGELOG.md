@@ -2,6 +2,16 @@
 
 This document contains only major functionality changes in certain versions. Minor fixes/updates are omitted.
 
+## 4.0
+
+- SDK will not add `/restapi/v1.0` to URLs
+- SDK was separated into 2 packages: `@ringcentral/sdk` and `@ringcentral/subscriptions`
+- `appKey` and `appSecret` were replaced with `clientId` and `clientSecret`
+- Async implementation of `Storage`
+- Platform method `createUrl('xxx', {addToken: true})` has been extracted as separate async method `signUrl('xxx')`
+- `ApiResponse` class was removed, all methods return plain `Response` which can be worked on using `Client`
+- Bower was discontinued
+
 ## 3.0
 
 - SDK no longer runs refresh queue across multiple tabs

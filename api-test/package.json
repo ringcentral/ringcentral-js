@@ -1,0 +1,8 @@
+{
+	"version": "4.0.0-alpha.5",
+	"name": "@ringcentral/sdk-api-test",
+	"private": true,
+	"dependencies": {
+		"soap": "0.23.0"
+	}
+}

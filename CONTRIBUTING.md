@@ -100,3 +100,30 @@ $ RCSDK_API_KEY=YOUR_API_KEY (...) RCSDK_AGS_DBNAME=database npm run test-api
 # Authentication Flow
 
 ![API Call Flow](http://habrastorage.org/files/308/78c/4d9/30878c4d9ee94a9d96fdefcaee5779ae.png)
+
+# Publishing
+
+1. *Canary release* — commit to master, CI will do the rest, alternatively you may publish locally:
+    ```bash
+    $ npm run publish:canary
+    ```
+
+2. *Pre release*:
+    ```bash
+    $ npm run prepare:prerelease [-- --yes --no-git-tag-version --no-push]
+    ```
+    This command will run `lerna version prerelease` to update versions and push to git with appropriate tag, tag will
+    be picked up by CI and actual publish will happen (`lerna publish`).
+    
+3. *Versioned release*:
+    ```bash
+    $ npm run prepare:release [-- --yes --no-git-tag-version --no-push]
+    ```
+    This command will run `lerna version` to update versions and push to git with appropriate tag, tag will be picked up
+    by CI and actual publish will happen (`lerna publish`).
+    
+4. *Manual publish* — run publishing locally, it assumes you already prepared your release:
+    ```bash
+    $ npm run publish:fromgit
+    ```
+    Keep in mind that CI will fail because it will try to publish on top of your already published tags.

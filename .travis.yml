@@ -1,37 +1,55 @@
 language: node_js
+
 node_js:
-- 6
 - stable
+
 cache:
   directories:
   - $HOME/.npm
   - node_modules
+
 addons:
   firefox: latest
+
+before_install:
+- export CHROME_BIN=chromium-browser
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- npm config set //registry.npmjs.org/:_authToken=${NPM_TOKEN}
+
+before_script:
+- DEBUG=eslint:cli-engine npm run lint:all
+- npm run build
+
 deploy:
-- provider: npm
-  email: kirill.konshin@gmail.com
-  api_key: $NPM_TOKEN
+- provider: script
+  script: npm run publish:canary -- --yes
   skip_cleanup: true
   on:
-    node: 6
+    branch: master
+    tags: false
+    repo: ringcentral/ringcentral-js
+- provider: script
+  script: npm run publish:fromgit -- --yes
+  skip_cleanup: true
+  on:
     tags: true
     repo: ringcentral/ringcentral-js
 - provider: releases
   api_key: $GITHUB_TOKEN
   skip_cleanup: true
   file:
-  - build/ringcentral.js
-  - build/ringcentral.js.map
-  - build/ringcentral.min.js
-  - build/ringcentral.min.js.map
+  - sdk/dist/ringcentral.js
+  - sdk/dist/ringcentral.js.map
+  - sdk/dist/ringcentral.min.js
+  - sdk/dist/ringcentral.min.js.map
+  - subscriptions/dist/ringcentral-subscriptions.js
+  - subscriptions/dist/ringcentral-subscriptions.js.map
+  - subscriptions/dist/ringcentral-subscriptions.min.js
+  - subscriptions/dist/ringcentral-subscriptions.min.js.map
   on:
-    node: 6
     tags: true
     repo: ringcentral/ringcentral-js
-before_install:
-- export CHROME_BIN=chromium-browser
-- export DISPLAY=:99.0
-- sh -e /etc/init.d/xvfb start
+
 after_success:
-- npm run coveralls
+- npm run test:coverage

@@ -1,94 +1,43 @@
 {
-  "name": "ringcentral",
-  "version": "3.2.2",
+  "name": "@ringcentral/mono",
+  "version": "4.0.0",
   "scripts": {
-    "clean": "rm -rf build/*",
-    "build": "npm run clean && webpack --display-modules --progress --colors --bail",
-    "watch": "npm run build -- --watch",
-    "test": "npm run hint && npm run build && npm run istanbul && npm run karma && npm run karma-webpack",
-    "mocha": "mocha --opts mocha.opts",
-    "mocha-watch": "npm run mocha -- --watch",
-    "mocha-api": "mocha ./test-api/**/*-spec.js",
-    "karma": "karma start karma.conf.js",
-    "karma-watch": "npm run karma -- --no-single-run --auto-watch",
-    "karma-webpack": "karma start karma.conf.webpack.js",
-    "karma-webpack-watch": "npm run karma-webpack -- --no-single-run --auto-watch",
-    "istanbul": "istanbul cover _mocha -- --opts mocha.opts",
-    "coveralls": "cat ./build/coverage/lcov.info | coveralls",
-    "tsd": "tsd reinstall -so",
-    "start": "http-server -p 3030",
-    "docs": "jsdoc2md 'src/**/*!(test).js' > API.md",
-    "hint": "jshint src/**/*.js"
+    "postinstall": "npm run bootstrap",
+    "bootstrap": "lerna bootstrap --no-ci --hoist",
+    "clean": "lerna run clean && lerna clean --yes && rm -rf node_modules",
+    "start": "npm run build && npm run start:quick",
+    "start:quick": "dotenv lerna run start -- --parallel",
+    "build": "lerna run build --concurrency=1 --stream",
+    "test": "lerna run test --concurrency=1 --stream",
+    "test:quick": "lerna run test:quick --concurrency=1 --stream",
+    "test:coverage": "cat */coverage/lcov.info | coveralls",
+    "publish:canary": "lerna publish --canary --force-publish=*",
+    "publish:fromgit": "lerna publish from-git --tag-version-prefix=\"\"",
+    "prepare:release": "lerna version --tag-version-prefix=\"\" --force-publish=*",
+    "prepare:prerelease": "npm run prepare:release -- prerelease --preid alpha",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix",
+    "lint:all": "npm run lint './*/src/**/*.ts*'",
+    "lint:staged": "lint-staged"
   },
-  "dependencies": {
-    "es6-promise": "^4.0.5",
-    "fetch-ponyfill": "^3.0.2",
-    "is-plain-object": "^2.0.1",
-    "object-assign": "^4.1.0",
-    "pubnub": "^4.4.2"
-  },
-  "devDependencies": {
-    "chai": "3.5.0",
-    "coveralls": "2.13.1",
-    "fetch-mock": "5.9.4",
-    "http-server": "0.9.0",
-    "istanbul": "0.4.5",
-    "jsdoc-to-markdown": "2.0.1",
-    "jshint": "2.9.4",
-    "json-loader": "0.5.4",
-    "karma": "1.4.1",
-    "karma-chai-plugins": "0.8.0",
-    "karma-chrome-launcher": "2.0.0",
-    "karma-coverage": "1.1.1",
-    "karma-firefox-launcher": "1.0.0",
-    "karma-html-reporter": "0.2.6",
-    "karma-mocha": "1.3.0",
-    "karma-mocha-reporter": "2.2.2",
-    "karma-phantomjs-launcher": "1.0.2",
-    "karma-sourcemap-loader": "0.3.5",
-    "karma-webpack": "2.0.2",
-    "mocha": "3.2.0",
-    "phantomjs-prebuilt": "2.1.14",
-    "sinon": "1.17.7",
-    "sinon-chai": "2.8.0",
-    "soap": "0.18.0",
-    "webpack": "1.14.0",
-    "whatwg-fetch": "2.0.2"
-  },
-  "jsdoc2md": {
-    "separators": true,
-    "module-index-format": "grouped",
-    "param-list-format": "table",
-    "property-list-format": "table"
-  },
-  "jshintConfig": {
-    "curly": false,
-    "expr": true,
-    "indent": 4,
-    "latedef": true
-  },
-  "preferGlobal": false,
-  "private": false,
-  "main": "./src/SDK.js",
-  "author": {
-    "name": "RingCentral, Inc.",
-    "email": "devsupport@ringcentral.com"
-  },
-  "contributors": [
-    {
-      "name": "Kirill Konshin"
-    }
-  ],
+  "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/ringcentral/ringcentral-js.git"
+    "url": "git+https://github.com/ringcentral/ringcentral-js.git"
   },
+  "author": "",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/ringcentral/ringcentral-js/issues"
   },
-  "homepage": "https://github.com/ringcentral/ringcentral-js",
-  "engines": {
-    "node": ">=0.10.36"
-  },
-  "license": "MIT"
+  "homepage": "https://github.com/ringcentral/ringcentral-js#readme",
+  "dependencies": {
+    "coveralls": "3.0.2",
+    "dotenv-cli": "1.4.0",
+    "eslint": "5.8.0",
+    "eslint-config-ringcentral-typescript": "0.1.0",
+    "husky": "1.1.3",
+    "lerna": "3.4.3",
+    "lint-staged": "8.0.4",
+    "typescript": "3.2.4"
+  }
 }
