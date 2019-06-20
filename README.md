@@ -1,4 +1,4 @@
-# RingCentral SDK for JavaScript
+# RingCentral JavaScript SDK
 
 [![TravisCI Status](https://travis-ci.org/ringcentral/ringcentral-js.svg?branch=master)](https://travis-ci.org/ringcentral/ringcentral-js)
 [![Coverage Status](https://coveralls.io/repos/github/ringcentral/ringcentral-js/badge.svg?branch=master)](https://coveralls.io/github/ringcentral/ringcentral-js)
@@ -6,35 +6,38 @@
 [![Community](https://img.shields.io/badge/dynamic/json.svg?label=community&colorB=&suffix=%20users&query=$.approximate_people_count&uri=http%3A%2F%2Fapi.getsatisfaction.com%2Fcompanies%2F102909.json)](https://devcommunity.ringcentral.com/ringcentraldev)
 [![Twitter](https://img.shields.io/twitter/follow/ringcentraldevs.svg?style=social&label=follow)](https://twitter.com/RingCentralDevs)
 
-__[RingCentral Developers](https://developer.ringcentral.com/api-products)__ is a cloud communications platform which can be accessed via more than 70 APIs. The platform's main capabilities include technologies that enable:
-__[Voice](https://developer.ringcentral.com/api-products/voice), [SMS/MMS](https://developer.ringcentral.com/api-products/sms), [Fax](https://developer.ringcentral.com/api-products/fax), [Glip Team Messaging](https://developer.ringcentral.com/api-products/team-messaging), [Data and Configurations](https://developer.ringcentral.com/api-products/configuration)__.
+The RingCentral Javascript SDK allows developers building client and server-side javascript applications to interface with the following RingCentral APIs more easily:
 
-[API Reference](https://developer.ringcentral.com/api-docs/latest/index.html) and [APIs Explorer](https://developer.ringcentral.com/api-explorer/latest/index.html).
+* [Voice](https://developer.ringcentral.com/api-products/voice)
+* [Messaging](https://developer.ringcentral.com/api-products/sms), e.g. Fax, SMS, voicemail, etc.
+* [Glip Team Messaging](https://developer.ringcentral.com/api-products/team-messaging)
+* [Call Management](https://developer.ringcentral.com/api-products/configuration)
+* [Meetings](https://developers.ringcentral.com/api-products/meetings)
 
-You are viewing documentation for upcoming `4.0.0` release. Follow [this link to see 3.x.x documentation](https://github.com/ringcentral/ringcentral-js/tree/v3).  
+## What's in this repository/SDK?
 
-# Packages
+This SDK contains two components useful to developers. They are:
 
 - [SDK](sdk) &mdash; Main SDK package, interacts with RingCentral REST API
 - [Subscriptions SDK](subscriptions) &mdash; Additional SDK which listens to push notifications
 
-***
+## Are you a first-time RingCentral Developer?
 
-# Key Benefits
+If this is your first time building a RingCentral application, we recommend you get started online using our SMS Quick Start guide which will help you get up-and-running in minutes.
 
-- Automatically handles token lifecycle procedures in multi-tab environment
-- Re-issues non-authorized requests
-- Decrypts PubNub notification messages
-- Parses multipart API responses
-- Restores subscriptions from cache
-- Automatically re-subscribes in case of subscription renewal errors
-- Compatible with latest WhatWG `fetch()` spec (DOM `Request`s and `Response`s)
+* [Get Started Using RingCentral &raquo;](https://developers.ringcentral.com/guide/sms/quick-start)
 
-***
+## Additional Resources
 
-# Demos
+* [RingCentral Developer Guide](https://developer.ringcentral.com/api-reference) - a comprehensive set of tutorials to help developers build their first application and to evolve existing applications on the platform. 
 
-Don't forget to create `.env` file with the following keys:
+* [RingCentral API Reference](https://developer.ringcentral.com/api-reference) - an interactive reference for the RingCentral API that allows developers to make API calls with no code.
+
+You are viewing documentation for upcoming `4.0.0` release. Follow [this link to see 3.x.x documentation](https://github.com/ringcentral/ringcentral-js/tree/v3).  
+
+## Running Demos in this SDK
+
+In this SDK are a number of sample/demo applications. Each of these demo apps require you to create a `.env` file with the following contents:
 
 ```
 BROWSER=false
@@ -48,14 +51,8 @@ REACT_APP_API_SERVER=https://platform.devtest.ringcentral.com
 REACT_APP_API_CLIENT_ID=XXX
 ```
 
-***
+**Be sure to replace "XXX" with your app's Client ID.**
 
-# Migration from previous releases
+## About RingCentral
 
-**!!! Attention !!!**
-
-**In SDK version 2.0 Helpers were moved to separate repository: [ringcentral-js-helpers](https://github.com/ringcentral/ringcentral-js-helpers).**
-
-A lot of code improvements were implemented in order to make SDK compatible with WhatWG Fetch, DOM Requests &
-DOM Responses: see [full list of migration instructions](../../CHANGELOG.md).
-  
+RingCentral is a leading provider of global enterprise cloud communications and collaboration solutions. More flexible and cost-effective than legacy on-premises systems, RingCentral empowers modern mobile and distributed workforces to communicate, collaborate, and connect from any location, on any device and via any mode. RingCentral provides unified voice, video, team messaging and collaboration, conferencing, online meetings, digital customer engagement and integrated contact center solutions for enterprises globally. RingCentral’s open platform integrates with leading business apps and enables customers to easily customize business workflows.
