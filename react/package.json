@@ -1,6 +1,6 @@
 {
   "name": "@ringcentral/react",
-  "version": "4.0.0-alpha.5",
+  "version": "0.0.0",
   "scripts": {
     "clean": "rimraf lib/* es6/*",
     "build": "npm run clean && npm run build:tsc:es5 && npm run build:tsc:es6",
@@ -11,8 +11,8 @@
     "start:tsc:es6": "npm run build:tsc:es6 -- --watch --preserveWatchOutput"
   },
   "devDependencies": {
-    "@ringcentral/sdk": "^4.0.0-alpha.5",
-    "@ringcentral/sdk-utils": "^4.0.0-alpha.5",
+    "@ringcentral/sdk": "*",
+    "@ringcentral/sdk-utils": "*",
     "@types/react": "16.7.20",
     "@types/react-dom": "16.0.11",
     "@types/react-router-dom": "4.3.1",

@@ -1,6 +1,6 @@
 {
   "name": "@ringcentral/sdk-utils",
-  "version": "4.0.0-alpha.5",
+  "version": "0.0.0",
   "private": true,
   "peerDependencies": {
     "tslib": ">=1.9.0",

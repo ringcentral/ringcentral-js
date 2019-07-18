@@ -4,6 +4,7 @@
   ],
   "rules": {
     "import/no-unresolved": "off", // to capture direct deps in TS
+    "no-dupe-class-members": "off", // to enable TS overload
     "no-undef": "off", //FIXME @see https://github.com/eslint/typescript-eslint-parser/issues/75
     "no-unused-expressions": "off", // tests
     "react/sort-comp": "off",

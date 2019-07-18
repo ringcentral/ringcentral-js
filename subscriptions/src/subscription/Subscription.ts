@@ -1,5 +1,5 @@
 import PubNubDefault from 'pubnub';
-import {SDK, EventEmitter} from '@ringcentral/sdk';
+import {SDK, EventEmitter, ApiError} from '@ringcentral/sdk';
 
 // detect ISO 8601 format string with +00[:00] timezone notations
 const ISO_REG_EXP = /(\+[\d]{2}):?([\d]{2})?$/;
@@ -20,18 +20,20 @@ declare class ActualPubNub extends PubNubDefault {
     public decrypt: any;
 }
 
+export enum events {
+    notification = 'notification',
+    removeSuccess = 'removeSuccess',
+    removeError = 'removeError',
+    renewSuccess = 'renewSuccess',
+    renewError = 'renewError',
+    subscribeSuccess = 'subscribeSuccess',
+    subscribeError = 'subscribeError',
+    automaticRenewSuccess = 'automaticRenewSuccess',
+    automaticRenewError = 'automaticRenewError',
+}
+
 export default class Subscription extends EventEmitter {
-    public events = {
-        notification: 'notification',
-        removeSuccess: 'removeSuccess',
-        removeError: 'removeError',
-        renewSuccess: 'renewSuccess',
-        renewError: 'renewError',
-        subscribeSuccess: 'subscribeSuccess',
-        subscribeError: 'subscribeError',
-        automaticRenewSuccess: 'automaticRenewSuccess',
-        automaticRenewError: 'automaticRenewError',
-    };
+    public events = events;
 
     protected _sdk: SDK;
 
@@ -63,6 +65,19 @@ export default class Subscription extends EventEmitter {
         this._PubNub = PubNub;
         this._pollInterval = pollInterval;
         this._renewHandicapMs = renewHandicapMs;
+    }
+
+    public on(event: events.notification, listener: (body: any) => void);
+    public on(event: events.removeSuccess, listener: (response: Response) => void);
+    public on(event: events.removeError, listener: (error: ApiError | Error) => void);
+    public on(event: events.renewSuccess, listener: (response: Response) => void);
+    public on(event: events.renewError, listener: (error: ApiError | Error) => void);
+    public on(event: events.automaticRenewSuccess, listener: (response: Response) => void);
+    public on(event: events.automaticRenewError, listener: (error: ApiError | Error) => void);
+    public on(event: events.subscribeSuccess, listener: (response: Response) => void);
+    public on(event: events.subscribeError, listener: (error: ApiError | Error) => void);
+    public on(event: string, listener: (...args) => void) {
+        return super.on(event, listener);
     }
 
     public subscribed() {

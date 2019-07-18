@@ -3,7 +3,7 @@ import * as qs from 'querystring';
 import Auth, {AuthOptions} from './Auth';
 import * as Constants from '../core/Constants';
 import Cache from '../core/Cache';
-import Client from '../http/Client';
+import Client, {ApiError} from '../http/Client';
 import Externals from '../core/Externals';
 
 declare const screen: any; //FIXME TS Crap
@@ -17,21 +17,23 @@ const delay = (timeout): Promise<any> =>
 
 const getParts = (url, separator) => url.split(separator).reverse()[0];
 
+export enum events {
+    beforeLogin = 'beforeLogin',
+    loginSuccess = 'loginSuccess',
+    loginError = 'loginError',
+    beforeRefresh = 'beforeRefresh',
+    refreshSuccess = 'refreshSuccess',
+    refreshError = 'refreshError',
+    beforeLogout = 'beforeLogout',
+    logoutSuccess = 'logoutSuccess',
+    logoutError = 'logoutError',
+    rateLimitError = 'rateLimitError',
+}
+
 export default class Platform extends EventEmitter {
     public static _cacheId = 'platform';
 
-    public events = {
-        beforeLogin: 'beforeLogin',
-        loginSuccess: 'loginSuccess',
-        loginError: 'loginError',
-        beforeRefresh: 'beforeRefresh',
-        refreshSuccess: 'refreshSuccess',
-        refreshError: 'refreshError',
-        beforeLogout: 'beforeLogout',
-        logoutSuccess: 'logoutSuccess',
-        logoutError: 'logoutError',
-        rateLimitError: 'rateLimitError',
-    };
+    public events = events;
 
     private _server: string;
 
@@ -63,6 +65,10 @@ export default class Platform extends EventEmitter {
 
     private _authorizeEndpoint;
 
+    private _authProxy;
+
+    private _urlPrefix;
+
     public constructor({
         server,
         clientId,
@@ -79,6 +85,8 @@ export default class Platform extends EventEmitter {
         tokenEndpoint = '/restapi/oauth/token',
         revokeEndpoint = '/restapi/oauth/revoke',
         authorizeEndpoint = '/restapi/oauth/authorize',
+        authProxy = false,
+        urlPrefix = '',
     }: PlatformOptionsConstructor) {
         super();
 
@@ -88,6 +96,8 @@ export default class Platform extends EventEmitter {
         this._redirectUri = redirectUri;
         this._refreshDelayMs = refreshDelayMs;
         this._clearCacheOnRefreshError = clearCacheOnRefreshError;
+        this._authProxy = authProxy;
+        this._urlPrefix = urlPrefix;
         this._userAgent = `${appName ? `${appName + (appVersion ? `/${appVersion}` : '')} ` : ''}RCJSSDK/${
             Constants.version
         }`;
@@ -106,25 +116,42 @@ export default class Platform extends EventEmitter {
         this._authorizeEndpoint = authorizeEndpoint;
     }
 
+    public on(event: events.beforeLogin, listener: () => void);
+    public on(event: events.loginSuccess, listener: (response: Response) => void);
+    public on(event: events.loginError, listener: (error: ApiError | Error) => void);
+    public on(event: events.beforeRefresh, listener: () => void);
+    public on(event: events.refreshSuccess, listener: (response: Response) => void);
+    public on(event: events.refreshError, listener: (error: ApiError | Error) => void);
+    public on(event: events.beforeLogout, listener: () => void);
+    public on(event: events.logoutSuccess, listener: (response: Response) => void);
+    public on(event: events.logoutError, listener: (error: ApiError | Error) => void);
+    public on(event: events.rateLimitError, listener: (error: ApiError | Error) => void);
+    public on(event: string, listener: (...args) => void) {
+        return super.on(event, listener);
+    }
+
     public auth() {
         return this._auth;
     }
 
     public createUrl(path = '', options: CreateUrlOptions = {}) {
         let builtUrl = '';
-        const hasHttp = path.indexOf('http://') !== -1 || path.indexOf('https://') !== -1;
+
+        const hasHttp = path.startsWith('http://') || path.startsWith('https://');
 
         if (options.addServer && !hasHttp) builtUrl += this._server;
 
+        if (this._urlPrefix) builtUrl += this._urlPrefix;
+
         builtUrl += path;
 
-        if (options.addMethod) builtUrl += `${path.indexOf('?') > -1 ? '&' : '?'}_method=${options.addMethod}`;
+        if (options.addMethod) builtUrl += `${path.includes('?') ? '&' : '?'}_method=${options.addMethod}`;
 
         return builtUrl;
     }
 
-    public async signUrl(path) {
-        return `${path + (path.indexOf('?') > -1 ? '&' : '?')}access_token=${(await this._auth.data()).access_token}`;
+    public async signUrl(path: string) {
+        return `${path + (path.includes('?') ? '&' : '?')}access_token=${(await this._auth.data()).access_token}`;
     }
 
     public loginUrl({implicit, state, brandId, display, prompt, uiOptions, uiLocales, localeId}: LoginUrlOptions = {}) {
@@ -149,9 +176,9 @@ export default class Platform extends EventEmitter {
      * @param {string} url
      * @return {Object}
      */
-    public parseLoginRedirect(url) {
+    public parseLoginRedirect(url: string) {
         const response =
-            (url.indexOf('#') === 0 && getParts(url, '#')) || (url.indexOf('?') === 0 && getParts(url, '?')) || null;
+            (url.startsWith('#') && getParts(url, '#')) || (url.startsWith('?') && getParts(url, '?')) || null;
 
         if (!response) throw new Error('Unable to parse response');
 
@@ -239,7 +266,11 @@ export default class Platform extends EventEmitter {
      */
     public async loggedIn() {
         try {
-            await this.ensureLoggedIn();
+            if (this._authProxy) {
+                await this.get('/restapi/v1.0/client-info'); // we only can determine the status if we actually make request
+            } else {
+                await this.ensureLoggedIn();
+            }
             return true;
         } catch (e) {
             return false;
@@ -345,6 +376,9 @@ export default class Platform extends EventEmitter {
     }
 
     public async refresh(): Promise<Response> {
+        if (this._authProxy) {
+            throw new Error('Refresh is not supported in Auth Proxy mode');
+        }
         if (!this._refreshPromise) {
             this._refreshPromise = (async () => {
                 try {
@@ -362,6 +396,9 @@ export default class Platform extends EventEmitter {
     }
 
     public async logout(): Promise<Response> {
+        if (this._authProxy) {
+            throw new Error('Logout is not supported in Auth Proxy mode');
+        }
         try {
             this.emit(this.events.beforeLogout);
 
@@ -389,14 +426,14 @@ export default class Platform extends EventEmitter {
     public async inflateRequest(request: Request, options: SendOptions = {}): Promise<Request> {
         options = options || {};
 
+        request.headers.set('X-User-Agent', this._userAgent);
+
         if (options.skipAuthCheck) return request;
 
         await this.ensureLoggedIn();
 
-        request.headers.set('X-User-Agent', this._userAgent);
         request.headers.set('Client-Id', this._clientId);
-        request.headers.set('Authorization', await this.authHeader());
-        //request.url = this.createUrl(request.url, {addServer: true}); //FIXME Spec prevents this...
+        if (!this._authProxy) request.headers.set('Authorization', await this.authHeader());
 
         return request;
     }
@@ -414,7 +451,8 @@ export default class Platform extends EventEmitter {
             const {response} = e;
             const {status} = response;
 
-            if (status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) throw e;
+            if ((status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) || this._authProxy)
+                throw e;
 
             options.retry = true;
 
@@ -467,6 +505,7 @@ export default class Platform extends EventEmitter {
     }
 
     public async ensureLoggedIn(): Promise<Response | null> {
+        if (this._authProxy) return null;
         if (await this._auth.accessTokenValid()) return null;
         await this.refresh();
         return null;
@@ -509,6 +548,8 @@ export interface PlatformOptions extends AuthOptions {
     tokenEndpoint?: string;
     revokeEndpoint?: string;
     authorizeEndpoint?: string;
+    authProxy?: boolean;
+    urlPrefix?: string;
 }
 
 export interface PlatformOptionsConstructor extends PlatformOptions {

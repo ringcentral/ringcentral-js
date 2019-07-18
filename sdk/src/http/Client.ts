@@ -15,11 +15,18 @@ function findHeaderName(name, headers) {
 export interface ApiError extends Error {
     originalMessage?: string;
     response?: Response;
+    request?: Request;
 }
 
 export interface ClientOptions {
     externals: Externals;
     defaultRequestInit: CreateRequestOptions;
+}
+
+export enum events {
+    beforeRequest = 'beforeRequest',
+    requestSuccess = 'requestSuccess',
+    requestError = 'requestError',
 }
 
 export default class Client extends EventEmitter {
@@ -48,11 +55,7 @@ export default class Client extends EventEmitter {
         mode: 'cors',
     };
 
-    public events = {
-        beforeRequest: 'beforeRequest',
-        requestSuccess: 'requestSuccess',
-        requestError: 'requestError',
-    };
+    public events = events;
 
     private _externals: Externals;
 
@@ -74,7 +77,7 @@ export default class Client extends EventEmitter {
 
             if (!response.ok) throw new Error('Response has unsuccessful status');
 
-            this.emit(this.events.requestSuccess, response);
+            this.emit(this.events.requestSuccess, response, request);
 
             return response;
         } catch (e) {
@@ -123,7 +126,7 @@ export default class Client extends EventEmitter {
 
         // Append Query String
         if (init.query) {
-            init.url = init.url + (init.url.indexOf('?') > -1 ? '&' : '?') + qs.stringify(init.query);
+            init.url = init.url + (init.url.includes('?') ? '&' : '?') + qs.stringify(init.query);
         }
 
         if (!findHeaderName('Accept', init.headers)) {
@@ -142,14 +145,14 @@ export default class Client extends EventEmitter {
             const contentType = init.headers[contentTypeHeaderName];
 
             // Assign a new encoded body
-            if (contentType.indexOf(Client._jsonContentType) > -1) {
+            if (contentType.includes(Client._jsonContentType)) {
                 if ((init.method === 'GET' || init.method === 'HEAD') && !!init.body) {
                     // oddly setting body to null still result in TypeError in phantomjs
                     init.body = undefined;
                 } else {
                     init.body = JSON.stringify(init.body);
                 }
-            } else if (contentType.indexOf(Client._urlencodedContentType) > -1) {
+            } else if (contentType.includes(Client._urlencodedContentType)) {
                 init.body = qs.stringify(init.body);
             }
         }
@@ -164,7 +167,7 @@ export default class Client extends EventEmitter {
     }
 
     public _isContentType(contentType, response) {
-        return !!~this.getContentType(response).indexOf(contentType);
+        return this.getContentType(response).includes(contentType);
     }
 
     public getContentType(response) {
@@ -259,6 +262,13 @@ export default class Client extends EventEmitter {
         } catch (e) {} //eslint-disable-line
 
         return msg;
+    }
+
+    public on(event: events.beforeRequest, listener: (request: Request) => void);
+    public on(event: events.requestSuccess, listener: (response: Response, request: Request) => void);
+    public on(event: events.requestError, listener: (error: ApiError) => void);
+    public on(event: string, listener: (...args) => void) {
+        return super.on(event, listener);
     }
 }
 

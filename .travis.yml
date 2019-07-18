@@ -23,14 +23,7 @@ before_script:
 
 deploy:
 - provider: script
-  script: npm run publish:canary -- --yes
-  skip_cleanup: true
-  on:
-    branch: master
-    tags: false
-    repo: ringcentral/ringcentral-js
-- provider: script
-  script: npm run publish:fromgit -- --yes
+  script: npm run publish:release -- $TRAVIS_TAG --yes
   skip_cleanup: true
   on:
     tags: true

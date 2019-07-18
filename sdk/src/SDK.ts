@@ -25,6 +25,7 @@ export {
     EventEmitter,
     ExternalsOptions,
     CreateRequestOptions,
+    ApiError,
 };
 
 let defaultExternals: ExternalsOptions = {};
