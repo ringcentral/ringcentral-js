@@ -14,6 +14,7 @@ addons:
   firefox: latest
 
 before_install:
+- export BRANCH=$(echo ${TRAVIS_BRANCH} | sed -e 's/\(.*\)/\L\1/' | sed -r 's/[^a-z0-9-]/-/g')
 - export CHROME_BIN=chromium-browser
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start
@@ -25,6 +26,13 @@ before_script:
 - npm run build
 
 deploy:
+- provider: script
+  script: npm run npm run publish:release -- --canary --preid=$BRANCH.$TRAVIS_JOB_NUMBER --dist-tag=$BRANCH --yes
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: false
+    repo: ringcentral/ringcentral-js
 - provider: script
   script: npm run publish:release -- $TRAVIS_TAG --yes
   skip_cleanup: true
