@@ -54,7 +54,7 @@ export default class Cache {
     public async clean() {
         await Promise.all(
             (await this._keys()).map(async key => {
-                if (key.indexOf(this._prefix) === 0) {
+                if (key.startsWith(this._prefix)) {
                     await this._externals.localStorage.removeItem(key);
                 }
             }),
