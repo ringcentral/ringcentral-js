@@ -27,7 +27,7 @@ before_script:
 
 deploy:
 - provider: script
-  script: npm run npm run publish:release -- --canary --preid=$BRANCH.$TRAVIS_JOB_NUMBER --dist-tag=$BRANCH --yes
+  script: npm run publish:release -- --canary --preid=$BRANCH.$TRAVIS_JOB_NUMBER --dist-tag=$BRANCH --yes
   skip_cleanup: true
   on:
     branch: master
