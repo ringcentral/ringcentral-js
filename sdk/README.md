@@ -47,8 +47,8 @@ SDK can be used in 3 environments:
  
     const rcsdk = new SDK({
         server: SDK.server.sandbox,
-        clientId: 'yourAppKey',
-        clientSecret: 'yourAppSecret',
+        clientId: 'yourClientId',
+        clientSecret: 'yourClientSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
     ```
@@ -87,8 +87,8 @@ Add the following to your HTML:
 
     var rcsdk = new RingCentral.SDK({
         server: RingCentral.SDK.server.sandbox,
-        clientId: 'yourAppKey',
-        clientSecret: 'yourAppSecret',
+        clientId: 'yourClientId',
+        clientSecret: 'yourClientSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
 
@@ -109,8 +109,8 @@ require.config({
 require(['ringcentral'], function(/** @type RingCentral.sdk */ ns) {
     var rcsdk = new ns.SDK({
         server: ns.SDK.server.sandbox,
-        clientId: 'yourAppKey',
-        clientSecret: 'yourAppSecret',
+        clientId: 'yourClientId',
+        clientSecret: 'yourClientSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
 });
