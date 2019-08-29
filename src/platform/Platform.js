@@ -471,10 +471,14 @@ Platform.prototype.logout = function() {
 
         this.emit(this.events.beforeLogout);
 
+        if (!this._appSecret) {
+            resolve(null);
+            return;
+        }
+
         resolve(this._tokenRequest(Platform._revokeEndpoint, {
             token: this._auth.accessToken()
         }));
-
     }.bind(this))).then(function(res) {
 
         this._cache.clean();
