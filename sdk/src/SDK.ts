@@ -110,6 +110,10 @@ export class SDK {
         this.platform().send({method: 'PUT', url, query, body, ...options});
 
     /* istanbul ignore next */
+    public patch = async (url, body?, query?, options?: SendOptions): Promise<Response> =>
+        this.platform().send({method: 'PATCH', url, query, body, ...options});
+
+    /* istanbul ignore next */
     public delete = async (url, query?, options?: SendOptions): Promise<Response> =>
         this.platform().send({method: 'DELETE', url, query, ...options});
 
