@@ -319,7 +319,7 @@ describe('RingCentral.platform.Platform', () => {
         );
     });
 
-    describe('get, post, put, delete', () => {
+    describe('get, post, put, patch, delete', () => {
         it(
             'sends request using appropriate method',
             asyncTest(async sdk => {
@@ -337,6 +337,7 @@ describe('RingCentral.platform.Platform', () => {
                 await test('get');
                 await test('post');
                 await test('put');
+                await test('patch');
                 await test('delete');
             }),
         );

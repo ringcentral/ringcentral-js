@@ -500,6 +500,10 @@ export default class Platform extends EventEmitter {
         return this.send({method: 'PUT', url, query, body, ...options});
     }
 
+    public async patch(url, body?, query?, options?: SendOptions): Promise<Response> {
+        return this.send({method: 'PATCH', url, query, body, ...options});
+    }
+
     public async delete(url, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'DELETE', url, query, ...options});
     }
