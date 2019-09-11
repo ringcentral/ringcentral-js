@@ -1797,8 +1797,8 @@ Platform.prototype.login = function(options) {
         }
 
         if (options.endpointId) body.endpoint_id = options.endpointId;
-        if (options.accessTokenTtl) body.accessTokenTtl = options.accessTokenTtl;
-        if (options.refreshTokenTtl) body.refreshTokenTtl = options.refreshTokenTtl;
+        if (options.accessTokenTtl) body.access_token_ttl = options.accessTokenTtl;
+        if (options.refreshTokenTtl) body.refresh_token_ttl = options.refreshTokenTtl;
 
         resolve(this._tokenRequest(Platform._tokenEndpoint, body));
 
@@ -1910,10 +1910,14 @@ Platform.prototype.logout = function() {
 
         this.emit(this.events.beforeLogout);
 
+        if (!this._appSecret) {
+            resolve(null);
+            return;
+        }
+
         resolve(this._tokenRequest(Platform._revokeEndpoint, {
             token: this._auth.accessToken()
         }));
-
     }.bind(this))).then(function(res) {
 
         this._cache.clean();
@@ -2008,7 +2012,7 @@ Platform.prototype.sendRequest = function(request, options) {
         }
 
         return this.delay(retryAfter).then(function() {
-            return this.sendRequest(request, options);
+            return this.sendRequest(this._client.createRequest(options), options);
         }.bind(this));
 
     }.bind(this));
@@ -2274,7 +2278,7 @@ module.exports = Auth;
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-var version = ("3.2.0");
+var version = ("3.2.2");
 
 // This will become false during the Webpack build, so no traces of package.json will be there
 if (false) {
