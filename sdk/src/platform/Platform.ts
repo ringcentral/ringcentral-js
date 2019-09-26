@@ -428,11 +428,11 @@ export default class Platform extends EventEmitter {
     }
 
     public async inflateRequest(request: Request, options: SendOptions = {}): Promise<Request> {
+        options = options || {};
+
         if (this._handleRateLimit) {
             options.handleRateLimit = this._handleRateLimit;
         }
-
-        options = options || {};
 
         request.headers.set('X-User-Agent', this._userAgent);
 
