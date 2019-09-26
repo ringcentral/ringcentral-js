@@ -428,6 +428,10 @@ export default class Platform extends EventEmitter {
     }
 
     public async inflateRequest(request: Request, options: SendOptions = {}): Promise<Request> {
+        if (this._handleRateLimit) {
+            options.handleRateLimit = this._handleRateLimit;
+        }
+
         options = options || {};
 
         request.headers.set('X-User-Agent', this._userAgent);
@@ -454,10 +458,6 @@ export default class Platform extends EventEmitter {
 
             const {response} = e;
             const {status} = response;
-
-            if (this._handleRateLimit) {
-                options.handleRateLimit = this._handleRateLimit;
-            }
 
             if ((status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) || this._authProxy)
                 throw e;
