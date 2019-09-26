@@ -69,6 +69,8 @@ export default class Platform extends EventEmitter {
 
     private _urlPrefix;
 
+    private _handleRateLimit: boolean
+
     public constructor({
         server,
         clientId,
@@ -87,6 +89,7 @@ export default class Platform extends EventEmitter {
         authorizeEndpoint = '/restapi/oauth/authorize',
         authProxy = false,
         urlPrefix = '',
+        handleRateLimit
     }: PlatformOptionsConstructor) {
         super();
 
@@ -114,6 +117,7 @@ export default class Platform extends EventEmitter {
         this._tokenEndpoint = tokenEndpoint;
         this._revokeEndpoint = revokeEndpoint;
         this._authorizeEndpoint = authorizeEndpoint;
+        this._handleRateLimit = handleRateLimit;
     }
 
     public on(event: events.beforeLogin, listener: () => void);
@@ -464,7 +468,7 @@ export default class Platform extends EventEmitter {
 
             if (status === Client._rateLimitStatus) {
                 const defaultRetryAfter =
-                    !handleRateLimit || typeof handleRateLimit === 'boolean' ? 60 : handleRateLimit;
+                    !handleRateLimit || typeof handleRateLimit === 'boolean' || this._handleRateLimit === true ? 60 : handleRateLimit;
 
                 // FIXME retry-after is custom header, by default, it can't be retrieved. Server should add header: 'Access-Control-Expose-Headers: retry-after'.
                 retryAfter = parseFloat(response.headers.get('retry-after') || defaultRetryAfter) * 1000;
@@ -554,6 +558,7 @@ export interface PlatformOptions extends AuthOptions {
     authorizeEndpoint?: string;
     authProxy?: boolean;
     urlPrefix?: string;
+    handleRateLimit?: boolean;
 }
 
 export interface PlatformOptionsConstructor extends PlatformOptions {

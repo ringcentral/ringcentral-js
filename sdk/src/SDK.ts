@@ -57,7 +57,7 @@ export class SDK {
     }
 
     public constructor(options: SDKOptions = {}) {
-        const {cachePrefix, defaultRequestInit} = options;
+        const {cachePrefix, defaultRequestInit, handleRateLimit} = options;
 
         this._externals = new Externals({
             ...defaultExternals,
@@ -79,6 +79,7 @@ export class SDK {
             externals: this._externals,
             client: this._client,
             cache: this._cache,
+            handleRateLimit
         });
     }
 
@@ -164,6 +165,7 @@ export class SDK {
 export interface SDKOptions extends PlatformOptions, ExternalsOptions {
     cachePrefix?: string;
     defaultRequestInit?: CreateRequestOptions;
+    handleRateLimit?: boolean
 }
 
 export default SDK;
