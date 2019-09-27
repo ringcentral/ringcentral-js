@@ -79,7 +79,7 @@ export class SDK {
             externals: this._externals,
             client: this._client,
             cache: this._cache,
-            handleRateLimit
+            handleRateLimit,
         });
     }
 
@@ -165,7 +165,7 @@ export class SDK {
 export interface SDKOptions extends PlatformOptions, ExternalsOptions {
     cachePrefix?: string;
     defaultRequestInit?: CreateRequestOptions;
-    handleRateLimit?: boolean
+    handleRateLimit?: boolean | number;
 }
 
 export default SDK;

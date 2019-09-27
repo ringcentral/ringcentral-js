@@ -25,6 +25,11 @@ describe('RingCentral.SDK', () => {
         return test(this, SDK.server.production);
     });
 
+    it('sets rate limit', async function rateLimitTest() {
+        const sdk = new SDK({handleRateLimit: 60});
+        expect(sdk.platform()['_handleRateLimit']).to.equal(60);
+    });
+
     describe('handleLoginRedirect', () => {
         const sdk = new SDK();
 
