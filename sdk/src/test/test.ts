@@ -70,6 +70,7 @@ export function createSdk(options: SDKOptions = {}) {
         fetch: fetchMock.fetchHandler,
         refreshDelayMs: 1,
         redirectUri: 'http://foo',
+        handleRateLimit: false,
         ...options,
     });
 }
