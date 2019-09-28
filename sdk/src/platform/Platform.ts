@@ -69,6 +69,8 @@ export default class Platform extends EventEmitter {
 
     private _urlPrefix;
 
+    private _handleRateLimit: boolean | number;
+
     public constructor({
         server,
         clientId,
@@ -87,6 +89,7 @@ export default class Platform extends EventEmitter {
         authorizeEndpoint = '/restapi/oauth/authorize',
         authProxy = false,
         urlPrefix = '',
+        handleRateLimit,
     }: PlatformOptionsConstructor) {
         super();
 
@@ -114,6 +117,7 @@ export default class Platform extends EventEmitter {
         this._tokenEndpoint = tokenEndpoint;
         this._revokeEndpoint = revokeEndpoint;
         this._authorizeEndpoint = authorizeEndpoint;
+        this._handleRateLimit = handleRateLimit;
     }
 
     public on(event: events.beforeLogin, listener: () => void);
@@ -443,7 +447,7 @@ export default class Platform extends EventEmitter {
             request = await this.inflateRequest(request, options);
             return await this._client.sendRequest(request);
         } catch (e) {
-            const {retry, handleRateLimit} = options;
+            let {retry, handleRateLimit} = options;
 
             // Guard is for errors that come from polling
             if (!e.response || retry) throw e;
@@ -463,6 +467,8 @@ export default class Platform extends EventEmitter {
             }
 
             if (status === Client._rateLimitStatus) {
+                handleRateLimit = handleRateLimit || this._handleRateLimit;
+
                 const defaultRetryAfter =
                     !handleRateLimit || typeof handleRateLimit === 'boolean' ? 60 : handleRateLimit;
 
@@ -473,7 +479,7 @@ export default class Platform extends EventEmitter {
 
                 this.emit(this.events.rateLimitError, e);
 
-                if (!options.handleRateLimit) throw e;
+                if (!handleRateLimit) throw e;
             }
 
             await delay(retryAfter);
@@ -554,6 +560,7 @@ export interface PlatformOptions extends AuthOptions {
     authorizeEndpoint?: string;
     authProxy?: boolean;
     urlPrefix?: string;
+    handleRateLimit?: boolean | number;
 }
 
 export interface PlatformOptionsConstructor extends PlatformOptions {

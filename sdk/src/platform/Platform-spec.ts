@@ -199,6 +199,34 @@ describe('RingCentral.platform.Platform', () => {
         );
 
         it(
+            'handles default rate limit 429',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+                const path = '/restapi/xxx';
+                const response = {foo: 'bar'};
+                const rateLimitSpy = spy(() => {
+                    apiCall('GET', path, response, 200);
+                });
+
+                platform['_handleRateLimit'] = 0.01;
+
+                apiCall('GET', path, {message: 'expected'}, 429, 'Rate Limit Exceeded');
+
+                platform.on(platform.events.rateLimitError, rateLimitSpy);
+
+                const res = await platform.get(path);
+
+                expect(rateLimitSpy.calledOnce).to.be.true;
+
+                const e = rateLimitSpy.getCalls()[0].args[0];
+                expect(e.message).to.equal('expected');
+                expect(e.retryAfter).to.equal(10);
+
+                expect(await res.json()).to.deep.equal(response);
+            }),
+        );
+
+        it(
             'emits rate limit 429 errors if they are not handled',
             asyncTest(async sdk => {
                 const platform = sdk.platform();
