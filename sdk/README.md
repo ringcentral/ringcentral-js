@@ -47,8 +47,8 @@ SDK can be used in 3 environments:
  
     const rcsdk = new SDK({
         server: SDK.server.sandbox,
-        clientId: 'yourClientId',
-        clientSecret: 'yourClientSecret',
+        appKey: 'yourAppKey',
+        appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
     ```
@@ -87,8 +87,8 @@ Add the following to your HTML:
 
     var rcsdk = new RingCentral.SDK({
         server: RingCentral.SDK.server.sandbox,
-        clientId: 'yourClientId',
-        clientSecret: 'yourClientSecret',
+        appKey: 'yourAppKey',
+        appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
 
@@ -109,8 +109,8 @@ require.config({
 require(['ringcentral'], function(/** @type RingCentral.sdk */ ns) {
     var rcsdk = new ns.SDK({
         server: ns.SDK.server.sandbox,
-        clientId: 'yourClientId',
-        clientSecret: 'yourClientSecret',
+        appKey: 'yourAppKey',
+        appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
 });
@@ -189,13 +189,13 @@ RingCentral.SDK.handleLoginRedirect();
 
 #### Difference between Authorization Code and Implicit Grant flows
 
-If your app uses Implicit Grant you should not provide `clientSecret` when creating SDK instance. The resulting login
+If your app uses Implicit Grant you should not provide `appSecret` when creating SDK instance. The resulting login
 information will not have `refresh_token`, which means that every time when `access_token` expires, app should navigate
 users to app login page and re-initiate login flow. Also your app will need to handle situations with `refreshError`
 events properly, for instance, enter auth flow automatically without user intervention.
 
 For dynamic apps with subscriptions Authorization Code should work better because it provides an ability to refresh
-tokens automatically without affecting the state of the app, but it requires to expose `clientSecret`.
+tokens automatically without affecting the state of the app, but it requires to expose `appSecret`.
 
 ### Password Flow
 
@@ -248,7 +248,7 @@ rcsdk.loggedIn().then(function(status){ if (status) { ... } else { ... } });
 Or you can call `ensureLogedIn` method which works the same way as `loggedIn` but rejects promise on failure:
 
 ```js
-rcsdk.ensureLogedIn().then(function(){ ... }).catch(function(){ ... });
+rcsdk.ensureLoggedIn().then(function(){ ... }).catch(function(){ ... });
 ```
 
 The SDK takes care of the token lifecycle. It will refresh tokens for you automatically. It will also automatically
