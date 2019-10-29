@@ -245,10 +245,10 @@ To check in your Application if the user is authenticated, you can call the `log
 rcsdk.loggedIn().then(function(status){ if (status) { ... } else { ... } });
 ```
 
-Or you can call `ensureLogedIn` method which works the same way as `loggedIn` but rejects promise on failure:
+Or you can call `ensureLoggedIn` method which works the same way as `loggedIn` but rejects promise on failure:
 
 ```js
-rcsdk.ensureLogedIn().then(function(){ ... }).catch(function(){ ... });
+rcsdk.ensureLoggedIn().then(function(){ ... }).catch(function(){ ... });
 ```
 
 The SDK takes care of the token lifecycle. It will refresh tokens for you automatically. It will also automatically
