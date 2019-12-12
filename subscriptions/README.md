@@ -17,7 +17,7 @@ Follow all instructions from [SDK package](../sdk).
 1. Install the NPM package:
 
     ```sh
-    npm install @ringcentral/sdk @ringcentra/subscriptions --save
+    npm install @ringcentral/sdk @ringcentral/subscriptions --save
     ```
 
 2. Require the SDK:
@@ -27,6 +27,8 @@ Follow all instructions from [SDK package](../sdk).
     import {Subscriptions} from "@ringcentral/subscriptions";
     // or
     const SDK = require('ringcentral').SDK;
+    const Subscriptions = require('@ringcentral/subscriptions').Subscriptions;
+
     const sdk = new SDK({
         server: SDK.server.sandbox,
         appKey: 'yourAppKey',
@@ -51,7 +53,8 @@ Pick the option that works best for you:
 
 - Use CDN **Attention! Versions listed here may be outdated**:
     - ... all SDK dependencies
-    - https://unpkg.com/@ringcentral/subscriptions@latest/dist/ringcentral.js
+    - https://unpkg.com/@ringcentral/sdk@latest/dist/ringcentral.js
+    - https://unpkg.com/browse/@ringcentral/subscriptions@latest/dist/ringcentral-subscriptions.js
     - https://unpkg.com/pubnub@latest/dist/web/pubnub.js
 
 - Download everything manually:

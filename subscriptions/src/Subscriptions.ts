@@ -15,7 +15,7 @@ export class Subscriptions {
         this._PubNub = PubNub;
     }
 
-    public createSubscription({pollInterval, renewHandicapMs}: SubscriptionOptions) {
+    public createSubscription({pollInterval, renewHandicapMs}: SubscriptionOptions = {}) {
         return new Subscription({
             pollInterval,
             renewHandicapMs,
