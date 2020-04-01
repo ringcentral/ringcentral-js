@@ -14,8 +14,9 @@
 
         var sdk = new RingCentral.SDK({
             server: server,
-            appKey: appKey,
-            appSecret: appSecret,
+            clientId: appKey,
+            clientSecret: appSecret,
+            urlPrefix: '/restapi/v1.0',
             appName: 'Demo',
             appVersion: RingCentral.SDK.version,
             redirectUri: decodeURIComponent(window.location.href.split('login', 1) + 'oauth/redirect.html')
