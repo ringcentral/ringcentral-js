@@ -21,6 +21,7 @@
     "hint": "jshint src/**/*.js"
   },
   "dependencies": {
+    "crypto-js": "^4.0.0",
     "es6-promise": "^4.0.5",
     "fetch-ponyfill": "^3.0.2",
     "is-plain-object": "^2.0.1",

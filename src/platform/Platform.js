@@ -1,9 +1,13 @@
 var EventEmitter = require("events").EventEmitter;
 var qs = require("querystring");
 var objectAssign = require('object-assign');
+var CryptoJS = require("crypto-js/core");
+var CryptoJSSHA256 = require("crypto-js/sha256");
+var CryptoJSBase64 = require("crypto-js/enc-base64");
 var Auth = require("./Auth");
 var Constants = require("../core/Constants");
 var ApiResponse = require("../http/ApiResponse");
+
 
 /**
  * @constructor
@@ -84,6 +88,9 @@ function Platform(options) {
 
     /** @private */
     this._refreshPromise = null;
+
+    /** @private */
+    this._codeVerifier = '';
 
     /** @private */
     this._auth = new Auth({
@@ -169,22 +176,45 @@ Platform.prototype.createUrl = function(path, options) {
  * @param {string} [options.display]
  * @param {string} [options.prompt]
  * @param {boolean} [options.implicit] Use Implicit Grant flow
+ * @param {boolean} [options.usePKCE] Use Auth Code Flow with PKCE
  * @return {string}
  */
 Platform.prototype.loginUrl = function(options) {
 
     options = options || {};
+    var query = {
+        'response_type': options.implicit ? 'token' : 'code',
+        'redirect_uri': options.redirectUri || this._redirectUri,
+        'client_id': this._appKey,
+        'state': options.state || '',
+        'brand_id': options.brandId || '',
+        'display': options.display || '',
+        'prompt': options.prompt || ''
+    };
+    this._codeVerifier = '';
+    if (options.usePKCE && !options.implicit) {
+        this._codeVerifier = this._generateCodeVerifier();
+        query['code_challenge'] = CryptoJSSHA256(this._codeVerifier)
+            .toString(CryptoJSBase64)
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=/g, '');
+        query['code_challenge_method'] = 'S256';
+    }
+    return this.createUrl(Platform._authorizeEndpoint + '?' + qs.stringify(query), {addServer: true});
+};
 
-    return this.createUrl(Platform._authorizeEndpoint + '?' + qs.stringify({
-            'response_type': options.implicit ? 'token' : 'code',
-            'redirect_uri': options.redirectUri || this._redirectUri,
-            'client_id': this._appKey,
-            'state': options.state || '',
-            'brand_id': options.brandId || '',
-            'display': options.display || '',
-            'prompt': options.prompt || ''
-        }), {addServer: true});
-
+/**
+ * @returns {string}
+ * @private
+ */
+Platform.prototype._generateCodeVerifier = function() {
+    var codeVerifier = CryptoJS.lib.WordArray.random(64)
+        .toString(CryptoJSBase64)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+    return codeVerifier;
 };
 
 /**
@@ -340,7 +370,7 @@ Platform.prototype.login = function(options) {
             return resolve(options);
 
         }
-
+        var skipAuthHeader = false;
         if (!options.code) {
 
             body.grant_type = 'password';
@@ -353,15 +383,18 @@ Platform.prototype.login = function(options) {
             body.grant_type = 'authorization_code';
             body.code = options.code;
             body.redirect_uri = options.redirectUri || this._redirectUri;
-            //body.client_id = this.getCredentials().key; // not needed
-
+            if (this._codeVerifier && this._codeVerifier.length > 0) {
+                body.client_id = this._appKey;
+                body.code_verifier = this._codeVerifier;
+                skipAuthHeader = true;
+            }
         }
 
         if (options.endpointId) body.endpoint_id = options.endpointId;
         if (options.accessTokenTtl) body.access_token_ttl = options.accessTokenTtl;
         if (options.refreshTokenTtl) body.refresh_token_ttl = options.refreshTokenTtl;
 
-        resolve(this._tokenRequest(Platform._tokenEndpoint, body));
+        resolve(this._tokenRequest(Platform._tokenEndpoint, body, skipAuthHeader));
 
     }.bind(this))).then(function(res) {
 
@@ -667,17 +700,19 @@ Platform.prototype.ensureLoggedIn = function() {
  * @return {Promise.<ApiResponse>}
  * @private
  */
-Platform.prototype._tokenRequest = function(path, body) {
-
+Platform.prototype._tokenRequest = function(path, body, skipAuthHeader) {
+    var headers = {
+        'Content-Type': ApiResponse._urlencodedContentType
+    };
+    if (!skipAuthHeader) {
+        headers['Authorization'] = 'Basic ' + this._apiKey();
+    }
     return this.send({
         url: path,
         skipAuthCheck: true,
         body: body,
         method: 'POST',
-        headers: {
-            'Authorization': 'Basic ' + this._apiKey(),
-            'Content-Type': ApiResponse._urlencodedContentType
-        }
+        headers: headers,
     });
 
 };

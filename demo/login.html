@@ -39,6 +39,7 @@
             </div>
             <div class="panel-footer text-center">
                 <button id="authorizeCode" class="btn btn-primary">Authorization Code</button>
+                <button id="authorizeCodePKCE" class="btn btn-primary">Authorization Code with PKCE</button>
                 <button id="authorizeImplicit" class="btn btn-primary">Implicit Grant</button>
             </div>
         </div>
@@ -152,11 +153,11 @@
 
         }
 
-        function show3leggedLogin(implicit) {
+        function show3leggedLogin({ implicit, usePKCE }) {
 
             platform
                 .loginWindow({
-                    url: platform.loginUrl({implicit: true})
+                    url: platform.loginUrl({ implicit, usePKCE })
                 })
                 .then(platform.login.bind(platform))
                 .then(showWelcome)
@@ -204,11 +205,15 @@
         });
 
         document.getElementById('authorizeCode').addEventListener('click', function authorize(e) {
-            show3leggedLogin(false);
+            show3leggedLogin({ implicit: false });
+        });
+
+        document.getElementById('authorizeCodePKCE').addEventListener('click', function authorize(e) {
+            show3leggedLogin({ implicit: false, usePKCE: true });
         });
 
         document.getElementById('authorizeImplicit').addEventListener('click', function authorize(e) {
-            show3leggedLogin(true);
+            show3leggedLogin({ implicit: true });
         });
 
         platform.ensureLoggedIn().then(showWelcome).catch(showLogin);
