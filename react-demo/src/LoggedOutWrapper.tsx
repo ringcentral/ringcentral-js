@@ -19,7 +19,7 @@ const LoggedOutWrapper: FunctionComponent<LoggedOutWrapperProps> = ({
     }
 
     if (isAuthorized) {
-        const {from} = location.state || {from: {pathname: '/'}};
+        const {from} = (location.state as any) || {from: {pathname: '/'}};
         console.log('Redirecting to', from); //eslint-disable-line
         return <Redirect to={from} />;
     }
