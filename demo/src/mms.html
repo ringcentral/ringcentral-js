@@ -91,7 +91,7 @@
 
             var fromPhoneNumbers = [];
             platform
-                    .get('/account/~/extension/~/phone-number', {'perPage': 'max'})
+                    .get('/restapi/v1.0/account/~/extension/~/phone-number', {'perPage': 'max'})
                     .then(function(res) {
                         return res.json();
                     })
@@ -119,7 +119,7 @@
             var $form = document.getElementById('mms-form');
 
             $to.value = localStorage.getItem('ringcentral-demo-mms-to');
-            $form.action = platform.createUrl('/account/~/extension/~/sms', {addToken: true, addServer: true});
+            $form.action = platform.createUrl('/restapi/v1.0/account/~/extension/~/sms', {addToken: true, addServer: true});
 
             // Populate the dropdown menu
             for( var i = 0; i < fromPhoneNumbers.length; i++) {
@@ -168,7 +168,7 @@
                 }
 
                 platform
-                        .post('/account/~/extension/~/sms', formData)
+                        .post('/restapi/v1.0/account/~/extension/~/sms', formData)
                         .then(function(res) {
                             localStorage.setItem('ringcentral-demo-mms-to', $to.value);
                             alert('MMS has been sent', $to.value);

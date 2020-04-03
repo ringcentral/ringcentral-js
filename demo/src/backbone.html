@@ -118,12 +118,12 @@
                 to: null,
                 from: null
             },
-            urlRoot: '/account/~/extension/~/call-log'
+            urlRoot: '/restapi/v1.0/account/~/extension/~/call-log'
         });
 
         var CallCollection = RestCollection.extend({
             model: Call,
-            url: '/account/~/extension/~/call-log'
+            url: '/restapi/v1.0/account/~/extension/~/call-log'
         });
 
         var Extension = RestModel.extend({
@@ -137,7 +137,7 @@
                 status: null,
                 setupWizardState: null
             },
-            urlRoot: '/account/~/extension'
+            urlRoot: '/restapi/v1.0/account/~/extension'
         });
 
         //////////

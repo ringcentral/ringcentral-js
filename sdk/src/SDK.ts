@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import {EventEmitter} from 'events';
 import Cache from './core/Cache';
 import Externals, {ExternalsOptions} from './core/Externals';
 import * as Constants from './core/Constants';
@@ -22,7 +22,6 @@ export {
     CreateUrlOptions,
     SendOptions,
     AuthData,
-    EventEmitter,
     ExternalsOptions,
     CreateRequestOptions,
     ApiError,
@@ -42,6 +41,8 @@ export class SDK {
     private _platform: Platform;
 
     public static version = Constants.version;
+
+    public static EventEmitter = EventEmitter;
 
     public static server = {
         sandbox: 'https://platform.devtest.ringcentral.com',

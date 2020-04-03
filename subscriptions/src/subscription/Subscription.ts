@@ -1,5 +1,5 @@
 import PubNubDefault from 'pubnub';
-import {SDK, EventEmitter, ApiError} from '@ringcentral/sdk';
+import {SDK, ApiError} from '@ringcentral/sdk';
 
 // detect ISO 8601 format string with +00[:00] timezone notations
 const ISO_REG_EXP = /(\+[\d]{2}):?([\d]{2})?$/;
@@ -32,7 +32,7 @@ export enum events {
     automaticRenewError = 'automaticRenewError',
 }
 
-export default class Subscription extends EventEmitter {
+export default class Subscription extends SDK.EventEmitter {
     public events = events;
 
     protected _sdk: SDK;

@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import {EventEmitter} from 'events';
 import * as qs from 'querystring';
 import Auth, {AuthOptions} from './Auth';
 import * as Constants from '../core/Constants';

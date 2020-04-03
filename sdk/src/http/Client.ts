@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import {EventEmitter} from 'events';
 import * as qs from 'querystring';
 import isPlainObject from 'is-plain-object';
 import Externals from '../core/Externals';

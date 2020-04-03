@@ -94,7 +94,7 @@
             var $text = document.getElementById('fax-text');
 
             $to.value = localStorage.getItem('ringcentral-demo-fax-to');
-            $form.action = platform.createUrl('/account/~/extension/~/fax', {addToken: true, addServer: true});
+            $form.action = platform.createUrl('/restapi/v1.0/account/~/extension/~/fax', {addToken: true, addServer: true});
 
             $attachment.addEventListener('change', function(e) {
 
@@ -139,7 +139,7 @@
                 }
 
                 platform
-                    .post('/account/~/extension/~/fax', formData)
+                    .post('/restapi/v1.0/account/~/extension/~/fax', formData)
                     .then(function(res) {
                         localStorage.setItem('ringcentral-demo-fax-to', $to.value);
                         alert('Fax has been placed in the queue.');

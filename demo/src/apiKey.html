@@ -94,8 +94,8 @@
 
         isTokenValid.style.display = platform.auth().accessTokenValid() ? '' : 'none';
 
-        appKeyField.value = platform._appKey;
-        appSecretField.value = platform._appSecret;
+        appKeyField.value = platform._clientId;
+        appSecretField.value = platform._clientSecret;
         serverField.value = platform._server || RingCentral.SDK.server.sandbox;
 
     }

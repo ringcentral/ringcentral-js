@@ -133,7 +133,7 @@
             document.getElementById('login').style.display = 'none';
             document.getElementById('welcome').style.display = '';
 
-            platform.get('/account/~/extension/~')
+            platform.get('/restapi/v1.0/account/~/extension/~')
                 .then(function(response) {
                     return response.json();
                 })
