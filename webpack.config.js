@@ -35,8 +35,8 @@
 
         node: {
             http: false,
-            Buffer: false,
-            process: false,
+            Buffer: true,
+            process: true,
             timers: false
         },
 

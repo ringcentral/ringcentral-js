@@ -1,9 +1,7 @@
 var EventEmitter = require("events").EventEmitter;
 var qs = require("querystring");
 var objectAssign = require('object-assign');
-var CryptoJS = require("crypto-js/core");
-var CryptoJSSHA256 = require("crypto-js/sha256");
-var CryptoJSBase64 = require("crypto-js/enc-base64");
+var crypto = require("crypto");
 var Auth = require("./Auth");
 var Constants = require("../core/Constants");
 var ApiResponse = require("../http/ApiResponse");
@@ -194,12 +192,13 @@ Platform.prototype.loginUrl = function(options) {
     this._codeVerifier = '';
     if (options.usePKCE && !options.implicit) {
         this._codeVerifier = this._generateCodeVerifier();
-        query['code_challenge'] = CryptoJSSHA256(this._codeVerifier)
-            .toString(CryptoJSBase64)
+        query.code_challenge = crypto.createHash('sha256')
+            .update(this._codeVerifier).digest()
+            .toString('base64')
             .replace(/\+/g, '-')
             .replace(/\//g, '_')
             .replace(/=/g, '');
-        query['code_challenge_method'] = 'S256';
+        query.code_challenge_method = 'S256';
     }
     return this.createUrl(Platform._authorizeEndpoint + '?' + qs.stringify(query), {addServer: true});
 };
@@ -209,8 +208,9 @@ Platform.prototype.loginUrl = function(options) {
  * @private
  */
 Platform.prototype._generateCodeVerifier = function() {
-    var codeVerifier = CryptoJS.lib.WordArray.random(64)
-        .toString(CryptoJSBase64)
+    var codeVerifier = crypto.randomBytes(32);
+    codeVerifier = codeVerifier
+        .toString('base64')
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
         .replace(/=/g, '');
@@ -705,7 +705,7 @@ Platform.prototype._tokenRequest = function(path, body, skipAuthHeader) {
         'Content-Type': ApiResponse._urlencodedContentType
     };
     if (!skipAuthHeader) {
-        headers['Authorization'] = 'Basic ' + this._apiKey();
+        headers.Authorization = 'Basic ' + this._apiKey();
     }
     return this.send({
         url: path,
