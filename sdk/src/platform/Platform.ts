@@ -1,4 +1,6 @@
 import {EventEmitter} from 'events';
+import {createHash, randomBytes} from 'crypto';
+
 import * as qs from 'querystring';
 import Auth, {AuthOptions} from './Auth';
 import * as Constants from '../core/Constants';
@@ -71,6 +73,8 @@ export default class Platform extends EventEmitter {
 
     private _handleRateLimit: boolean | number;
 
+    private _codeVerifier: string;
+
     public constructor({
         server,
         clientId,
@@ -118,6 +122,7 @@ export default class Platform extends EventEmitter {
         this._revokeEndpoint = revokeEndpoint;
         this._authorizeEndpoint = authorizeEndpoint;
         this._handleRateLimit = handleRateLimit;
+        this._codeVerifier = '';
     }
 
     public on(event: events.beforeLogin, listener: () => void);
@@ -158,22 +163,54 @@ export default class Platform extends EventEmitter {
         return `${path + (path.includes('?') ? '&' : '?')}access_token=${(await this._auth.data()).access_token}`;
     }
 
-    public loginUrl({implicit, state, brandId, display, prompt, uiOptions, uiLocales, localeId}: LoginUrlOptions = {}) {
-        return this.createUrl(
-            `${this._authorizeEndpoint}?${qs.stringify({
-                response_type: implicit ? 'token' : 'code',
-                redirect_uri: this._redirectUri,
-                client_id: this._clientId,
-                state,
-                brand_id: brandId,
-                display,
-                prompt,
-                ui_options: uiOptions,
-                ui_locales: uiLocales,
-                localeId,
-            })}`,
-            {addServer: true},
-        );
+    public loginUrl({
+        implicit,
+        state,
+        brandId,
+        display,
+        prompt,
+        uiOptions,
+        uiLocales,
+        localeId,
+        usePKCE,
+    }: LoginUrlOptions = {}) {
+        let query: AuthorizationQuery = {
+            response_type: implicit ? 'token' : 'code',
+            redirect_uri: this._redirectUri,
+            client_id: this._clientId,
+            state,
+            brand_id: brandId,
+            display,
+            prompt,
+            ui_options: uiOptions,
+            ui_locales: uiLocales,
+            localeId,
+        };
+        this._codeVerifier = '';
+        if (usePKCE && !implicit) {
+            this._codeVerifier = this._generateCodeVerifier();
+            query.code_challenge = createHash('sha256')
+                .update(this._codeVerifier)
+                .digest()
+                .toString('base64')
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+            query.code_challenge_method = 'S256';
+        }
+        return this.createUrl(`${this._authorizeEndpoint}?${qs.stringify(query)}`, {addServer: true});
+    }
+
+    /**
+     * @return {string}
+     */
+    private _generateCodeVerifier() {
+        let codeVerifier: any = randomBytes(32);
+        codeVerifier = codeVerifier
+            .toString('base64')
+            .replace(/\//g, '_')
+            .replace(/=/g, '');
+        return codeVerifier;
     }
 
     /**
@@ -303,6 +340,7 @@ export default class Platform extends EventEmitter {
                 //TODO Potentially make a request to /oauth/tokeninfo
                 json = {access_token, ...options};
             } else {
+                let skipAuthHeader = false;
                 if (!code) {
                     body.grant_type = 'password';
                     body.username = username;
@@ -313,13 +351,18 @@ export default class Platform extends EventEmitter {
                     body.grant_type = 'authorization_code';
                     body.code = code;
                     body.redirect_uri = this._redirectUri;
+                    if (this._codeVerifier && this._codeVerifier.length > 0) {
+                        body.client_id = this._clientId;
+                        body.code_verifier = this._codeVerifier;
+                        skipAuthHeader = true;
+                    }
                 }
 
                 if (access_token_ttl) body.access_token_ttl = access_token_ttl;
                 if (refresh_token_ttl) body.refresh_token_ttl = refresh_token_ttl;
                 if (endpoint_id) body.endpoint_id = endpoint_id;
 
-                response = await this._tokenRequest(this._tokenEndpoint, body);
+                response = await this._tokenRequest(this._tokenEndpoint, body, skipAuthHeader);
 
                 json = await response.clone().json();
             }
@@ -521,16 +564,19 @@ export default class Platform extends EventEmitter {
         return null;
     }
 
-    protected async _tokenRequest(url, body): Promise<Response> {
+    protected async _tokenRequest(url, body, skipAuthHeader: boolean = false): Promise<Response> {
+        let headers: TokenRequestHeaders = {
+            'Content-Type': Client._urlencodedContentType,
+        };
+        if (!skipAuthHeader) {
+            headers.Authorization = this.basicAuthHeader();
+        }
         return this.send({
             url,
             body,
             skipAuthCheck: true,
             method: 'POST',
-            headers: {
-                Authorization: this.basicAuthHeader(),
-                'Content-Type': Client._urlencodedContentType,
-            },
+            headers,
         });
     }
 
@@ -600,6 +646,7 @@ export interface LoginUrlOptions {
     uiOptions?: string;
     uiLocales?: string;
     localeId?: string;
+    usePKCE?: boolean;
 }
 
 export enum LoginUrlPrompt {
@@ -628,4 +675,24 @@ export interface LoginWindowOptions {
     origin?: string;
     property?: string;
     target?: string;
+}
+
+export interface AuthorizationQuery {
+    response_type: 'token' | 'code';
+    redirect_uri: string;
+    client_id: string;
+    state?: string;
+    brand_id?: string;
+    display?: LoginUrlDisplay | string;
+    prompt?: LoginUrlPrompt | string;
+    ui_options?: string;
+    ui_locales?: string;
+    localeId?: string;
+    code_challenge?: string;
+    code_challenge_method?: string;
+}
+
+export interface TokenRequestHeaders {
+    'Content-Type': string;
+    Authorization?: string;
 }
