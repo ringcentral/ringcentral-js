@@ -497,12 +497,10 @@ describe('RingCentral.platform.Platform', () => {
                 );
 
                 expect(
-                    platform
-                        .loginUrl({
-                            usePKCE: true,
-                        })
-                        .indexOf('code_challenge') > 0,
-                ).to.equal(true);
+                    platform.loginUrl({
+                        usePKCE: true,
+                    }),
+                ).to.have.string('code_challenge');
             }),
         );
     });
