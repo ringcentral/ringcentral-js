@@ -70,6 +70,24 @@ describe('RingCentral.platform.Platform', () => {
         );
 
         it(
+            'login with code and PKCE',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+
+                await platform.auth().cancelAccessToken();
+                platform.loginUrl({usePKCE: true});
+                authentication();
+
+                await platform.login({
+                    code: 'foo',
+                    access_token_ttl: 100,
+                    refresh_token_ttl: 100,
+                });
+                expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
+            }),
+        );
+
+        it(
             'login with access_token',
             asyncTest(async sdk => {
                 const platform = sdk.platform();
@@ -477,6 +495,19 @@ describe('RingCentral.platform.Platform', () => {
                 ).to.equal(
                     'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=&ui_locales=&localeId=',
                 );
+
+                expect(
+                    platform.loginUrl({
+                        usePKCE: true,
+                    }),
+                ).to.have.string('code_challenge');
+
+                expect(
+                    platform.loginUrl.bind(platform, {
+                        implicit: true,
+                        usePKCE: true,
+                    }),
+                ).to.throw('PKCE only works with Authrization Code Flow');
             }),
         );
     });
