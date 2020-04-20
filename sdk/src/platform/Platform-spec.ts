@@ -501,6 +501,13 @@ describe('RingCentral.platform.Platform', () => {
                         usePKCE: true,
                     }),
                 ).to.have.string('code_challenge');
+
+                expect(
+                    platform.loginUrl.bind(platform, {
+                        implicit: true,
+                        usePKCE: true,
+                    }),
+                ).to.throw('PKCE only works with Authrization Code Flow');
             }),
         );
     });

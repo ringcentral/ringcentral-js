@@ -186,8 +186,11 @@ export default class Platform extends EventEmitter {
             ui_locales: uiLocales,
             localeId,
         };
+        if (usePKCE && implicit) {
+            throw new Error('PKCE only works with Authrization Code Flow');
+        }
         this._codeVerifier = '';
-        if (usePKCE && !implicit) {
+        if (usePKCE) {
             this._codeVerifier = this._generateCodeVerifier();
             query.code_challenge = createHash('sha256')
                 .update(this._codeVerifier)
