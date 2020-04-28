@@ -2751,7 +2751,8 @@ Subscription.prototype._subscribeAtPubnub = function() {
             ssl: true,
             restore: true,
             subscribeKey: deliveryMode.subscriberKey,
-            origin: 'ringcentral.pubnubapi.com'
+            origin: 'ringcentral.pubnubapi.com',
+            keepAlive: true
         });
 
         this._pubnub.addListener({
