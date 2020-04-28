@@ -30,6 +30,7 @@ export enum events {
     subscribeError = 'subscribeError',
     automaticRenewSuccess = 'automaticRenewSuccess',
     automaticRenewError = 'automaticRenewError',
+    status = 'status',
 }
 
 export default class Subscription extends SDK.EventEmitter {
@@ -337,10 +338,12 @@ export default class Subscription extends SDK.EventEmitter {
                 ssl: true,
                 restore: true,
                 subscribeKey: subscriberKey,
+                origin: 'ringcentral.pubnubapi.com',
+                keepAlive: true,
             });
 
             this._pubnub.addListener({
-                status: statusEvent => {},
+                status: statusEvent => this.emit(this.events.status, statusEvent),
                 message: m => this._notify(m.message),
             });
         }
