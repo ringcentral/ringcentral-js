@@ -453,7 +453,8 @@ Subscription.prototype._subscribeAtPubnub = function() {
         this._pubnub = new PubNub({
             ssl: true,
             restore: true,
-            subscribeKey: deliveryMode.subscriberKey
+            subscribeKey: deliveryMode.subscriberKey,
+            origin: 'ringcentral.pubnubapi.com'
         });
 
         this._pubnub.addListener({
