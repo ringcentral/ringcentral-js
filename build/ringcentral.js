@@ -2346,7 +2346,8 @@ function Subscription(options) {
         subscribeSuccess: 'subscribeSuccess',
         subscribeError: 'subscribeError',
         automaticRenewSuccess: 'automaticRenewSuccess',
-        automaticRenewError: 'automaticRenewError'
+        automaticRenewError: 'automaticRenewError',
+        status: 'status'
     };
 
     /** @private */
@@ -2749,11 +2750,14 @@ Subscription.prototype._subscribeAtPubnub = function() {
         this._pubnub = new PubNub({
             ssl: true,
             restore: true,
-            subscribeKey: deliveryMode.subscriberKey
+            subscribeKey: deliveryMode.subscriberKey,
+            origin: 'ringcentral.pubnubapi.com'
         });
 
         this._pubnub.addListener({
-            status: function(statusEvent) {},
+            status: function(statusEvent) {
+                this.emit(this.events.status, statusEvent);
+            }.bind(this),
             message: function(m) {
                 this._notify(m.message); // all other props are ignored
             }.bind(this)
