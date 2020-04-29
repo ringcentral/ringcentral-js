@@ -25,7 +25,7 @@
     "fetch-ponyfill": "^3.0.2",
     "is-plain-object": "^2.0.1",
     "object-assign": "^4.1.0",
-    "pubnub": "^4.4.2"
+    "pubnub": "^4.27.6"
   },
   "devDependencies": {
     "chai": "3.5.0",
@@ -51,7 +51,7 @@
     "phantomjs-prebuilt": "2.1.14",
     "sinon": "1.17.7",
     "sinon-chai": "2.8.0",
-    "soap": "0.18.0",
+    "soap": "0.31.0",
     "webpack": "1.14.0",
     "whatwg-fetch": "2.0.2"
   },
