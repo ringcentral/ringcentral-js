@@ -387,6 +387,23 @@ describe('RingCentral.platform.Platform', () => {
                 await test('delete');
             }),
         );
+
+        it(
+            'send request with user agent option',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+                const client = sdk.client();
+                const path = `/restapi/v1.0/foo/get`;
+
+                apiCall('get', path, {foo: 'bar'});
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
+                });
+                await platform.get(path, null, {userAgent: 'TestAgent'});
+                expect(request.headers.get('x-user-agent')).have.string('TestAgent');
+            }),
+        );
     });
 
     describe('createUrl', () => {

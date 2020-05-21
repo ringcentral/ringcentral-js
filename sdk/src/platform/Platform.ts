@@ -475,8 +475,11 @@ export default class Platform extends EventEmitter {
 
     public async inflateRequest(request: Request, options: SendOptions = {}): Promise<Request> {
         options = options || {};
-
-        request.headers.set('X-User-Agent', this._userAgent);
+        let userAgent = this._userAgent;
+        if (options.userAgent) {
+            userAgent = `${options.userAgent} ${userAgent}`;
+        }
+        request.headers.set('X-User-Agent', userAgent);
 
         if (options.skipAuthCheck) return request;
 
@@ -624,6 +627,7 @@ export interface SendOptions {
     method?: string;
     query?: any;
     headers?: any;
+    userAgent?: string;
     skipAuthCheck?: boolean;
     handleRateLimit?: boolean | number;
     retry?: boolean; // Will be set by this method if SDK makes second request
