@@ -173,9 +173,11 @@ export default class Platform extends EventEmitter {
         uiLocales,
         localeId,
         usePKCE,
+        responseHint,
     }: LoginUrlOptions = {}) {
         let query: AuthorizationQuery = {
             response_type: implicit ? 'token' : 'code',
+            response_hint: responseHint,
             redirect_uri: this._redirectUri,
             client_id: this._clientId,
             state,
@@ -646,10 +648,11 @@ export interface LoginUrlOptions {
     display?: LoginUrlDisplay | string;
     prompt?: LoginUrlPrompt | string;
     implicit?: boolean;
-    uiOptions?: string;
+    uiOptions?: string | string[];
     uiLocales?: string;
     localeId?: string;
     usePKCE?: boolean;
+    responseHint?: string | string[];
 }
 
 export enum LoginUrlPrompt {
@@ -682,13 +685,14 @@ export interface LoginWindowOptions {
 
 export interface AuthorizationQuery {
     response_type: 'token' | 'code';
+    response_hint?: string | string[];
     redirect_uri: string;
     client_id: string;
     state?: string;
     brand_id?: string;
     display?: LoginUrlDisplay | string;
     prompt?: LoginUrlPrompt | string;
-    ui_options?: string;
+    ui_options?: string | string[];
     ui_locales?: string;
     localeId?: string;
     code_challenge?: string;

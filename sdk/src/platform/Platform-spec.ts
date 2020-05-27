@@ -473,7 +473,7 @@ describe('RingCentral.platform.Platform', () => {
                         prompt: 'foo',
                     }),
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=token&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId=',
+                    'http://whatever/restapi/oauth/authorize?response_type=token&response_hint=&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId=',
                 );
 
                 expect(
@@ -485,7 +485,7 @@ describe('RingCentral.platform.Platform', () => {
                         prompt: 'foo',
                     }),
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId=',
+                    'http://whatever/restapi/oauth/authorize?response_type=code&response_hint=&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=foo&brand_id=foo&display=foo&prompt=foo&ui_options=&ui_locales=&localeId=',
                 );
 
                 expect(
@@ -493,7 +493,7 @@ describe('RingCentral.platform.Platform', () => {
                         implicit: false,
                     }),
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=&ui_locales=&localeId=',
+                    'http://whatever/restapi/oauth/authorize?response_type=code&response_hint=&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=&ui_locales=&localeId=',
                 );
 
                 expect(
@@ -508,6 +508,15 @@ describe('RingCentral.platform.Platform', () => {
                         usePKCE: true,
                     }),
                 ).to.throw('PKCE only works with Authrization Code Flow');
+
+                expect(
+                    platform.loginUrl({
+                        implicit: false,
+                        uiOptions: ['foo', 'bar'],
+                    }),
+                ).to.equal(
+                    'http://whatever/restapi/oauth/authorize?response_type=code&response_hint=&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=foo&ui_options=bar&ui_locales=&localeId=',
+                );
             }),
         );
     });
