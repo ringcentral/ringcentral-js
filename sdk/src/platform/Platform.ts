@@ -177,7 +177,6 @@ export default class Platform extends EventEmitter {
     }: LoginUrlOptions = {}) {
         let query: AuthorizationQuery = {
             response_type: implicit ? 'token' : 'code',
-            response_hint: responseHint,
             redirect_uri: this._redirectUri,
             client_id: this._clientId,
             state,
@@ -188,6 +187,9 @@ export default class Platform extends EventEmitter {
             ui_locales: uiLocales,
             localeId,
         };
+        if (responseHint) {
+            query.response_hint = responseHint;
+        }
         if (usePKCE && implicit) {
             throw new Error('PKCE only works with Authrization Code Flow');
         }
