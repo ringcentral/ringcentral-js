@@ -513,9 +513,20 @@ describe('RingCentral.platform.Platform', () => {
                     platform.loginUrl({
                         implicit: false,
                         uiOptions: ['foo', 'bar'],
+                        responseHint: ['baz', 'quux'],
                     }),
                 ).to.equal(
-                    'http://whatever/restapi/oauth/authorize?response_type=code&response_hint=&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=foo&ui_options=bar&ui_locales=&localeId=',
+                    'http://whatever/restapi/oauth/authorize?response_type=code&response_hint=baz&response_hint=quux&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=foo&ui_options=bar&ui_locales=&localeId=',
+                );
+
+                expect(
+                    platform.loginUrl({
+                        implicit: false,
+                        uiOptions: 'foo',
+                        responseHint: 'bar',
+                    }),
+                ).to.equal(
+                    'http://whatever/restapi/oauth/authorize?response_type=code&response_hint=bar&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=foo&ui_locales=&localeId=',
                 );
             }),
         );
