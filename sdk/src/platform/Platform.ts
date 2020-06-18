@@ -215,6 +215,7 @@ export default class Platform extends EventEmitter {
         let codeVerifier: any = randomBytes(32);
         codeVerifier = codeVerifier
             .toString('base64')
+            .replace(/\+/g, '-')
             .replace(/\//g, '_')
             .replace(/=/g, '');
         return codeVerifier;
@@ -374,7 +375,10 @@ export default class Platform extends EventEmitter {
                 json = await response.clone().json();
             }
 
-            await this._auth.setData(json);
+            await this._auth.setData({
+                ...json,
+                code_verifier: this._codeVerifier,
+            });
 
             this.emit(this.events.loginSuccess, response);
 
@@ -399,13 +403,18 @@ export default class Platform extends EventEmitter {
             // Perform sanity checks
             if (!authData.refresh_token) throw new Error('Refresh token is missing');
             if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
-
-            const res = await this._tokenRequest(this._tokenEndpoint, {
+            const body: RefreshTokenBody = {
                 grant_type: 'refresh_token',
                 refresh_token: authData.refresh_token,
-                access_token_ttl: authData.expires_in + 1,
-                refresh_token_ttl: authData.refresh_token_expires_in + 1,
-            });
+                access_token_ttl: parseInt(authData.expires_in),
+                refresh_token_ttl: parseInt(authData.refresh_token_expires_in),
+            };
+            let skipAuthHeader = false;
+            if (authData.code_verifier && authData.code_verifier.length > 0) {
+                body.client_id = this._clientId;
+                skipAuthHeader = true;
+            }
+            const res = await this._tokenRequest(this._tokenEndpoint, body, skipAuthHeader);
 
             const json = await res.clone().json();
 
@@ -459,10 +468,19 @@ export default class Platform extends EventEmitter {
             let res = null;
 
             //FIXME https://developers.ringcentral.com/legacy-api-reference/index.html#!#RefRevokeToken.html requires secret
-            if (this._revokeEndpoint && this._clientSecret) {
-                res = await this._tokenRequest(this._revokeEndpoint, {
-                    token: (await this._auth.data()).access_token,
-                });
+            if (this._revokeEndpoint) {
+                const authData = await this._auth.data();
+                const body: RevokeTokenBody = {
+                    token: authData.access_token,
+                };
+                let skipAuthHeader = false;
+                if (authData.code_verifier && authData.code_verifier.length > 0) {
+                    body.client_id = this._clientId;
+                    skipAuthHeader = true;
+                }
+                if (skipAuthHeader || this._clientSecret) {
+                    res = await this._tokenRequest(this._revokeEndpoint, body, skipAuthHeader);
+                }
             }
 
             await this._cache.clean();
@@ -708,4 +726,17 @@ export interface AuthorizationQuery {
 export interface TokenRequestHeaders {
     'Content-Type': string;
     Authorization?: string;
+}
+
+export interface RefreshTokenBody {
+    grant_type: 'refresh_token';
+    refresh_token: string;
+    access_token_ttl: number;
+    refresh_token_ttl: number;
+    client_id?: string;
+}
+
+export interface RevokeTokenBody {
+    token: string;
+    client_id?: string;
 }
