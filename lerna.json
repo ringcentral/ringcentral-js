@@ -9,7 +9,8 @@
     "redux-demo",
     "sdk",
     "subscriptions",
-    "utils"
+    "utils",
+    "wap"
   ],
   "version": "0.0.0"
 }
