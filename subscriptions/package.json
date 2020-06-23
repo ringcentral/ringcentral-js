@@ -39,7 +39,7 @@
   },
   "main": "./lib/Subscriptions.js",
   "module": "./es6/Subscriptions.js",
-  "browser": "./dist/ringcentral-subscriptions.js",
+  "browser": "./lib/Subscriptions.js",
   "types": "./src/Subscriptions.ts",
   "author": {
     "name": "RingCentral, Inc.",

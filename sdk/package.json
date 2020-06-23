@@ -43,7 +43,7 @@
   "main": "./lib/index.js",
   "module": "./es6/index.js",
   "types": "./lib/SDK.d.ts",
-  "browser": "./dist/ringcentral.js",
+  "browser": "./lib/SDK.js",
   "author": {
     "name": "RingCentral, Inc.",
     "email": "devsupport@ringcentral.com"
