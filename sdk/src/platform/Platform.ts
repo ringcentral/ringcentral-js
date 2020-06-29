@@ -2,7 +2,7 @@ import {EventEmitter} from 'events';
 import {createHash, randomBytes} from 'crypto';
 
 import * as qs from 'querystring';
-import Auth, {AuthOptions} from './Auth';
+import Auth, {AuthOptions, AuthData} from './Auth';
 import * as Constants from '../core/Constants';
 import Cache from '../core/Cache';
 import Client, {ApiError} from '../http/Client';
@@ -360,7 +360,6 @@ export default class Platform extends EventEmitter {
                     body.code = code;
                     body.redirect_uri = this._redirectUri;
                     if (this._codeVerifier && this._codeVerifier.length > 0) {
-                        body.client_id = this._clientId;
                         body.code_verifier = this._codeVerifier;
                         skipAuthHeader = true;
                     }
@@ -409,11 +408,7 @@ export default class Platform extends EventEmitter {
                 access_token_ttl: parseInt(authData.expires_in),
                 refresh_token_ttl: parseInt(authData.refresh_token_expires_in),
             };
-            let skipAuthHeader = false;
-            if (authData.code_verifier && authData.code_verifier.length > 0) {
-                body.client_id = this._clientId;
-                skipAuthHeader = true;
-            }
+            const skipAuthHeader = this._shouldSkipAuthHeader(authData);
             const res = await this._tokenRequest(this._tokenEndpoint, body, skipAuthHeader);
 
             const json = await res.clone().json();
@@ -473,11 +468,7 @@ export default class Platform extends EventEmitter {
                 const body: RevokeTokenBody = {
                     token: authData.access_token,
                 };
-                let skipAuthHeader = false;
-                if (authData.code_verifier && authData.code_verifier.length > 0) {
-                    body.client_id = this._clientId;
-                    skipAuthHeader = true;
-                }
+                const skipAuthHeader = this._shouldSkipAuthHeader(authData);
                 if (skipAuthHeader || this._clientSecret) {
                     res = await this._tokenRequest(this._revokeEndpoint, body, skipAuthHeader);
                 }
@@ -596,7 +587,9 @@ export default class Platform extends EventEmitter {
         let headers: TokenRequestHeaders = {
             'Content-Type': Client._urlencodedContentType,
         };
-        if (!skipAuthHeader) {
+        if (skipAuthHeader) {
+            body.client_id = this._clientId;
+        } else {
             headers.Authorization = this.basicAuthHeader();
         }
         return this.send({
@@ -616,6 +609,10 @@ export default class Platform extends EventEmitter {
     public async authHeader(): Promise<string> {
         const data = await this._auth.data();
         return (data.token_type || 'Bearer') + (data.access_token ? ` ${data.access_token}` : '');
+    }
+
+    private _shouldSkipAuthHeader(authData: AuthData) {
+        return !!(authData.code_verifier && authData.code_verifier.length > 0);
     }
 }
 
