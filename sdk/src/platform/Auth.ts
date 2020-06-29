@@ -82,4 +82,7 @@ export interface AuthData {
     refresh_token_expires_in?: string;
     refresh_token_expire_time?: number;
     scope?: string;
+    code_verifier?: string;
+    owner_id?: string;
+    endpoint_id?: string;
 }

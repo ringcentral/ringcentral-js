@@ -83,7 +83,9 @@ describe('RingCentral.platform.Platform', () => {
                     access_token_ttl: 100,
                     refresh_token_ttl: 100,
                 });
-                expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
+                const authData = await platform.auth().data();
+                expect(authData.access_token).to.equal('ACCESS_TOKEN');
+                expect(authData.code_verifier).not.to.be.empty;
             }),
         );
 
@@ -361,6 +363,27 @@ describe('RingCentral.platform.Platform', () => {
                 expect(res[0].increment).to.equal(1);
                 expect(res[1].increment).to.equal(2);
                 expect(res[2].increment).to.equal(3);
+            }),
+        );
+
+        it(
+            'skip auth header when auth data with code_verifier',
+            asyncTest(async sdk => {
+                tokenRefresh();
+
+                const platform = sdk.platform();
+                const client = sdk.client();
+                await platform.auth().cancelAccessToken();
+                await platform.auth().setData({
+                    code_verifier: '1212121',
+                });
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
+                });
+                await platform.refresh();
+                expect(request.headers.get('authorization')).to.equal(null);
+                expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
             }),
         );
     });
@@ -684,6 +707,27 @@ describe('RingCentral.platform.Platform', () => {
                 expect(() => {
                     platform.parseLoginRedirect('xxx');
                 }).to.throw('Unable to parse response');
+            }),
+        );
+    });
+
+    describe('logout', () => {
+        it(
+            'skip auth header when auth data with code_verifier',
+            asyncTest(async sdk => {
+                logout();
+                const platform = sdk.platform();
+                const client = sdk.client();
+                await platform.auth().setData({
+                    code_verifier: '1212121',
+                });
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
+                });
+                await platform.logout();
+                expect(request.headers.get('authorization')).to.equal(null);
+                expect(await platform.auth().accessTokenValid()).to.equal(false);
             }),
         );
     });
