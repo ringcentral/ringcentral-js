@@ -401,7 +401,8 @@ export default class Platform extends EventEmitter {
 
             // Perform sanity checks
             if (!authData.refresh_token) throw new Error('Refresh token is missing');
-            if (!this._auth.refreshTokenValid()) throw new Error('Refresh token has expired');
+            const refreshTokenValid = await this._auth.refreshTokenValid();
+            if (!refreshTokenValid) throw new Error('Refresh token has expired');
             const body: RefreshTokenBody = {
                 grant_type: 'refresh_token',
                 refresh_token: authData.refresh_token,

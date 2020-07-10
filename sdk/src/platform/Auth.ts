@@ -41,12 +41,15 @@ export default class Auth {
 
     public async setData(newData: AuthData = {}) {
         const data = await this.data();
-
+        let refreshTokenExpireTime = data.refresh_token_expire_time;
+        if (newData.refresh_token_expires_in) {
+            refreshTokenExpireTime = Date.now() + parseInt(newData.refresh_token_expires_in, 10) * 1000;
+        }
         await this._cache.setItem(this._cacheId, {
             ...data,
             ...newData,
             expire_time: Date.now() + parseInt(newData.expires_in, 10) * 1000,
-            refresh_token_expire_time: Date.now() + parseInt(newData.refresh_token_expires_in, 10) * 1000,
+            refresh_token_expire_time: refreshTokenExpireTime,
         });
     }
 
