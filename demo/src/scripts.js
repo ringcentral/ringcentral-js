@@ -6,7 +6,7 @@
         var appSecret = localStorage.getItem('ringcentral-demo-appSecret');
         var server = localStorage.getItem('ringcentral-demo-server');
 
-        if (!appSecret || !appKey || !server) {
+        if (!appKey || !server) {
             if (location.href.indexOf('apiKey.html') == -1) {
                 location.assign('apiKey.html');
             }
