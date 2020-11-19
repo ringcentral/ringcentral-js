@@ -3,6 +3,7 @@ import {createHash, randomBytes} from 'crypto';
 
 import * as qs from 'querystring';
 import Auth, {AuthOptions, AuthData} from './Auth';
+import Discovery from './Discovery';
 import * as Constants from '../core/Constants';
 import Cache from '../core/Cache';
 import Client, {ApiError} from '../http/Client';
@@ -32,8 +33,13 @@ export enum events {
     rateLimitError = 'rateLimitError',
 }
 
+function checkPathHasHttp(path) {
+    return path.startsWith('http://') || path.startsWith('https://');
+}
+
 export default class Platform extends EventEmitter {
     public static _cacheId = 'platform';
+    public static _discoveryCacheId = 'platform-discovery';
 
     public events = events;
 
@@ -75,6 +81,8 @@ export default class Platform extends EventEmitter {
 
     private _codeVerifier: string;
 
+    private _discovery?: Discovery;
+
     public constructor({
         server,
         clientId,
@@ -91,6 +99,9 @@ export default class Platform extends EventEmitter {
         tokenEndpoint = '/restapi/oauth/token',
         revokeEndpoint = '/restapi/oauth/revoke',
         authorizeEndpoint = '/restapi/oauth/authorize',
+        enableDiscovery = false,
+        discoveryServer,
+        discoveryInitalEndpoint = '/.well-known/entry-points/initial',
         authProxy = false,
         urlPrefix = '',
         handleRateLimit,
@@ -123,6 +134,25 @@ export default class Platform extends EventEmitter {
         this._authorizeEndpoint = authorizeEndpoint;
         this._handleRateLimit = handleRateLimit;
         this._codeVerifier = '';
+        if (enableDiscovery) {
+            const initialEndpoint = discoveryServer
+                ? `${discoveryServer}${discoveryInitalEndpoint}`
+                : discoveryInitalEndpoint;
+            this._discovery = new Discovery({
+                clientId,
+                cache: this._cache,
+                cacheId: Platform._cacheId,
+                initialEndpoint,
+                fetchGet: this.get.bind(this),
+            });
+            this._discovery.on(this._discovery.events.initialized, discoveryData => {
+                this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
+            });
+            this.on(events.logoutSuccess, this._fetchDiscoveryAndUpdateAuthorizeEndpoint);
+            this.on(events.logoutError, this._fetchDiscoveryAndUpdateAuthorizeEndpoint);
+            this.on(events.refreshError, this._updateDiscoveryAndAuthorizeEndpointOnRefreshError);
+            this.on(events.loginError, this._updateDiscoveryAndAuthorizeEndpointOnRefreshError);
+        }
     }
 
     public on(event: events.beforeLogin, listener: () => void);
@@ -143,10 +173,25 @@ export default class Platform extends EventEmitter {
         return this._auth;
     }
 
+    public discovery() {
+        return this._discovery;
+    }
+
+    private _fetchDiscoveryAndUpdateAuthorizeEndpoint = async () => {
+        const discoveryData = await this._discovery.fetchInitialData();
+        this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
+    };
+
+    private _updateDiscoveryAndAuthorizeEndpointOnRefreshError = async () => {
+        if (this._clearCacheOnRefreshError) {
+            await this._fetchDiscoveryAndUpdateAuthorizeEndpoint();
+        }
+    };
+
     public createUrl(path = '', options: CreateUrlOptions = {}) {
         let builtUrl = '';
 
-        const hasHttp = path.startsWith('http://') || path.startsWith('https://');
+        const hasHttp = checkPathHasHttp(path);
 
         if (options.addServer && !hasHttp) builtUrl += this._server;
 
@@ -161,6 +206,13 @@ export default class Platform extends EventEmitter {
 
     public async signUrl(path: string) {
         return `${path + (path.includes('?') ? '&' : '?')}access_token=${(await this._auth.data()).access_token}`;
+    }
+
+    public async loginUrlWithDiscovery(options: LoginUrlOptions = {}) {
+        if (this._discovery) {
+            await this._fetchDiscoveryAndUpdateAuthorizeEndpoint();
+        }
+        return this.loginUrl(options);
     }
 
     public loginUrl({
@@ -189,6 +241,12 @@ export default class Platform extends EventEmitter {
         };
         if (responseHint) {
             query.response_hint = responseHint;
+        }
+        if (this._discovery) {
+            if (!this._discovery.initialized) {
+                throw new Error('Discovery is not initialized');
+            }
+            query.discovery = true;
         }
         if (usePKCE && implicit) {
             throw new Error('PKCE only works with Authrization Code Flow');
@@ -335,6 +393,8 @@ export default class Platform extends EventEmitter {
         refresh_token_ttl,
         access_token,
         endpoint_id,
+        token_uri,
+        discovery_uri,
         ...options
     }: LoginOptions = {}): Promise<Response> {
         try {
@@ -343,6 +403,13 @@ export default class Platform extends EventEmitter {
             const body: any = {};
             let response = null;
             let json;
+            let tokenEndpoint = this._tokenEndpoint;
+            let discoveryEndpoint;
+            if (this._discovery) {
+                const discovery = await this._getTokenAndDiscoveryUriOnLogin({token_uri, discovery_uri});
+                tokenEndpoint = discovery.tokenEndpoint;
+                discoveryEndpoint = discovery.discoveryEndpoint;
+            }
 
             if (access_token) {
                 //TODO Potentially make a request to /oauth/tokeninfo
@@ -368,8 +435,7 @@ export default class Platform extends EventEmitter {
                 if (access_token_ttl) body.access_token_ttl = access_token_ttl;
                 if (refresh_token_ttl) body.refresh_token_ttl = refresh_token_ttl;
                 if (endpoint_id) body.endpoint_id = endpoint_id;
-
-                response = await this._tokenRequest(this._tokenEndpoint, body, skipAuthHeader);
+                response = await this._tokenRequest(tokenEndpoint, body, skipAuthHeader);
 
                 json = await response.clone().json();
             }
@@ -378,6 +444,10 @@ export default class Platform extends EventEmitter {
                 ...json,
                 code_verifier: this._codeVerifier,
             });
+
+            if (discoveryEndpoint) {
+                await this._discovery.fetchExternalData(discoveryEndpoint);
+            }
 
             this.emit(this.events.loginSuccess, response);
 
@@ -389,6 +459,22 @@ export default class Platform extends EventEmitter {
 
             throw e;
         }
+    }
+
+    private async _getTokenAndDiscoveryUriOnLogin({token_uri, discovery_uri}) {
+        let tokenEndpoint = token_uri;
+        let discoveryEndpoint = discovery_uri;
+        if (tokenEndpoint && discoveryEndpoint) {
+            return {tokenEndpoint, discoveryEndpoint};
+        }
+        const discoveryData = await this._discovery.initialData();
+        if (!tokenEndpoint) {
+            tokenEndpoint = discoveryData.authApi.defaultTokenUri;
+        }
+        if (!discoveryEndpoint) {
+            discoveryEndpoint = discoveryData.discoveryApi.defaultExternalUri;
+        }
+        return {tokenEndpoint, discoveryEndpoint};
     }
 
     private async _refresh(): Promise<Response> {
@@ -410,7 +496,12 @@ export default class Platform extends EventEmitter {
                 refresh_token_ttl: parseInt(authData.refresh_token_expires_in),
             };
             const skipAuthHeader = this._shouldSkipAuthHeader(authData);
-            const res = await this._tokenRequest(this._tokenEndpoint, body, skipAuthHeader);
+            let tokenEndpoint = this._tokenEndpoint;
+            if (this._discovery) {
+                const discoveryData = await this._discovery.externalData();
+                tokenEndpoint = discoveryData.authApi.tokenUri;
+            }
+            const res = await this._tokenRequest(tokenEndpoint, body, skipAuthHeader);
 
             const json = await res.clone().json();
 
@@ -471,20 +562,30 @@ export default class Platform extends EventEmitter {
                 };
                 const skipAuthHeader = this._shouldSkipAuthHeader(authData);
                 if (skipAuthHeader || this._clientSecret) {
-                    res = await this._tokenRequest(this._revokeEndpoint, body, skipAuthHeader);
+                    let revokeEndpoint = await this._getRevokeEndpoint();
+                    res = await this._tokenRequest(revokeEndpoint, body, skipAuthHeader);
                 }
             }
 
             await this._cache.clean();
-
             this.emit(this.events.logoutSuccess, res);
-
             return res;
         } catch (e) {
             this.emit(this.events.logoutError, e);
 
             throw e;
         }
+    }
+
+    private async _getRevokeEndpoint() {
+        let revokeEndpoint = this._revokeEndpoint;
+        if (!this._discovery || checkPathHasHttp(revokeEndpoint)) {
+            return revokeEndpoint;
+        }
+        const discoveryData = await this._discovery.externalData();
+        const baseUri = discoveryData.authApi.baseUri;
+        revokeEndpoint = `${baseUri}${revokeEndpoint}`;
+        return revokeEndpoint;
     }
 
     public async inflateRequest(request: Request, options: SendOptions = {}): Promise<Request> {
@@ -550,7 +651,13 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    public send(options: SendOptions = {}) {
+    public async send(options: SendOptions = {}) {
+        if (this._discovery && !options.skipAuthCheck) {
+            const discoveryData = await this._discovery.externalData();
+            if (discoveryData) {
+                this._server = discoveryData.coreApi.baseUri;
+            }
+        }
         //FIXME https://github.com/bitinn/node-fetch/issues/43
         options.url = this.createUrl(options.url, {addServer: true});
 
@@ -633,6 +740,10 @@ export interface PlatformOptions extends AuthOptions {
     authProxy?: boolean;
     urlPrefix?: string;
     handleRateLimit?: boolean | number;
+    enableDiscovery?: boolean;
+    discoveryServer?: string;
+    discoveryInitalEndpoint?: string;
+    discoveryAuthorizedEndpoint?: string;
 }
 
 export interface PlatformOptionsConstructor extends PlatformOptions {
@@ -662,6 +773,8 @@ export interface LoginOptions {
     access_token_ttl?: number;
     refresh_token_ttl?: number;
     endpoint_id?: string;
+    token_uri?: string;
+    discovery_uri?: string;
 }
 
 export interface LoginUrlOptions {
@@ -719,6 +832,7 @@ export interface AuthorizationQuery {
     localeId?: string;
     code_challenge?: string;
     code_challenge_method?: string;
+    discovery?: boolean;
 }
 
 export interface TokenRequestHeaders {
