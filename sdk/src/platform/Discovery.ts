@@ -348,7 +348,7 @@ export default class Discovery extends EventEmitter {
         if (!data) {
             return true;
         }
-        return data.expireTime - this._refreshHandicapMs > Date.now();
+        return data.expireTime - this._refreshHandicapMs < Date.now();
     }
 
     public get initialized() {
