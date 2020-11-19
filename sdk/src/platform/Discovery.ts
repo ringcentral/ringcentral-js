@@ -12,8 +12,8 @@ export interface DiscoveryOptions {
     clientId: string;
     refreshHandicapMs?: number;
     refreshDelayMs?: number;
-    initialRetryCount?: number;
-    initialRetryInterval?: number;
+    retryCount?: number;
+    retryInterval?: number;
 }
 
 export interface ExternalDisconveryAuthApiData {
@@ -95,6 +95,7 @@ export interface ExternalDisconveryData {
 export enum events {
     initialized = 'initialized',
     externalDataUpdated = 'externalDataUpdated',
+    externalRefreshError = 'externalRefreshError',
     initialFetchError = 'initialFetchError',
 }
 
@@ -129,6 +130,11 @@ export default class Discovery extends EventEmitter {
     private _initialRetryMaxCount: number;
     private _initialRetryInterval: number;
 
+    private _externalRetryCount: number = 0;
+    private _externalRetryMaxCount: number;
+    private _externalRetryInterval: number;
+    private _externalRetryCycelTimeout?: ReturnType<typeof setTimeout>;
+
     public constructor({
         cache,
         cacheId,
@@ -137,8 +143,8 @@ export default class Discovery extends EventEmitter {
         initialEndpoint,
         refreshHandicapMs = DEFAULT_RENEW_HANDICAP_MS,
         refreshDelayMs = 100,
-        initialRetryCount = DEFAULT_RETRY_COUNT,
-        initialRetryInterval = DEFAULT_RETRY_Interval,
+        retryCount = DEFAULT_RETRY_COUNT,
+        retryInterval = DEFAULT_RETRY_Interval,
     }: DiscoveryOptions) {
         super();
 
@@ -151,8 +157,11 @@ export default class Discovery extends EventEmitter {
         this._fetchGet = fetchGet;
         this._clientId = clientId;
 
-        this._initialRetryMaxCount = initialRetryCount;
-        this._initialRetryInterval = initialRetryInterval;
+        this._initialRetryMaxCount = retryCount;
+        this._initialRetryInterval = retryInterval;
+
+        this._externalRetryMaxCount = retryCount;
+        this._externalRetryInterval = retryInterval;
 
         this.init();
     }
@@ -175,14 +184,14 @@ export default class Discovery extends EventEmitter {
 
     private async _init() {
         let initialData = await this.initialData();
-        if (initialData) {
-            this._initialized = true;
+        if (!initialData) {
+            initialData = await this.fetchInitialData();
+        } else {
             this._initialRetryMaxCount = initialData.retryCount;
             this._initialRetryInterval = initialData.retryInterval;
-            this.emit(events.initialized, initialData);
-            return;
+            this._externalRetryMaxCount = initialData.retryCount;
+            this._externalRetryInterval = initialData.retryInterval;
         }
-        initialData = await this.fetchInitialData();
         this._initialized = true;
         this.emit(events.initialized, initialData);
     }
@@ -193,6 +202,10 @@ export default class Discovery extends EventEmitter {
         }
         try {
             const initialData = await this._initialFetchPromise;
+            this._initialRetryMaxCount = initialData.retryCount;
+            this._initialRetryInterval = initialData.retryInterval;
+            this._externalRetryMaxCount = initialData.retryCount;
+            this._externalRetryInterval = initialData.retryInterval;
             this._initialFetchPromise = null;
             return initialData;
         } catch (e) {
@@ -210,8 +223,6 @@ export default class Discovery extends EventEmitter {
                 {skipAuthCheck: true, skipDiscoveryCheck: true},
             );
             const initialData = await response.json();
-            this._initialRetryMaxCount = initialData.retryCount;
-            this._initialRetryInterval = initialData.retryInterval;
             await this._setInitialData(initialData);
             this._initialRetryCount = 0;
             return initialData;
@@ -227,13 +238,23 @@ export default class Discovery extends EventEmitter {
     }
 
     private async _fetchExternalData(externalEndoint: string) {
-        const response = await this._fetchGet(externalEndoint, null, {skipDiscoveryCheck: true});
-        const externalData = await response.json();
-        const discoveryTag = response.headers.get('discovery-tag');
-        if (discoveryTag) {
-            externalData.tag = discoveryTag;
+        try {
+            const response = await this._fetchGet(externalEndoint, null, {skipDiscoveryCheck: true});
+            const externalData = await response.json();
+            const discoveryTag = response.headers.get('discovery-tag');
+            if (discoveryTag) {
+                externalData.tag = discoveryTag;
+            }
+            return externalData;
+        } catch (e) {
+            this._externalRetryCount += 1;
+            if (this._externalRetryCount < this._externalRetryMaxCount) {
+                await delay(this._externalRetryInterval * 1000);
+                return this._fetchExternalData(externalEndoint);
+            }
+            this._externalRetryCount = 0;
+            throw e;
         }
-        return externalData;
     }
 
     public async fetchExternalData(externalEndoint: string) {
@@ -253,10 +274,24 @@ export default class Discovery extends EventEmitter {
     }
 
     private async _refreshExternalData() {
+        if (this._externalRetryCycelTimeout) {
+            return;
+        }
         await delay(this._refreshDelayMs);
         const oldExternalData = await this.externalData();
         const externalEndoint = oldExternalData.discoveryApi.externalUri;
-        await this.fetchExternalData(externalEndoint);
+        try {
+            await this.fetchExternalData(externalEndoint);
+        } catch (e) {
+            this._externalRetryCycelTimeout = setTimeout(() => {
+                this._externalRetryCycelTimeout = null;
+                this._refreshExternalData();
+            }, oldExternalData.retryCycleDelay * 1000);
+            this.emit(events.externalRefreshError, {
+                error: e,
+                message: `Fetch External Discovery data error, will retry after ${oldExternalData.retryCycleDelay}s.`,
+            });
+        }
     }
 
     public async refreshExternalData() {
