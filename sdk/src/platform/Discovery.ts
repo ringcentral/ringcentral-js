@@ -2,12 +2,16 @@ import {EventEmitter} from 'events';
 
 import Cache from '../core/Cache';
 
+import {delay} from './utils';
+
 export interface DiscoveryOptions {
     cache: Cache;
     cacheId: string;
     initialEndpoint: string;
     fetchGet: (url: string, query?, options?) => Promise<Response>;
     clientId: string;
+    refreshHandicapMs?: number;
+    refreshDelayMs?: number;
 }
 
 export interface ExternalDisconveryAuthApiData {
@@ -71,6 +75,7 @@ export interface InitialDiscoveryData {
 
 export interface ExternalDisconveryData {
     version: string;
+    tag?: string;
     expiresIn: number;
     expireTime: number;
     retryCount: number;
@@ -93,6 +98,8 @@ export enum events {
 export const DEFAULT_RETRY_COUNT = 3;
 export const DEFAULT_RETRY_Interval = 3;
 
+export const DEFAULT_RENEW_HANDICAP_MS = 60 * 1000; // 1 minute
+
 export default class Discovery extends EventEmitter {
     public events = events;
 
@@ -104,29 +111,54 @@ export default class Discovery extends EventEmitter {
     private _fetchGet: (url: string, query?, options?) => Promise<Response>;
     private _initialEndpoint: string;
     private _clientId: string;
-    private _initialPromise: Promise<void>;
-    private _initialFetchPromise: Promise<InitialDiscoveryData>;
+    private _initialPromise?: Promise<void>;
+    private _initialFetchPromise?: Promise<InitialDiscoveryData>;
+
+    private _externalFetchPromise?: Promise<ExternalDisconveryData>;
+    private _externalRefreshPromise?: Promise<void>;
 
     private _initialized: boolean = false;
 
-    public constructor({cache, cacheId, fetchGet, clientId, initialEndpoint}: DiscoveryOptions) {
+    private _refreshHandicapMs: number;
+    private _refreshDelayMs: number;
+
+    public constructor({
+        cache,
+        cacheId,
+        fetchGet,
+        clientId,
+        initialEndpoint,
+        refreshHandicapMs = DEFAULT_RENEW_HANDICAP_MS,
+        refreshDelayMs = 100,
+    }: DiscoveryOptions) {
         super();
 
         this._cache = cache;
         this._initialCacheId = `${cacheId}-initial`;
         this._externalCacheId = `${cacheId}-external`;
+        this._refreshHandicapMs = refreshHandicapMs;
+        this._refreshDelayMs = refreshDelayMs;
         this._initialEndpoint = initialEndpoint;
         this._fetchGet = fetchGet;
         this._clientId = clientId;
+
         this.init();
     }
 
     public async init() {
+        if (!this._clientId) {
+            throw new Error('Client Id is required for discovery');
+        }
         if (!this._initialPromise) {
             this._initialPromise = this._init();
         }
-        await this._initialPromise;
-        this._initialPromise = null;
+        try {
+            await this._initialPromise;
+            this._initialPromise = null;
+        } catch (e) {
+            this._initialPromise = null;
+            throw e;
+        }
     }
 
     private async _init() {
@@ -158,21 +190,49 @@ export default class Discovery extends EventEmitter {
     }
 
     private async _fetchExternalData(externalEndoint: string) {
-        const response = await this._fetchGet(externalEndoint);
+        const response = await this._fetchGet(externalEndoint, null, {skipDiscoveryCheck: true});
         const externalData = await response.json();
+        const discoveryTag = response.headers.get('discovery-tag');
+        if (discoveryTag) {
+            externalData.tag = discoveryTag;
+        }
         return externalData;
     }
 
     public async fetchExternalData(externalEndoint: string) {
-        const externalData = await this._fetchExternalData(externalEndoint);
-        this._setExternalData(externalData);
-        this.emit(events.externalDataUpdated, externalData);
+        if (!this._externalFetchPromise) {
+            this._externalFetchPromise = this._fetchExternalData(externalEndoint);
+        }
+        try {
+            const externalData = await this._externalFetchPromise;
+            await this._setExternalData(externalData);
+            this._externalFetchPromise = null;
+            this.emit(events.externalDataUpdated, externalData);
+            return externalData;
+        } catch (e) {
+            this._externalFetchPromise = null;
+            throw e;
+        }
+    }
+
+    private async _refreshExternalData() {
+        await delay(this._refreshDelayMs);
+        const oldExternalData = await this.externalData();
+        const externalEndoint = oldExternalData.discoveryApi.externalUri;
+        await this.fetchExternalData(externalEndoint);
     }
 
     public async refreshExternalData() {
-        const oldExternalData = await this.externalData();
-        const externalEndoint = oldExternalData.discoveryApi.externalUri;
-        this.fetchExternalData(externalEndoint);
+        if (!this._externalRefreshPromise) {
+            this._externalRefreshPromise = this._refreshExternalData();
+        }
+        try {
+            await this._externalRefreshPromise;
+            this._externalRefreshPromise = null;
+        } catch (e) {
+            this._externalRefreshPromise = null;
+            throw e;
+        }
     }
 
     public async initialData(): Promise<InitialDiscoveryData | null> {
@@ -213,7 +273,10 @@ export default class Discovery extends EventEmitter {
      */
     public async externalDataExpired() {
         const data = await this.externalData();
-        return data.expireTime > Date.now();
+        if (!data) {
+            return true;
+        }
+        return data.expireTime - this._refreshHandicapMs > Date.now();
     }
 
     public get initialized() {

@@ -8,15 +8,9 @@ import * as Constants from '../core/Constants';
 import Cache from '../core/Cache';
 import Client, {ApiError} from '../http/Client';
 import Externals from '../core/Externals';
+import {delay} from './utils';
 
 declare const screen: any; //FIXME TS Crap
-
-const delay = (timeout): Promise<any> =>
-    new Promise((resolve, reject) => {
-        setTimeout(() => {
-            resolve(null);
-        }, timeout);
-    });
 
 const getParts = (url, separator) => url.split(separator).reverse()[0];
 
@@ -152,6 +146,11 @@ export default class Platform extends EventEmitter {
             this.on(events.logoutError, this._fetchDiscoveryAndUpdateAuthorizeEndpoint);
             this.on(events.refreshError, this._updateDiscoveryAndAuthorizeEndpointOnRefreshError);
             this.on(events.loginError, this._updateDiscoveryAndAuthorizeEndpointOnRefreshError);
+            this._client.on(this._client.events.requestSuccess, response => {
+                if (response.headers.get('discovery-required')) {
+                    this._discovery.refreshExternalData();
+                }
+            });
         }
     }
 
@@ -652,10 +651,19 @@ export default class Platform extends EventEmitter {
     }
 
     public async send(options: SendOptions = {}) {
-        if (this._discovery && !options.skipAuthCheck) {
+        if (!options.skipAuthCheck && !options.skipDiscoveryCheck && this._discovery) {
+            const discoveryExpired = await this._discovery.externalDataExpired();
+            if (discoveryExpired) {
+                await this._discovery.refreshExternalData();
+            }
             const discoveryData = await this._discovery.externalData();
-            if (discoveryData) {
-                this._server = discoveryData.coreApi.baseUri;
+            if (!discoveryData) {
+                throw new Error('Discovery data is missing');
+            }
+            this._server = discoveryData.coreApi.baseUri;
+            if (discoveryData.tag) {
+                options.headers = options.headers || {};
+                options.headers['Discovery-Tag'] = discoveryData.tag;
             }
         }
         //FIXME https://github.com/bitinn/node-fetch/issues/43
@@ -760,6 +768,7 @@ export interface SendOptions {
     headers?: any;
     userAgent?: string;
     skipAuthCheck?: boolean;
+    skipDiscoveryCheck?: boolean;
     handleRateLimit?: boolean | number;
     retry?: boolean; // Will be set by this method if SDK makes second request
 }
