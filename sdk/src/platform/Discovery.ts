@@ -12,6 +12,8 @@ export interface DiscoveryOptions {
     clientId: string;
     refreshHandicapMs?: number;
     refreshDelayMs?: number;
+    initialRetryCount?: number;
+    initialRetryInterval?: number;
 }
 
 export interface ExternalDisconveryAuthApiData {
@@ -92,7 +94,8 @@ export interface ExternalDisconveryData {
 
 export enum events {
     initialized = 'initialized',
-    externalDataUpdated = 'external-data-updated',
+    externalDataUpdated = 'externalDataUpdated',
+    initialFetchError = 'initialFetchError',
 }
 
 export const DEFAULT_RETRY_COUNT = 3;
@@ -122,6 +125,10 @@ export default class Discovery extends EventEmitter {
     private _refreshHandicapMs: number;
     private _refreshDelayMs: number;
 
+    private _initialRetryCount: number = 0;
+    private _initialRetryMaxCount: number;
+    private _initialRetryInterval: number;
+
     public constructor({
         cache,
         cacheId,
@@ -130,6 +137,8 @@ export default class Discovery extends EventEmitter {
         initialEndpoint,
         refreshHandicapMs = DEFAULT_RENEW_HANDICAP_MS,
         refreshDelayMs = 100,
+        initialRetryCount = DEFAULT_RETRY_COUNT,
+        initialRetryInterval = DEFAULT_RETRY_Interval,
     }: DiscoveryOptions) {
         super();
 
@@ -141,6 +150,9 @@ export default class Discovery extends EventEmitter {
         this._initialEndpoint = initialEndpoint;
         this._fetchGet = fetchGet;
         this._clientId = clientId;
+
+        this._initialRetryMaxCount = initialRetryCount;
+        this._initialRetryInterval = initialRetryInterval;
 
         this.init();
     }
@@ -165,6 +177,8 @@ export default class Discovery extends EventEmitter {
         let initialData = await this.initialData();
         if (initialData) {
             this._initialized = true;
+            this._initialRetryMaxCount = initialData.retryCount;
+            this._initialRetryInterval = initialData.retryInterval;
             this.emit(events.initialized, initialData);
             return;
         }
@@ -177,16 +191,39 @@ export default class Discovery extends EventEmitter {
         if (!this._initialFetchPromise) {
             this._initialFetchPromise = this._fetchInitialData();
         }
-        const initialData = await this._initialFetchPromise;
-        this._initialFetchPromise = null;
-        return initialData;
+        try {
+            const initialData = await this._initialFetchPromise;
+            this._initialFetchPromise = null;
+            return initialData;
+        } catch (e) {
+            this._initialFetchPromise = null;
+            this.emit(events.initialFetchError, e);
+            throw e;
+        }
     }
 
     private async _fetchInitialData() {
-        const response = await this._fetchGet(this._initialEndpoint, {clientId: this._clientId}, {skipAuthCheck: true});
-        const initialData = await response.json();
-        await this._setInitialData(initialData);
-        return initialData;
+        try {
+            const response = await this._fetchGet(
+                this._initialEndpoint,
+                {clientId: this._clientId},
+                {skipAuthCheck: true, skipDiscoveryCheck: true},
+            );
+            const initialData = await response.json();
+            this._initialRetryMaxCount = initialData.retryCount;
+            this._initialRetryInterval = initialData.retryInterval;
+            await this._setInitialData(initialData);
+            this._initialRetryCount = 0;
+            return initialData;
+        } catch (e) {
+            this._initialRetryCount += 1;
+            if (this._initialRetryCount < this._initialRetryMaxCount) {
+                await delay(this._initialRetryInterval * 1000);
+                return this._fetchInitialData();
+            }
+            this._initialRetryCount = 0;
+            throw e;
+        }
     }
 
     private async _fetchExternalData(externalEndoint: string) {
