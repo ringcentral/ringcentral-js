@@ -135,7 +135,7 @@ export default class Platform extends EventEmitter {
             this._discovery = new Discovery({
                 clientId,
                 cache: this._cache,
-                cacheId: Platform._cacheId,
+                cacheId: Platform._discoveryCacheId,
                 initialEndpoint,
                 fetchGet: this.get.bind(this),
             });
