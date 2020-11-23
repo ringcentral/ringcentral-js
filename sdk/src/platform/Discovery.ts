@@ -1,6 +1,7 @@
 import {EventEmitter} from 'events';
 
 import Cache from '../core/Cache';
+import Client from '../http/Client';
 
 import {delay} from './utils';
 
@@ -197,10 +198,10 @@ export default class Discovery extends EventEmitter {
     }
 
     public async fetchInitialData() {
-        if (!this._initialFetchPromise) {
-            this._initialFetchPromise = this._fetchInitialData();
-        }
         try {
+            if (!this._initialFetchPromise) {
+                this._initialFetchPromise = this._fetchInitialData();
+            }
             const initialData = await this._initialFetchPromise;
             this._initialRetryMaxCount = initialData.retryCount;
             this._initialRetryInterval = initialData.retryInterval;
@@ -247,6 +248,9 @@ export default class Discovery extends EventEmitter {
             }
             return externalData;
         } catch (e) {
+            if (e.response && e.response.status === Client._unauthorizedStatus) {
+                throw e;
+            }
             this._externalRetryCount += 1;
             if (this._externalRetryCount < this._externalRetryMaxCount) {
                 await delay(this._externalRetryInterval * 1000);
@@ -258,10 +262,10 @@ export default class Discovery extends EventEmitter {
     }
 
     public async fetchExternalData(externalEndoint: string) {
-        if (!this._externalFetchPromise) {
-            this._externalFetchPromise = this._fetchExternalData(externalEndoint);
-        }
         try {
+            if (!this._externalFetchPromise) {
+                this._externalFetchPromise = this._fetchExternalData(externalEndoint);
+            }
             const externalData = await this._externalFetchPromise;
             await this._setExternalData(externalData);
             this._externalFetchPromise = null;
