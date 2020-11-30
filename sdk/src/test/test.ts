@@ -1,6 +1,8 @@
 import {expect, spy, fetchMock} from '@ringcentral/sdk-utils/test';
 import {SDK, SDKOptions} from '../SDK';
 
+fetchMock.config.fallbackToNetwork = true;
+
 export function apiCall(method, path, json, status = 200, statusText = 'OK', headers = null) {
     const isJson = typeof json !== 'string';
 
