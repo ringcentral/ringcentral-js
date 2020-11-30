@@ -27,7 +27,6 @@
   "peerDependencies": {
     "@ringcentral/sdk": ">=4",
     "react": "*",
-    "react-dom": "*",
     "redux": "*"
   },
   "main": "./lib/index.js",
