@@ -77,6 +77,8 @@ export default class Platform extends EventEmitter {
 
     private _discovery?: Discovery;
 
+    private _discoveryInitPromise: Promise<void>;
+
     public constructor({
         server,
         clientId,
@@ -96,6 +98,7 @@ export default class Platform extends EventEmitter {
         enableDiscovery = false,
         discoveryServer,
         discoveryInitalEndpoint = '/.well-known/entry-points/initial',
+        discoveryAutoInit = true,
         authProxy = false,
         urlPrefix = '',
         handleRateLimit,
@@ -151,6 +154,9 @@ export default class Platform extends EventEmitter {
                     this._discovery.refreshExternalData();
                 }
             });
+            if (discoveryAutoInit) {
+                this._discoveryInitPromise = this.initDiscovery();
+            }
         }
     }
 
@@ -212,6 +218,19 @@ export default class Platform extends EventEmitter {
             await this._fetchDiscoveryAndUpdateAuthorizeEndpoint();
         }
         return this.loginUrl(options);
+    }
+
+    public async initDiscovery() {
+        if (!this._discovery) {
+            throw new Error('Discovery is not enabled!');
+        }
+        try {
+            await this._discovery.init();
+            this._discoveryInitPromise = null;
+        } catch (e) {
+            this._discoveryInitPromise = null;
+            throw e;
+        }
     }
 
     public loginUrl({
@@ -730,6 +749,10 @@ export default class Platform extends EventEmitter {
     private _shouldSkipAuthHeader(authData: AuthData) {
         return !!(authData.code_verifier && authData.code_verifier.length > 0);
     }
+
+    public get discoveryInitPromise() {
+        return this._discoveryInitPromise;
+    }
 }
 
 export interface PlatformOptions extends AuthOptions {
@@ -752,6 +775,7 @@ export interface PlatformOptions extends AuthOptions {
     discoveryServer?: string;
     discoveryInitalEndpoint?: string;
     discoveryAuthorizedEndpoint?: string;
+    discoveryAutoInit?: boolean;
 }
 
 export interface PlatformOptionsConstructor extends PlatformOptions {

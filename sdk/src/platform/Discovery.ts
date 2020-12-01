@@ -163,8 +163,6 @@ export default class Discovery extends EventEmitter {
 
         this._externalRetryMaxCount = retryCount;
         this._externalRetryInterval = retryInterval;
-
-        this.init();
     }
 
     public async init() {
@@ -365,6 +363,22 @@ export default class Discovery extends EventEmitter {
 
     public get fetchingExternalData() {
         return !!this._externalFetchPromise;
+    }
+
+    public get refreshingExternalData() {
+        return !!this._externalRefreshPromise;
+    }
+
+    public get initializing() {
+        return !!this._initialPromise;
+    }
+
+    public get initialPromise() {
+        return this._initialPromise;
+    }
+
+    public get externalRefreshPromise() {
+        return this._externalFetchPromise;
     }
 
     public on(event: events.initialized, listener: (discoveryData: InitialDiscoveryData) => void);
