@@ -134,7 +134,7 @@ export default class Discovery extends EventEmitter {
     private _externalRetryCount: number = 0;
     private _externalRetryMaxCount: number;
     private _externalRetryInterval: number;
-    private _externalRetryCycelTimeout?: ReturnType<typeof setTimeout>;
+    private _externalRetryCycleTimeout?: ReturnType<typeof setTimeout> = null;
 
     public constructor({
         cache,
@@ -276,7 +276,7 @@ export default class Discovery extends EventEmitter {
     }
 
     private async _refreshExternalData() {
-        if (this._externalRetryCycelTimeout) {
+        if (this.externalRetryCycleScheduled) {
             return;
         }
         await delay(this._refreshDelayMs);
@@ -285,8 +285,8 @@ export default class Discovery extends EventEmitter {
         try {
             await this.fetchExternalData(externalEndoint);
         } catch (e) {
-            this._externalRetryCycelTimeout = setTimeout(() => {
-                this._externalRetryCycelTimeout = null;
+            this._externalRetryCycleTimeout = setTimeout(() => {
+                this._externalRetryCycleTimeout = null;
                 this._refreshExternalData();
             }, oldExternalData.retryCycleDelay * 1000);
             this.emit(events.externalRefreshError, {
@@ -379,6 +379,16 @@ export default class Discovery extends EventEmitter {
 
     public get externalRefreshPromise() {
         return this._externalFetchPromise;
+    }
+
+    public get externalRetryCycleScheduled() {
+        return this._externalRetryCycleTimeout !== null;
+    }
+
+    public cancelExternalRetryCycleTimeout() {
+        if (this._externalRetryCycleTimeout !== null) {
+            clearTimeout(this._externalRetryCycleTimeout);
+        }
     }
 
     public on(event: events.initialized, listener: (discoveryData: InitialDiscoveryData) => void);

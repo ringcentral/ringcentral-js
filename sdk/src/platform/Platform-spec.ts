@@ -1079,5 +1079,26 @@ describe('RingCentral.platform.Platform', () => {
             const discovery = await platform.discovery().externalData();
             expect(discovery.version).to.equal(externalDiscoveryData.version);
         });
+
+        it('should not throw error when refresh error and start retry cycle', async function() {
+            this.timeout(20000);
+            apiCall('GET', '/restapi/v1.0/foo/1', {increment: 1}, 200, 'OK', {
+                'Discovery-Required': 1,
+                'Access-Control-Expose-Headers': 'Discovery-Required',
+            });
+            // mock
+            apiCall('GET', '/.well-known/entry-points/external', null, 500);
+            apiCall('GET', '/.well-known/entry-points/external', null, 500);
+            apiCall('GET', '/.well-known/entry-points/external', null, 500);
+            const res = await platform.get('/restapi/v1.0/foo/1');
+            await res.json();
+            if (platform.discovery().refreshingExternalData) {
+                await platform.discovery().refreshExternalData();
+            }
+            const discovery = await platform.discovery().externalData();
+            expect(discovery.version).to.equal('1.0.0');
+            expect(platform.discovery().externalRetryCycleScheduled).to.equal(true);
+            platform.discovery().cancelExternalRetryCycleTimeout();
+        });
     });
 });
