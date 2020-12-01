@@ -121,4 +121,8 @@ export async function expectThrows(fn, errorText = '', additional = (e?: Error) 
     }
 }
 
+export function cleanFetchMock() {
+    fetchMock.restore();
+}
+
 export {spy, SDK, expect};

@@ -8,6 +8,7 @@ import {
     spy,
     tokenRefresh,
     createSdk,
+    cleanFetchMock,
 } from '../test/test';
 
 const globalAny: any = global;
@@ -742,7 +743,17 @@ describe('RingCentral.platform.Platform', () => {
         );
     });
 
-    describe('discovery', () => {
+    describe('discovery initial', () => {
+        let sdk;
+
+        beforeEach(() => {
+            cleanFetchMock();
+        });
+
+        afterEach(async () => {
+            await sdk.cache().clean();
+        });
+
         it('should fetch initial discovery and set auth endpoint on init', async () => {
             const discoveryData = {
                 version: '1.0.0',
@@ -761,7 +772,7 @@ describe('RingCentral.platform.Platform', () => {
                 },
             };
             apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', discoveryData);
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever'});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever'});
             const platform = sdk.platform();
             await platform.discovery().init();
             const loginUrl = platform.loginUrl();
@@ -770,6 +781,31 @@ describe('RingCentral.platform.Platform', () => {
             expect((await platform.discovery().initialData()).discoveryApi.defaultExternalUri).to.equal(
                 discoveryData.discoveryApi.defaultExternalUri,
             );
+        });
+
+        it('should emit initialFetchError error after 3 retry', async () => {
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', null, 500);
+            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever'});
+            const platform = sdk.platform();
+            const sendSpy = spy(() => {
+                throw new Error();
+            });
+            platform.send = sendSpy;
+            const discovery = platform.discovery();
+            try {
+                await discovery.init();
+            } catch (e) {
+                // ignore
+            }
+            expect(discovery.initialized).to.equal(false);
+            expect(sendSpy.calledThrice).to.equal(true);
+            let loginUrlError = false;
+            try {
+                platform.loginUrl();
+            } catch (e) {
+                loginUrlError = true;
+            }
+            expect(loginUrlError).to.equal(true);
         });
 
         it('should fetch initial discovery on loginUrlWithDiscovery', async () => {
@@ -840,7 +876,7 @@ describe('RingCentral.platform.Platform', () => {
             apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
             authentication();
 
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever'});
+            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             await platform.discovery().init();
             await platform.login({
@@ -850,6 +886,152 @@ describe('RingCentral.platform.Platform', () => {
             });
             const externalData = await platform.discovery().externalData();
             expect(externalData.coreApi.baseUri).to.equal(externalDiscoveryData.coreApi.baseUri);
+        });
+
+        it('should fetch external discovery fail with 3 retry', async () => {
+            const initialDiscoveryData = {
+                version: '1.0.0',
+                retryCount: 3,
+                retryInterval: 3,
+                discoveryApi: {
+                    defaultExternalUri: 'http://whatever/.well-known/entry-points/external',
+                },
+                authApi: {
+                    authorizationUri: 'http://whatever/restapi/oauth/authorize',
+                    oidcDiscoveryUri: 'http://whatever/.well-known/openid-configuration',
+                    defaultTokenUri: 'http://whatever/restapi/oauth/token',
+                },
+                coreApi: {
+                    baseUri: 'http://whatever',
+                },
+            };
+            // mock
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            apiCall('GET', '/.well-known/entry-points/external', null, 500);
+            apiCall('GET', '/.well-known/entry-points/external', null, 500);
+            apiCall('GET', '/.well-known/entry-points/external', null, 500);
+            authentication();
+
+            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            const platform = sdk.platform();
+            await platform.discovery().init();
+            const clientFetchErrorSpy = spy(() => {});
+            sdk.client().on(sdk.client().events.requestError, clientFetchErrorSpy);
+            let hasError = false;
+            try {
+                await platform.login({
+                    code: 'whatever',
+                    discovery_uri: 'http://whatever/.well-known/entry-points/external',
+                    token_uri: 'http://whatever/restapi/oauth/token',
+                });
+            } catch (e) {
+                hasError = true;
+            }
+            expect(hasError).to.equal(true);
+            expect(clientFetchErrorSpy.calledThrice).to.equal(true);
+            await platform.discovery().init();
+        });
+    });
+
+    describe('API request with discovery', () => {
+        let platform;
+
+        beforeEach(async () => {
+            cleanFetchMock();
+            const initialDiscoveryData = {
+                version: '1.0.0',
+                retryCount: 3,
+                retryInterval: 3,
+                discoveryApi: {
+                    defaultExternalUri: 'http://whatever/.well-known/entry-points/external',
+                },
+                authApi: {
+                    authorizationUri: 'http://whatever/restapi/oauth/authorize',
+                    oidcDiscoveryUri: 'http://whatever/.well-known/openid-configuration',
+                    defaultTokenUri: 'http://whatever/restapi/oauth/token',
+                },
+                coreApi: {
+                    baseUri: 'http://whatever',
+                },
+            };
+            const externalDiscoveryData = {
+                version: '1.0.0',
+                expiresIn: 86400,
+                retryCount: 3,
+                retryInterval: 3,
+                retryCycleDelay: 824,
+                discoveryApi: {
+                    initialUri: 'http://discovery/.well-known/entry-points/initial',
+                    externalUri: 'http://discovery/.well-known/entry-points/external',
+                },
+                authApi: {
+                    authorizationUri: 'http://whatever/restapi/oauth/authorize',
+                    oidcDiscoveryUri: 'http://whatever/.well-known/openid-configuration',
+                    baseUri: 'http://whatever',
+                    tokenUri: 'http://whatever/restapi/oauth/token',
+                },
+                coreApi: {
+                    baseUri: 'http://whatever',
+                    pubnubOrigin: 'whatever',
+                },
+            };
+            // mock
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
+            authentication();
+
+            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            platform = sdk.platform();
+            await platform.discovery().init();
+            await platform.login({
+                code: 'whatever',
+                discovery_uri: 'http://whatever/.well-known/entry-points/external',
+                token_uri: 'http://whatever/restapi/oauth/token',
+            });
+        });
+
+        it('should fetch api request successfully', async () => {
+            apiCall('GET', '/restapi/v1.0/foo/1', {increment: 1});
+            const res = await platform.get('/restapi/v1.0/foo/1');
+            const data = await res.json();
+            expect(data.increment).to.equal(1);
+        });
+
+        it('should refresh token successfully', async () => {
+            tokenRefresh();
+            const noErrors = true;
+            await platform.refresh();
+            expect(noErrors).to.equal(true);
+        });
+
+        it('should logout successfully', async () => {
+            cleanFetchMock();
+            logout();
+            const initialDiscoveryData = {
+                version: '1.0.0',
+                retryCount: 3,
+                retryInterval: 3,
+                discoveryApi: {
+                    defaultExternalUri: 'http://whatever/.well-known/entry-points/external',
+                },
+                authApi: {
+                    authorizationUri: 'http://whatever1/restapi/oauth/authorize',
+                    oidcDiscoveryUri: 'http://whatever/.well-known/openid-configuration',
+                    defaultTokenUri: 'http://whatever/restapi/oauth/token',
+                },
+                coreApi: {
+                    baseUri: 'http://whatever',
+                },
+            };
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            const noErrors = true;
+            await platform.logout();
+            expect(noErrors).to.equal(true);
+            const loginUrl = await platform.loginUrlWithDiscovery();
+            const initialData = await platform.discovery().initialData();
+            expect(loginUrl.indexOf(initialDiscoveryData.authApi.authorizationUri)).to.equal(0);
         });
     });
 });

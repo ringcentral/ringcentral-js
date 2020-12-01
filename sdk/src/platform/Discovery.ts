@@ -359,7 +359,18 @@ export default class Discovery extends EventEmitter {
         return this._initialized;
     }
 
+    public get fetchingInitialData() {
+        return !!this._initialFetchPromise;
+    }
+
+    public get fetchingExternalData() {
+        return !!this._externalFetchPromise;
+    }
+
     public on(event: events.initialized, listener: (discoveryData: InitialDiscoveryData) => void);
+    public on(event: events.externalDataUpdated, listener: (discoveryData: ExternalDisconveryData) => void);
+    public on(event: events.initialFetchError, listener: (e: Error) => void);
+    public on(event: events.externalRefreshError, listener: (e: Error) => void);
     public on(event: string, listener: (...args) => void) {
         return super.on(event, listener);
     }
