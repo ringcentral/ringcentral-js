@@ -157,7 +157,9 @@
         }
 
         function show3leggedLogin({ implicit, usePKCE }) {
-
+            if (!implicit && !usePKCE && !platform._clientSecret) {
+                throw new Error('App Client Secret is required for authorization code flow');
+            }
             platform
                 .loginWindow({
                     url: platform.loginUrl({ implicit, usePKCE })
