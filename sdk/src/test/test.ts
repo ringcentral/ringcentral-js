@@ -125,4 +125,47 @@ export function cleanFetchMock() {
     fetchMock.restore();
 }
 
+export function getInitialDiscoveryMockData() {
+    return {
+        version: '1.0.0',
+        retryCount: 3,
+        retryInterval: 3,
+        discoveryApi: {
+            defaultExternalUri: 'http://whatever/.well-known/entry-points/external',
+        },
+        authApi: {
+            authorizationUri: 'http://whatever/restapi/oauth/authorize',
+            oidcDiscoveryUri: 'http://whatever/.well-known/openid-configuration',
+            defaultTokenUri: 'http://whatever/restapi/oauth/token',
+        },
+        coreApi: {
+            baseUri: 'http://whatever',
+        },
+    };
+}
+
+export function getExternalDiscoveryMockData() {
+    return {
+        version: '1.0.0',
+        expiresIn: 86400,
+        retryCount: 3,
+        retryInterval: 3,
+        retryCycleDelay: 824,
+        discoveryApi: {
+            initialUri: 'http://whatever/.well-known/entry-points/initial',
+            externalUri: 'http://whatever/.well-known/entry-points/external',
+        },
+        authApi: {
+            authorizationUri: 'http://whatever/restapi/oauth/authorize',
+            oidcDiscoveryUri: 'http://whatever/.well-known/openid-configuration',
+            baseUri: 'http://whatever',
+            tokenUri: 'http://whatever/restapi/oauth/token',
+        },
+        coreApi: {
+            baseUri: 'http://whatever',
+            pubnubOrigin: 'whatever',
+        },
+    };
+}
+
 export {spy, SDK, expect};

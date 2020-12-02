@@ -281,7 +281,13 @@ export default class Discovery extends EventEmitter {
         }
         await delay(this._refreshDelayMs);
         const oldExternalData = await this.externalData();
-        const externalEndoint = oldExternalData.discoveryApi.externalUri;
+        let externalEndoint;
+        if (oldExternalData) {
+            externalEndoint = oldExternalData.discoveryApi.externalUri;
+        } else {
+            const initialData = await this.initialData();
+            externalEndoint = initialData.discoveryApi.defaultExternalUri;
+        }
         try {
             await this.fetchExternalData(externalEndoint);
         } catch (e) {
@@ -350,6 +356,9 @@ export default class Discovery extends EventEmitter {
         if (!data) {
             return true;
         }
+        if (!data.expireTime) {
+            return false;
+        }
         return data.expireTime - this._refreshHandicapMs < Date.now();
     }
 
@@ -357,28 +366,8 @@ export default class Discovery extends EventEmitter {
         return this._initialized;
     }
 
-    public get fetchingInitialData() {
-        return !!this._initialFetchPromise;
-    }
-
-    public get fetchingExternalData() {
-        return !!this._externalFetchPromise;
-    }
-
     public get refreshingExternalData() {
         return !!this._externalRefreshPromise;
-    }
-
-    public get initializing() {
-        return !!this._initialPromise;
-    }
-
-    public get initialPromise() {
-        return this._initialPromise;
-    }
-
-    public get externalRefreshPromise() {
-        return this._externalFetchPromise;
     }
 
     public get externalRetryCycleScheduled() {
