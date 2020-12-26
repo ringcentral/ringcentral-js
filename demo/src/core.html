@@ -103,6 +103,9 @@
                     renewHandicapMs: 14 * 60 * 1000 // set quicker subscription refresh
                 });
 
+                subscription.on(subscription.events.status, function(msg) {
+                    console.log(msg);
+                });
                 subscription.on(subscription.events.notification, function(msg) {
                     cb(msg.body);
                 });
