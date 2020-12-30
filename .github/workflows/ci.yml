@@ -1,0 +1,34 @@
+name: CI Pipeline
+
+on: [push, pull_request]
+
+env:
+  CHROME_BIN: chromium-browser
+  DISPLAY: :99.0
+
+jobs:
+  test:
+    runs-on: ubuntu-latest # Firefox in it
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+      - run: sh -e /etc/init.d/xvfb start
+      - run: sleep 3
+      - run: npm install
+      - run: DEBUG=eslint:cli-engine npm run lint:all
+      - run: npm run build
+      - run: npm test
+      - run: cat */coverage/lcov.info
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: "*/coverage/lcov.info"
