@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
+      - run: sudo apt-get install xvfb
       - run: sh -e /etc/init.d/xvfb start
       - run: sleep 3
       - run: npm install
