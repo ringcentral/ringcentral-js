@@ -11,6 +11,7 @@ export interface DiscoveryOptions {
     initialEndpoint: string;
     fetchGet: (url: string, query?, options?) => Promise<Response>;
     clientId: string;
+    brandId?: string;
     refreshHandicapMs?: number;
     refreshDelayMs?: number;
     retryCount?: number;
@@ -116,6 +117,7 @@ export default class Discovery extends EventEmitter {
     private _fetchGet: (url: string, query?, options?) => Promise<Response>;
     private _initialEndpoint: string;
     private _clientId: string;
+    private _defaultBrandId?: string;
     private _initialPromise?: Promise<void>;
     private _initialFetchPromise?: Promise<InitialDiscoveryData>;
 
@@ -146,6 +148,7 @@ export default class Discovery extends EventEmitter {
         refreshDelayMs = 100,
         retryCount = DEFAULT_RETRY_COUNT,
         retryInterval = DEFAULT_RETRY_Interval,
+        brandId,
     }: DiscoveryOptions) {
         super();
 
@@ -157,6 +160,7 @@ export default class Discovery extends EventEmitter {
         this._initialEndpoint = initialEndpoint;
         this._fetchGet = fetchGet;
         this._clientId = clientId;
+        this._defaultBrandId = brandId;
 
         this._initialRetryMaxCount = retryCount;
         this._initialRetryInterval = retryInterval;
@@ -216,11 +220,14 @@ export default class Discovery extends EventEmitter {
 
     private async _fetchInitialData() {
         try {
-            const response = await this._fetchGet(
-                this._initialEndpoint,
-                {clientId: this._clientId},
-                {skipAuthCheck: true, skipDiscoveryCheck: true},
-            );
+            const initialParams = {clientId: this._clientId};
+            if (this._defaultBrandId) {
+                initialParams['brandId'] = this._defaultBrandId;
+            }
+            const response = await this._fetchGet(this._initialEndpoint, initialParams, {
+                skipAuthCheck: true,
+                skipDiscoveryCheck: true,
+            });
             const initialData = await response.json();
             await this._setInitialData(initialData);
             this._initialRetryCount = 0;
