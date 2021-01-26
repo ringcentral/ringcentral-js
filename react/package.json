@@ -26,8 +26,8 @@
   },
   "peerDependencies": {
     "@ringcentral/sdk": ">=4",
-    "react": "*",
-    "react-dom": "*"
+    "react": ">=16",
+    "react-dom": ">=16"
   },
   "main": "./lib/index.js",
   "module": "./es6/index.js",
