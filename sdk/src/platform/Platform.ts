@@ -45,6 +45,8 @@ export default class Platform extends EventEmitter {
 
     private _redirectUri: string;
 
+    private _brandId: string;
+
     private _refreshDelayMs: number;
 
     private _clearCacheOnRefreshError: boolean;
@@ -83,6 +85,7 @@ export default class Platform extends EventEmitter {
         server,
         clientId,
         clientSecret,
+        brandId,
         redirectUri = '',
         refreshDelayMs = 100,
         clearCacheOnRefreshError = true,
@@ -108,6 +111,7 @@ export default class Platform extends EventEmitter {
         this._server = server;
         this._clientId = clientId;
         this._clientSecret = clientSecret;
+        this._brandId = brandId;
         this._redirectUri = redirectUri;
         this._refreshDelayMs = refreshDelayMs;
         this._clearCacheOnRefreshError = clearCacheOnRefreshError;
@@ -137,6 +141,7 @@ export default class Platform extends EventEmitter {
                 : discoveryInitalEndpoint;
             this._discovery = new Discovery({
                 clientId,
+                brandId,
                 cache: this._cache,
                 cacheId: Platform._discoveryCacheId,
                 initialEndpoint,
@@ -244,13 +249,14 @@ export default class Platform extends EventEmitter {
         localeId,
         usePKCE,
         responseHint,
+        redirectUri,
     }: LoginUrlOptions = {}) {
         let query: AuthorizationQuery = {
             response_type: implicit ? 'token' : 'code',
-            redirect_uri: this._redirectUri,
+            redirect_uri: redirectUri ? redirectUri : this._redirectUri,
             client_id: this._clientId,
             state,
-            brand_id: brandId,
+            brand_id: brandId ? brandId : this._brandId,
             display,
             prompt,
             ui_options: uiOptions,
@@ -776,6 +782,7 @@ export interface PlatformOptions extends AuthOptions {
     discoveryInitalEndpoint?: string;
     discoveryAuthorizedEndpoint?: string;
     discoveryAutoInit?: boolean;
+    brandId?: string;
 }
 
 export interface PlatformOptionsConstructor extends PlatformOptions {
@@ -821,6 +828,7 @@ export interface LoginUrlOptions {
     localeId?: string;
     usePKCE?: boolean;
     responseHint?: string | string[];
+    redirectUri?: string;
 }
 
 export enum LoginUrlPrompt {
