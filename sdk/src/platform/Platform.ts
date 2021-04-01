@@ -523,15 +523,15 @@ export default class Platform extends EventEmitter {
             let tokenEndpoint = this._tokenEndpoint;
             if (this._discovery) {
                 const discoveryData = await this._discovery.externalData();
-                // For user who logged before discovery enabled. Need to refresh token firstly, then get discovery data
                 if (discoveryData) {
                     tokenEndpoint = discoveryData.authApi.tokenUri;
-                } else if (!this._server) {
+                } else {
+                    // For user who logged before discovery enabled. Need to refresh token firstly, then get discovery data
                     if (this._discoveryInitPromise) {
                         await this._discoveryInitPromise;
                     }
                     const initialDiscoveryData = await this._discovery.initialData();
-                    this._server = initialDiscoveryData.coreApi.baseUri;
+                    tokenEndpoint = initialDiscoveryData.authApi.defaultTokenUri;
                 }
             }
             const res = await this._tokenRequest(tokenEndpoint, body, skipAuthHeader);
