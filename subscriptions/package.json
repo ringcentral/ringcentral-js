@@ -24,7 +24,7 @@
     "@ringcentral/sdk": "*",
     "@ringcentral/sdk-utils": "*",
     "@types/mocha": "5.2.5",
-    "@types/node": "10.14.0",
+    "@types/node": "10.12.0",
     "@types/pubnub": "4.0.2",
     "mocha": "5.2.0",
     "npm-run-all": "4.1.3",
