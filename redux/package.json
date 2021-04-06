@@ -13,6 +13,7 @@
   "devDependencies": {
     "@ringcentral/sdk": "*",
     "@ringcentral/sdk-utils": "*",
+    "@types/node": "10.12.0",
     "@types/react": "16.7.20",
     "@types/react-redux": "6.0.9",
     "@types/redux": "3.6.0",
