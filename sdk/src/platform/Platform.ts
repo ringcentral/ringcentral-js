@@ -442,9 +442,12 @@ export default class Platform extends EventEmitter {
                 let skipAuthHeader = false;
                 if (!code) {
                     body.grant_type = 'password';
-                    body.username = username;
+                    if (extension && extension.length > 0) {
+                        body.username = `${username}*${extension}`;
+                    } else {
+                        body.username = username;
+                    }
                     body.password = password;
-                    body.extension = extension;
                 } else if (code) {
                     //@see https://developers.ringcentral.com/legacy-api-reference/index.html#!#RefAuthorizationCodeFlow
                     body.grant_type = 'authorization_code';
