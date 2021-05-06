@@ -419,6 +419,8 @@ export default class Platform extends EventEmitter {
         endpoint_id,
         token_uri,
         discovery_uri,
+        code_verifier,
+        redirect_uri,
         ...options
     }: LoginOptions = {}): Promise<Response> {
         try {
@@ -434,6 +436,8 @@ export default class Platform extends EventEmitter {
                 tokenEndpoint = discovery.tokenEndpoint;
                 discoveryEndpoint = discovery.discoveryEndpoint;
             }
+
+            const codeVerifier = code_verifier ? code_verifier : this._codeVerifier;
 
             if (access_token) {
                 //TODO Potentially make a request to /oauth/tokeninfo
@@ -452,9 +456,9 @@ export default class Platform extends EventEmitter {
                     //@see https://developers.ringcentral.com/legacy-api-reference/index.html#!#RefAuthorizationCodeFlow
                     body.grant_type = 'authorization_code';
                     body.code = code;
-                    body.redirect_uri = this._redirectUri;
-                    if (this._codeVerifier && this._codeVerifier.length > 0) {
-                        body.code_verifier = this._codeVerifier;
+                    body.redirect_uri = redirect_uri ? redirect_uri : this._redirectUri;
+                    if (codeVerifier && codeVerifier.length > 0) {
+                        body.code_verifier = codeVerifier;
                         skipAuthHeader = true;
                     }
                 }
@@ -469,7 +473,7 @@ export default class Platform extends EventEmitter {
 
             await this._auth.setData({
                 ...json,
-                code_verifier: this._codeVerifier,
+                code_verifier: codeVerifier,
             });
 
             if (discoveryEndpoint) {
@@ -771,6 +775,10 @@ export default class Platform extends EventEmitter {
     public get discoveryInitPromise() {
         return this._discoveryInitPromise;
     }
+
+    public get codeVerifier() {
+        return this._codeVerifier;
+    }
 }
 
 export interface PlatformOptions extends AuthOptions {
@@ -827,6 +835,8 @@ export interface LoginOptions {
     endpoint_id?: string;
     token_uri?: string;
     discovery_uri?: string;
+    code_verifier?: string;
+    redirect_uri?: string;
 }
 
 export interface LoginUrlOptions {
