@@ -745,6 +745,23 @@ describe('RingCentral.platform.Platform', () => {
         );
     });
 
+    describe('Login with code_verifier', () => {
+        it(
+            'should get code_verifier at request body',
+            asyncTest(async sdk => {
+                authentication();
+                const platform = sdk.platform();
+                const client = sdk.client();
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
+                });
+                await platform.login({code: 'test', code_verifier: 'test_code_verifier'});
+                expect(request.body.indexOf('code_verifier=test_code_verifier') > -1).to.equal(true);
+            }),
+        );
+    });
+
     describe('discovery initial', () => {
         let sdk;
 
