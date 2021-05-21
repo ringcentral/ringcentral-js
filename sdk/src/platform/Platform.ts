@@ -39,6 +39,8 @@ export default class Platform extends EventEmitter {
 
     private _server: string;
 
+    private _rcvServer: string;
+
     private _clientId: string;
 
     private _clientSecret: string;
@@ -109,6 +111,7 @@ export default class Platform extends EventEmitter {
         super();
 
         this._server = server;
+        this._rcvServer = server;
         this._clientId = clientId;
         this._clientSecret = clientSecret;
         this._brandId = brandId;
@@ -203,7 +206,13 @@ export default class Platform extends EventEmitter {
 
         const hasHttp = checkPathHasHttp(path);
 
-        if (options.addServer && !hasHttp) builtUrl += this._server;
+        if (options.addServer && !hasHttp) {
+            if (path.indexOf('/rcvideo') === 0 || (this._urlPrefix && this._urlPrefix.indexOf('/rcvideo') === 0)) {
+                builtUrl += this._rcvServer;
+            } else {
+                builtUrl += this._server;
+            }
+        }
 
         if (this._urlPrefix) builtUrl += this._urlPrefix;
 
@@ -702,6 +711,7 @@ export default class Platform extends EventEmitter {
                 throw new Error('Discovery data is missing');
             }
             this._server = discoveryData.coreApi.baseUri;
+            this._rcvServer = discoveryData.rcv.baseApiUri;
             if (discoveryData.tag) {
                 options.headers = options.headers || {};
                 options.headers['Discovery-Tag'] = discoveryData.tag;
