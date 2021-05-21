@@ -337,6 +337,7 @@ export default class Subscription extends SDK.EventEmitter {
                 ssl: true,
                 restore: true,
                 subscribeKey: subscriberKey,
+                useRandomIVs: false,
             });
 
             this._pubnub.addListener({
