@@ -972,6 +972,13 @@ describe('RingCentral.platform.Platform', () => {
             expect(data.increment).to.equal(1);
         });
 
+        it('should fetch rcv api request successfully', async () => {
+            apiCall('GET', '/rcvideo/v1/bridges', {id: 123});
+            const res = await platform.get('/rcvideo/v1/bridges');
+            const data = await res.json();
+            expect(data.id).to.equal(123);
+        });
+
         it('should refresh token successfully', async () => {
             tokenRefresh();
             const noErrors = true;
