@@ -161,6 +161,9 @@ export function getExternalDiscoveryMockData() {
             baseUri: 'http://whatever',
             tokenUri: 'http://whatever/restapi/oauth/token',
         },
+        rcv: {
+            baseApiUri: 'http://whatever',
+        },
         coreApi: {
             baseUri: 'http://whatever',
             pubnubOrigin: 'whatever',
