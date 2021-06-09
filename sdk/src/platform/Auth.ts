@@ -88,5 +88,4 @@ export interface AuthData {
     code_verifier?: string;
     owner_id?: string;
     endpoint_id?: string;
-    interop?: boolean;
 }
