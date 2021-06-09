@@ -430,6 +430,7 @@ export default class Platform extends EventEmitter {
         discovery_uri,
         code_verifier,
         redirect_uri,
+        interop,
         ...options
     }: LoginOptions = {}): Promise<Response> {
         try {
@@ -470,6 +471,9 @@ export default class Platform extends EventEmitter {
                         body.code_verifier = codeVerifier;
                         skipAuthHeader = true;
                     }
+                    if (interop) {
+                        skipAuthHeader = true;
+                    }
                 }
 
                 if (access_token_ttl) body.access_token_ttl = access_token_ttl;
@@ -483,6 +487,7 @@ export default class Platform extends EventEmitter {
             await this._auth.setData({
                 ...json,
                 code_verifier: codeVerifier,
+                interop,
             });
 
             if (discoveryEndpoint) {
@@ -779,7 +784,7 @@ export default class Platform extends EventEmitter {
     }
 
     private _shouldSkipAuthHeader(authData: AuthData) {
-        return !!(authData.code_verifier && authData.code_verifier.length > 0);
+        return !!((authData.code_verifier && authData.code_verifier.length > 0) || authData.interop);
     }
 
     public get discoveryInitPromise() {
@@ -847,6 +852,7 @@ export interface LoginOptions {
     discovery_uri?: string;
     code_verifier?: string;
     redirect_uri?: string;
+    interop?: boolean;
 }
 
 export interface LoginUrlOptions {
