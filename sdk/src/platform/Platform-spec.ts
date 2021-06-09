@@ -83,7 +83,7 @@ describe('RingCentral.platform.Platform', () => {
         );
 
         it(
-            'login with code and PKCE',
+            'login with code from usePKCE flow',
             asyncTest(async sdk => {
                 const platform = sdk.platform();
 
@@ -99,6 +99,28 @@ describe('RingCentral.platform.Platform', () => {
                 const authData = await platform.auth().data();
                 expect(authData.access_token).to.equal('ACCESS_TOKEN');
                 expect(authData.code_verifier).not.to.be.empty;
+            }),
+        );
+
+        it(
+            'login with code and code_verifier',
+            asyncTest(async sdk => {
+                authentication();
+                const platform = sdk.platform();
+                await platform.login({code: 'test', code_verifier: 'test_code_verifier'});
+                const authData = await platform.auth().data();
+                expect(authData.code_verifier).to.equal('test_code_verifier');
+            }),
+        );
+
+        it(
+            'login with code and interop flag',
+            asyncTest(async sdk => {
+                authentication();
+                const platform = sdk.platform();
+                await platform.login({code: 'test', interop: true});
+                const authData = await platform.auth().data();
+                expect(authData.interop).to.equal(true);
             }),
         );
 
@@ -397,6 +419,29 @@ describe('RingCentral.platform.Platform', () => {
                 await platform.refresh();
                 expect(request.headers.get('authorization')).to.equal(null);
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
+            }),
+        );
+
+        it(
+            'skip auth header when auth data with interop',
+            asyncTest(async sdk => {
+                tokenRefresh();
+
+                const platform = sdk.platform();
+                const client = sdk.client();
+                await platform.auth().cancelAccessToken();
+                await platform.auth().setData({
+                    interop: true,
+                });
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
+                });
+                await platform.refresh();
+                expect(request.headers.get('authorization')).to.equal(null);
+                const authData = await platform.auth().data();
+                expect(authData.access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
+                expect(authData.interop).to.equal(true);
             }),
         );
     });
@@ -726,7 +771,7 @@ describe('RingCentral.platform.Platform', () => {
 
     describe('logout', () => {
         it(
-            'skip auth header when auth data with code_verifier',
+            'should skip auth header when auth data with code_verifier',
             asyncTest(async sdk => {
                 logout();
                 const platform = sdk.platform();
@@ -743,17 +788,23 @@ describe('RingCentral.platform.Platform', () => {
                 expect(await platform.auth().accessTokenValid()).to.equal(false);
             }),
         );
-    });
 
-    describe('Login with code_verifier', () => {
         it(
-            'should get code_verifier at auth data',
+            'should skip auth header when auth data with interop',
             asyncTest(async sdk => {
-                authentication();
+                logout();
                 const platform = sdk.platform();
-                await platform.login({code: 'test', code_verifier: 'test_code_verifier'});
-                const authData = await platform.auth().data();
-                expect(authData.code_verifier).to.equal('test_code_verifier');
+                const client = sdk.client();
+                await platform.auth().setData({
+                    interop: true,
+                });
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
+                });
+                await platform.logout();
+                expect(request.headers.get('authorization')).to.equal(null);
+                expect(await platform.auth().accessTokenValid()).to.equal(false);
             }),
         );
     });
