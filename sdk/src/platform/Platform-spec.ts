@@ -154,7 +154,7 @@ describe('RingCentral.platform.Platform', () => {
                     });
                     await platform.login({code: 'test'});
                     expect(request.headers.get('authorization')).to.equal(null);
-                    expect(request.body).have.string('client_id=whatever');
+                    expect(request.body || request.originalBody).have.string('client_id=whatever');
                     const authData = await platform.auth().data();
                     expect(authData.access_token).to.equal('ACCESS_TOKEN');
                 },
@@ -474,7 +474,7 @@ describe('RingCentral.platform.Platform', () => {
                     });
                     await platform.refresh();
                     expect(request.headers.get('authorization')).to.equal(null);
-                    expect(request.body).have.string('client_id=whatever');
+                    expect(request.body || request.originalBody).have.string('client_id=whatever');
                     const authData = await platform.auth().data();
                     expect(authData.access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
                 },
@@ -825,7 +825,7 @@ describe('RingCentral.platform.Platform', () => {
                     });
                     await platform.logout();
                     expect(request.headers.get('authorization')).to.equal(null);
-                    expect(request.body).have.string('client_id=whatever');
+                    expect(request.body || request.originalBody).have.string('client_id=whatever');
                     expect(await platform.auth().accessTokenValid()).to.equal(false);
                 },
                 {clientSecret: ''},
