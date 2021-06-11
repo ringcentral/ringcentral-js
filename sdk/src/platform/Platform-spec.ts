@@ -83,23 +83,85 @@ describe('RingCentral.platform.Platform', () => {
         );
 
         it(
-            'login with code and PKCE',
+            'login with code from usePKCE flow without client secret',
+            asyncTest(
+                async sdk => {
+                    const platform = sdk.platform();
+
+                    await platform.auth().cancelAccessToken();
+                    platform.loginUrl({usePKCE: true});
+                    authentication();
+
+                    await platform.login({
+                        code: 'foo',
+                        access_token_ttl: 100,
+                        refresh_token_ttl: 100,
+                    });
+                    const authData = await platform.auth().data();
+                    expect(authData.access_token).to.equal('ACCESS_TOKEN');
+                    expect(authData.code_verifier).not.to.be.empty;
+                },
+                {
+                    clientSecret: '',
+                },
+            ),
+        );
+
+        it(
+            'login with code and code_verifier',
+            asyncTest(
+                async sdk => {
+                    authentication();
+                    const platform = sdk.platform();
+                    await platform.login({code: 'test', code_verifier: 'test_code_verifier'});
+                    const authData = await platform.auth().data();
+                    expect(authData.code_verifier).to.equal('test_code_verifier');
+                },
+                {
+                    clientSecret: '',
+                },
+            ),
+        );
+
+        it(
+            'login with code and code_verifier with client secret',
             asyncTest(async sdk => {
-                const platform = sdk.platform();
-
-                await platform.auth().cancelAccessToken();
-                platform.loginUrl({usePKCE: true});
                 authentication();
-
-                await platform.login({
-                    code: 'foo',
-                    access_token_ttl: 100,
-                    refresh_token_ttl: 100,
+                const platform = sdk.platform();
+                const client = sdk.client();
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
                 });
+                await platform.login({code: 'test', code_verifier: 'test_code_verifier'});
+                expect(request.headers.get('authorization')).not.to.equal(null);
                 const authData = await platform.auth().data();
                 expect(authData.access_token).to.equal('ACCESS_TOKEN');
-                expect(authData.code_verifier).not.to.be.empty;
+                expect(authData.code_verifier).to.equal('test_code_verifier');
             }),
+        );
+
+        it(
+            'login with code without clientSecret',
+            asyncTest(
+                async sdk => {
+                    authentication();
+                    const platform = sdk.platform();
+                    const client = sdk.client();
+                    let request;
+                    client.on(client.events.requestSuccess, (_, r) => {
+                        request = r;
+                    });
+                    await platform.login({code: 'test'});
+                    expect(request.headers.get('authorization')).to.equal(null);
+                    expect(request.body || request.originalBody).have.string('client_id=whatever');
+                    const authData = await platform.auth().data();
+                    expect(authData.access_token).to.equal('ACCESS_TOKEN');
+                },
+                {
+                    clientSecret: '',
+                },
+            ),
         );
 
         it(
@@ -380,24 +442,46 @@ describe('RingCentral.platform.Platform', () => {
         );
 
         it(
-            'skip auth header when auth data with code_verifier',
+            'not skip auth header when auth data with clientSecret',
             asyncTest(async sdk => {
                 tokenRefresh();
 
                 const platform = sdk.platform();
                 const client = sdk.client();
                 await platform.auth().cancelAccessToken();
-                await platform.auth().setData({
-                    code_verifier: '1212121',
-                });
                 let request;
                 client.on(client.events.requestSuccess, (_, r) => {
                     request = r;
                 });
                 await platform.refresh();
-                expect(request.headers.get('authorization')).to.equal(null);
+                expect(request.headers.get('authorization')).not.to.equal(null);
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
             }),
+        );
+
+        it(
+            'skip auth header when auth data without client secret',
+            asyncTest(
+                async sdk => {
+                    tokenRefresh();
+
+                    const platform = sdk.platform();
+                    const client = sdk.client();
+                    await platform.auth().cancelAccessToken();
+                    let request;
+                    client.on(client.events.requestSuccess, (_, r) => {
+                        request = r;
+                    });
+                    await platform.refresh();
+                    expect(request.headers.get('authorization')).to.equal(null);
+                    expect(request.body || request.originalBody).have.string('client_id=whatever');
+                    const authData = await platform.auth().data();
+                    expect(authData.access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
+                },
+                {
+                    clientSecret: '',
+                },
+            ),
         );
     });
 
@@ -726,35 +810,26 @@ describe('RingCentral.platform.Platform', () => {
 
     describe('logout', () => {
         it(
-            'skip auth header when auth data with code_verifier',
-            asyncTest(async sdk => {
-                logout();
-                const platform = sdk.platform();
-                const client = sdk.client();
-                await platform.auth().setData({
-                    code_verifier: '1212121',
-                });
-                let request;
-                client.on(client.events.requestSuccess, (_, r) => {
-                    request = r;
-                });
-                await platform.logout();
-                expect(request.headers.get('authorization')).to.equal(null);
-                expect(await platform.auth().accessTokenValid()).to.equal(false);
-            }),
-        );
-    });
-
-    describe('Login with code_verifier', () => {
-        it(
-            'should get code_verifier at auth data',
-            asyncTest(async sdk => {
-                authentication();
-                const platform = sdk.platform();
-                await platform.login({code: 'test', code_verifier: 'test_code_verifier'});
-                const authData = await platform.auth().data();
-                expect(authData.code_verifier).to.equal('test_code_verifier');
-            }),
+            'should skip auth header when auth without client secret',
+            asyncTest(
+                async sdk => {
+                    logout();
+                    const platform = sdk.platform();
+                    const client = sdk.client();
+                    await platform.auth().setData({
+                        code_verifier: '1212121',
+                    });
+                    let request;
+                    client.on(client.events.requestSuccess, (_, r) => {
+                        request = r;
+                    });
+                    await platform.logout();
+                    expect(request.headers.get('authorization')).to.equal(null);
+                    expect(request.body || request.originalBody).have.string('client_id=whatever');
+                    expect(await platform.auth().accessTokenValid()).to.equal(false);
+                },
+                {clientSecret: ''},
+            ),
         );
     });
 

@@ -452,7 +452,6 @@ export default class Platform extends EventEmitter {
                 //TODO Potentially make a request to /oauth/tokeninfo
                 json = {access_token, ...options};
             } else {
-                let skipAuthHeader = false;
                 if (!code) {
                     body.grant_type = 'password';
                     if (extension && extension.length > 0) {
@@ -468,14 +467,13 @@ export default class Platform extends EventEmitter {
                     body.redirect_uri = redirect_uri ? redirect_uri : this._redirectUri;
                     if (codeVerifier && codeVerifier.length > 0) {
                         body.code_verifier = codeVerifier;
-                        skipAuthHeader = true;
                     }
                 }
 
                 if (access_token_ttl) body.access_token_ttl = access_token_ttl;
                 if (refresh_token_ttl) body.refresh_token_ttl = refresh_token_ttl;
                 if (endpoint_id) body.endpoint_id = endpoint_id;
-                response = await this._tokenRequest(tokenEndpoint, body, skipAuthHeader);
+                response = await this._tokenRequest(tokenEndpoint, body);
 
                 json = await response.clone().json();
             }
@@ -535,7 +533,6 @@ export default class Platform extends EventEmitter {
                 access_token_ttl: parseInt(authData.expires_in),
                 refresh_token_ttl: parseInt(authData.refresh_token_expires_in),
             };
-            const skipAuthHeader = this._shouldSkipAuthHeader(authData);
             let tokenEndpoint = this._tokenEndpoint;
             if (this._discovery) {
                 const discoveryData = await this._discovery.externalData();
@@ -550,7 +547,7 @@ export default class Platform extends EventEmitter {
                     tokenEndpoint = initialDiscoveryData.authApi.defaultTokenUri;
                 }
             }
-            const res = await this._tokenRequest(tokenEndpoint, body, skipAuthHeader);
+            const res = await this._tokenRequest(tokenEndpoint, body);
 
             const json = await res.clone().json();
 
@@ -603,17 +600,14 @@ export default class Platform extends EventEmitter {
 
             let res = null;
 
-            //FIXME https://developers.ringcentral.com/legacy-api-reference/index.html#!#RefRevokeToken.html requires secret
-            if (this._revokeEndpoint) {
+            const revokeEndpoint = await this._getRevokeEndpoint();
+            if (revokeEndpoint) {
                 const authData = await this._auth.data();
                 const body: RevokeTokenBody = {
                     token: authData.access_token,
                 };
-                const skipAuthHeader = this._shouldSkipAuthHeader(authData);
-                if (skipAuthHeader || this._clientSecret) {
-                    let revokeEndpoint = await this._getRevokeEndpoint();
-                    res = await this._tokenRequest(revokeEndpoint, body, skipAuthHeader);
-                }
+                // Support to revoke token without client secret with client id in body
+                res = await this._tokenRequest(revokeEndpoint, body);
             }
 
             await this._cache.clean();
@@ -750,14 +744,15 @@ export default class Platform extends EventEmitter {
         return null;
     }
 
-    protected async _tokenRequest(url, body, skipAuthHeader: boolean = false): Promise<Response> {
+    protected async _tokenRequest(url, body): Promise<Response> {
         let headers: TokenRequestHeaders = {
             'Content-Type': Client._urlencodedContentType,
         };
-        if (skipAuthHeader) {
-            body.client_id = this._clientId;
-        } else {
+        if (this._clientSecret && this._clientSecret.length > 0) {
             headers.Authorization = this.basicAuthHeader();
+        } else {
+            // Put client_id in body when no app secret
+            body.client_id = this._clientId;
         }
         return this.send({
             url,
@@ -776,10 +771,6 @@ export default class Platform extends EventEmitter {
     public async authHeader(): Promise<string> {
         const data = await this._auth.data();
         return (data.token_type || 'Bearer') + (data.access_token ? ` ${data.access_token}` : '');
-    }
-
-    private _shouldSkipAuthHeader(authData: AuthData) {
-        return !!(authData.code_verifier && authData.code_verifier.length > 0);
     }
 
     public get discoveryInitPromise() {

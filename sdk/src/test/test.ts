@@ -77,9 +77,9 @@ export function createSdk(options: SDKOptions = {}) {
     });
 }
 
-export function asyncTest(fn: (sdk: SDK) => any) {
+export function asyncTest(fn: (sdk: SDK) => any, sdkOption: SDKOptions = {}) {
     return async () => {
-        const sdk = createSdk(); // {cachePrefix: 'prefix-' + Date.now()}
+        const sdk = createSdk(sdkOption); // {cachePrefix: 'prefix-' + Date.now()}
 
         const clean = async () => {
             fetchMock.restore();
