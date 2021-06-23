@@ -43,7 +43,7 @@
   "types": "./src/Subscriptions.ts",
   "author": {
     "name": "RingCentral, Inc.",
-    "email": "devsupport@ringcentral.com"
+    "url": "https://developers.ringcentral.com"
   },
   "contributors": [
     {
