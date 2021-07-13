@@ -53,6 +53,8 @@ export default class Subscription extends SDK.EventEmitter {
 
     protected _subscription: SubscriptionData = null;
 
+    protected _automaticRenewPromise: Promise<void> = null;
+
     public constructor({
         sdk,
         PubNub,
@@ -117,6 +119,10 @@ export default class Subscription extends SDK.EventEmitter {
 
     public subscription() {
         return this._subscription || {};
+    }
+
+    public pubnub() {
+        return this._pubnub;
     }
 
     /**
@@ -253,6 +259,20 @@ export default class Subscription extends SDK.EventEmitter {
         return this.eventFilters().map(event => this._sdk.platform().createUrl(event));
     }
 
+    private async _automaticRenewHandler() {
+        try {
+            if (this.alive()) return;
+
+            this._clearTimeout();
+
+            const res = await (this.expired() ? this.subscribe() : this.renew());
+
+            this.emit(this.events.automaticRenewSuccess, res);
+        } catch (e) {
+            this.emit(this.events.automaticRenewError, e);
+        }
+    }
+
     /**
      * @return {Subscription}
      * @private
@@ -263,20 +283,19 @@ export default class Subscription extends SDK.EventEmitter {
         if (!this.alive()) throw new Error('Subscription is not alive');
 
         this._timeout = setInterval(async () => {
-            try {
-                if (this.alive()) return;
-
-                this._clearTimeout();
-
-                const res = await (this.expired() ? this.subscribe() : this.renew());
-
-                this.emit(this.events.automaticRenewSuccess, res);
-            } catch (e) {
-                this.emit(this.events.automaticRenewError, e);
+            if (!this._automaticRenewPromise) {
+                this._automaticRenewPromise = this._automaticRenewHandler();
             }
+            await this._automaticRenewPromise;
+            this._automaticRenewPromise = null;
         }, this._pollInterval);
 
         return this;
+    }
+
+    // check if app is automatic renewing
+    public automaticRenewing(): Promise<void> {
+        return this._automaticRenewPromise;
     }
 
     /**
@@ -363,6 +382,12 @@ export default class Subscription extends SDK.EventEmitter {
         this._pubnub = null;
 
         return this;
+    }
+
+    // Allow to force rebuild pubnub connection
+    public async resubscribeAtPubNub(): Promise<Response> {
+        this._unsubscribeAtPubNub();
+        return this.register();
     }
 }
 
