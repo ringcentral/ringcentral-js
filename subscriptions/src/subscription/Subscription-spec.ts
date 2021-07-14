@@ -104,6 +104,25 @@ describe('Subscription', () => {
         );
     });
 
+    describe('resubscribeAtPubNub', () => {
+        it(
+            'resubscribe pubnub instance',
+            asyncTest(async sdk => {
+                subscribeGeneric(expiresIn);
+
+                const s = createSubscription(sdk).setEventFilters(['foo', 'bar']);
+                await s.register();
+                const oldPubNub = s.pubnub();
+                subscribeGeneric(expiresIn + 10, s.subscription().id);
+                await s.resubscribeAtPubNub();
+                expect(s.subscription().expiresIn).to.equal(expiresIn + 10);
+                expect(!!s.pubnub()).to.equal(true);
+                expect(s.pubnub()).not.to.equal(oldPubNub);
+                s.reset();
+            }),
+        );
+    });
+
     describe('notify', () => {
         it(
             'fires a notification event when the notify method is called and passes the message object',
