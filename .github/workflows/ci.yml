@@ -28,13 +28,13 @@ jobs:
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          base-path: sdk
+          path-to-lcov: ./sdk/coverage/lcov.info
           parallel: true
       - name: Coveralls Subscriptions
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          base-path: subscriptions
+          path-to-lcov: ./subscriptions/coverage/lcov.info
           parallel: true
       - name: Coveralls
         uses: coverallsapp/github-action@master
