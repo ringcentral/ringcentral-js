@@ -6,7 +6,7 @@ on:
       - "**.**.**"
 
 jobs:
-  npm:
+  release:
     if: ${{ github.repository_owner == 'ringcentral' }}
     runs-on: ubuntu-latest # Firefox in it
     steps:
@@ -28,21 +28,6 @@ jobs:
         env:
           SOURCE_TAG: ${{ steps.get_version.outputs.SOURCE_TAG }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  release:
-    if: ${{ github.repository_owner == 'ringcentral' }}
-    runs-on: ubuntu-latest # Firefox in it
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install
-      - run: npm run build
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
