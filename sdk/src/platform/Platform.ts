@@ -505,6 +505,10 @@ export default class Platform extends EventEmitter {
         if (tokenEndpoint && discoveryEndpoint) {
             return {tokenEndpoint, discoveryEndpoint};
         }
+        // wait discovery initial finished
+        if (this._discoveryInitPromise) {
+            await this._discoveryInitPromise;
+        }
         const discoveryData = await this._discovery.initialData();
         if (!tokenEndpoint) {
             tokenEndpoint = discoveryData.authApi.defaultTokenUri;

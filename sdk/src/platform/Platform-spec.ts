@@ -928,6 +928,26 @@ describe('RingCentral.platform.Platform', () => {
 
             const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
+            await platform.login({
+                code: 'whatever',
+                discovery_uri: 'http://whatever/.well-known/entry-points/external',
+                token_uri: 'http://whatever/restapi/oauth/token',
+            });
+            const externalData = await platform.discovery().externalData();
+            expect(externalData.coreApi.baseUri).to.equal(externalDiscoveryData.coreApi.baseUri);
+            expect(await platform.discovery().externalDataExpired()).to.equal(false);
+        });
+
+        it('should fetch external discovery when login with discovery_uri and token_uri when discoveryInitPromise finished', async () => {
+            // mock
+            const initialDiscoveryData = getInitialDiscoveryMockData();
+            const externalDiscoveryData = getExternalDiscoveryMockData();
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
+            authentication();
+
+            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            const platform = sdk.platform();
             if (platform.discoveryInitPromise) {
                 await platform.discoveryInitPromise;
             }
@@ -951,9 +971,6 @@ describe('RingCentral.platform.Platform', () => {
 
             const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
-            if (platform.discoveryInitPromise) {
-                await platform.discoveryInitPromise;
-            }
             await platform.login({code: 'whatever'});
             const externalData = await platform.discovery().externalData();
             expect(externalData.coreApi.baseUri).to.equal(externalDiscoveryData.coreApi.baseUri);
