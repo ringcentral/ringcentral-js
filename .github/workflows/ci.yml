@@ -1,0 +1,73 @@
+name: CI Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Firefox in it
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
+      - run: sudo apt-get install xvfb
+      - run: npm install
+      - run: DEBUG=eslint:cli-engine npm run lint:all
+      - run: npm run build
+      - run: xvfb-run --auto-servernum -- npm test
+        env:
+          CHROME_BIN: chromium-browser
+      - run: cat */coverage/lcov.info
+      - name: Coveralls SDK
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./sdk/coverage/lcov.info
+          parallel: true
+      - name: Coveralls Subscriptions
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./subscriptions/coverage/lcov.info
+          parallel: true
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+      - run: npm run publish:release -- --canary --preid=$BRANCH.$GITHUB_RUN_ID.$GITHUB_RUN_NUMBER --dist-tag=$BRANCH --yes
+        if: ${{ github.event_name == 'push' && github.repository == 'ringcentral/ringcentral-js' }}
+        env:
+          BRANCH: ${{ steps.extract_branch.outputs.branch }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - run: npm run publish:release -- $TAG --yes
+        if: ${{ env.TAG != '' && !contains(env.TAG, '/') && !contains(env.TAG, '-') && github.repository == 'ringcentral/ringcentral-js' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Release
+        if: ${{ env.TAG != '' && !contains(env.TAG, '/') && !contains(env.TAG, '-') && github.repository == 'ringcentral/ringcentral-js' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            sdk/dist/ringcentral.js
+            sdk/dist/ringcentral.js.map
+            sdk/dist/ringcentral.min.js
+            sdk/dist/ringcentral.min.js.map
+            subscriptions/dist/ringcentral-subscriptions.js
+            subscriptions/dist/ringcentral-subscriptions.js.map
+            subscriptions/dist/ringcentral-subscriptions.min.js
+            subscriptions/dist/ringcentral-subscriptions.min.js.map
+        env:
+          GITHUB_REPOSITORY: ringcentral/ringcentral-js
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
