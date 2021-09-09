@@ -12,11 +12,11 @@ export interface AuthOptionsConstructor extends AuthOptions {
 }
 
 export default class Auth {
-    private _cache: Cache;
+    protected _cache: Cache;
 
-    private readonly _cacheId: string;
+    protected readonly _cacheId: string;
 
-    private readonly _refreshHandicapMs: number;
+    protected readonly _refreshHandicapMs: number;
 
     public constructor({cache, cacheId, refreshHandicapMs = DEFAULT_RENEW_HANDICAP_MS}: AuthOptionsConstructor) {
         this._cache = cache;

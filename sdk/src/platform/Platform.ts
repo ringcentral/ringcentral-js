@@ -37,51 +37,51 @@ export default class Platform extends EventEmitter {
 
     public events = events;
 
-    private _server: string;
+    protected _server: string;
 
-    private _rcvServer: string;
+    protected _rcvServer: string;
 
-    private _clientId: string;
+    protected _clientId: string;
 
-    private _clientSecret: string;
+    protected _clientSecret: string;
 
-    private _redirectUri: string;
+    protected _redirectUri: string;
 
-    private _brandId: string;
+    protected _brandId: string;
 
-    private _refreshDelayMs: number;
+    protected _refreshDelayMs: number;
 
-    private _clearCacheOnRefreshError: boolean;
+    protected _clearCacheOnRefreshError: boolean;
 
-    private _userAgent: string;
+    protected _userAgent: string;
 
-    private _externals: Externals;
+    protected _externals: Externals;
 
-    private _cache: Cache;
+    protected _cache: Cache;
 
-    private _client: Client;
+    protected _client: Client;
 
-    private _refreshPromise: Promise<any>;
+    protected _refreshPromise: Promise<any>;
 
-    private _auth: Auth;
+    protected _auth: Auth;
 
-    private _tokenEndpoint;
+    protected _tokenEndpoint;
 
-    private _revokeEndpoint;
+    protected _revokeEndpoint;
 
-    private _authorizeEndpoint;
+    protected _authorizeEndpoint;
 
-    private _authProxy;
+    protected _authProxy;
 
-    private _urlPrefix;
+    protected _urlPrefix;
 
-    private _handleRateLimit: boolean | number;
+    protected _handleRateLimit: boolean | number;
 
-    private _codeVerifier: string;
+    protected _codeVerifier: string;
 
-    private _discovery?: Discovery;
+    protected _discovery?: Discovery;
 
-    private _discoveryInitPromise: Promise<void>;
+    protected _discoveryInitPromise: Promise<void>;
 
     public constructor({
         server,
@@ -190,12 +190,12 @@ export default class Platform extends EventEmitter {
         return this._discovery;
     }
 
-    private _fetchDiscoveryAndUpdateAuthorizeEndpoint = async () => {
+    protected _fetchDiscoveryAndUpdateAuthorizeEndpoint = async () => {
         const discoveryData = await this._discovery.fetchInitialData();
         this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
     };
 
-    private _updateDiscoveryAndAuthorizeEndpointOnRefreshError = async () => {
+    protected _updateDiscoveryAndAuthorizeEndpointOnRefreshError = async () => {
         if (this._clearCacheOnRefreshError) {
             await this._fetchDiscoveryAndUpdateAuthorizeEndpoint();
         }
@@ -302,7 +302,7 @@ export default class Platform extends EventEmitter {
     /**
      * @return {string}
      */
-    private _generateCodeVerifier() {
+    protected _generateCodeVerifier() {
         let codeVerifier: any = randomBytes(32);
         codeVerifier = codeVerifier
             .toString('base64')
@@ -499,7 +499,7 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    private async _getTokenAndDiscoveryUriOnLogin({token_uri, discovery_uri}) {
+    protected async _getTokenAndDiscoveryUriOnLogin({token_uri, discovery_uri}) {
         let tokenEndpoint = token_uri;
         let discoveryEndpoint = discovery_uri;
         if (tokenEndpoint && discoveryEndpoint) {
@@ -519,7 +519,7 @@ export default class Platform extends EventEmitter {
         return {tokenEndpoint, discoveryEndpoint};
     }
 
-    private async _refresh(): Promise<Response> {
+    protected async _refresh(): Promise<Response> {
         try {
             this.emit(this.events.beforeRefresh);
 
@@ -624,7 +624,7 @@ export default class Platform extends EventEmitter {
         }
     }
 
-    private async _getRevokeEndpoint() {
+    protected async _getRevokeEndpoint() {
         let revokeEndpoint = this._revokeEndpoint;
         if (!this._discovery || checkPathHasHttp(revokeEndpoint)) {
             return revokeEndpoint;

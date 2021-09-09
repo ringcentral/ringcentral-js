@@ -109,34 +109,34 @@ export const DEFAULT_RENEW_HANDICAP_MS = 60 * 1000; // 1 minute
 export default class Discovery extends EventEmitter {
     public events = events;
 
-    private _cache: Cache;
+    protected _cache: Cache;
 
-    private _initialCacheId: string;
-    private _externalCacheId: string;
+    protected _initialCacheId: string;
+    protected _externalCacheId: string;
 
-    private _fetchGet: (url: string, query?, options?) => Promise<Response>;
-    private _initialEndpoint: string;
-    private _clientId: string;
-    private _defaultBrandId?: string;
-    private _initialPromise?: Promise<void>;
-    private _initialFetchPromise?: Promise<InitialDiscoveryData>;
+    protected _fetchGet: (url: string, query?, options?) => Promise<Response>;
+    protected _initialEndpoint: string;
+    protected _clientId: string;
+    protected _defaultBrandId?: string;
+    protected _initialPromise?: Promise<void>;
+    protected _initialFetchPromise?: Promise<InitialDiscoveryData>;
 
-    private _externalFetchPromise?: Promise<ExternalDisconveryData>;
-    private _externalRefreshPromise?: Promise<void>;
+    protected _externalFetchPromise?: Promise<ExternalDisconveryData>;
+    protected _externalRefreshPromise?: Promise<void>;
 
-    private _initialized: boolean = false;
+    protected _initialized: boolean = false;
 
-    private _refreshHandicapMs: number;
-    private _refreshDelayMs: number;
+    protected _refreshHandicapMs: number;
+    protected _refreshDelayMs: number;
 
-    private _initialRetryCount: number = 0;
-    private _initialRetryMaxCount: number;
-    private _initialRetryInterval: number;
+    protected _initialRetryCount: number = 0;
+    protected _initialRetryMaxCount: number;
+    protected _initialRetryInterval: number;
 
-    private _externalRetryCount: number = 0;
-    private _externalRetryMaxCount: number;
-    private _externalRetryInterval: number;
-    private _externalRetryCycleTimeout?: ReturnType<typeof setTimeout> = null;
+    protected _externalRetryCount: number = 0;
+    protected _externalRetryMaxCount: number;
+    protected _externalRetryInterval: number;
+    protected _externalRetryCycleTimeout?: ReturnType<typeof setTimeout> = null;
 
     public constructor({
         cache,
@@ -185,7 +185,7 @@ export default class Discovery extends EventEmitter {
         }
     }
 
-    private async _init() {
+    protected async _init() {
         let initialData = await this.initialData();
         if (!initialData) {
             initialData = await this.fetchInitialData();
@@ -218,7 +218,7 @@ export default class Discovery extends EventEmitter {
         }
     }
 
-    private async _fetchInitialData() {
+    protected async _fetchInitialData() {
         try {
             const initialParams = {clientId: this._clientId};
             if (this._defaultBrandId) {
@@ -243,7 +243,7 @@ export default class Discovery extends EventEmitter {
         }
     }
 
-    private async _fetchExternalData(externalEndoint: string) {
+    protected async _fetchExternalData(externalEndoint: string) {
         try {
             const response = await this._fetchGet(externalEndoint, null, {skipDiscoveryCheck: true});
             const externalData = await response.json();
@@ -282,7 +282,7 @@ export default class Discovery extends EventEmitter {
         }
     }
 
-    private async _refreshExternalData() {
+    protected async _refreshExternalData() {
         if (this.externalRetryCycleScheduled) {
             return;
         }
@@ -332,11 +332,11 @@ export default class Discovery extends EventEmitter {
         return data || null;
     }
 
-    private async _setInitialData(newData: InitialDiscoveryData) {
+    protected async _setInitialData(newData: InitialDiscoveryData) {
         await this._cache.setItem(this._initialCacheId, newData);
     }
 
-    private async _setExternalData(newData: ExternalDisconveryData) {
+    protected async _setExternalData(newData: ExternalDisconveryData) {
         let expireTime;
         if (newData.expiresIn) {
             expireTime = Date.now() + newData.expiresIn * 1000;

@@ -32,13 +32,13 @@ let defaultExternals: ExternalsOptions = {};
 export const setDefaultExternals = (externals: ExternalsOptions) => (defaultExternals = externals);
 
 export class SDK {
-    private _externals: Externals;
+    protected _externals: Externals;
 
-    private _cache: Cache;
+    protected _cache: Cache;
 
-    private _client: Client;
+    protected _client: Client;
 
-    private _platform: Platform;
+    protected _platform: Platform;
 
     public static version = Constants.version;
 
