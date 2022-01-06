@@ -393,7 +393,7 @@ rcsdk.get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
 // read as stream
 rcsdk.get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
 
-    res.response().body.pipe(fs.createWriteStream('./octocat.png')); // we are accessing Node Fetch's Response
+    res.body.pipe(fs.createWriteStream('./octocat.png')); // we are accessing Node Fetch's Response
 
 });
 ```
