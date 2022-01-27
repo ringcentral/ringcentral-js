@@ -83,6 +83,42 @@ describe('RingCentral.platform.Platform', () => {
         );
 
         it(
+            'login with JWT',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+
+                await platform.auth().cancelAccessToken();
+
+                authentication();
+
+                await platform.login({
+                    jwt: 'foo'
+                });
+
+                expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
+            }),
+        );
+
+        it(
+            'login with username/password',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+
+                await platform.auth().cancelAccessToken();
+
+                authentication();
+
+                await platform.login({
+                    username: 'foo',
+                    password: 'foo',
+                    extension: 'foo'
+                });
+
+                expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
+            }),
+        );
+
+        it(
             'login with code from usePKCE flow without client secret',
             asyncTest(
                 async sdk => {
