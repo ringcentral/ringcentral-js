@@ -422,7 +422,7 @@ export default class Platform extends EventEmitter {
         password,
         extension = '',
         code,
-	jwt,
+        jwt,
         access_token_ttl,
         refresh_token_ttl,
         access_token,
@@ -463,7 +463,7 @@ export default class Platform extends EventEmitter {
                     body.password = password;
                 } else if (jwt) {
                     body.grant_type = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
-		    body.assertion = jwt;
+                    body.assertion = jwt;
                 } else if (code) {
                     //@see https://developers.ringcentral.com/legacy-api-reference/index.html#!#RefAuthorizationCodeFlow
                     body.grant_type = 'authorization_code';

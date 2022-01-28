@@ -92,7 +92,7 @@ describe('RingCentral.platform.Platform', () => {
                 authentication();
 
                 await platform.login({
-                    jwt: 'foo'
+                    jwt: 'foo',
                 });
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
@@ -111,7 +111,7 @@ describe('RingCentral.platform.Platform', () => {
                 await platform.login({
                     username: 'foo',
                     password: 'foo',
-                    extension: 'foo'
+                    extension: 'foo',
                 });
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
