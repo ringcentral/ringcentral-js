@@ -422,6 +422,7 @@ export default class Platform extends EventEmitter {
         password,
         extension = '',
         code,
+        jwt,
         access_token_ttl,
         refresh_token_ttl,
         access_token,
@@ -452,7 +453,7 @@ export default class Platform extends EventEmitter {
                 //TODO Potentially make a request to /oauth/tokeninfo
                 json = {access_token, ...options};
             } else {
-                if (!code) {
+                if (!code && !jwt) {
                     body.grant_type = 'password';
                     if (extension && extension.length > 0) {
                         body.username = `${username}*${extension}`;
@@ -460,6 +461,9 @@ export default class Platform extends EventEmitter {
                         body.username = username;
                     }
                     body.password = password;
+                } else if (jwt) {
+                    body.grant_type = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
+                    body.assertion = jwt;
                 } else if (code) {
                     //@see https://developers.ringcentral.com/legacy-api-reference/index.html#!#RefAuthorizationCodeFlow
                     body.grant_type = 'authorization_code';
@@ -834,6 +838,7 @@ export interface LoginOptions {
     password?: string;
     extension?: string;
     code?: string;
+    jwt?: string;
     access_token?: string;
     access_token_ttl?: number;
     refresh_token_ttl?: number;
