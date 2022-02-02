@@ -44,7 +44,7 @@ SDK can be used in 3 environments:
     import {SDK} from "@ringcentral/sdk";
     // op
     const SDK = require('@ringcentral/sdk').SDK;
- 
+
     const rcsdk = new SDK({
         server: SDK.server.sandbox,
         clientId: 'yourClientId',
@@ -338,9 +338,9 @@ rcsdk
             alert('API error ' + e.message + ' for URL' + request.url + ' ' + rcsdk.error(response));
 
         } else {
-         
+
             alert(e.message);
-   
+
         }
 
     });
@@ -424,7 +424,7 @@ In any case you always can just add token to known URL of resource and download 
 use directly as `<img src="..."/>`:
 
 ```js
-var url = rcsdk.createUrl('/restapi/v1.0/account/~/messages/foo/content', {addServer: true, addToken: true});
+var url = rcsdk.signUrl('/restapi/v1.0/account/~/messages/foo/content');
 ```
 
 ## Rate Limiting
@@ -548,7 +548,7 @@ function update() {
             .get(ringout.uri)
             .then(function(response) { return response.json() })
             .then(function(ringout) {
-                
+
                 console.info('Current status:', ringout.status.callStatus);
                 update();
 
