@@ -163,6 +163,27 @@ rcsdk.login(loginOptions).then(...);
 The above mentioned flow assumes that login page will be rendered in the top frame, e.g. user will temporarily navigate
 away from the app to RingCentral login pages.
 
+#### Top Frame with PKCE Setup
+
+When enabling PKCE with top frame, you will have to manually save the codeVerifier and pass it to the redirect page
+
+One way of doing this is using the localStorage
+
+```js
+var loginUrl = rcsdk.loginUrl({ usePKCE: true, implicit: false });
+var codeVerifier = rcsdk.platform().codeVerifier;
+localStorage.setItem('codeVerifier', codeVerifier);
+window.location.assign(loginUrl); // or .replace()
+```
+
+Then in your redirect landing page, use this code verifier before calling the login method
+
+```js
+var loginOptions = rcsdk.parseLoginRedirect(window.location.hash || window.location.search);
+loginOptions['code_verifier'] = localStorage.getItem('codeVerifier');
+rcsdk.login(loginOptions).then(...);
+```
+
 #### Popup Setup
 
 This setup is good when your app is rendered as a widget on a third-party sites.
