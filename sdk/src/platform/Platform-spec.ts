@@ -1118,6 +1118,26 @@ describe('RingCentral.platform.Platform', () => {
             expect(loginUrl.indexOf(initialDiscoveryData.authApi.authorizationUri)).to.equal(0);
         });
 
+        it('should init discovery when logout error', async () => {
+            cleanFetchMock();
+            logout(404);
+            const initialDiscoveryData = getInitialDiscoveryMockData();
+            initialDiscoveryData.authApi.authorizationUri = 'http://whatever1/restapi/oauth/authorize';
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            let hasError = false;
+            try {
+                await platform.logout();
+            } catch (e) {
+                hasError = true;
+            }
+            expect(hasError).to.equal(true);
+            if (platform.discoveryInitPromise) {
+                await platform.discoveryInitPromise;
+            }
+            const initialData = await platform.discovery().initialData();
+            expect(initialData.authApi.authorizationUri).to.equal(initialDiscoveryData.authApi.authorizationUri);
+        });
+
         it('should login successfully after logout', async () => {
             cleanFetchMock();
             logout();

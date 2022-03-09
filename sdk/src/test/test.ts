@@ -33,8 +33,8 @@ export function authentication() {
     });
 }
 
-export function logout() {
-    apiCall('POST', '/restapi/oauth/revoke', {});
+export function logout(status = 200) {
+    apiCall('POST', '/restapi/oauth/revoke', {}, status);
 }
 
 export function tokenRefresh(failure = false) {
