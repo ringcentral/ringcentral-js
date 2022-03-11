@@ -489,7 +489,7 @@ export default class Platform extends EventEmitter {
             if (this._clearCacheOnRefreshError) {
                 await this._cache.clean();
                 if (this._discovery) {
-                    this.initDiscovery(); // request new init data after refresh error and cache cleaned
+                    this._discoveryInitPromise = this.initDiscovery(); // request new init data after refresh error and cache cleaned
                 }
             }
 
@@ -568,7 +568,7 @@ export default class Platform extends EventEmitter {
             if (this._clearCacheOnRefreshError) {
                 await this._cache.clean();
                 if (this._discovery) {
-                    this.initDiscovery(); // request new init data after refresh error and cache cleaned
+                    this._discoveryInitPromise = this.initDiscovery(); // request new init data after refresh error and cache cleaned
                 }
             }
 
@@ -619,13 +619,13 @@ export default class Platform extends EventEmitter {
 
             await this._cache.clean();
             if (this._discovery) {
-                this.initDiscovery(); // request new init data after logout
+                this._discoveryInitPromise = this.initDiscovery(); // request new init data after logout
             }
             this.emit(this.events.logoutSuccess, res);
             return res;
         } catch (e) {
             if (this._discovery) {
-                this.initDiscovery(); // request new init data after logout error
+                this._discoveryInitPromise = this.initDiscovery(); // request new init data after logout error
             }
             this.emit(this.events.logoutError, e);
 
