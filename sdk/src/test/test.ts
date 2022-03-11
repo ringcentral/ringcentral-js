@@ -21,16 +21,21 @@ export function apiCall(method, path, json, status = 200, statusText = 'OK', hea
     });
 }
 
-export function authentication() {
-    apiCall('POST', '/restapi/oauth/token', {
-        access_token: 'ACCESS_TOKEN',
-        token_type: 'bearer',
-        expires_in: 3600,
-        refresh_token: 'REFRESH_TOKEN',
-        refresh_token_expires_in: 60480,
-        scope: 'SMS RCM Foo Boo',
-        expireTime: new Date().getTime() + 3600000,
-    });
+export function authentication(status = 200) {
+    apiCall(
+        'POST',
+        '/restapi/oauth/token',
+        {
+            access_token: 'ACCESS_TOKEN',
+            token_type: 'bearer',
+            expires_in: 3600,
+            refresh_token: 'REFRESH_TOKEN',
+            refresh_token_expires_in: 60480,
+            scope: 'SMS RCM Foo Boo',
+            expireTime: new Date().getTime() + 3600000,
+        },
+        status,
+    );
 }
 
 export function logout(status = 200) {
