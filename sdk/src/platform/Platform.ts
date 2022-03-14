@@ -153,10 +153,6 @@ export default class Platform extends EventEmitter {
             this._discovery.on(this._discovery.events.initialized, discoveryData => {
                 this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
             });
-            this.on(events.logoutSuccess, this._fetchDiscoveryAndUpdateAuthorizeEndpoint);
-            this.on(events.logoutError, this._fetchDiscoveryAndUpdateAuthorizeEndpoint);
-            this.on(events.refreshError, this._updateDiscoveryAndAuthorizeEndpointOnRefreshError);
-            this.on(events.loginError, this._updateDiscoveryAndAuthorizeEndpointOnRefreshError);
             this._client.on(this._client.events.requestSuccess, response => {
                 if (response.headers.get('discovery-required')) {
                     this._discovery.refreshExternalData();
@@ -190,17 +186,6 @@ export default class Platform extends EventEmitter {
         return this._discovery;
     }
 
-    private _fetchDiscoveryAndUpdateAuthorizeEndpoint = async () => {
-        const discoveryData = await this._discovery.fetchInitialData();
-        this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
-    };
-
-    private _updateDiscoveryAndAuthorizeEndpointOnRefreshError = async () => {
-        if (this._clearCacheOnRefreshError) {
-            await this._fetchDiscoveryAndUpdateAuthorizeEndpoint();
-        }
-    };
-
     public createUrl(path = '', options: CreateUrlOptions = {}) {
         let builtUrl = '';
 
@@ -229,7 +214,13 @@ export default class Platform extends EventEmitter {
 
     public async loginUrlWithDiscovery(options: LoginUrlOptions = {}) {
         if (this._discovery) {
-            await this._fetchDiscoveryAndUpdateAuthorizeEndpoint();
+            // fetch new discovery when generate login url
+            const discoveryData = await this._discovery.fetchInitialData();
+            this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
+            if (this._discoveryInitPromise) {
+                // await init discovery if it's not initialized
+                await this._discoveryInitPromise;
+            }
         }
         return this.loginUrl(options);
     }
@@ -282,7 +273,7 @@ export default class Platform extends EventEmitter {
             query.discovery = true;
         }
         if (usePKCE && implicit) {
-            throw new Error('PKCE only works with Authrization Code Flow');
+            throw new Error('PKCE only works with Authorization Code Flow');
         }
         this._codeVerifier = '';
         if (usePKCE) {
@@ -495,7 +486,12 @@ export default class Platform extends EventEmitter {
 
             return response;
         } catch (e) {
-            if (this._clearCacheOnRefreshError) await this._cache.clean();
+            if (this._clearCacheOnRefreshError) {
+                await this._cache.clean();
+                if (this._discovery) {
+                    this._discoveryInitPromise = this.initDiscovery(); // request new init data after refresh error and cache cleaned
+                }
+            }
 
             this.emit(this.events.loginError, e);
 
@@ -571,6 +567,9 @@ export default class Platform extends EventEmitter {
         } catch (e) {
             if (this._clearCacheOnRefreshError) {
                 await this._cache.clean();
+                if (this._discovery) {
+                    this._discoveryInitPromise = this.initDiscovery(); // request new init data after refresh error and cache cleaned
+                }
             }
 
             this.emit(this.events.refreshError, e);
@@ -619,9 +618,15 @@ export default class Platform extends EventEmitter {
             }
 
             await this._cache.clean();
+            if (this._discovery) {
+                this._discoveryInitPromise = this.initDiscovery(); // request new init data after logout
+            }
             this.emit(this.events.logoutSuccess, res);
             return res;
         } catch (e) {
+            if (this._discovery) {
+                this._discoveryInitPromise = this.initDiscovery(); // request new init data after logout error
+            }
             this.emit(this.events.logoutError, e);
 
             throw e;
