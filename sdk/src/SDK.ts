@@ -96,6 +96,10 @@ export class SDK {
         return this._cache;
     }
 
+    public externals() {
+        return this._externals;
+    }
+
     /* istanbul ignore next */
     public send = async (options: SendOptions): Promise<Response> => this.platform().send(options);
 
