@@ -709,6 +709,9 @@ export default class Platform extends EventEmitter {
 
     public async send(options: SendOptions = {}) {
         if (!options.skipAuthCheck && !options.skipDiscoveryCheck && this._discovery) {
+            if (this._discoveryInitPromise) {
+                await this._discoveryInitPromise;
+            }
             const discoveryExpired = await this._discovery.externalDataExpired();
             if (discoveryExpired) {
                 await this._discovery.refreshExternalData();
