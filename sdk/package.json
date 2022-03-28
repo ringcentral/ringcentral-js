@@ -19,9 +19,9 @@
     "start:webpack": "npm run build:webpack -- --watch"
   },
   "dependencies": {
-    "dom-storage": "2.1.0",
-    "is-plain-object": "2.0.4",
-    "node-fetch": "2.6.1"
+    "dom-storage": "^2.1.0",
+    "is-plain-object": "^2.0.4",
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "@ringcentral/sdk-utils": "*",
