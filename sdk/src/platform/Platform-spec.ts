@@ -1059,6 +1059,30 @@ describe('RingCentral.platform.Platform', () => {
             expect(hasError).to.equal(true);
             expect(clientFetchErrorSpy.calledThrice).to.equal(true);
         });
+
+        it('should fetch discovery if user has logged before discovery enabled', async () => {
+            authentication();
+            const noDiscoverySdk = createSdk();
+            await noDiscoverySdk.platform().login({
+                code: 'whatever',
+                discovery_uri: 'http://whatever/.well-known/entry-points/external',
+                token_uri: 'http://whatever/restapi/oauth/token',
+            });
+            const initialDiscoveryData = getInitialDiscoveryMockData();
+            const externalDiscoveryData = getExternalDiscoveryMockData();
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
+            const withDiscoverySDK = createSdk({
+                enableDiscovery: true,
+                discoveryServer: 'http://whatever',
+                server: '',
+                localStorage: noDiscoverySdk.externals().localStorage,
+            });
+            apiCall('GET', '/restapi/v1.0/foo/1', {increment: 1});
+            const res = await withDiscoverySDK.get('/restapi/v1.0/foo/1');
+            const data = await res.json();
+            expect(data.increment).to.equal(1);
+        });
     });
 
     describe('API request with discovery', () => {

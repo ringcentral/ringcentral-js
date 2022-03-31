@@ -18,14 +18,14 @@ export interface DiscoveryOptions {
     retryInterval?: number;
 }
 
-export interface ExternalDisconveryAuthApiData {
+export interface ExternalDiscoveryAuthApiData {
     authorizationUri: string;
     oidcDiscoveryUri: string;
     baseUri: string;
     tokenUri: string;
 }
 
-export interface InitialDisconveryAuthApiData {
+export interface InitialDiscoveryAuthApiData {
     authorizationUri: string;
     oidcDiscoveryUri: string;
     defaultTokenUri: string;
@@ -44,7 +44,7 @@ export interface InitialDiscoveryApiData {
     defaultExternalUri: string;
 }
 
-export interface DisconveryGlipData {
+export interface DiscoveryGlipData {
     discovery: string;
     entry: string;
 }
@@ -69,15 +69,15 @@ export interface InitialDiscoveryData {
     retryCount: number;
     retryInterval: number;
     discoveryApi: InitialDiscoveryApiData;
-    authApi: InitialDisconveryAuthApiData;
+    authApi: InitialDiscoveryAuthApiData;
     coreApi: DiscoveryCoreApiData;
     rcm: DiscoveryRcmData;
     rcv: DiscoveryRcvData;
     edc?: DiscoveryEdcData;
-    glip?: DisconveryGlipData;
+    glip?: DiscoveryGlipData;
 }
 
-export interface ExternalDisconveryData {
+export interface ExternalDiscoveryData {
     version: string;
     tag?: string;
     expiresIn: number;
@@ -86,12 +86,12 @@ export interface ExternalDisconveryData {
     retryInterval: number;
     retryCycleDelay: number;
     discoveryApi: ExternalDiscoveryApiData;
-    authApi: ExternalDisconveryAuthApiData;
+    authApi: ExternalDiscoveryAuthApiData;
     coreApi: DiscoveryCoreApiData;
     rcm: DiscoveryRcmData;
     rcv: DiscoveryRcvData;
     edc?: DiscoveryEdcData;
-    glip?: DisconveryGlipData;
+    glip?: DiscoveryGlipData;
 }
 
 export enum events {
@@ -121,7 +121,7 @@ export default class Discovery extends EventEmitter {
     private _initialPromise?: Promise<void>;
     private _initialFetchPromise?: Promise<InitialDiscoveryData>;
 
-    private _externalFetchPromise?: Promise<ExternalDisconveryData>;
+    private _externalFetchPromise?: Promise<ExternalDiscoveryData>;
     private _externalRefreshPromise?: Promise<void>;
 
     private _initialized: boolean = false;
@@ -243,9 +243,9 @@ export default class Discovery extends EventEmitter {
         }
     }
 
-    private async _fetchExternalData(externalEndoint: string) {
+    private async _fetchExternalData(externalEndpoint: string) {
         try {
-            const response = await this._fetchGet(externalEndoint, null, {skipDiscoveryCheck: true});
+            const response = await this._fetchGet(externalEndpoint, null, {skipDiscoveryCheck: true});
             const externalData = await response.json();
             const discoveryTag = response.headers.get('discovery-tag');
             if (discoveryTag) {
@@ -259,17 +259,17 @@ export default class Discovery extends EventEmitter {
             this._externalRetryCount += 1;
             if (this._externalRetryCount < this._externalRetryMaxCount) {
                 await delay(this._externalRetryInterval * 1000);
-                return this._fetchExternalData(externalEndoint);
+                return this._fetchExternalData(externalEndpoint);
             }
             this._externalRetryCount = 0;
             throw e;
         }
     }
 
-    public async fetchExternalData(externalEndoint: string) {
+    public async fetchExternalData(externalEndpoint: string) {
         try {
             if (!this._externalFetchPromise) {
-                this._externalFetchPromise = this._fetchExternalData(externalEndoint);
+                this._externalFetchPromise = this._fetchExternalData(externalEndpoint);
             }
             const externalData = await this._externalFetchPromise;
             await this._setExternalData(externalData);
@@ -288,15 +288,15 @@ export default class Discovery extends EventEmitter {
         }
         await delay(this._refreshDelayMs);
         const oldExternalData = await this.externalData();
-        let externalEndoint;
+        let externalEndpoint;
         if (oldExternalData) {
-            externalEndoint = oldExternalData.discoveryApi.externalUri;
+            externalEndpoint = oldExternalData.discoveryApi.externalUri;
         } else {
             const initialData = await this.initialData();
-            externalEndoint = initialData.discoveryApi.defaultExternalUri;
+            externalEndpoint = initialData.discoveryApi.defaultExternalUri;
         }
         try {
-            await this.fetchExternalData(externalEndoint);
+            await this.fetchExternalData(externalEndpoint);
         } catch (e) {
             this._externalRetryCycleTimeout = setTimeout(() => {
                 this._externalRetryCycleTimeout = null;
@@ -327,7 +327,7 @@ export default class Discovery extends EventEmitter {
         return data || null;
     }
 
-    public async externalData(): Promise<ExternalDisconveryData | null> {
+    public async externalData(): Promise<ExternalDiscoveryData | null> {
         const data = await this._cache.getItem(this._externalCacheId);
         return data || null;
     }
@@ -336,7 +336,7 @@ export default class Discovery extends EventEmitter {
         await this._cache.setItem(this._initialCacheId, newData);
     }
 
-    private async _setExternalData(newData: ExternalDisconveryData) {
+    private async _setExternalData(newData: ExternalDiscoveryData) {
         let expireTime;
         if (newData.expiresIn) {
             expireTime = Date.now() + newData.expiresIn * 1000;
@@ -388,7 +388,7 @@ export default class Discovery extends EventEmitter {
     }
 
     public on(event: events.initialized, listener: (discoveryData: InitialDiscoveryData) => void);
-    public on(event: events.externalDataUpdated, listener: (discoveryData: ExternalDisconveryData) => void);
+    public on(event: events.externalDataUpdated, listener: (discoveryData: ExternalDiscoveryData) => void);
     public on(event: events.initialFetchError, listener: (e: Error) => void);
     public on(event: events.externalRefreshError, listener: (e: Error) => void);
     public on(event: string, listener: (...args) => void) {
