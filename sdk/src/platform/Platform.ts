@@ -83,6 +83,9 @@ export default class Platform extends EventEmitter {
 
     private _discoveryInitPromise: Promise<void>;
 
+    private _loginWindowCheckTimeout?: ReturnType<typeof setTimeout>;
+    private _loginWindowEventListener?: (event: MessageEvent) => void;
+
     public constructor({
         server,
         clientId,
@@ -341,6 +344,8 @@ export default class Platform extends EventEmitter {
         property = Constants.authResponseProperty,
         target = '_blank',
     }: LoginWindowOptions): Promise<LoginOptions> {
+        // clear check last timeout when user open loginWindow twice to avoid leak
+        this._clearLoginWindowCheckTimeout();
         return new Promise((resolve, reject) => {
             if (typeof window === 'undefined') throw new Error('This method can be used only in browser');
 
@@ -368,15 +373,18 @@ export default class Platform extends EventEmitter {
             }
 
             if (win.focus) win.focus();
-
-            const eventListener = e => {
+            // clear listener when user open loginWindow twice to avoid leak
+            if (this._loginWindowEventListener) {
+                window.removeEventListener('message', this._loginWindowEventListener);
+            }
+            this._loginWindowEventListener = e => {
                 try {
                     if (e.origin !== origin) return;
                     if (!e.data || !e.data[property]) return; // keep waiting
-
+                    this._clearLoginWindowCheckTimeout();
                     win.close();
-                    window.addEventListener('message', eventListener);
-
+                    window.removeEventListener('message', this._loginWindowEventListener);
+                    this._loginWindowEventListener = null;
                     const loginOptions = this.parseLoginRedirect(e.data[property]);
 
                     if (!loginOptions.code && !loginOptions.access_token)
@@ -387,9 +395,31 @@ export default class Platform extends EventEmitter {
                     reject(e);
                 }
             };
-
-            window.addEventListener('message', eventListener, false);
+            window.addEventListener('message', this._loginWindowEventListener, false);
+            this._createLoginWindowCheckTimeout(win, reject);
         });
+    }
+
+    private _createLoginWindowCheckTimeout(win, reject) {
+        this._loginWindowCheckTimeout = setTimeout(() => {
+            if (win.closed) {
+                if (this._loginWindowEventListener) {
+                    window.removeEventListener('message', this._loginWindowEventListener);
+                    this._loginWindowEventListener = null;
+                }
+                this._loginWindowCheckTimeout = null;
+                reject(new Error('Login window is closed'));
+                return;
+            }
+            this._createLoginWindowCheckTimeout(win, reject);
+        }, 2000);
+    }
+
+    private _clearLoginWindowCheckTimeout() {
+        if (this._loginWindowCheckTimeout) {
+            clearTimeout(this._loginWindowCheckTimeout);
+            this._loginWindowCheckTimeout = null;
+        }
     }
 
     /**

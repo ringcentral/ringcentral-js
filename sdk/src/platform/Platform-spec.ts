@@ -799,7 +799,6 @@ describe('RingCentral.platform.Platform', () => {
                 const openSpy = spy(() => null);
 
                 window.open = openSpy;
-
                 await expectThrows(async () => {
                     await platform.loginWindow({
                         url: 'foo',
@@ -808,6 +807,61 @@ describe('RingCentral.platform.Platform', () => {
                 }, 'Could not open login window. Please allow popups for this site');
 
                 expect(openSpy.calledOnce).to.be.true;
+            }),
+        );
+
+        it(
+            'throws an exception if window is closed',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+                const openWindow = {closed: false};
+                const openSpy = spy(() => openWindow);
+
+                window.open = openSpy;
+                setTimeout(() => {
+                    openWindow.closed = true;
+                }, 3000);
+
+                await expectThrows(async () => {
+                    await platform.loginWindow({
+                        url: 'foo',
+                        origin: 'foo',
+                    });
+                }, 'Login window is closed');
+
+                expect(openSpy.calledOnce).to.be.true;
+            }),
+        );
+
+        it(
+            'login success when call loginWindow twice',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+                const close = spy();
+                const focus = spy();
+                const openSpy = spy(() => ({
+                    close,
+                    focus,
+                }));
+
+                window.open = openSpy;
+
+                window.removeEventListener = spy();
+
+                setTimeout(() => {
+                    windowAny.triggerEvent({origin: 'foo', data: {RCAuthorizationResponse: '#access_token=foo'}});
+                }, 1000);
+
+                platform.loginWindow({
+                    url: 'foo',
+                    origin: 'foo',
+                });
+                const res = await platform.loginWindow({
+                    url: 'foo',
+                    origin: 'foo',
+                });
+
+                expect(res.access_token).to.equal('foo');
             }),
         );
     });
