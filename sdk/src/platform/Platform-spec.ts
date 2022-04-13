@@ -1008,6 +1008,45 @@ describe('RingCentral.platform.Platform', () => {
             ).to.equal(0);
         });
 
+        it('should not throw error when fetch initial discovery error with cache data on loginUrlWithDiscovery', async function() {
+            this.timeout(20000);
+            const initialDiscoveryData = getInitialDiscoveryMockData();
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            const platform = sdk.platform();
+            if (platform.discoveryInitPromise) {
+                await platform.discoveryInitPromise;
+            }
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', {description: 'Fail'}, 500);
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', {description: 'Fail'}, 500);
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', {description: 'Fail'}, 500);
+            expect(
+                (await platform.loginUrlWithDiscovery()).indexOf(initialDiscoveryData.authApi.authorizationUri),
+            ).to.equal(0);
+        });
+
+        it('should throw error when fetch initial discovery error without cache data on loginUrlWithDiscovery', async function() {
+            this.timeout(20000);
+            const initialDiscoveryData = getInitialDiscoveryMockData();
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            const platform = sdk.platform();
+            if (platform.discoveryInitPromise) {
+                await platform.discoveryInitPromise;
+            }
+            await platform.discovery().removeInitialData();
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', {description: 'Fail'}, 500);
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', {description: 'Fail'}, 500);
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', {description: 'Fail'}, 500);
+            let error;
+            try {
+                await platform.loginUrlWithDiscovery();
+            } catch (e) {
+                error = e;
+            }
+            expect(!!error).to.equal(true);
+        });
+
         it('should fetch external discovery when login with discovery_uri and token_uri', async () => {
             // mock
             const initialDiscoveryData = getInitialDiscoveryMockData();

@@ -105,7 +105,7 @@ export default class Platform extends EventEmitter {
         authorizeEndpoint = '/restapi/oauth/authorize',
         enableDiscovery = false,
         discoveryServer,
-        discoveryInitalEndpoint = '/.well-known/entry-points/initial',
+        discoveryInitialEndpoint = '/.well-known/entry-points/initial',
         discoveryAutoInit = true,
         authProxy = false,
         urlPrefix = '',
@@ -143,8 +143,8 @@ export default class Platform extends EventEmitter {
         this._codeVerifier = '';
         if (enableDiscovery) {
             const initialEndpoint = discoveryServer
-                ? `${discoveryServer}${discoveryInitalEndpoint}`
-                : discoveryInitalEndpoint;
+                ? `${discoveryServer}${discoveryInitialEndpoint}`
+                : discoveryInitialEndpoint;
             this._discovery = new Discovery({
                 clientId,
                 brandId,
@@ -217,12 +217,21 @@ export default class Platform extends EventEmitter {
 
     public async loginUrlWithDiscovery(options: LoginUrlOptions = {}) {
         if (this._discovery) {
-            // fetch new discovery when generate login url
-            const discoveryData = await this._discovery.fetchInitialData();
-            this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
-            if (this._discoveryInitPromise) {
-                // await init discovery if it's not initialized
-                await this._discoveryInitPromise;
+            try {
+                // fetch new discovery when generate login url
+                const discoveryData = await this._discovery.fetchInitialData();
+                this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
+                if (this._discoveryInitPromise) {
+                    // await init discovery if it's not initialized
+                    await this._discoveryInitPromise;
+                }
+            } catch (e) {
+                const discoveryData = await this._discovery.initialData();
+                if (!discoveryData) {
+                    throw e;
+                }
+                // feedback to use the cached data
+                this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
             }
         }
         return this.loginUrl(options);
@@ -846,7 +855,7 @@ export interface PlatformOptions extends AuthOptions {
     handleRateLimit?: boolean | number;
     enableDiscovery?: boolean;
     discoveryServer?: string;
-    discoveryInitalEndpoint?: string;
+    discoveryInitialEndpoint?: string;
     discoveryAuthorizedEndpoint?: string;
     discoveryAutoInit?: boolean;
     brandId?: string;
