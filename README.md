@@ -20,6 +20,11 @@ This SDK contains two components useful to developers. They are:
 - [SDK](sdk) &mdash; Main SDK package, interacts with RingCentral REST API
 - [Subscriptions SDK](subscriptions) &mdash; Additional SDK which listens to push notifications
 
+## Install the SDK via NPM
+
+- [RingCentral JS SDK](https://www.npmjs.com/package/@ringcentral/sdk) ```npm install @ringcentral/sdk```
+- [RingCentral JS Subscriptions SDK](https://www.npmjs.com/package/@ringcentral/subscriptions) ```npm install @ringcentral/subscriptions```
+
 ## Are you a first-time RingCentral Developer?
 
 If this is your first time building a RingCentral application, we recommend you get started online using our SMS Quick Start guide which will help you get up-and-running in minutes.
