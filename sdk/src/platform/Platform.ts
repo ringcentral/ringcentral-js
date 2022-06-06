@@ -9,6 +9,13 @@ import Cache from '../core/Cache';
 import Client, {ApiError} from '../http/Client';
 import Externals from '../core/Externals';
 import {delay} from './utils';
+import {
+    parseMiddlewares,
+    executePreMiddlewaresInSerial,
+    executePostMiddlewaresInSerial,
+    executeErrorMiddlewaresInSerial,
+    Middleware,
+} from './middleware';
 
 declare const screen: any; //FIXME TS Crap
 
@@ -702,20 +709,28 @@ export default class Platform extends EventEmitter {
     }
 
     public async sendRequest(request: Request, options: SendOptions = {}): Promise<Response> {
+        const {preMiddlewares, postMiddlewares, errorMiddlewares} = parseMiddlewares(options.middlewares || []);
         try {
             request = await this.inflateRequest(request, options);
-            return await this._client.sendRequest(request);
+            request = await executePreMiddlewaresInSerial(preMiddlewares, request);
+            const response = await this._client.sendRequest(request);
+            return await executePostMiddlewaresInSerial(postMiddlewares, response);
         } catch (e) {
             let {retry, handleRateLimit} = options;
 
             // Guard is for errors that come from polling
-            if (!e.response || retry) throw e;
+            if (!e.response || retry) {
+                const error = await executeErrorMiddlewaresInSerial(errorMiddlewares, e);
+                throw error;
+            }
 
             const {response} = e;
             const {status} = response;
 
-            if ((status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) || this._authProxy)
-                throw e;
+            if ((status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) || this._authProxy) {
+                const error = await executeErrorMiddlewaresInSerial(errorMiddlewares, e);
+                throw error;
+            }
 
             options.retry = true;
 
@@ -738,7 +753,10 @@ export default class Platform extends EventEmitter {
 
                 this.emit(this.events.rateLimitError, e);
 
-                if (!handleRateLimit) throw e;
+                if (!handleRateLimit) {
+                    const error = await executeErrorMiddlewaresInSerial(errorMiddlewares, e);
+                    throw error;
+                }
             }
 
             await delay(retryAfter);
@@ -878,6 +896,7 @@ export interface SendOptions {
     skipDiscoveryCheck?: boolean;
     handleRateLimit?: boolean | number;
     retry?: boolean; // Will be set by this method if SDK makes second request
+    middlewares?: Middleware[];
 }
 
 export interface LoginOptions {
