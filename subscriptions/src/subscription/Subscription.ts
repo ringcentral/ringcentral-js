@@ -118,7 +118,8 @@ export default class Subscription extends SDK.EventEmitter {
     }
 
     public subscription() {
-        return this._subscription || {};
+        const _subscription = this._subscription || {}
+        return { ..._subscription };
     }
 
     public pubnub() {
@@ -247,7 +248,9 @@ export default class Subscription extends SDK.EventEmitter {
      * @private
      */
     protected _setSubscription(subscription: SubscriptionData) {
-        this._subscription = subscription;
+        this._subscription = {
+            ...subscription,
+        };
         return this;
     }
 
