@@ -8,7 +8,7 @@ export interface CacheOptions {
 export default class Cache {
     public static defaultPrefix = 'rc-';
 
-    private readonly _prefix = null;
+    private readonly _prefix: string | null = null;
 
     private _externals = null;
 
@@ -17,32 +17,19 @@ export default class Cache {
         this._externals = externals;
     }
 
-    public setItemSync(key, data) {
-        this._externals.localStorage.setItem(this._prefixKey(key), JSON.stringify(data));
+    public async setItem(key: string, data: object) {
+        await this._externals.localStorage.setItem(this._prefixKey(key), JSON.stringify(data));
         return this;
     }
 
-    public async setItem(key, data) {
-        this.setItemSync(key, data);
+    public async removeItem(key: string) {
+        await this._externals.localStorage.removeItem(this._prefixKey(key));
     }
 
-    public removeItemSync(key) {
-        this._externals.localStorage.removeItem(this._prefixKey(key));
-        return this;
-    }
-
-    public async removeItem(key) {
-        await this.removeItemSync(key);
-    }
-
-    public getItemSync(key) {
-        const item = this._externals.localStorage.getItem(this._prefixKey(key));
+    public async getItem<T>(key: string): Promise<T> {
+        const item = await this._externals.localStorage.getItem(this._prefixKey(key));
         if (!item) return null;
         return JSON.parse(item);
-    }
-
-    public async getItem(key) {
-        return this.getItemSync(key);
     }
 
     private async _keys(): Promise<string[]> {
@@ -57,7 +44,7 @@ export default class Cache {
                 if (key.startsWith(this._prefix)) {
                     await this._externals.localStorage.removeItem(key);
                 }
-            }),
+            })
         );
 
         return this;

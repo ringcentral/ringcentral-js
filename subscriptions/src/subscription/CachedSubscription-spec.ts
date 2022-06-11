@@ -5,11 +5,11 @@ describe('CachedSubscription', () => {
     describe('create', () => {
         it(
             'supports legacy definition',
-            asyncTest(sdk => {
+            asyncTest(async sdk => {
                 const sub = createSubscriptions(sdk);
 
-                const subscription1 = sub.createCachedSubscription({cacheKey: 'foo'});
-                const subscription2 = sub.createCachedSubscription({
+                const subscription1 = await sub.createCachedSubscription({cacheKey: 'foo'});
+                const subscription2 = await sub.createCachedSubscription({
                     cacheKey: 'foo',
                     pollInterval: 11,
                     renewHandicapMs: 22,
@@ -38,9 +38,9 @@ describe('CachedSubscription', () => {
     describe('restore', () => {
         it(
             'sets event filters if they are not defined',
-            asyncTest(sdk => {
+            asyncTest(async sdk => {
                 const sub = createSubscriptions(sdk);
-                const s = sub.createCachedSubscription({cacheKey: 'foo'});
+                const s = await sub.createCachedSubscription({cacheKey: 'foo'});
                 s.restore(['foo']);
                 expect(s.eventFilters()).to.deep.equal(['foo']);
             }),
@@ -48,9 +48,9 @@ describe('CachedSubscription', () => {
 
         it(
             'uses previous event filters if they are defined',
-            asyncTest(sdk => {
+            asyncTest(async sdk => {
                 const sub = createSubscriptions(sdk);
-                const s = sub.createCachedSubscription({cacheKey: 'foo'});
+                const s = await sub.createCachedSubscription({cacheKey: 'foo'});
                 s.restore(['bar']);
                 s.restore(['foo']);
                 expect(s.eventFilters()).to.deep.equal(['bar']);

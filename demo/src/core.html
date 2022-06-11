@@ -96,9 +96,9 @@
 
             }
 
-            function getPresenceSubscription(event, cb) {
+            async function getPresenceSubscription(event, cb) {
 
-                var subscription = subscriptions.createCachedSubscription({
+                var subscription = await subscriptions.createCachedSubscription({
                     cacheKey: 'demo',
                     renewHandicapMs: 14 * 60 * 1000 // set quicker subscription refresh
                 });

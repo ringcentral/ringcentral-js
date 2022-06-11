@@ -24,14 +24,16 @@ export class Subscriptions {
         });
     }
 
-    public createCachedSubscription({cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptions) {
-        return new CachedSubscription({
+    public async createCachedSubscription({cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptions) {
+        const cachedSubscription = new CachedSubscription({
             cacheKey,
             pollInterval,
             renewHandicapMs,
             sdk: this._sdk,
             PubNub: this._PubNub,
         });
+        await cachedSubscription.loadCache();
+        return cachedSubscription;
     }
 
     public getPubNub() {
