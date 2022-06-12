@@ -2,39 +2,6 @@ import {asyncTest, expect} from '@ringcentral/sdk/lib/test/test';
 import {createSubscriptions} from '../test/test';
 
 describe('CachedSubscription', () => {
-    describe('create', () => {
-        it(
-            'supports legacy definition',
-            asyncTest(async sdk => {
-                const sub = createSubscriptions(sdk);
-
-                const subscription1 = await sub.createCachedSubscription({cacheKey: 'foo'});
-                const subscription2 = await sub.createCachedSubscription({
-                    cacheKey: 'foo',
-                    pollInterval: 11,
-                    renewHandicapMs: 22,
-                });
-
-                const data = {
-                    id: 'foo',
-                    expirationTime: new Date(Date.now() + 10000).toISOString(),
-                    deliveryMode: {
-                        subscriberKey: 'foo',
-                        address: 'foo',
-                    },
-                };
-
-                expect(subscription1['_cacheKey']).to.equal('foo');
-                expect(subscription2['_cacheKey']).to.equal('foo');
-                expect(subscription2['_pollInterval']).to.equal(11);
-                expect(subscription2['_renewHandicapMs']).to.equal(22);
-
-                subscription1['_setSubscription'](data);
-                // expect(subscription2.subscription()).to.deep.equal(data);
-            }),
-        );
-    });
-
     describe('restore', () => {
         it(
             'sets event filters if they are not defined',
