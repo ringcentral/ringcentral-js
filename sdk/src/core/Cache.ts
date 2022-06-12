@@ -26,7 +26,7 @@ export default class Cache {
         await this._externals.localStorage.removeItem(this._prefixKey(key));
     }
 
-    public async getItem<T>(key: string): Promise<T> {
+    public async getItem<T = any>(key: string): Promise<T> {
         const item = await this._externals.localStorage.getItem(this._prefixKey(key));
         if (!item) return null;
         return JSON.parse(item);
@@ -44,7 +44,7 @@ export default class Cache {
                 if (key.startsWith(this._prefix)) {
                     await this._externals.localStorage.removeItem(key);
                 }
-            })
+            }),
         );
 
         return this;
