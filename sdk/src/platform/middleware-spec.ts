@@ -5,6 +5,33 @@ const globalAny: any = global;
 const windowAny: any = typeof window !== 'undefined' ? window : global;
 
 describe('RingCentral.platform.middleware', () => {
+    describe('add middlewares in sdkOption', () => {
+        const preMiddleware: PreMiddleware = request => {
+            request.headers.append('custom-value', 'RC');
+            return request;
+        };
+        it(
+            'will enhance the request config before send the request',
+            asyncTest(
+                async sdk => {
+                    const platform = sdk.platform();
+                    const customValue = await platform
+                        .send({
+                            url: 'http://whatever/test/test',
+                            method: 'GET',
+                        })
+                        .catch(error => {
+                            return error.request.headers.get('custom-value');
+                        });
+                    expect(customValue).to.equal('RC');
+                },
+                {
+                    middlewares: [{pre: preMiddleware}],
+                },
+            ),
+        );
+    });
+
     describe('PreMiddleware', () => {
         it(
             'will enhance the request config before send the request',

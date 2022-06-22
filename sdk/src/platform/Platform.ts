@@ -84,6 +84,8 @@ export default class Platform extends EventEmitter {
 
     private _handleRateLimit: boolean | number;
 
+    private _middlewares: Middleware[];
+
     private _codeVerifier: string;
 
     private _discovery?: Discovery;
@@ -117,6 +119,7 @@ export default class Platform extends EventEmitter {
         authProxy = false,
         urlPrefix = '',
         handleRateLimit,
+        middlewares = [],
     }: PlatformOptionsConstructor) {
         super();
 
@@ -147,6 +150,7 @@ export default class Platform extends EventEmitter {
         this._revokeEndpoint = revokeEndpoint;
         this._authorizeEndpoint = authorizeEndpoint;
         this._handleRateLimit = handleRateLimit;
+        this._middlewares = middlewares;
         this._codeVerifier = '';
         if (enableDiscovery) {
             const initialEndpoint = discoveryServer
@@ -709,7 +713,8 @@ export default class Platform extends EventEmitter {
     }
 
     public async sendRequest(request: Request, options: SendOptions = {}): Promise<Response> {
-        const {preMiddlewares, postMiddlewares, errorMiddlewares} = parseMiddlewares(options.middlewares || []);
+        const middlewares = [...this._middlewares, ...(options.middlewares || [])];
+        const {preMiddlewares, postMiddlewares, errorMiddlewares} = parseMiddlewares(middlewares);
         try {
             request = await this.inflateRequest(request, options);
             request = await executePreMiddlewaresInSerial(preMiddlewares, request);
@@ -874,6 +879,7 @@ export interface PlatformOptions extends AuthOptions {
     discoveryAuthorizedEndpoint?: string;
     discoveryAutoInit?: boolean;
     brandId?: string;
+    middlewares?: Middleware[];
 }
 
 export interface PlatformOptionsConstructor extends PlatformOptions {
