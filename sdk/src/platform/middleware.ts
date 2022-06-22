@@ -16,7 +16,7 @@ export interface Middleware {
     error?: ErrorMiddleware;
 }
 
-export function executeMiddlewaresInSerial<T>(middlewares: ((opts: T) => Promise<T> | T)[], opts: T) {
+function executeMiddlewaresInSerial<T>(middlewares: ((opts: T) => Promise<T> | T)[], opts: T) {
     return middlewares.reduce((acc, middleware) => {
         return acc.then(middleware);
     }, Promise.resolve(opts));
@@ -31,7 +31,9 @@ export function executePostMiddlewaresInSerial(middlewares: PostMiddleware[], re
 }
 
 export function executeErrorMiddlewaresInSerial(middlewares: ErrorMiddleware[], error: Error) {
-    return executeMiddlewaresInSerial(middlewares, error);
+    return middlewares.reduce((acc, middleware) => {
+        return acc.catch(middleware);
+    }, Promise.reject(error));
 }
 
 export function parseMiddlewares(middlewares: Middleware[]) {

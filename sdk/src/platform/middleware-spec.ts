@@ -98,10 +98,10 @@ describe('RingCentral.platform.middleware', () => {
 
     describe('ErrorMiddleware', () => {
         it(
-            'will enhance the error after the request was failed',
+            'will be treated as success after the request was failed',
             asyncTest(async sdk => {
                 const errorMiddleware: ErrorMiddleware = error => {
-                    error.message = 'RC';
+                    error.message = 'Success';
                     return error;
                 };
                 const platform = sdk.platform();
@@ -111,22 +111,45 @@ describe('RingCentral.platform.middleware', () => {
                         method: 'GET',
                         middlewares: [{error: errorMiddleware}],
                     })
-                    .catch(error => {
-                        return error.message;
+                    .then((res: any) => res.message)
+                    .catch(() => {
+                        return 'Error';
                     });
-                expect(customValue).to.equal('RC');
+                expect(customValue).to.equal('Success');
             }),
         );
 
         it(
-            'will enhance the error twice after the request was failed',
+            'will enhance the error after the request was failed',
+            asyncTest(async sdk => {
+                const errorMiddleware: ErrorMiddleware = error => {
+                    error.message = 'Failed';
+                    throw error;
+                };
+                const platform = sdk.platform();
+                const customValue = await platform
+                    .send({
+                        url: 'http://whatever/test/test',
+                        method: 'GET',
+                        middlewares: [{error: errorMiddleware}],
+                    })
+                    .then(() => 'Success')
+                    .catch(error => {
+                        return error.message;
+                    });
+                expect(customValue).to.equal('Failed');
+            }),
+        );
+
+        it(
+            'will enhance the error twice after the request was failed 1',
             asyncTest(async sdk => {
                 const errorMiddleware1: ErrorMiddleware = error => {
                     error.message = 'RC';
-                    return error;
+                    throw error;
                 };
                 const errorMiddleware2: ErrorMiddleware = error => {
-                    return error.message;
+                    throw error.message;
                 };
                 const platform = sdk.platform();
                 const customValue = await platform
@@ -139,18 +162,86 @@ describe('RingCentral.platform.middleware', () => {
                 expect(customValue).to.equal('RC');
             }),
         );
+
+        it(
+            'will enhance the error twice after the request was failed 2',
+            asyncTest(async sdk => {
+                const errorMiddleware1: ErrorMiddleware = error => {
+                    error.message = 'RC';
+                    throw error;
+                };
+                const errorMiddleware2: ErrorMiddleware = error => {
+                    return error.message;
+                };
+                const platform = sdk.platform();
+                const customValue = await platform
+                    .send({
+                        url: 'http://whatever/test/test',
+                        method: 'GET',
+                        middlewares: [{error: errorMiddleware1}, {error: errorMiddleware2}],
+                    })
+                    .catch(() => 'Error');
+                expect(customValue).to.equal('RC');
+            }),
+        );
+
+        it(
+            'will enhance the error twice after the request was failed 3',
+            asyncTest(async sdk => {
+                const errorMiddleware1: ErrorMiddleware = error => {
+                    error.message = 'RC';
+                    return error;
+                };
+                const errorMiddleware2: ErrorMiddleware = error => {
+                    throw error.message;
+                };
+                const platform = sdk.platform();
+                const customValue: any = await platform
+                    .send({
+                        url: 'http://whatever/test/test',
+                        method: 'GET',
+                        middlewares: [{error: errorMiddleware1}, {error: errorMiddleware2}],
+                    })
+                    .catch(() => 'Error');
+                expect(customValue.message).to.equal('RC');
+            }),
+        );
     });
 
     describe('PostMiddleware & ErrorMiddleware', () => {
         it(
-            'will goto error middleware if there are some errors in the post middlewares',
+            'will goto error middleware if there are some errors in the post middlewares 1',
             asyncTest(async sdk => {
                 apiCall('GET', '/test/test', {name: 'RC'}, 200);
                 const postMiddleware: PostMiddleware = _response => {
                     throw new Error('RC');
                 };
                 const errorMiddleware: ErrorMiddleware = error => {
-                    return error.message;
+                    return error;
+                };
+                const platform = sdk.platform();
+                const response = await platform
+                    .send({
+                        url: 'http://whatever/test/test',
+                        method: 'GET',
+                        middlewares: [{post: postMiddleware, error: errorMiddleware}],
+                        skipAuthCheck: true,
+                        skipDiscoveryCheck: true,
+                    })
+                    .catch(error => error);
+                expect(response.message).to.equal('RC');
+            }),
+        );
+
+        it(
+            'will goto error middleware if there are some errors in the post middlewares 2',
+            asyncTest(async sdk => {
+                apiCall('GET', '/test/test', {name: 'RC'}, 200);
+                const postMiddleware: PostMiddleware = _response => {
+                    throw new Error('RC');
+                };
+                const errorMiddleware: ErrorMiddleware = error => {
+                    throw error.message;
                 };
                 const platform = sdk.platform();
                 const response = await platform

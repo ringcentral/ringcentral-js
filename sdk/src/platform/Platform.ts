@@ -720,16 +720,14 @@ export default class Platform extends EventEmitter {
 
             // Guard is for errors that come from polling
             if (!e.response || retry) {
-                const error = await executeErrorMiddlewaresInSerial(errorMiddlewares, e);
-                throw error;
+                return executeErrorMiddlewaresInSerial(errorMiddlewares, e);
             }
 
             const {response} = e;
             const {status} = response;
 
             if ((status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) || this._authProxy) {
-                const error = await executeErrorMiddlewaresInSerial(errorMiddlewares, e);
-                throw error;
+                return executeErrorMiddlewaresInSerial(errorMiddlewares, e);
             }
 
             options.retry = true;
@@ -754,8 +752,7 @@ export default class Platform extends EventEmitter {
                 this.emit(this.events.rateLimitError, e);
 
                 if (!handleRateLimit) {
-                    const error = await executeErrorMiddlewaresInSerial(errorMiddlewares, e);
-                    throw error;
+                    return executeErrorMiddlewaresInSerial(errorMiddlewares, e);
                 }
             }
 
