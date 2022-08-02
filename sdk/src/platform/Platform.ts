@@ -96,6 +96,7 @@ export default class Platform extends EventEmitter {
         clearCacheOnRefreshError = true,
         appName = '',
         appVersion = '',
+        additionalUserAgent = '',
         externals,
         cache,
         client,
@@ -125,7 +126,7 @@ export default class Platform extends EventEmitter {
         this._urlPrefix = urlPrefix;
         this._userAgent = `${appName ? `${appName + (appVersion ? `/${appVersion}` : '')} ` : ''}RCJSSDK/${
             Constants.version
-        }`;
+        }${additionalUserAgent ? ` ${additionalUserAgent}` : ''}`;
 
         this._externals = externals;
         this._cache = cache;
@@ -847,6 +848,7 @@ export interface PlatformOptions extends AuthOptions {
     clearCacheOnRefreshError?: boolean;
     appName?: string;
     appVersion?: string;
+    additionalUserAgent?: string;
     tokenEndpoint?: string;
     revokeEndpoint?: string;
     authorizeEndpoint?: string;

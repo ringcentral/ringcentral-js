@@ -13,6 +13,8 @@ import {
     getExternalDiscoveryMockData,
 } from '../test/test';
 
+import {version} from '../core/Constants';
+
 const globalAny: any = global;
 const windowAny: any = typeof window !== 'undefined' ? window : global;
 
@@ -40,6 +42,117 @@ describe('RingCentral.platform.Platform', () => {
 
                 expect(await platform.auth().accessTokenValid()).to.equal(false);
             }),
+        );
+    });
+
+    describe('X-User-Agent', () => {
+        it(
+            'is added with default value',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+                const client = sdk.client();
+                const path = `/restapi/v1.0/foo/get`;
+
+                apiCall('get', path, {foo: 'bar'});
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
+                });
+                await platform.get(path, null);
+                expect(request.headers.get('x-user-agent')).to.equal(`RCJSSDK/${version}`);
+            }),
+        );
+
+        it(
+            'is added with app name and version',
+            asyncTest(
+                async sdk => {
+                    const platform = sdk.platform();
+                    const client = sdk.client();
+                    const path = `/restapi/v1.0/foo/get`;
+
+                    apiCall('get', path, {foo: 'bar'});
+                    let request;
+                    client.on(client.events.requestSuccess, (_, r) => {
+                        request = r;
+                    });
+                    await platform.get(path, null);
+                    expect(request.headers.get('x-user-agent')).have.string('TestApp/1.0.0 ');
+                },
+                {
+                    appName: 'TestApp',
+                    appVersion: '1.0.0',
+                },
+            ),
+        );
+
+        it(
+            'is added with app name',
+            asyncTest(
+                async sdk => {
+                    const platform = sdk.platform();
+                    const client = sdk.client();
+                    const path = `/restapi/v1.0/foo/get`;
+
+                    apiCall('get', path, {foo: 'bar'});
+                    let request;
+                    client.on(client.events.requestSuccess, (_, r) => {
+                        request = r;
+                    });
+                    await platform.get(path, null);
+                    expect(request.headers.get('x-user-agent')).have.string('TestApp ');
+                },
+                {
+                    appName: 'TestApp',
+                },
+            ),
+        );
+
+        it(
+            'is added with additional user agent',
+            asyncTest(
+                async sdk => {
+                    const platform = sdk.platform();
+                    const client = sdk.client();
+                    const path = `/restapi/v1.0/foo/get`;
+
+                    apiCall('get', path, {foo: 'bar'});
+                    let request;
+                    client.on(client.events.requestSuccess, (_, r) => {
+                        request = r;
+                    });
+                    await platform.get(path, null);
+                    expect(request.headers.get('x-user-agent')).have.string(' (build.1000; rev.149f00000)');
+                },
+                {
+                    additionalUserAgent: '(build.1000; rev.149f00000)',
+                },
+            ),
+        );
+
+        it(
+            'is added with app name, version and additional user agent',
+            asyncTest(
+                async sdk => {
+                    const platform = sdk.platform();
+                    const client = sdk.client();
+                    const path = `/restapi/v1.0/foo/get`;
+
+                    apiCall('get', path, {foo: 'bar'});
+                    let request;
+                    client.on(client.events.requestSuccess, (_, r) => {
+                        request = r;
+                    });
+                    await platform.get(path, null);
+                    expect(request.headers.get('x-user-agent')).have.string('TestApp/1.0.0 ');
+                    expect(request.headers.get('x-user-agent')).have.string(' (build.1000; rev.149f00000)');
+                },
+                {
+                    appName: 'TestApp',
+                    appVersion: '1.0.0',
+                    additionalUserAgent: '(build.1000; rev.149f00000)',
+                },
+            ),
         );
     });
 
