@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "clean": "rimraf build",
-    "start": "PORT=$REDUX_DEMO_PORT react-scripts start"
+    "start": "PORT=$REDUX_DEMO_PORT SKIP_PREFLIGHT_CHECK=true react-scripts start"
   },
   "dependencies": {
     "@ringcentral/redux": "*",
