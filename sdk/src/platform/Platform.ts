@@ -940,7 +940,7 @@ export interface LoginWindowOptions {
     target?: string;
 }
 
-export interface AuthorizationQuery {
+export interface AuthorizationQuery extends qs.ParsedUrlQueryInput {
     response_type: 'token' | 'code';
     response_hint?: string | string[];
     redirect_uri: string;
