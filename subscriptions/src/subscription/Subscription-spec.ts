@@ -142,7 +142,7 @@ describe('Subscription', () => {
 
                         subscription.on(subscription.events.notification, event => {
                             expect(event).to.deep.equal({foo: 'bar'});
-                            resolve();
+                            resolve(1);
                         });
 
                         subscription['_notify']({foo: 'bar'});

@@ -118,8 +118,8 @@ export default class Subscription extends SDK.EventEmitter {
     }
 
     public subscription() {
-        const _subscription = this._subscription || {}
-        return { ..._subscription };
+        const _subscription = this._subscription || {};
+        return {..._subscription};
     }
 
     public pubnub() {
