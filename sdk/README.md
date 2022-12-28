@@ -447,6 +447,25 @@ rcsdk.get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
     document.getElementById('container').appendChild(img);
 
 });
+
+// Additional Example: GET media endpoint like call recording requires header 'Accept':'audio/mpeg'
+const options = {
+    headers:{
+        'Accept':'audio/mpeg'
+    }
+}
+rcsdk.get('/restapi/v1.0/account/~/recording/{recordingId}/content', null, options).then(function(res) {
+
+    return res.response().blob(); // or arrayBuffer(), we are accessing WhatWG Fetch's Response
+
+}).then(function(blob ){
+
+    var audio = document.createElement('audio');
+    audio.controls='controls';
+    audio.src = URL.createObjectURL(blob);
+    document.getElementById('container').appendChild(audio);
+
+});
 ```
 
 See more here [https://developer.mozilla.org/en-US/docs/Web/API/Response](https://developer.mozilla.org/en-US/docs/Web/API/Response).
