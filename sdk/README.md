@@ -417,6 +417,18 @@ rcsdk.get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
     res.response().body.pipe(fs.createWriteStream('./octocat.png')); // we are accessing Node Fetch's Response
 
 });
+
+// Additional Example: GET media endpoint like call recording requires header 'Accept':'audio/mpeg'
+const options = {
+    headers:{
+        'Accept':'audio/mpeg'
+    }
+}
+rcsdk.get('/restapi/v1.0/account/~/recording/{recordingId}/content', null, options).then(function(res) {
+
+    res.response().body.pipe(fs.createWriteStream('./recording.wav')); // we are accessing Node Fetch's Response
+
+});
 ```
 
 See more here [https://github.com/bitinn/node-fetch#usage](https://github.com/bitinn/node-fetch#usage).
