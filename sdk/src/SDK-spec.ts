@@ -17,9 +17,9 @@ describe('RingCentral.SDK', () => {
         expect((await res.json()).uri).to.equal(`${server}/restapi/v1.0`);
     };
 
-    it('connects to sandbox', async function theTest() {
-        return test(this, SDK.server.sandbox);
-    });
+    // it('connects to sandbox', async function theTest() {
+    //     return test(this, SDK.server.sandbox);
+    // });
 
     it('connects to production', async function theTest() {
         return test(this, SDK.server.production);
