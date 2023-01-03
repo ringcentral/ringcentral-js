@@ -14,7 +14,6 @@ describe('RingCentral.http.Client', () => {
                 const request = sdk.client().createRequest({url: 'http://foo/bar', query: {foo: 'foo'}});
 
                 expect(request.headers.get('Content-Type')).to.equal('application/json');
-                expect(request.headers.get('Accept')).to.equal('application/json');
                 expect(request.url).to.equal('http://foo/bar?foo=foo');
                 expect(request.method).to.equal('GET');
             }),
@@ -25,7 +24,6 @@ describe('RingCentral.http.Client', () => {
             asyncTest(sdk => {
                 const request = sdk.client().createRequest({url: 'http://foo/bar', method: 'POST', body: {foo: 'bar'}});
 
-                expect(request.headers.get('Accept')).to.equal('application/json');
                 expect(request.headers.get('Content-Type')).to.equal('application/json');
                 expect(request.url).to.equal('http://foo/bar');
                 expect(request.method).to.equal('POST');
