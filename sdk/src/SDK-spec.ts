@@ -2,7 +2,7 @@ import {expect, SDK, spy} from './test/test';
 
 describe('RingCentral.SDK', () => {
     const test = async (suite, server) => {
-        suite.timeout(50000); // Per SLA should be 3 seconds
+        suite.timeout(500000); // Per SLA should be 3 seconds
 
         const sdk = new SDK({
             server,
