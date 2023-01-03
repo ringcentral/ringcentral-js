@@ -129,10 +129,6 @@ export default class Client extends EventEmitter {
             init.url = init.url + (init.url.includes('?') ? '&' : '?') + qs.stringify(init.query);
         }
 
-        if (!findHeaderName('Accept', init.headers)) {
-            init.headers.Accept = Client._jsonContentType;
-        }
-
         // Serialize body
         if (isPlainObject(init.body) || !init.body) {
             let contentTypeHeaderName = findHeaderName(Client._contentType, init.headers);
