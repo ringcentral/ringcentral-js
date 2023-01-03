@@ -2,7 +2,7 @@ import {expect, SDK, spy} from './test/test';
 
 describe('RingCentral.SDK', () => {
     const test = async (suite, server) => {
-        suite.timeout(20000); // Per SLA should be 3 seconds
+        suite.timeout(50000); // Per SLA should be 3 seconds
 
         const sdk = new SDK({
             server,
@@ -17,9 +17,9 @@ describe('RingCentral.SDK', () => {
         expect((await res.json()).uri).to.equal(`${server}/restapi/v1.0`);
     };
 
-    // it('connects to sandbox', async function theTest() {
-    //     return test(this, SDK.server.sandbox);
-    // });
+    it('connects to sandbox', async function theTest() {
+        return test(this, SDK.server.sandbox);
+    });
 
     it('connects to production', async function theTest() {
         return test(this, SDK.server.production);
