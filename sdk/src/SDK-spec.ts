@@ -2,19 +2,23 @@ import {expect, SDK, spy} from './test/test';
 
 describe('RingCentral.SDK', () => {
     const test = async (suite, server) => {
-        suite.timeout(500000); // Per SLA should be 3 seconds
+        suite.timeout(20000); // Per SLA should be 3 seconds
 
         const sdk = new SDK({
             server,
             clientId: '',
             clientSecret: '',
         });
+        console.log('SDK initialized');
 
         const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
+        console.log('API call made');
 
         await sdk.cache().clean();
+        console.log('cache cleaned');
 
         expect((await res.json()).uri).to.equal(`${server}/restapi/v1.0`);
+        console.log('assertion done');
     };
 
     it('connects to sandbox', async function theTest() {
