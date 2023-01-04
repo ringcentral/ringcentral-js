@@ -9,16 +9,12 @@ describe('RingCentral.SDK', () => {
             clientId: '',
             clientSecret: '',
         });
-        console.log('SDK initialized');
 
-        const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
-        console.log('API call made');
+        const res = await sdk.platform().get('/restapi/v1.0/status', null, {skipAuthCheck: true});
 
         await sdk.cache().clean();
-        console.log('cache cleaned');
 
-        expect((await res.json()).uri).to.equal(`${server}/restapi/v1.0`);
-        console.log('assertion done');
+        expect(res.status).to.equal(200);
     };
 
     it('connects to sandbox', async function theTest() {

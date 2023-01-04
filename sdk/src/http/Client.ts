@@ -38,6 +38,8 @@ export default class Client extends EventEmitter {
 
     public static _urlencodedContentType = 'application/x-www-form-urlencoded';
 
+    public static _allPassContentType = '*/*';
+
     public static _headerSeparator = ':';
 
     public static _bodySeparator = '\n\n';
@@ -127,6 +129,10 @@ export default class Client extends EventEmitter {
         // Append Query String
         if (init.query) {
             init.url = init.url + (init.url.includes('?') ? '&' : '?') + qs.stringify(init.query);
+        }
+
+        if (!findHeaderName('Accept', init.headers)) {
+            init.headers.Accept = Client._allPassContentType;
         }
 
         // Serialize body
