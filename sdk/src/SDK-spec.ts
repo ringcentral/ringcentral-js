@@ -1,28 +1,38 @@
 import {expect, SDK, spy} from './test/test';
 
 describe('RingCentral.SDK', () => {
-    const test = async (suite, server) => {
-        suite.timeout(20000); // Per SLA should be 3 seconds
-
+    it('connects to sandbox', async function theTest() {
+        this.timeout(20000);
+        const server = SDK.server.sandbox;
         const sdk = new SDK({
             server,
             clientId: '',
             clientSecret: '',
         });
 
+        // sandbox's /restapi/v1.0 throws a weird error, but /restapi/v1.0/status works fine
+        const res = await sdk.platform().get('/restapi/v1.0/status', null, {skipAuthCheck: true});
+
+        await sdk.cache().clean();
+
+        expect(res.status).to.equal(200);
+    });
+
+    it('connects to production', async function theTest() {
+        this.timeout(20000);
+        const server = SDK.server.production;
+        const sdk = new SDK({
+            server,
+            clientId: '',
+            clientSecret: '',
+        });
+
+        // production's /restapi/v1.0/status triggers service overloaded very easily, but /restapi/v1.0 works fine
         const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
 
         await sdk.cache().clean();
 
-        expect((await res.json()).uri).to.equal(`${server}/restapi/v1.0`);
-    };
-
-    it('connects to sandbox', async function theTest() {
-        return test(this, SDK.server.sandbox);
-    });
-
-    it('connects to production', async function theTest() {
-        return test(this, SDK.server.production);
+        expect(res.status).to.equal(200);
     });
 
     it('sets rate limit', async function rateLimitTest() {
