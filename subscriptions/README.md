@@ -6,7 +6,7 @@ This package allows to listen to server side events via push notifications.
 
 On NodeJS it is preferred to have Web Hooks instead of PubNub subscriptions.
 
-If you plan to use this package on NodeJS make sure that if you supply a custom `SDK.Cache` it has synchronous interface. 
+If you plan to use this package on NodeJS make sure that if you supply a custom `SDK.Cache` it has synchronous interface.
 
 # Installation
 
@@ -82,7 +82,7 @@ Add the following to your HTML:
         appSecret: 'yourAppSecret',
         redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
-    
+
     var subscriptions = new RingCentral.Subscriptions({
        sdk: sdk
     });
@@ -178,9 +178,9 @@ One of very useful techniques to limit the number of active subscriptions is to 
 share this data across Subscription instances in multiple tabs:
 
 ```js
-var cacheKey = 'some-custom-key';
-var subscription = subscriptions.createSubscription();
-var cachedSubscriptionData = sdk.cache().getItemSync(cacheKey);
+const cacheKey = 'some-custom-key';
+const subscription = subscriptions.createSubscription();
+const cachedSubscriptionData = await sdk.cache().getItem(cacheKey);
 
 if (cachedSubscriptionData) {
     try { // if subscription is already expired an error will be thrown so we need to capture it
@@ -192,8 +192,8 @@ if (cachedSubscriptionData) {
     subscription.setEventFilters(['/restapi/v1.0/account/~/extension/~/presence']); // explicitly set required events
 }
 
-subscription.on([subscription.events.subscribeSuccess, subscription.events.renewSuccess], function() {
-    sdk.cache().setItemSync(cacheKey, subscription.subscription());
+subscription.on([subscription.events.subscribeSuccess, subscription.events.renewSuccess], async function() {
+    await sdk.cache().setItem(cacheKey, subscription.subscription());
 });
 
 subscription.register().catch(...);
@@ -253,9 +253,8 @@ subscription.on(subscription.events.notification, function(msg) {
 The above mentioned things are put together into `CachedSubscription` class and its `restore(cacheKey)` method:
 
 ```js
-var subscription = subscriptions
-    .createCachedSubscription('cache-key')
-    .restore(['/restapi/v1.0/account/~/extension/~/presence']);
+var subscription = await subscriptions.createCachedSubscription('cache-key');
+subscription.restore(['/restapi/v1.0/account/~/extension/~/presence']);
 
 // use it as usual
 subscription.register().catch(...);

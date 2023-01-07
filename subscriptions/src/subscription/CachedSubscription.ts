@@ -11,12 +11,19 @@ export default class CachedSubscription extends Subscription {
         this._cacheKey = cacheKey;
     }
 
+    protected _cachedSubscription = {};
+
+    public async loadCache() {
+        this._cachedSubscription = await this._sdk.cache().getItem(this._cacheKey);
+    }
+
     public subscription() {
-        return this._sdk.cache().getItemSync(this._cacheKey) || {};
+        return this._cachedSubscription || {};
     }
 
     protected _setSubscription(subscription) {
-        this._sdk.cache().setItemSync(this._cacheKey, subscription);
+        this._cachedSubscription = subscription;
+        this._sdk.cache().setItem(this._cacheKey, subscription);
         return this;
     }
 
