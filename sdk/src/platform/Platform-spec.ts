@@ -1200,6 +1200,29 @@ describe('RingCentral.platform.Platform', () => {
             expect(await platform.discovery().externalDataExpired()).to.equal(false);
         });
 
+        it('should fetch external discovery successfully when login without initDiscovery data', async () => {
+            // mock
+            const initialDiscoveryData = getInitialDiscoveryMockData();
+            const externalDiscoveryData = getExternalDiscoveryMockData();
+            apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
+            apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
+            authentication();
+
+            const sdk = createSdk({
+                enableDiscovery: true,
+                discoveryServer: 'http://whatever',
+                discoveryAutoInit: false,
+                server: '',
+            });
+            const platform = sdk.platform();
+            await platform.login({
+                code: 'whatever',
+            });
+            const externalData = await platform.discovery().externalData();
+            expect(externalData.coreApi.baseUri).to.equal(externalDiscoveryData.coreApi.baseUri);
+            expect(await platform.discovery().externalDataExpired()).to.equal(false);
+        });
+
         it('should fetch external discovery when login without discovery_uri and token_uri', async () => {
             // mock
             const initialDiscoveryData = getInitialDiscoveryMockData();
