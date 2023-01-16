@@ -18,7 +18,10 @@
     "start:webpack": "npm run build:webpack -- --watch"
   },
   "dependencies": {
-    "pubnub": "^4.29.11"
+    "@rc-ex/core": "^1.0.1-alpha.0",
+    "@rc-ex/rcsdk": "^1.0.4-alpha.0",
+    "@rc-ex/ws": "^1.0.4-alpha.0",
+    "wait-for-async": "^0.6.0"
   },
   "devDependencies": {
     "@ringcentral/sdk": "*",

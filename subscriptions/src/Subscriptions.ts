@@ -1,47 +1,64 @@
-import PubNubDefault from 'pubnub';
 import {SDK} from '@ringcentral/sdk';
-import Subscription, {SubscriptionOptions} from './subscription/Subscription';
-import CachedSubscription, {CachedSubscriptionOptions} from './subscription/CachedSubscription';
+import EventEmitter from 'events';
+import RingCentral from '@rc-ex/core';
+import RcSdkExtension from '@rc-ex/rcsdk';
+import WebSocketExtension from '@rc-ex/ws';
+import waitFor from 'wait-for-async';
 
-export {SubscriptionOptions, CachedSubscriptionOptions};
+export class Subscription extends EventEmitter {
+    subscriptions: Subscriptions;
+    events = {
+        notification: 'notification',
+    };
+    eventFilters!: string[];
+
+    constructor(options: {subscriptions: Subscriptions}) {
+        super();
+        this.subscriptions = options.subscriptions;
+    }
+
+    setEventFilters(eventFilters: string[]) {
+        this.eventFilters = eventFilters;
+        return this;
+    }
+
+    async register() {
+        await this.subscriptions.init();
+        return await this.subscriptions.wsExtension.subscribe(this.eventFilters, event => {
+            this.emit(this.events.notification, event);
+        });
+    }
+}
 
 export class Subscriptions {
-    private _sdk: SDK;
+    status = 'new'; // new, in-progress, ready
+    rc: RingCentral;
+    rcSdkExtension: RcSdkExtension;
+    wsExtension: WebSocketExtension;
 
-    private _PubNub: any; // typeof PubNub;
-
-    public constructor({sdk, PubNub = PubNubDefault}: SubscriptionsOptions) {
-        this._sdk = sdk;
-        this._PubNub = PubNub;
+    constructor(options: {sdk: SDK}) {
+        this.rc = new RingCentral();
+        this.rcSdkExtension = new RcSdkExtension({rcSdk: options.sdk});
+        this.wsExtension = new WebSocketExtension();
     }
 
-    public createSubscription({pollInterval, renewHandicapMs}: SubscriptionOptions = {}) {
-        return new Subscription({
-            pollInterval,
-            renewHandicapMs,
-            sdk: this._sdk,
-            PubNub: this._PubNub,
-        });
+    async init() {
+        if (this.status === 'ready') {
+            return;
+        }
+        if (this.status === 'in-progress') {
+            await waitFor({
+                condition: () => this.status === 'ready',
+            });
+            return;
+        }
+        this.status = 'in-progress';
+        await this.rc.installExtension(this.rcSdkExtension);
+        await this.rc.installExtension(this.wsExtension);
+        this.status = 'ready';
     }
 
-    public createCachedSubscription({cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptions) {
-        return new CachedSubscription({
-            cacheKey,
-            pollInterval,
-            renewHandicapMs,
-            sdk: this._sdk,
-            PubNub: this._PubNub,
-        });
-    }
-
-    public getPubNub() {
-        return this._PubNub;
+    createSubscription(): Subscription {
+        return new Subscription({subscriptions: this});
     }
 }
-
-export interface SubscriptionsOptions {
-    sdk: SDK;
-    PubNub?: typeof PubNubDefault;
-}
-
-export default Subscriptions;
