@@ -13,11 +13,5 @@ module.exports = createConfig({
             amd: 'ringcentral',
             root: 'RingCentral',
         },
-        pubnub: {
-            commonjs: 'pubnub',
-            commonjs2: 'pubnub',
-            amd: 'pubnub',
-            root: 'PubNub',
-        },
     },
 });
