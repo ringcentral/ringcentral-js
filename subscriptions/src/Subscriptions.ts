@@ -6,23 +6,23 @@ import WebSocketExtension from '@rc-ex/ws';
 import waitFor from 'wait-for-async';
 
 export class Subscription extends EventEmitter {
-    subscriptions: Subscriptions;
-    events = {
+    private subscriptions: Subscriptions;
+    public events = {
         notification: 'notification',
     };
-    eventFilters!: string[];
+    public eventFilters!: string[];
 
-    constructor(options: {subscriptions: Subscriptions}) {
+    public constructor(options: {subscriptions: Subscriptions}) {
         super();
         this.subscriptions = options.subscriptions;
     }
 
-    setEventFilters(eventFilters: string[]) {
+    public setEventFilters(eventFilters: string[]) {
         this.eventFilters = eventFilters;
         return this;
     }
 
-    async register() {
+    public async register() {
         await this.subscriptions.init();
         return await this.subscriptions.wsExtension.subscribe(this.eventFilters, event => {
             this.emit(this.events.notification, event);
@@ -31,18 +31,18 @@ export class Subscription extends EventEmitter {
 }
 
 export class Subscriptions {
-    status = 'new'; // new, in-progress, ready
-    rc: RingCentral;
-    rcSdkExtension: RcSdkExtension;
-    wsExtension: WebSocketExtension;
+    private status = 'new'; // new, in-progress, ready
+    public rc: RingCentral;
+    public rcSdkExtension: RcSdkExtension;
+    public wsExtension: WebSocketExtension;
 
-    constructor(options: {sdk: SDK}) {
+    public constructor(options: {sdk: SDK}) {
         this.rc = new RingCentral();
         this.rcSdkExtension = new RcSdkExtension({rcSdk: options.sdk});
         this.wsExtension = new WebSocketExtension();
     }
 
-    async init() {
+    public async init() {
         if (this.status === 'ready') {
             return;
         }
@@ -58,7 +58,7 @@ export class Subscriptions {
         this.status = 'ready';
     }
 
-    createSubscription(): Subscription {
+    public createSubscription(): Subscription {
         return new Subscription({subscriptions: this});
     }
 }
