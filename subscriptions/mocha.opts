@@ -2,4 +2,4 @@
 --require source-map-support/register
 --recursive
 --full-trace
-./src/**/*-spec.ts
+./src/*-spec.ts
