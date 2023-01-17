@@ -3,11 +3,6 @@
   "version": "0.0.0",
   "scripts": {
     "clean": "rimraf dist/* lib/* es6/* coverage/* .nyc_output .rpt2_cache",
-    "test": "npm run nyc",
-    "test:quick": "npm run mocha",
-    "test:watch": "npm run test:quick -- --watch",
-    "mocha": "mocha --opts mocha.opts",
-    "nyc": "nyc mocha --opts mocha.opts",
     "build": "npm run clean && npm run build:tsc:es5 && npm run build:tsc:es6 && npm run build:webpack",
     "build:tsc:es5": "tsc",
     "build:tsc:es6": "tsc --project tsconfig.es6.json",
