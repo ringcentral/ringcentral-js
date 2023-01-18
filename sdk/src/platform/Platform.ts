@@ -550,10 +550,10 @@ export default class Platform extends EventEmitter {
             await this._discoveryInitPromise;
         }
         let discoveryData = await this._discovery.initialData();
+        // check if discovery data is initialized successfully
         if (!discoveryData) {
-            this._discoveryInitPromise = this.initDiscovery(); // request new init data after refresh error and cache cleaned
-            await this._discoveryInitPromise;
-            discoveryData = await this._discovery.initialData();
+            // discovery request fail in previous init, try re-fetch discovery
+            discoveryData = await this._discovery.fetchInitialData();
         }
         if (!tokenEndpoint) {
             tokenEndpoint = discoveryData.authApi.defaultTokenUri;
