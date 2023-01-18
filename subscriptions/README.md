@@ -7,6 +7,11 @@ It is just for existing package users to easily migrate from PubNub to WebSocket
 For new users, you are recommended to use [this project](https://github.com/ringcentral/ringcentral-extensible/tree/master/packages/extensions/ws) directly.
 
 
+## App permissions required
+
+Your RingCentral app needs to have the "WebSocket Subscriptions" permission. If you don't know how to enabled it, please contact [dev support](https://developers.ringcentral.com/support/create-case).
+
+
 ## Installation
 
 ```sh
