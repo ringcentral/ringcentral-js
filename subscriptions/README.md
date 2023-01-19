@@ -2,9 +2,9 @@
 
 This project is a proxy project to the [WebSocket Extension](https://github.com/ringcentral/ringcentral-extensible/tree/master/packages/extensions/ws) of the [RingCentral Extensible](https://github.com/ringcentral/ringcentral-extensible) project.
 
-It is just for existing package users to easily migrate from PubNub to WebSocket.
-
 For new users, you are recommended to use [this project](https://github.com/ringcentral/ringcentral-extensible/tree/master/packages/extensions/ws) directly.
+
+Please do read this article: [Create WebSocket subscriptions using RingCentral JavaScript SDKs](https://medium.com/@tylerlong/create-websocket-subscriptions-using-ringcentral-javascript-sdks-1204ce5843b8).
 
 
 ## App permissions required
