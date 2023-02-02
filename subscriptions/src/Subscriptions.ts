@@ -62,3 +62,5 @@ export class Subscriptions {
         return new Subscription({subscriptions: this});
     }
 }
+
+export default Subscriptions;
