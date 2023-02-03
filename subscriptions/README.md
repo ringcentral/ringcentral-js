@@ -64,3 +64,38 @@ const main = async () => {
 
 main();
 ```
+
+
+## Traditional way
+
+Let's say you just want to use plain HTML and JavaScript without any fancy technology such as webpack/parcel/TypeScript...etc.
+
+Please refer to the [RingCentral SPA Demo](https://github.com/tylerlong/rc-spa-demo).
+
+Simply put:
+
+```
+<script type="text/javascript" src="https://unpkg.com/@ringcentral/sdk@latest/dist/ringcentral.js"></script>
+<script type="text/javascript" src="https://unpkg.com/@ringcentral/subscriptions@0.0.1-master.4079103221.135.0/dist/ringcentral-subscriptions.js"></script>
+
+...
+
+
+const rc = new RingCentral.SDK({
+  server,
+  clientId,
+});
+
+...
+
+const subscriptions = new RingCentral.Subscriptions({
+  sdk: rc
+});
+const subscription = subscriptions.createSubscription();
+
+...
+```
+
+
+`@ringcentral/subscriptions@0.0.1-master.4079103221.135.0` was the latest nightly build when I was writing this documentation.
+Please choose a proper version yourself.
