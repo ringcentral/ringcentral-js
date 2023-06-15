@@ -845,6 +845,10 @@ export default class Platform extends EventEmitter {
     public get codeVerifier() {
         return this._codeVerifier;
     }
+
+    public get userAgent() {
+        return this._userAgent;
+    }
 }
 
 export interface PlatformOptions extends AuthOptions {
