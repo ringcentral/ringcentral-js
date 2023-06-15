@@ -13,6 +13,8 @@ export class Subscriptions {
     public constructor({sdk, PubNub = PubNubDefault}: SubscriptionsOptions) {
         this._sdk = sdk;
         this._PubNub = PubNub;
+        // eslint-disable-next-line no-console
+        console.warn('PubNub support is deprecated. Please migrate your application to WebSockets.');
     }
 
     public createSubscription({pollInterval, renewHandicapMs}: SubscriptionOptions = {}) {
