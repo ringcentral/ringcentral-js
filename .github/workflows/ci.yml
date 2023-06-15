@@ -63,6 +63,10 @@ jobs:
             subscriptions/dist/ringcentral-subscriptions.js.map
             subscriptions/dist/ringcentral-subscriptions.min.js
             subscriptions/dist/ringcentral-subscriptions.min.js.map
+            subscriptions-deprecated/dist/ringcentral-subscriptions-deprecated.js
+            subscriptions-deprecated/dist/ringcentral-subscriptions-deprecated.js.map
+            subscriptions-deprecated/dist/ringcentral-subscriptions-deprecated.min.js
+            subscriptions-deprecated/dist/ringcentral-subscriptions-deprecated.min.js.map
         env:
           GITHUB_REPOSITORY: ringcentral/ringcentral-js
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
