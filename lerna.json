@@ -9,6 +9,7 @@
     "redux-demo",
     "sdk",
     "subscriptions",
+    "subscriptions-deprecated",
     "utils"
   ],
   "version": "0.0.0"
