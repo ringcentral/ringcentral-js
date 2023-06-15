@@ -492,6 +492,10 @@ export default class Platform extends EventEmitter {
                         body.username = username;
                     }
                     body.password = password;
+                    // eslint-disable-next-line no-console
+                    console.warn(
+                        'Username/password authentication is deprecated. Please migrate to the JWT grant type.',
+                    );
                 } else if (jwt) {
                     body.grant_type = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
                     body.assertion = jwt;
