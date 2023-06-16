@@ -47,11 +47,11 @@ jobs:
           BRANCH: ${{ steps.extract_branch.outputs.branch }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: npm run publish:release -- $TAG --yes
-        if: ${{ env.TAG != '' && !contains(env.TAG, '/') && !contains(env.TAG, '-') && github.repository == 'ringcentral/ringcentral-js' }}
+        if: ${{ env.TAG != '' && !contains(env.TAG, '/') && github.repository == 'ringcentral/ringcentral-js' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Release
-        if: ${{ env.TAG != '' && !contains(env.TAG, '/') && !contains(env.TAG, '-') && github.repository == 'ringcentral/ringcentral-js' }}
+        if: ${{ env.TAG != '' && !contains(env.TAG, '/') && github.repository == 'ringcentral/ringcentral-js' }}
         uses: softprops/action-gh-release@v1
         with:
           files: |
