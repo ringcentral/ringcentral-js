@@ -241,6 +241,41 @@ rcsdk
     });
 ```
 
+### Multi User Login
+
+If you need to have multiple users login in to different instances of the sdk, you can use the `cachePrefix` SDK option.  Specify different `cachePrefix` values for each instance.
+
+```js
+const rcsdk1 = new RingCentral.SDK({
+    server: RingCentral.SDK.server.sandbox,
+    clientId: 'yourClientId',
+    clientSecret: 'yourClientSecret',
+    cachePrefix: 'user1',
+});
+
+rcsdk1.login({
+    username: '18001234567',
+    extension: '101',
+    password: 'password1'
+})
+
+const rcsdk2 = new RingCentral.SDK({
+    server: RingCentral.SDK.server.sandbox,
+    clientId: 'yourClientId',
+    clientSecret: 'yourClientSecret',
+    cachePrefix: 'user2',
+});
+
+rcsdk1.login({
+    username: '18005557777',
+    extension: '102',
+    password: 'password2'
+})
+
+```
+This prevents login state from being shared between the two instances `rcsdk1` and `rcsdk2`
+
+
 ## Handling login success
 
 Because the login process is asynchronous, you need to call the promise's `then` method and pass your success handler as

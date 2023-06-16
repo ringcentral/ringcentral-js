@@ -60,6 +60,7 @@ describe('RingCentral.platform.Platform', () => {
                 });
                 await platform.get(path, null);
                 expect(request.headers.get('x-user-agent')).to.equal(`RCJSSDK/${version}`);
+                expect(platform.userAgent).to.equal(`RCJSSDK/${version}`);
             }),
         );
 
