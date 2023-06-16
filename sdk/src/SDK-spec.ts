@@ -10,8 +10,8 @@ describe('RingCentral.SDK', () => {
             clientSecret: '',
         });
 
-        // sandbox's /restapi/v1.0 throws a weird error, but /restapi/v1.0/status works fine
-        const res = await sdk.platform().get('/restapi/v1.0/status', null, {skipAuthCheck: true});
+        // sandbox's /restapi/v1.0/status triggers service overloaded very easily, but /restapi/v1.0 works fine
+        const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
 
         await sdk.cache().clean();
 
