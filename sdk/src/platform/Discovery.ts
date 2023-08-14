@@ -289,17 +289,16 @@ export default class Discovery extends EventEmitter {
         await delay(this._refreshDelayMs);
         const oldExternalData = await this.externalData();
         let externalEndpoint;
-        let initialData;
         if (oldExternalData) {
             externalEndpoint = oldExternalData.discoveryApi.externalUri;
         } else {
-            initialData = await this.initialData();
+            const initialData = await this.initialData();
             externalEndpoint = initialData.discoveryApi.defaultExternalUri;
         }
         try {
             await this.fetchExternalData(externalEndpoint);
         } catch (e) {
-            const retryCycleDelay = oldExternalData ? oldExternalData.retryCycleDelay : initialData.retryCycleDelay;
+            const retryCycleDelay = oldExternalData ? oldExternalData.retryCycleDelay : 824;
             this._externalRetryCycleTimeout = setTimeout(() => {
                 this._externalRetryCycleTimeout = null;
                 this._refreshExternalData();
