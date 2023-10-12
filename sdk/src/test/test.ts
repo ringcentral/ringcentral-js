@@ -1,4 +1,5 @@
-import {expect, spy, fetchMock} from '@ringcentral/sdk-utils/test';
+import {expect, fetchMock, spy} from '@ringcentral/sdk-utils/test';
+
 import {SDK, SDKOptions} from '../SDK';
 
 fetchMock.config.fallbackToNetwork = true;
@@ -99,8 +100,7 @@ export function asyncTest(fn: (sdk: SDK) => any, sdkOption: SDKOptions = {}) {
             const platofrm = sdk.platform();
 
             await platofrm.login({
-                username: 'whatever',
-                password: 'whatever',
+                jwt: 'jwt_string',
             });
 
             await fn(sdk);
@@ -176,4 +176,4 @@ export function getExternalDiscoveryMockData() {
     };
 }
 
-export {spy, SDK, expect};
+export {expect, SDK, spy};
