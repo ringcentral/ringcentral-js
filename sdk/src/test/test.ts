@@ -1,4 +1,5 @@
-import {expect, spy, fetchMock} from '@ringcentral/sdk-utils/test';
+import {expect, fetchMock, spy} from '@ringcentral/sdk-utils/test';
+
 import {SDK, SDKOptions} from '../SDK';
 
 fetchMock.config.fallbackToNetwork = true;
@@ -30,9 +31,8 @@ export function authentication(status = 200) {
             token_type: 'bearer',
             expires_in: 3600,
             refresh_token: 'REFRESH_TOKEN',
-            refresh_token_expires_in: 60480,
+            refresh_token_expires_in: 604800,
             scope: 'SMS RCM Foo Boo',
-            expireTime: new Date().getTime() + 3600000,
         },
         status,
     );
@@ -49,7 +49,7 @@ export function tokenRefresh(failure = false) {
             token_type: 'bearer',
             expires_in: 3600,
             refresh_token: 'REFRESH_TOKEN_FROM_REFRESH',
-            refresh_token_expires_in: 60480,
+            refresh_token_expires_in: 604800,
             scope: 'SMS RCM Foo Boo',
         });
     } else {
@@ -99,8 +99,7 @@ export function asyncTest(fn: (sdk: SDK) => any, sdkOption: SDKOptions = {}) {
             const platofrm = sdk.platform();
 
             await platofrm.login({
-                username: 'whatever',
-                password: 'whatever',
+                jwt: 'jwt_string',
             });
 
             await fn(sdk);
@@ -176,4 +175,4 @@ export function getExternalDiscoveryMockData() {
     };
 }
 
-export {spy, SDK, expect};
+export {expect, SDK, spy};

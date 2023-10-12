@@ -323,8 +323,8 @@ rcsdk.platform().auth().accessTokenValid(); // returns Promise<boolean>
 You can retrieve save and set back the auth information:
 
 ```js
-var authData = rcsdk.platform().auth().data();
-rcsdk.platform().auth().setData(authData);
+var authData = await rcsdk.platform().auth().data();
+await rcsdk.platform().auth().setData(authData);
 ```
 
 It can be useful on the server if SDK instances are created and disposed for every HTTP request.
