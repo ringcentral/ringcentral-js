@@ -1,19 +1,18 @@
+import {version} from '../core/Constants';
 import {
     apiCall,
     asyncTest,
     authentication,
+    cleanFetchMock,
+    createSdk,
     expect,
     expectThrows,
+    getExternalDiscoveryMockData,
+    getInitialDiscoveryMockData,
     logout,
     spy,
     tokenRefresh,
-    createSdk,
-    cleanFetchMock,
-    getInitialDiscoveryMockData,
-    getExternalDiscoveryMockData,
 } from '../test/test';
-
-import {version} from '../core/Constants';
 
 const globalAny: any = global;
 const windowAny: any = typeof window !== 'undefined' ? window : global;
@@ -193,6 +192,12 @@ describe('RingCentral.platform.Platform', () => {
                 });
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
+                expect(await platform.auth().accessTokenValid()).to.equal(true);
+                expect(await platform.auth().refreshTokenValid()).to.equal(true);
+                expect((await platform.auth().data()).expire_time > Date.now() + 30 * 60 * 1000).to.equal(true);
+                expect(
+                    (await platform.auth().data()).refresh_token_expire_time > Date.now() + 6 * 24 * 60 * 60 * 1000,
+                ).to.equal(true);
             }),
         );
 
@@ -210,6 +215,7 @@ describe('RingCentral.platform.Platform', () => {
                 });
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
+                expect(await platform.auth().accessTokenValid()).to.equal(true);
             }),
         );
 
@@ -229,6 +235,7 @@ describe('RingCentral.platform.Platform', () => {
                 });
 
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN');
+                expect(await platform.auth().accessTokenValid()).to.equal(true);
             }),
         );
 
@@ -249,6 +256,7 @@ describe('RingCentral.platform.Platform', () => {
                     });
                     const authData = await platform.auth().data();
                     expect(authData.access_token).to.equal('ACCESS_TOKEN');
+                    expect(await platform.auth().accessTokenValid()).to.equal(true);
                     expect(authData.code_verifier).not.to.be.empty;
                 },
                 {
@@ -266,6 +274,7 @@ describe('RingCentral.platform.Platform', () => {
                     await platform.login({code: 'test', code_verifier: 'test_code_verifier'});
                     const authData = await platform.auth().data();
                     expect(authData.code_verifier).to.equal('test_code_verifier');
+                    expect(await platform.auth().accessTokenValid()).to.equal(true);
                 },
                 {
                     clientSecret: '',
@@ -288,6 +297,7 @@ describe('RingCentral.platform.Platform', () => {
                 const authData = await platform.auth().data();
                 expect(authData.access_token).to.equal('ACCESS_TOKEN');
                 expect(authData.code_verifier).to.equal('test_code_verifier');
+                expect(await platform.auth().accessTokenValid()).to.equal(true);
             }),
         );
 
@@ -606,6 +616,8 @@ describe('RingCentral.platform.Platform', () => {
                 await platform.refresh();
                 expect(request.headers.get('authorization')).not.to.equal(null);
                 expect((await platform.auth().data()).access_token).to.equal('ACCESS_TOKEN_FROM_REFRESH');
+                expect(await platform.auth().accessTokenValid()).to.equal(true);
+                expect(await platform.auth().refreshTokenValid()).to.equal(true);
             }),
         );
 
@@ -1023,6 +1035,8 @@ describe('RingCentral.platform.Platform', () => {
                     await platform.auth().setData({
                         code_verifier: '1212121',
                     });
+                    expect(await platform.auth().accessTokenValid()).to.equal(true);
+                    expect(await platform.auth().refreshTokenValid()).to.equal(true);
                     let request;
                     client.on(client.events.requestSuccess, (_, r) => {
                         request = r;
@@ -1582,6 +1596,27 @@ describe('RingCentral.platform.Platform', () => {
             });
             const res = await platform.get('/restapi/v1.0/foo/1');
             expect(request.headers.get('discovery-tag')).to.equal(discoveryTag);
+        });
+    });
+
+    describe('Auth setData', () => {
+        it('should set auth data successfully', async () => {
+            const sdk = createSdk({clientId: 'xxx', clientSecret: 'yyy', server: ''});
+            const platform = sdk.platform();
+            const oldToken = {
+                access_token: 'xxx',
+                refresh_token: 'yyy',
+                expire_time: Date.now() + 100000,
+                refresh_token_expire_time: Date.now() + 900000,
+            };
+            await platform.auth().setData(oldToken);
+            expect(await platform.auth().accessTokenValid()).to.equal(true);
+            expect(await platform.auth().refreshTokenValid()).to.equal(true);
+            const authData = await platform.auth().data();
+            expect(authData.access_token).to.equal(oldToken.access_token);
+            expect(authData.refresh_token).to.equal(oldToken.refresh_token);
+            expect(authData.expire_time).to.equal(oldToken.expire_time);
+            expect(authData.refresh_token_expire_time).to.equal(oldToken.refresh_token_expire_time);
         });
     });
 });

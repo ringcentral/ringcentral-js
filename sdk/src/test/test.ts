@@ -31,9 +31,8 @@ export function authentication(status = 200) {
             token_type: 'bearer',
             expires_in: 3600,
             refresh_token: 'REFRESH_TOKEN',
-            refresh_token_expires_in: 60480,
+            refresh_token_expires_in: 604800,
             scope: 'SMS RCM Foo Boo',
-            expireTime: new Date().getTime() + 3600000,
         },
         status,
     );
@@ -50,7 +49,7 @@ export function tokenRefresh(failure = false) {
             token_type: 'bearer',
             expires_in: 3600,
             refresh_token: 'REFRESH_TOKEN_FROM_REFRESH',
-            refresh_token_expires_in: 60480,
+            refresh_token_expires_in: 604800,
             scope: 'SMS RCM Foo Boo',
         });
     } else {
