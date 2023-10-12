@@ -45,10 +45,10 @@ export default class Auth {
             ...data,
             ...newData,
         };
-        if (newData.expires_in && !newData.expire_time) {
+        if (typeof newData.expires_in !== 'undefined' && !newData.expire_time) {
             savedData.expire_time = Date.now() + parseInt(newData.expires_in, 10) * 1000;
         }
-        if (newData.refresh_token_expires_in && !newData.refresh_token_expire_time) {
+        if (typeof newData.refresh_token_expires_in !== 'undefined' && !newData.refresh_token_expire_time) {
             savedData.refresh_token_expire_time = Date.now() + parseInt(newData.refresh_token_expires_in, 10) * 1000;
         }
         await this._cache.setItem(this._cacheId, savedData);
