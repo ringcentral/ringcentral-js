@@ -298,13 +298,14 @@ export default class Discovery extends EventEmitter {
         try {
             await this.fetchExternalData(externalEndpoint);
         } catch (e) {
+            const retryCycleDelay = oldExternalData ? oldExternalData.retryCycleDelay : 824;
             this._externalRetryCycleTimeout = setTimeout(() => {
                 this._externalRetryCycleTimeout = null;
                 this._refreshExternalData();
-            }, oldExternalData.retryCycleDelay * 1000);
+            }, retryCycleDelay * 1000);
             this.emit(events.externalRefreshError, {
                 error: e,
-                message: `Fetch External Discovery data error, will retry after ${oldExternalData.retryCycleDelay}s.`,
+                message: `Fetch External Discovery data error, will retry after ${retryCycleDelay}s.`,
             });
         }
     }
