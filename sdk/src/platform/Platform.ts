@@ -1,13 +1,12 @@
-import {EventEmitter} from 'events';
 import {createHash, randomBytes} from 'crypto';
+import {EventEmitter} from 'events';
 
-import * as qs from 'querystring';
-import Auth, {AuthOptions, AuthData} from './Auth';
-import Discovery from './Discovery';
-import * as Constants from '../core/Constants';
 import Cache from '../core/Cache';
-import Client, {ApiError} from '../http/Client';
+import * as Constants from '../core/Constants';
 import Externals from '../core/Externals';
+import Client, {ApiError} from '../http/Client';
+import Auth, {AuthOptions} from './Auth';
+import Discovery from './Discovery';
 import {delay} from './utils';
 
 declare const screen: any; //FIXME TS Crap
@@ -29,6 +28,24 @@ export enum events {
 
 function checkPathHasHttp(path) {
     return path.startsWith('http://') || path.startsWith('https://');
+}
+
+function encodeURIComponentWithUndefined(value) {
+    return typeof value === 'undefined' ? '' : encodeURIComponent(value);
+}
+
+function objectToUrlParams(obj) {
+    const queryString = Object.keys(obj)
+        .map(key => {
+            if (Array.isArray(obj[key])) {
+                return obj[key]
+                    .map(value => encodeURIComponent(key) + '=' + encodeURIComponentWithUndefined(value))
+                    .join('&');
+            }
+            return encodeURIComponent(key) + '=' + encodeURIComponentWithUndefined(obj[key]);
+        })
+        .join('&');
+    return queryString;
 }
 
 export default class Platform extends EventEmitter {
@@ -300,7 +317,7 @@ export default class Platform extends EventEmitter {
                 .replace(/=/g, '');
             query.code_challenge_method = 'S256';
         }
-        return this.createUrl(`${this._authorizeEndpoint}?${qs.stringify(query)}`, {addServer: true});
+        return this.createUrl(`${this._authorizeEndpoint}?${objectToUrlParams(query)}`, {addServer: true});
     }
 
     /**
@@ -326,19 +343,18 @@ export default class Platform extends EventEmitter {
 
         if (!response) throw new Error('Unable to parse response');
 
-        const queryString = qs.parse(response);
-
+        const queryString = new URLSearchParams(response);
         if (!queryString) throw new Error('Unable to parse response');
 
-        const error = queryString.error_description || queryString.error;
+        const error = queryString.get('error_description') || queryString.get('error');
 
         if (error) {
             const e: any = new Error(error.toString());
-            e.error = queryString.error;
+            e.error = queryString.get('error');
             throw e;
         }
 
-        return queryString;
+        return Object.fromEntries(queryString);
     }
 
     /**
@@ -953,7 +969,7 @@ export interface LoginWindowOptions {
     target?: string;
 }
 
-export interface AuthorizationQuery extends qs.ParsedUrlQueryInput {
+export interface AuthorizationQuery {
     response_type: 'token' | 'code';
     response_hint?: string | string[];
     redirect_uri: string;
