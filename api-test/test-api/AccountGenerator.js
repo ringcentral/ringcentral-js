@@ -28,7 +28,7 @@ export default class AccountGenerator {
 
             console.log('Connecting to', url);
 
-            soap.createClient(url, (e, cl) => {
+            soap.createClient(url, {}, (e, cl) => {
                 console.info('AccountGenerator: SOAP has been connected', e && e.message || '');
                 if (e) return reject(e);
                 this._client = cl;

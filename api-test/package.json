@@ -3,6 +3,6 @@
 	"name": "@ringcentral/sdk-api-test",
 	"private": true,
 	"dependencies": {
-		"soap": "^0.23.0"
+		"soap": "^1.0.0"
 	}
 }
