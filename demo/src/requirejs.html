@@ -41,17 +41,13 @@
     requirejs.config({
         paths: {
             'ringcentral': '../node_modules/@ringcentral/sdk/dist/ringcentral',
-            'ringcentral-subscriptions': '../node_modules/@ringcentral/subscriptions/dist/ringcentral-subscriptions',
-            'pubnub': '../node_modules/pubnub/dist/web/pubnub',
         }
     });
 
-    require(['ringcentral', 'ringcentral-subscriptions'], function(sdkNS, subscriptionsNS) {
+    require(['ringcentral'], function(sdkNS) {
 
-        var Subscriptions = subscriptionsNS.Subscriptions;
-        var SDK = sdkNS.SDK;
+        var SDK = sdkNS;
         var sdk = new SDK({server: SDK.server.sandbox});
-        var subscription = new Subscriptions({sdk: sdk});
 
         sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true})
                 .then(function(apiResponse) { return apiResponse.json(); })
@@ -60,7 +56,6 @@
                     document.getElementById('report').innerHTML = [
                         'RingCentral version: ' + SDK.version,
                         'API version: ' + data.versionString,
-                        'PUBNUB version: ' + subscription.getPubNub().toString(),
                         'Promise native: ' + (Promise.toString().trim() == 'function Promise() { [native code] }'),
                         'Fetch native: ' + (sdk.externals().fetch.toString().trim() == 'function fetch() { [native code] }'),
                         'Root scope is not poisoned: ' + (window.RingCentral == undefined)

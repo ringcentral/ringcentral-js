@@ -39,7 +39,6 @@
 </script>
 <script type="text/javascript" src="../node_modules/whatwg-fetch/dist/fetch.umd.js"></script>
 <script type="text/javascript" src="../node_modules/es6-promise/dist/es6-promise.auto.js"></script>
-<script type="text/javascript" src="../node_modules/pubnub/dist/web/pubnub.js"></script>
 <script src="../node_modules/@ringcentral/sdk/dist/ringcentral.js" type="text/javascript"></script>
 <script src="../node_modules/@ringcentral/subscriptions/dist/ringcentral-subscriptions.js" type="text/javascript"></script>
 <script src="scripts.js" type="text/javascript"></script>
@@ -98,34 +97,16 @@
 
             function getPresenceSubscription(event, cb) {
 
-                var subscription = subscriptions.createCachedSubscription({
-                    cacheKey: 'demo',
-                    renewHandicapMs: 14 * 60 * 1000 // set quicker subscription refresh
-                });
+                var subscription = subscriptions.createSubscription();
 
                 subscription.on(subscription.events.notification, function(msg) {
                     cb(msg.body);
                 });
-                subscription.on(subscription.events.renewError, function() {
-                    subscription.reset();
-                    subscription = null;
-                    getPresenceSubscription(event, cb);
-                });
-                subscription.on(subscription.events.subscribeError, function() {
-                    subscription.reset();
-                    subscription = null;
-                    getPresenceSubscription(event, cb);
-                });
-
                 subscription
-                    .restore([event])
+                    .setEventFilters([event])
                     .register()
-                    .then(function(response) {
-                        return response.json();
-                    })
-                    .then(function(json) {
-                        console.log('Subscribed, renews in', Math.ceil(json.expiresIn / 60));
-                        console.log(json);
+                    .then(function() {
+                        console.log('Ready to receive incoming SMS via WebSocket.');
                     })
                     .catch(function(e) {
                         console.error(e);
