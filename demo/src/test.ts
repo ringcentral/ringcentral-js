@@ -9,4 +9,4 @@ const sdk = new SDK({
 
 const subscriptions = new Subscriptions({sdk});
 
-const sub = subscriptions.createSubscription({});
+const sub = subscriptions.createSubscription();

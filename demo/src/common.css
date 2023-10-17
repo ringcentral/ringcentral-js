@@ -1,6 +1,7 @@
 #logo {
     display: inline-block;
-    background: url(http://ringcentral.com/etc/designs/ringcentral/images/br_design/header/topsprite.png) no-repeat 0 -58px;
-    width: 162px;
-    height: 25px;
+    background: url(https://ringcentral-tutorials.github.io/ringcentral-embeddable-demos/assets/rc-developers_logo.png) no-repeat;
+    background-size: contain;
+    width: 300px;
+    height: 27px;
 }
