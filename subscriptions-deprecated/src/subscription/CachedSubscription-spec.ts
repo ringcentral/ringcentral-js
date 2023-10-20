@@ -1,4 +1,5 @@
 import {asyncTest, expect} from '@ringcentral/sdk/lib/test/test';
+
 import {createSubscriptions} from '../test/test';
 
 describe('CachedSubscription', () => {
@@ -24,13 +25,13 @@ describe('CachedSubscription', () => {
                     },
                 };
 
-                expect(subscription1['_cacheKey']).to.equal('foo');
-                expect(subscription2['_cacheKey']).to.equal('foo');
-                expect(subscription2['_pollInterval']).to.equal(11);
-                expect(subscription2['_renewHandicapMs']).to.equal(22);
+                expect(subscription1['_cacheKey']).toEqual('foo');
+                expect(subscription2['_cacheKey']).toEqual('foo');
+                expect(subscription2['_pollInterval']).toEqual(11);
+                expect(subscription2['_renewHandicapMs']).toEqual(22);
 
                 subscription1['_setSubscription'](data);
-                expect(subscription2.subscription()).to.deep.equal(data);
+                expect(subscription2.subscription()).toEqual(data);
             }),
         );
     });
@@ -42,7 +43,7 @@ describe('CachedSubscription', () => {
                 const sub = createSubscriptions(sdk);
                 const s = sub.createCachedSubscription({cacheKey: 'foo'});
                 s.restore(['foo']);
-                expect(s.eventFilters()).to.deep.equal(['foo']);
+                expect(s.eventFilters()).toEqual(['foo']);
             }),
         );
 
@@ -53,7 +54,7 @@ describe('CachedSubscription', () => {
                 const s = sub.createCachedSubscription({cacheKey: 'foo'});
                 s.restore(['bar']);
                 s.restore(['foo']);
-                expect(s.eventFilters()).to.deep.equal(['bar']);
+                expect(s.eventFilters()).toEqual(['bar']);
             }),
         );
 

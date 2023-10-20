@@ -96,15 +96,15 @@ export function asyncTest(fn: (sdk: SDK) => any, sdkOption: SDKOptions = {}) {
 
             authentication();
 
-            const platofrm = sdk.platform();
+            const platform = sdk.platform();
 
-            await platofrm.login({
+            await platform.login({
                 jwt: 'jwt_string',
             });
 
             await fn(sdk);
 
-            expect(fetchMock.done()).to.equal(true);
+            expect(fetchMock.done()).toEqual(true);
 
             await clean();
         } catch (e) {
@@ -120,7 +120,7 @@ export async function expectThrows(fn, errorText = '', additional = (e?: Error) 
         await fn();
         throw new Error('This should not be reached');
     } catch (e) {
-        expect(e.message).to.have.string(errorText);
+        expect(e.message).toContain(errorText);
         await additional(e);
     }
 }

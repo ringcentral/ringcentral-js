@@ -1,4 +1,4 @@
-import {asyncTest, expect, createSdk} from '../test/test';
+import {asyncTest, createSdk, expect} from '../test/test';
 
 describe('RingCentral.core.Cache', () => {
     describe('getItem', () => {
@@ -7,7 +7,7 @@ describe('RingCentral.core.Cache', () => {
             asyncTest(async sdk => {
                 const cache = sdk.cache();
 
-                expect(await cache.getItem('foo')).to.equal(null);
+                expect(await cache.getItem('foo')).toEqual(null);
             }),
         );
     });
@@ -20,11 +20,11 @@ describe('RingCentral.core.Cache', () => {
                 const json = {foo: 'bar'};
 
                 await cache.setItem('foo', json);
-                expect(await cache.getItem('foo')).to.deep.equal(json);
+                expect(await cache.getItem('foo')).toEqual(json);
 
                 await cache.removeItem('foo');
 
-                expect(await cache.getItem('foo')).to.equal(null);
+                expect(await cache.getItem('foo')).toEqual(null);
             }),
         );
     });
@@ -38,14 +38,14 @@ describe('RingCentral.core.Cache', () => {
                 cache['_externals'].localStorage.setItem('rc-foo', '"foo"');
                 cache['_externals'].localStorage.setItem('foo', '"foo"');
 
-                expect(await cache.getItem('foo')).to.equal('foo');
+                expect(await cache.getItem('foo')).toEqual('foo');
 
                 await cache.clean();
 
-                expect(await cache.getItem('foo')).to.equal(null);
+                expect(await cache.getItem('foo')).toEqual(null);
 
                 // prettier-ignore
-                expect(cache['_externals'].localStorage.getItem('foo')).to.equal('"foo"');
+                expect(cache['_externals'].localStorage.getItem('foo')).toEqual('"foo"');
             }),
         );
     });
@@ -60,7 +60,7 @@ describe('RingCentral.core.Cache', () => {
 
                 await cache1.setItem('foo', {foo: 'bar'});
 
-                expect(await sdk2.cache().getItem('foo')).to.equal(null);
+                expect(await sdk2.cache().getItem('foo')).toEqual(null);
             }),
         );
     });

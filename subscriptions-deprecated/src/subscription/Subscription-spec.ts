@@ -1,4 +1,5 @@
 import {apiCall, asyncTest, expect, expectThrows} from '@ringcentral/sdk/lib/test/test';
+
 import {createSubscriptions, subscribeGeneric} from '../test/test';
 
 const pollInterval = 1; // ms
@@ -24,7 +25,7 @@ describe('Subscription', () => {
 
                 await subscription.setEventFilters(['foo', 'bar']).register();
 
-                expect(subscription.subscription().expiresIn).to.equal(quickExpiresIn);
+                expect(subscription.subscription().expiresIn).toEqual(quickExpiresIn);
 
                 await new Promise((resolve, reject) => {
                     subscription.on(subscription.events.automaticRenewError, e => {
@@ -49,7 +50,7 @@ describe('Subscription', () => {
 
                 await subscription.setEventFilters(['foo', 'bar']).register();
 
-                expect(subscription.subscription().expiresIn).to.equal(quickExpiresIn);
+                expect(subscription.subscription().expiresIn).toEqual(quickExpiresIn);
 
                 await new Promise((resolve, reject) => {
                     subscription.on(subscription.events.automaticRenewError, e => {
@@ -76,7 +77,7 @@ describe('Subscription', () => {
 
                 await new Promise((resolve, reject) => {
                     subscription.on(subscription.events.automaticRenewError, e => {
-                        expect(e.message).to.equal('expected');
+                        expect(e.message).toEqual('expected');
                         resolve(null);
                     });
                     subscription.on(subscription.events.automaticRenewSuccess, () => {
@@ -98,7 +99,7 @@ describe('Subscription', () => {
                 const s = createSubscription(sdk).setEventFilters(['foo', 'bar']);
 
                 await s.resubscribe();
-                expect(s.subscription().expiresIn).to.equal(expiresIn);
+                expect(s.subscription().expiresIn).toEqual(expiresIn);
                 s.reset();
             }),
         );
@@ -115,9 +116,9 @@ describe('Subscription', () => {
                 const oldPubNub = s.pubnub();
                 subscribeGeneric(expiresIn + 10, s.subscription().id);
                 await s.resubscribeAtPubNub();
-                expect(s.subscription().expiresIn).to.equal(expiresIn + 10);
-                expect(!!s.pubnub()).to.equal(true);
-                expect(s.pubnub()).not.to.equal(oldPubNub);
+                expect(s.subscription().expiresIn).toEqual(expiresIn + 10);
+                expect(!!s.pubnub()).toEqual(true);
+                expect(s.pubnub()).not.toEqual(oldPubNub);
                 s.reset();
             }),
         );
@@ -141,7 +142,7 @@ describe('Subscription', () => {
                         });
 
                         subscription.on(subscription.events.notification, event => {
-                            expect(event).to.deep.equal({foo: 'bar'});
+                            expect(event).toEqual({foo: 'bar'});
                             resolve(1);
                         });
 
@@ -291,7 +292,7 @@ describe('Subscription', () => {
                 subscribeGeneric();
 
                 await subscription.setEventFilters([event]).subscribe();
-                expect(subscription.subscription().eventFilters.length).to.equal(1);
+                expect(subscription.subscription().eventFilters.length).toEqual(1);
                 subscription.reset();
             }),
         );
@@ -333,7 +334,7 @@ describe('Subscription', () => {
                     },
                 });
 
-                expect(subscription._decrypt(aesMessage)).to.deep.equal({
+                expect(subscription._decrypt(aesMessage)).toEqual({
                     timestamp: '2014-03-12T20:47:54.712+0000',
                     body: {
                         extensionId: 402853446008,

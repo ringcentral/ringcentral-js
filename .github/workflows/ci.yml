@@ -16,14 +16,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
-      - run: sudo apt-get install xvfb
       - run: npm install
       - run: DEBUG=eslint:cli-engine npm run lint:all
       - run: npm run build
-      - run: xvfb-run --auto-servernum -- npm test
-        env:
-          CHROME_BIN: chromium-browser
-      - run: cat */coverage/lcov.info
+      - run: npm run test:coverage
       - name: Coveralls SDK
         uses: coverallsapp/github-action@1.1.3
         with:
