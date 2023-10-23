@@ -1,7 +1,8 @@
 import {EventEmitter} from 'events';
-import * as qs from 'querystring';
 import isPlainObject from 'is-plain-object';
+
 import Externals from '../core/Externals';
+import {objectToUrlParams} from './utils';
 
 function findHeaderName(name, headers) {
     name = name.toLowerCase();
@@ -126,9 +127,8 @@ export default class Client extends EventEmitter {
 
         // Append Query String
         if (init.query) {
-            init.url = init.url + (init.url.includes('?') ? '&' : '?') + qs.stringify(init.query);
+            init.url = init.url + (init.url.includes('?') ? '&' : '?') + objectToUrlParams(init.query);
         }
-
         // Serialize body
         if (isPlainObject(init.body) || !init.body) {
             let contentTypeHeaderName = findHeaderName(Client._contentType, init.headers);
@@ -149,7 +149,7 @@ export default class Client extends EventEmitter {
                     init.body = JSON.stringify(init.body);
                 }
             } else if (contentType.includes(Client._urlencodedContentType)) {
-                init.body = qs.stringify(init.body);
+                init.body = objectToUrlParams(init.body);
             }
         }
 
