@@ -3,7 +3,7 @@ import {withAuthGate} from '@ringcentral/react';
 import {sdk} from './lib';
 
 const Login = ({authError, loginUrl, authorizing}: any) => {
-    if (authorizing) return <div>Loading...</div>;
+    if (authorizing) {return <div>Loading...</div>;}
 
     const login = () => window.location.assign(loginUrl({implicit: true}));
 

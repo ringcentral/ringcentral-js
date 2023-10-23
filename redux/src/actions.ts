@@ -13,7 +13,7 @@ export default class Actions {
     }
 
     public login = query => {
-        if (query.error_description) return this.authError(new Error(query.error_description));
+        if (query.error_description) {return this.authError(new Error(query.error_description));}
         this.sdk.login(query); // we ignore promise result because we listen to all events already
         return {type: LOGIN};
     };

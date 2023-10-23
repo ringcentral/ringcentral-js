@@ -4,4 +4,4 @@ import Router from './Router';
 
 render(<Router />, document.getElementById('app'));
 
-if (module.hot) module.hot.accept();
+if (module.hot) {module.hot.accept();}

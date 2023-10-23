@@ -7,7 +7,7 @@ fetchMock.config.fallbackToNetwork = true;
 export function apiCall(method, path, json, status = 200, statusText = 'OK', headers = null) {
     const isJson = typeof json !== 'string';
 
-    if (isJson && !headers) headers = {'Content-Type': 'application/json'};
+    if (isJson && !headers) {headers = {'Content-Type': 'application/json'};}
 
     fetchMock.mock({
         method,

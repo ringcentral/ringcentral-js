@@ -6,8 +6,8 @@ import Externals from '../core/Externals';
 function findHeaderName(name, headers) {
     name = name.toLowerCase();
     return Object.keys(headers).reduce((res, key) => {
-        if (res) return res;
-        if (name === key.toLowerCase()) return key;
+        if (res) {return res;}
+        if (name === key.toLowerCase()) {return key;}
         return res;
     }, null);
 }
@@ -75,7 +75,7 @@ export default class Client extends EventEmitter {
 
             response = await this._loadResponse(request);
 
-            if (!response.ok) throw new Error('Response has unsuccessful status');
+            if (!response.ok) {throw new Error('Response has unsuccessful status');}
 
             this.emit(this.events.requestSuccess, response, request);
 
@@ -113,8 +113,8 @@ export default class Client extends EventEmitter {
         init.headers = init.headers || {};
 
         // Sanity checks
-        if (!init.url) throw new Error('Url is not defined');
-        if (!init.method) init.method = 'GET';
+        if (!init.url) {throw new Error('Url is not defined');}
+        if (!init.method) {init.method = 'GET';}
         init.method = init.method.toUpperCase();
         if (init.method && Client._allowedMethods.indexOf(init.method) < 0) {
             throw new Error(`Method has wrong value: ${init.method}`);
@@ -183,13 +183,13 @@ export default class Client extends EventEmitter {
     }
 
     public async multipart(response: Response): Promise<Response[]> {
-        if (!this.isMultipart(response)) throw new Error('Response is not multipart');
+        if (!this.isMultipart(response)) {throw new Error('Response is not multipart');}
 
         // Step 1. Split multipart response
 
         const text = await response.text();
 
-        if (!text) throw new Error('No response body');
+        if (!text) {throw new Error('No response body');}
 
         let boundary;
 
@@ -199,14 +199,14 @@ export default class Client extends EventEmitter {
             throw new Error('Cannot find boundary');
         }
 
-        if (!boundary) throw new Error('Cannot find boundary');
+        if (!boundary) {throw new Error('Cannot find boundary');}
 
         const parts = text.toString().split(Client._boundarySeparator + boundary);
 
-        if (parts[0].trim() === '') parts.shift();
-        if (parts[parts.length - 1].trim() === Client._boundarySeparator) parts.pop();
+        if (parts[0].trim() === '') {parts.shift();}
+        if (parts[parts.length - 1].trim() === Client._boundarySeparator) {parts.pop();}
 
-        if (parts.length < 1) throw new Error('No parts in body');
+        if (parts.length < 1) {throw new Error('No parts in body');}
 
         // Step 2. Parse status info
 
@@ -234,7 +234,7 @@ export default class Client extends EventEmitter {
             const key = split.shift().trim();
             const value = split.join(Client._headerSeparator).trim();
 
-            if (key) headers.append(key, value);
+            if (key) {headers.append(key, value);}
         });
 
         return new this._externals.Response(text, {
@@ -245,16 +245,16 @@ export default class Client extends EventEmitter {
     }
 
     public async error(response: Response, skipOKCheck = false): Promise<string> {
-        if (response.ok && !skipOKCheck) return null;
+        if (response.ok && !skipOKCheck) {return null;}
 
         let msg = (response.status ? `${response.status} ` : '') + (response.statusText ? response.statusText : '');
 
         try {
             const {message, error_description, description} = await response.clone().json();
 
-            if (message) msg = message;
-            if (error_description) msg = error_description;
-            if (description) msg = description;
+            if (message) {msg = message;}
+            if (error_description) {msg = error_description;}
+            if (description) {msg = description;}
         } catch (e) {} //eslint-disable-line
 
         return msg;

@@ -1,5 +1,9 @@
 import PubNubDefault from 'pubnub';
-import {SDK, ApiError} from '@ringcentral/sdk';
+
+import {
+    ApiError,
+    SDK,
+} from '@ringcentral/sdk';
 
 // detect ISO 8601 format string with +00[:00] timezone notations
 const ISO_REG_EXP = /(\+[\d]{2}):?([\d]{2})?$/;
@@ -98,7 +102,7 @@ export default class Subscription extends SDK.EventEmitter {
     }
 
     public expired() {
-        if (!this.subscribed()) return true;
+        if (!this.subscribed()) {return true;}
         return !this.subscribed() || Date.now() > parseISOString(this.subscription().expirationTime);
     }
 
@@ -140,18 +144,18 @@ export default class Subscription extends SDK.EventEmitter {
         return this.subscription().eventFilters || [];
     }
 
-    public addEventFilters(events: string[]) {
-        this.setEventFilters(this.eventFilters().concat(events));
+    public addEventFilters(eventFilters: string[]) {
+        this.setEventFilters(this.eventFilters().concat(eventFilters));
         return this;
     }
 
     /**
-     * @param {string[]} events
+     * @param {string[]} eventFilters
      * @return {Subscription}
      */
-    public setEventFilters(events) {
+    public setEventFilters(eventFilters) {
         const subscription = this.subscription();
-        subscription.eventFilters = events;
+        subscription.eventFilters = eventFilters;
         this._setSubscription(subscription);
         return this;
     }
@@ -160,7 +164,7 @@ export default class Subscription extends SDK.EventEmitter {
         try {
             this._clearTimeout();
 
-            if (!this.eventFilters().length) throw new Error('Events are undefined');
+            if (!this.eventFilters().length) {throw new Error('Events are undefined');}
 
             const response = await this._sdk.platform().post('/restapi/v1.0/subscription', {
                 eventFilters: this._getFullEventFilters(),
@@ -187,9 +191,9 @@ export default class Subscription extends SDK.EventEmitter {
         try {
             this._clearTimeout();
 
-            if (!this.subscribed()) throw new Error('No subscription');
+            if (!this.subscribed()) {throw new Error('No subscription');}
 
-            if (!this.eventFilters().length) throw new Error('Events are undefined');
+            if (!this.eventFilters().length) {throw new Error('Events are undefined');}
 
             const response = await this._sdk.platform().put(`/restapi/v1.0/subscription/${this.subscription().id}`, {
                 eventFilters: this._getFullEventFilters(),
@@ -211,7 +215,7 @@ export default class Subscription extends SDK.EventEmitter {
 
     public async remove(): Promise<Response> {
         try {
-            if (!this.subscribed()) throw new Error('No subscription');
+            if (!this.subscribed()) {throw new Error('No subscription');}
 
             const response = await this._sdk.platform().delete(`/restapi/v1.0/subscription/${this.subscription().id}`);
 
@@ -264,7 +268,7 @@ export default class Subscription extends SDK.EventEmitter {
 
     private async _automaticRenewHandler() {
         try {
-            if (this.alive()) return;
+            if (this.alive()) {return;}
 
             this._clearTimeout();
 
@@ -283,7 +287,7 @@ export default class Subscription extends SDK.EventEmitter {
     public _setTimeout() {
         this._clearTimeout();
 
-        if (!this.alive()) throw new Error('Subscription is not alive');
+        if (!this.alive()) {throw new Error('Subscription is not alive');}
 
         this._timeout = setInterval(async () => {
             if (!this._automaticRenewPromise) {
@@ -311,7 +315,7 @@ export default class Subscription extends SDK.EventEmitter {
     }
 
     public _decrypt(message) {
-        if (!this.subscribed()) throw new Error('No subscription');
+        if (!this.subscribed()) {throw new Error('No subscription');}
 
         if (this.subscription().deliveryMode.encryptionKey) {
             //FIXME decrypt is not described in DTS
@@ -332,7 +336,7 @@ export default class Subscription extends SDK.EventEmitter {
     }
 
     private _subscribeAtPubNub() {
-        if (!this.alive()) throw new Error('Subscription is not alive');
+        if (!this.alive()) {throw new Error('Subscription is not alive');}
 
         const {address, subscriberKey} = this.subscription().deliveryMode;
 
@@ -375,7 +379,7 @@ export default class Subscription extends SDK.EventEmitter {
     }
 
     private _unsubscribeAtPubNub() {
-        if (!this.subscribed() || !this._pubnub) return this;
+        if (!this.subscribed() || !this._pubnub) {return this;}
 
         this._pubnub.unsubscribeAll();
         this._pubnub.removeAllListeners();

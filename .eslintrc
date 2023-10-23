@@ -5,16 +5,21 @@
   "rules": {
     "import/default": "off",
     "import/no-unresolved": "off", // to capture direct deps in TS
+    "import/no-default-export": "off",
     "no-dupe-class-members": "off", // to enable TS overload
     "no-undef": "off", //FIXME @see https://github.com/eslint/typescript-eslint-parser/issues/75
     "import/named": "off", //FIXME @see https://github.com/eslint/typescript-eslint-parser/issues/75
     "no-unused-expressions": "off", // tests
     "react/sort-comp": "off",
     "react/prop-types": "off",
+    "prefer-const": "warn",
+    "sonarjs/no-nested-template-literals": "off",
+    "ringcentral/specified-comment-with-task-id": "off",
     "@typescript-eslint/camelcase": "off", // OAuth responses
     "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-var-requires": "off" // conditional require in Externals
   },
   "env": {
