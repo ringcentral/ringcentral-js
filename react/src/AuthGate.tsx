@@ -6,7 +6,7 @@ function getDisplayName(WrappedComponent) {
     return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }
 
-const delay = () => new Promise(res => setImmediate(res));
+const delay = () => new Promise(res => setTimeout(res, 0));
 
 export interface AuthGateState {
     isAuthorized: boolean;
