@@ -9,6 +9,7 @@
     "start:quick": "dotenv lerna run start -- --parallel",
     "build": "lerna run build --concurrency=1 --stream",
     "test": "lerna run test --concurrency=1 --stream",
+    "test:browser": "lerna run jest:browser --concurrency=1 --stream",
     "test:coverage": "lerna run test:coverage --concurrency=1 --stream",
     "publish:release": "lerna publish --tag-version-prefix=\"\" --force-publish=* --no-push --no-git-tag-version",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix",
