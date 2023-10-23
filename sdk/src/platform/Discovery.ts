@@ -124,16 +124,16 @@ export default class Discovery extends EventEmitter {
     private _externalFetchPromise?: Promise<ExternalDiscoveryData>;
     private _externalRefreshPromise?: Promise<void>;
 
-    private _initialized: boolean = false;
+    private _initialized = false;
 
     private _refreshHandicapMs: number;
     private _refreshDelayMs: number;
 
-    private _initialRetryCount: number = 0;
+    private _initialRetryCount = 0;
     private _initialRetryMaxCount: number;
     private _initialRetryInterval: number;
 
-    private _externalRetryCount: number = 0;
+    private _externalRetryCount = 0;
     private _externalRetryMaxCount: number;
     private _externalRetryInterval: number;
     private _externalRetryCycleTimeout?: ReturnType<typeof setTimeout> = null;
@@ -344,7 +344,7 @@ export default class Discovery extends EventEmitter {
         }
         await this._cache.setItem(this._externalCacheId, {
             ...newData,
-            expireTime: expireTime,
+            expireTime,
         });
     }
 

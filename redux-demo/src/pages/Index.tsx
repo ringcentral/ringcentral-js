@@ -31,9 +31,9 @@ class Index extends Component<any, IndexState> {
     public render() {
         const {error, user} = this.state;
 
-        if (error) return <div>Error: {error.toString()}</div>;
+        if (error) {return <div>Error: {error.toString()}</div>;}
 
-        if (!user) return <div>Loading...</div>;
+        if (!user) {return <div>Loading...</div>;}
 
         return (
             <div>

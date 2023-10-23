@@ -1,4 +1,7 @@
-import {createHash, randomBytes} from 'crypto';
+import {
+    createHash,
+    randomBytes,
+} from 'crypto';
 import {EventEmitter} from 'events';
 
 import Cache from '../core/Cache';
@@ -35,7 +38,7 @@ function encodeURIComponentWithUndefined(value) {
 }
 
 function objectToUrlParams(obj) {
-    const queryString = Object.keys(obj)
+    return Object.keys(obj)
         .map(key => {
             if (Array.isArray(obj[key])) {
                 return obj[key]
@@ -45,7 +48,6 @@ function objectToUrlParams(obj) {
             return encodeURIComponent(key) + '=' + encodeURIComponentWithUndefined(obj[key]);
         })
         .join('&');
-    return queryString;
 }
 
 export default class Platform extends EventEmitter {
@@ -220,11 +222,11 @@ export default class Platform extends EventEmitter {
             }
         }
 
-        if (this._urlPrefix) builtUrl += this._urlPrefix;
+        if (this._urlPrefix) {builtUrl += this._urlPrefix;}
 
         builtUrl += path;
 
-        if (options.addMethod) builtUrl += `${path.includes('?') ? '&' : '?'}_method=${options.addMethod}`;
+        if (options.addMethod) {builtUrl += `${path.includes('?') ? '&' : '?'}_method=${options.addMethod}`;}
 
         return builtUrl;
     }
@@ -281,7 +283,7 @@ export default class Platform extends EventEmitter {
         responseHint,
         redirectUri,
     }: LoginUrlOptions = {}) {
-        let query: AuthorizationQuery = {
+        const query: AuthorizationQuery = {
             response_type: implicit ? 'token' : 'code',
             redirect_uri: redirectUri ? redirectUri : this._redirectUri,
             client_id: this._clientId,
@@ -341,10 +343,10 @@ export default class Platform extends EventEmitter {
         const response =
             (url.startsWith('#') && getParts(url, '#')) || (url.startsWith('?') && getParts(url, '?')) || null;
 
-        if (!response) throw new Error('Unable to parse response');
+        if (!response) {throw new Error('Unable to parse response');}
 
         const queryString = new URLSearchParams(response);
-        if (!queryString) throw new Error('Unable to parse response');
+        if (!queryString) {throw new Error('Unable to parse response');}
 
         const error = queryString.get('error_description') || queryString.get('error');
 
@@ -373,9 +375,9 @@ export default class Platform extends EventEmitter {
         // clear check last timeout when user open loginWindow twice to avoid leak
         this._clearLoginWindowCheckTimeout();
         return new Promise((resolve, reject) => {
-            if (typeof window === 'undefined') throw new Error('This method can be used only in browser');
+            if (typeof window === 'undefined') {throw new Error('This method can be used only in browser');}
 
-            if (!url) throw new Error('Missing mandatory URL parameter');
+            if (!url) {throw new Error('Missing mandatory URL parameter');}
 
             const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : 0;
             const dualScreenTop = window.screenTop !== undefined ? window.screenTop : 0;
@@ -398,15 +400,15 @@ export default class Platform extends EventEmitter {
                 throw new Error('Could not open login window. Please allow popups for this site');
             }
 
-            if (win.focus) win.focus();
+            if (win.focus) {win.focus();}
             // clear listener when user open loginWindow twice to avoid leak
             if (this._loginWindowEventListener) {
                 window.removeEventListener('message', this._loginWindowEventListener);
             }
             this._loginWindowEventListener = e => {
                 try {
-                    if (e.origin !== origin) return;
-                    if (!e.data || !e.data[property]) return; // keep waiting
+                    if (e.origin !== origin) {return;}
+                    if (!e.data || !e.data[property]) {return;} // keep waiting
                     this._clearLoginWindowCheckTimeout();
                     win.close();
                     window.removeEventListener('message', this._loginWindowEventListener);
@@ -414,11 +416,11 @@ export default class Platform extends EventEmitter {
                     const loginOptions = this.parseLoginRedirect(e.data[property]);
 
                     if (!loginOptions.code && !loginOptions.access_token)
-                        throw new Error('No authorization code or token');
+                        {throw new Error('No authorization code or token');}
 
                     resolve(loginOptions);
-                } catch (e) {
-                    reject(e);
+                } catch (e1) {
+                    reject(e1);
                 }
             };
             window.addEventListener('message', this._loginWindowEventListener, false);
@@ -525,9 +527,9 @@ export default class Platform extends EventEmitter {
                     }
                 }
 
-                if (access_token_ttl) body.access_token_ttl = access_token_ttl;
-                if (refresh_token_ttl) body.refresh_token_ttl = refresh_token_ttl;
-                if (endpoint_id) body.endpoint_id = endpoint_id;
+                if (access_token_ttl) {body.access_token_ttl = access_token_ttl;}
+                if (refresh_token_ttl) {body.refresh_token_ttl = refresh_token_ttl;}
+                if (endpoint_id) {body.endpoint_id = endpoint_id;}
                 response = await this._tokenRequest(tokenEndpoint, body);
 
                 json = await response.clone().json();
@@ -593,9 +595,9 @@ export default class Platform extends EventEmitter {
             const authData = await this.auth().data();
 
             // Perform sanity checks
-            if (!authData.refresh_token) throw new Error('Refresh token is missing');
+            if (!authData.refresh_token) {throw new Error('Refresh token is missing');}
             const refreshTokenValid = await this._auth.refreshTokenValid();
-            if (!refreshTokenValid) throw new Error('Refresh token has expired');
+            if (!refreshTokenValid) {throw new Error('Refresh token has expired');}
             const body: RefreshTokenBody = {
                 grant_type: 'refresh_token',
                 refresh_token: authData.refresh_token,
@@ -717,12 +719,12 @@ export default class Platform extends EventEmitter {
         }
         request.headers.set('X-User-Agent', userAgent);
 
-        if (options.skipAuthCheck) return request;
+        if (options.skipAuthCheck) {return request;}
 
         await this.ensureLoggedIn();
 
         request.headers.set('Client-Id', this._clientId);
-        if (!this._authProxy) request.headers.set('Authorization', await this.authHeader());
+        if (!this._authProxy) {request.headers.set('Authorization', await this.authHeader());}
 
         return request;
     }
@@ -735,13 +737,13 @@ export default class Platform extends EventEmitter {
             let {retry, handleRateLimit} = options;
 
             // Guard is for errors that come from polling
-            if (!e.response || retry) throw e;
+            if (!e.response || retry) {throw e;}
 
             const {response} = e;
             const {status} = response;
 
             if ((status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) || this._authProxy)
-                throw e;
+                {throw e;}
 
             options.retry = true;
 
@@ -764,7 +766,7 @@ export default class Platform extends EventEmitter {
 
                 this.emit(this.events.rateLimitError, e);
 
-                if (!handleRateLimit) throw e;
+                if (!handleRateLimit) {throw e;}
             }
 
             await delay(retryAfter);
@@ -819,14 +821,14 @@ export default class Platform extends EventEmitter {
     }
 
     public async ensureLoggedIn(): Promise<Response | null> {
-        if (this._authProxy) return null;
-        if (await this._auth.accessTokenValid()) return null;
+        if (this._authProxy) {return null;}
+        if (await this._auth.accessTokenValid()) {return null;}
         await this.refresh();
         return null;
     }
 
     protected async _tokenRequest(url, body): Promise<Response> {
-        let headers: TokenRequestHeaders = {
+        const headers: TokenRequestHeaders = {
             'Content-Type': Client._urlencodedContentType,
         };
         if (this._clientSecret && this._clientSecret.length > 0) {

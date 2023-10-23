@@ -1,10 +1,16 @@
-import {createLogger} from 'redux-logger';
-import {applyMiddleware, createStore as createReduxStore, combineReducers, Store} from 'redux';
+import {
+    applyMiddleware,
+    combineReducers,
+    createStore as createReduxStore,
+} from 'redux';
 import locationHelperBuilder from 'redux-auth-wrapper/history4/locationHelper';
 import {connectedRouterRedirect} from 'redux-auth-wrapper/history4/redirect';
-import SDK from '@ringcentral/sdk';
+import {createLogger} from 'redux-logger';
+
 import StoreConnector from '@ringcentral/redux';
-import {version} from '../package.json';
+import SDK from '@ringcentral/sdk';
+
+import packageJSON from '../package.json';
 
 const locationHelper = locationHelperBuilder({});
 
@@ -14,7 +20,7 @@ export const redirectUri = window.location.origin + redirectPath;
 
 export const sdk = new SDK({
     appName: 'ReduxDemo',
-    appVersion: version,
+    appVersion: packageJSON.version,
     server: process.env.REACT_APP_API_SERVER,
     clientId: process.env.REACT_APP_API_CLIENT_ID,
     redirectUri,

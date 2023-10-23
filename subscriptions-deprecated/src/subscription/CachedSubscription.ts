@@ -6,7 +6,7 @@ export default class CachedSubscription extends Subscription {
     public constructor({sdk, PubNub, cacheKey, pollInterval, renewHandicapMs}: CachedSubscriptionOptionsConstructor) {
         super({sdk, PubNub, pollInterval, renewHandicapMs});
 
-        if (!cacheKey) throw new Error('Cached Subscription requires cacheKey parameter to be defined');
+        if (!cacheKey) {throw new Error('Cached Subscription requires cacheKey parameter to be defined');}
 
         this._cacheKey = cacheKey;
     }

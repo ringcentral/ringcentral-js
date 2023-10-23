@@ -8,4 +8,4 @@ const store = createStore();
 
 render(<Router store={store} storeConnector={storeConnector} />, rootEl);
 
-if (module.hot) module.hot.accept();
+if (module.hot) {module.hot.accept();}

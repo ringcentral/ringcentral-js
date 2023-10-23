@@ -37,7 +37,7 @@ export default class Cache {
 
     public getItemSync(key) {
         const item = this._externals.localStorage.getItem(this._prefixKey(key));
-        if (!item) return null;
+        if (!item) {return null;}
         return JSON.parse(item);
     }
 

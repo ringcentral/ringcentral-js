@@ -1,5 +1,7 @@
-import {apiCall} from '@ringcentral/sdk/lib/test/test';
 import PubNub from 'pubnub';
+
+import {apiCall} from '@ringcentral/sdk/src/test/test';
+
 import {Subscriptions} from '../Subscriptions';
 
 class PubNubMock extends PubNub {
@@ -29,8 +31,8 @@ export function subscribeGeneric(expiresIn = 15 * 60 * 60, id = null, remove = f
     const date = new Date();
 
     let method = 'POST';
-    if (id) method = 'PUT';
-    if (remove) method = 'DELETE';
+    if (id) {method = 'PUT';}
+    if (remove) {method = 'DELETE';}
 
     let expirationTime = new Date(date.getTime() + expiresIn * 1000).toISOString();
     if (timeZoneString) {

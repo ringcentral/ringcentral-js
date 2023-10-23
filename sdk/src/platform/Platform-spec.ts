@@ -1121,7 +1121,7 @@ describe('RingCentral.platform.Platform', () => {
             apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', {description: 'Fail'}, 500);
             apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', {description: 'Fail'}, 500);
             apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', {description: 'Fail'}, 500);
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             const requestErrorSpy = spy(() => {});
             sdk.client().on(sdk.client().events.requestError, requestErrorSpy);
@@ -1147,7 +1147,7 @@ describe('RingCentral.platform.Platform', () => {
         it('should fetch initial discovery on loginUrlWithDiscovery', async () => {
             const initialDiscoveryData = getInitialDiscoveryMockData();
             apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             expect(
                 (await platform.loginUrlWithDiscovery()).indexOf(initialDiscoveryData.authApi.authorizationUri),
@@ -1157,7 +1157,7 @@ describe('RingCentral.platform.Platform', () => {
         it('should not throw error when fetch initial discovery error with cache data on loginUrlWithDiscovery', async function() {
             const initialDiscoveryData = getInitialDiscoveryMockData();
             apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             if (platform.discoveryInitPromise) {
                 await platform.discoveryInitPromise;
@@ -1173,7 +1173,7 @@ describe('RingCentral.platform.Platform', () => {
         it('should throw error when fetch initial discovery error without cache data on loginUrlWithDiscovery', async function() {
             const initialDiscoveryData = getInitialDiscoveryMockData();
             apiCall('GET', '/.well-known/entry-points/initial?clientId=whatever', initialDiscoveryData);
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             if (platform.discoveryInitPromise) {
                 await platform.discoveryInitPromise;
@@ -1199,7 +1199,7 @@ describe('RingCentral.platform.Platform', () => {
             apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
             authentication();
 
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             await platform.login({
                 code: 'whatever',
@@ -1219,7 +1219,7 @@ describe('RingCentral.platform.Platform', () => {
             apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
             authentication();
 
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             await platform.login({
                 code: 'whatever',
@@ -1239,7 +1239,7 @@ describe('RingCentral.platform.Platform', () => {
             apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
             authentication();
 
-            const sdk = createSdk({
+            sdk = createSdk({
                 enableDiscovery: true,
                 discoveryServer: 'http://whatever',
                 discoveryAutoInit: false,
@@ -1262,7 +1262,7 @@ describe('RingCentral.platform.Platform', () => {
             apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
             authentication();
 
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             await platform.login({code: 'whatever'});
             const externalData = await platform.discovery().externalData();
@@ -1279,7 +1279,7 @@ describe('RingCentral.platform.Platform', () => {
             apiCall('GET', '/.well-known/entry-points/external', externalDiscoveryData);
             authentication();
 
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             await platform.login({
                 code: 'whatever',
@@ -1301,7 +1301,7 @@ describe('RingCentral.platform.Platform', () => {
             apiCall('GET', '/.well-known/entry-points/external', null, 500);
             authentication();
 
-            const sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
+            sdk = createSdk({enableDiscovery: true, discoveryServer: 'http://whatever', server: ''});
             const platform = sdk.platform();
             const clientFetchErrorSpy = spy(() => {});
             sdk.client().on(sdk.client().events.requestError, clientFetchErrorSpy);

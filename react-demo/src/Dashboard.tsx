@@ -22,8 +22,8 @@ export default class Dashboard extends Component<any, DashboardState> {
 
     public render() {
         const {error, user} = this.state;
-        if (error) return <div>{error}</div>;
-        if (!user) return <div>Loading</div>;
+        if (error) {return <div>{error}</div>;}
+        if (!user) {return <div>Loading</div>;}
         return <pre>{JSON.stringify(user, null, 2)}</pre>;
     }
 }

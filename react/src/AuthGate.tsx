@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
+
 import {SDK} from '@ringcentral/sdk';
 
 function getDisplayName(WrappedComponent) {
     return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }
 
-const delay = () => new Promise(res => setImmediate(res));
+const delay = () => new Promise(res => setTimeout(res, 0));
 
 export interface AuthGateState {
     isAuthorized: boolean;
@@ -30,6 +31,11 @@ export class AuthGate extends Component<AuthGateProps, AuthGateState> {
         isAuthorized: false,
         authorizing: true,
         authError: null,
+    };
+
+    // default props
+    public static defaultProps = {
+        ensure: false,
     };
 
     /**
@@ -93,7 +99,7 @@ export class AuthGate extends Component<AuthGateProps, AuthGateState> {
         try {
             const platform = this.props.sdk.platform();
             const loginOptions = platform.parseLoginRedirect(search);
-            if (!loginOptions.code && !loginOptions.access_token) throw new Error('No authorization information');
+            if (!loginOptions.code && !loginOptions.access_token) {throw new Error('No authorization information');}
             return platform.login(loginOptions);
         } catch (e) {
             await this.error(e);

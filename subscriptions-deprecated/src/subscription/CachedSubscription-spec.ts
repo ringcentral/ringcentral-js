@@ -1,4 +1,4 @@
-import {asyncTest, expect} from '@ringcentral/sdk/lib/test/test';
+import {asyncTest, expect} from '@ringcentral/sdk/src/test/test';
 
 import {createSubscriptions} from '../test/test';
 

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "clean": "rimraf build",
-    "start": "PORT=$REACT_DEMO_PORT SKIP_PREFLIGHT_CHECK=true react-scripts start"
+    "start": "PORT=$REACT_DEMO_PORT SKIP_PREFLIGHT_CHECK=true react-app-rewired start"
   },
   "dependencies": {
     "@ringcentral/react": "*",
@@ -20,7 +20,11 @@
     "@types/react-dom": "^16.9.8",
     "@types/react-router-dom": "^5.3.3",
     "@types/webpack-env": "^1.13.6",
-    "react-scripts": "^2.1.3",
+    "crypto-browserify": "^3.12.0",
+    "querystring-es3": "^0.2.1",
+    "stream-browserify": "^3.0.0",
+    "react-scripts": "^5.0.1",
+    "react-app-rewired": "^2.2.1",
     "rimraf": "^2.6.2"
   },
   "browserslist": [

@@ -9,7 +9,7 @@ export interface LoginProps extends RouteComponentProps {
     error: null | Error;
 }
 
-let Login: FunctionComponent<LoginProps> = ({error, location: {pathname, search, hash}}) => {
+const Login: FunctionComponent<LoginProps> = ({error, location: {pathname, search, hash}}) => {
     const query = sdk.parseLoginRedirect(search || hash);
 
     // code is defined in redirect from OAuth
