@@ -1,33 +1,23 @@
 # Builds
 
+Node.js >= 16
+
 ```
 $ npm run build
-$ npm run watch
 ```
 
 # Tests
 
-## Full test
+## Full test (NodeJS)
 
 ```
 $ npm test
 ```
 
-## Mocha (NodeJS)
+## Jest with jsdom (browser)
 
 ```
-$ npm run mocha
-$ npm run mocha-watch
-$ npm run istanbul
-```
-
-## Karma (browser)
-
-```
-$ npm run karma
-$ npm run karma-watch
-$ npm run karma-webpack
-$ npm run karma-webpack-watch
+$ npm run test:browser
 ```
 
 ***
@@ -73,7 +63,7 @@ The way it should be done:
 
 ***
 
-# API Tests 
+# API Tests
 
 These tests access real account on real production/staging servers. In order to make things happen a proper environment
 variables have to be defined:
@@ -114,14 +104,14 @@ $ RCSDK_API_KEY=YOUR_API_KEY (...) RCSDK_AGS_DBNAME=database npm run test-api
     ```
     This command will run `lerna version prerelease` to update versions and push to git with appropriate tag, tag will
     be picked up by CI and actual publish will happen (`lerna publish`).
-    
+
 3. *Versioned release*:
     ```bash
     $ npm run prepare:release [-- --yes --no-git-tag-version --no-push]
     ```
     This command will run `lerna version` to update versions and push to git with appropriate tag, tag will be picked up
     by CI and actual publish will happen (`lerna publish`).
-    
+
 4. *Manual publish* — run publishing locally, it assumes you already prepared your release:
     ```bash
     $ npm run publish:fromgit
