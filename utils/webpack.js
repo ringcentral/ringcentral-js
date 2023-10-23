@@ -1,7 +1,7 @@
 function createConfig({entry, filename, outputPath, libraryName, externals}) {
     const common = {
         mode: 'production',
-        devtool: '#source-map',
+        devtool: 'source-map',
         entry,
         module: {
             rules: [
@@ -14,6 +14,17 @@ function createConfig({entry, filename, outputPath, libraryName, externals}) {
         },
         resolve: {
             extensions: ['.tsx', '.ts', '.js'],
+            fallback: {
+                crypto: require.resolve('crypto-browserify'),
+                stream: require.resolve('stream-browserify'),
+                vm: require.resolve('vm-browserify'),
+                process: require.resolve('process/browser'),
+                buffer: require.resolve('buffer'),
+                events: require.resolve('events'),
+                path: require.resolve('path-browserify'),
+                querystring: require.resolve('querystring-es3'),
+                url: require.resolve('url'),
+            },
         },
         output: {
             path: outputPath,

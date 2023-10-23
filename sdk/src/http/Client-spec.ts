@@ -13,9 +13,9 @@ describe('RingCentral.http.Client', () => {
             asyncTest(sdk => {
                 const request = sdk.client().createRequest({url: 'http://foo/bar', query: {foo: 'foo'}});
 
-                expect(request.headers.get('Content-Type')).to.equal('application/json');
-                expect(request.url).to.equal('http://foo/bar?foo=foo');
-                expect(request.method).to.equal('GET');
+                expect(request.headers.get('Content-Type')).toEqual('application/json');
+                expect(request.url).toEqual('http://foo/bar?foo=foo');
+                expect(request.method).toEqual('GET');
             }),
         );
 
@@ -24,10 +24,10 @@ describe('RingCentral.http.Client', () => {
             asyncTest(sdk => {
                 const request = sdk.client().createRequest({url: 'http://foo/bar', method: 'POST', body: {foo: 'bar'}});
 
-                expect(request.headers.get('Content-Type')).to.equal('application/json');
-                expect(request.url).to.equal('http://foo/bar');
-                expect(request.method).to.equal('POST');
-                expect(request['originalBody']).to.equal(JSON.stringify({foo: 'bar'}));
+                expect(request.headers.get('Content-Type')).toEqual('application/json');
+                expect(request.url).toEqual('http://foo/bar');
+                expect(request.method).toEqual('POST');
+                expect(request['originalBody']).toEqual(JSON.stringify({foo: 'bar'}));
             }),
         );
 
@@ -36,7 +36,7 @@ describe('RingCentral.http.Client', () => {
             asyncTest(sdk => {
                 expect(() => {
                     sdk.client().createRequest({url: 'http://foo/bar', method: 'foo'});
-                }).to.throw();
+                }).toThrow();
             }),
         );
     });
@@ -125,7 +125,7 @@ describe('RingCentral.http.Client', () => {
             'parses OK headers into object',
             asyncTest(async sdk => {
                 const res = await createResponse(sdk, '{}', 200, 'OK', jsonResponseHeaders);
-                expect(sdk.client().isJson(res)).to.equal(true);
+                expect(sdk.client().isJson(res)).toEqual(true);
             }),
         );
 
@@ -133,7 +133,7 @@ describe('RingCentral.http.Client', () => {
             'parses Multi-Status headers into object',
             asyncTest(async sdk => {
                 const res = await createResponse(sdk, '{}', 207, 'Multi-Status', multipartResponseHeaders);
-                expect(sdk.client().isMultipart(res)).to.equal(true);
+                expect(sdk.client().isMultipart(res)).toEqual(true);
             }),
         );
     });
@@ -166,15 +166,15 @@ describe('RingCentral.http.Client', () => {
 
                 const multipart = await sdk.client().multipart(res);
 
-                expect(multipart.length).to.equal(3);
+                expect(multipart.length).toEqual(3);
 
-                expect((await multipart[0].json()).foo).to.be.equal('bar');
-                expect(multipart[0].status).to.be.equal(200);
+                expect((await multipart[0].json()).foo).toEqual('bar');
+                expect(multipart[0].status).toEqual(200);
 
-                expect(sdk.client().error(multipart[1])).to.be.not.equal(null); //FIXME
+                expect(sdk.client().error(multipart[1])).not.toEqual(null); //FIXME
 
-                expect((await multipart[2].json()).baz).to.be.equal('qux');
-                expect(multipart[2].status).to.be.equal(200);
+                expect((await multipart[2].json()).baz).toEqual('qux');
+                expect(multipart[2].status).toEqual(200);
             }),
         );
 
@@ -261,7 +261,7 @@ describe('RingCentral.http.Client', () => {
             'returns an array with self if not multipart',
             asyncTest(async sdk => {
                 const res = await createResponse(sdk, '{}', 200, 'OK', jsonResponseHeaders);
-                expect((await sdk.client().toMultipart(res))[0]).to.equal(res);
+                expect((await sdk.client().toMultipart(res))[0]).toEqual(res);
             }),
         );
     });

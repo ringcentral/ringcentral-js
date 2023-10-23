@@ -1,44 +1,41 @@
 import {expect, SDK, spy} from './test/test';
 
 describe('RingCentral.SDK', () => {
-    // TODO: gzip content is not supported by Karma. Need to migrate karma (deprecated) to other framework
-    // it('connects to sandbox', async function theTest() {
-    //     this.timeout(20000);
-    //     const server = SDK.server.sandbox;
-    //     const sdk = new SDK({
-    //         server,
-    //         clientId: '',
-    //         clientSecret: '',
-    //     });
+    it('connects to sandbox', async function theTest() {
+        const server = SDK.server.sandbox;
+        const sdk = new SDK({
+            server,
+            clientId: '',
+            clientSecret: '',
+        });
 
-    //     // sandbox's /restapi/v1.0/status triggers service overloaded very easily, but /restapi/v1.0 works fine
-    //     const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
+        // sandbox's /restapi/v1.0/status triggers service overloaded very easily, but /restapi/v1.0 works fine
+        const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
 
-    //     await sdk.cache().clean();
+        await sdk.cache().clean();
 
-    //     expect(res.status).to.equal(200);
-    // });
+        expect(res.status).toEqual(200);
+    });
 
-    // it('connects to production', async function theTest() {
-    //     this.timeout(20000);
-    //     const server = SDK.server.production;
-    //     const sdk = new SDK({
-    //         server,
-    //         clientId: '',
-    //         clientSecret: '',
-    //     });
+    it('connects to production', async function theTest() {
+        const server = SDK.server.production;
+        const sdk = new SDK({
+            server,
+            clientId: '',
+            clientSecret: '',
+        });
 
-    //     // production's /restapi/v1.0/status triggers service overloaded very easily, but /restapi/v1.0 works fine
-    //     const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
+        // production's /restapi/v1.0/status triggers service overloaded very easily, but /restapi/v1.0 works fine
+        const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
 
-    //     await sdk.cache().clean();
+        await sdk.cache().clean();
 
-    //     expect(res.status).to.equal(200);
-    // });
+        expect(res.status).toEqual(200);
+    });
 
     it('sets rate limit', async function rateLimitTest() {
         const sdk = new SDK({handleRateLimit: 60});
-        expect(sdk.platform()['_handleRateLimit']).to.equal(60);
+        expect(sdk.platform()['_handleRateLimit']).toEqual(60);
     });
 
     describe('handleLoginRedirect', () => {
@@ -54,8 +51,8 @@ describe('RingCentral.SDK', () => {
 
             SDK.handleLoginRedirect(null, win);
 
-            expect(s.getCalls()[0].args[0]).to.deep.equal({RCAuthorizationResponse: '#foo'});
-            expect(s.getCalls()[0].args[1]).to.equal('foo');
+            expect(s.mock.calls[0][0]).toEqual({RCAuthorizationResponse: '#foo'});
+            expect(s.mock.calls[0][1]).toEqual('foo');
         });
 
         it('handles query', () => {
@@ -68,8 +65,8 @@ describe('RingCentral.SDK', () => {
 
             SDK.handleLoginRedirect('foo', win);
 
-            expect(s.getCalls()[0].args[0]).to.deep.equal({RCAuthorizationResponse: '?foo'});
-            expect(s.getCalls()[0].args[1]).to.equal('foo');
+            expect(s.mock.calls[0][0]).toEqual({RCAuthorizationResponse: '?foo'});
+            expect(s.mock.calls[0][1]).toEqual('foo');
         });
     });
 });
