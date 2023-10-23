@@ -1,4 +1,4 @@
-import {apiCall, asyncTest, expect, expectThrows} from '@ringcentral/sdk/lib/test/test';
+import {apiCall, asyncTest, expect, expectThrows} from '@ringcentral/sdk/src/test/test';
 
 import {createSubscriptions, subscribeGeneric} from '../test/test';
 

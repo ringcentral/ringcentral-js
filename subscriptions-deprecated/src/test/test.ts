@@ -1,5 +1,7 @@
-import {apiCall} from '@ringcentral/sdk/lib/test/test';
 import PubNub from 'pubnub';
+
+import {apiCall} from '@ringcentral/sdk/src/test/test';
+
 import {Subscriptions} from '../Subscriptions';
 
 class PubNubMock extends PubNub {
