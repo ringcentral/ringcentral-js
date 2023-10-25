@@ -22,7 +22,6 @@ function createConfig({entry, filename, outputPath, libraryName, externals}) {
                 buffer: require.resolve('buffer'),
                 events: require.resolve('events'),
                 path: require.resolve('path-browserify'),
-                querystring: require.resolve('querystring-es3'),
                 url: require.resolve('url'),
             },
         },

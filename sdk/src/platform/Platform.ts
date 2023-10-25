@@ -8,6 +8,7 @@ import Cache from '../core/Cache';
 import * as Constants from '../core/Constants';
 import Externals from '../core/Externals';
 import Client, {ApiError} from '../http/Client';
+import {objectToUrlParams} from '../http/utils';
 import Auth, {AuthOptions} from './Auth';
 import Discovery from './Discovery';
 import {delay} from './utils';
@@ -31,23 +32,6 @@ export enum events {
 
 function checkPathHasHttp(path) {
     return path.startsWith('http://') || path.startsWith('https://');
-}
-
-function encodeURIComponentWithUndefined(value) {
-    return typeof value === 'undefined' ? '' : encodeURIComponent(value);
-}
-
-function objectToUrlParams(obj) {
-    return Object.keys(obj)
-        .map(key => {
-            if (Array.isArray(obj[key])) {
-                return obj[key]
-                    .map(value => encodeURIComponent(key) + '=' + encodeURIComponentWithUndefined(value))
-                    .join('&');
-            }
-            return encodeURIComponent(key) + '=' + encodeURIComponentWithUndefined(obj[key]);
-        })
-        .join('&');
 }
 
 export default class Platform extends EventEmitter {
