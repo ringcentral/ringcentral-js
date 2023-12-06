@@ -17,7 +17,7 @@
     "start:webpack": "npm run build:webpack -- --watch"
   },
   "dependencies": {
-    "pubnub": "^4.29.11"
+    "pubnub": "^7.4.0"
   },
   "devDependencies": {
     "@ringcentral/sdk": "*",
