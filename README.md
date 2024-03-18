@@ -7,32 +7,32 @@
 
 The RingCentral Javascript SDK allows developers building client and server-side javascript applications to interface with the following RingCentral APIs more easily:
 
-* [Voice](https://developer.ringcentral.com/api-products/voice)
-* [Messaging](https://developer.ringcentral.com/api-products/sms), e.g. Fax, SMS, voicemail, etc.
-* [Glip Team Messaging](https://developer.ringcentral.com/api-products/team-messaging)
-* [Call Management](https://developer.ringcentral.com/api-products/configuration)
-* [Meetings](https://developers.ringcentral.com/api-products/meetings)
+-   [Voice](https://developer.ringcentral.com/api-products/voice)
+-   [Messaging](https://developer.ringcentral.com/api-products/sms), e.g. Fax, SMS, voicemail, etc.
+-   [Glip Team Messaging](https://developer.ringcentral.com/api-products/team-messaging)
+-   [Call Management](https://developer.ringcentral.com/api-products/configuration)
+-   [Meetings](https://developers.ringcentral.com/api-products/meetings)
 
 ## What's in this repository/SDK?
 
 This SDK contains two components useful to developers. They are:
 
-- [SDK](sdk) &mdash; Main SDK package, interacts with RingCentral REST API
-- [Subscriptions SDK](subscriptions) &mdash; Additional SDK which listens to push notifications
+-   [SDK](sdk) &mdash; Main SDK package, interacts with RingCentral REST API
+-   [Subscriptions SDK](subscriptions) &mdash; Additional SDK which listens to push notifications
 
 ## Are you a first-time RingCentral Developer?
 
 If this is your first time building a RingCentral application, we recommend you get started online using our SMS Quick Start guide which will help you get up-and-running in minutes.
 
-* [Get Started Using RingCentral &raquo;](https://developers.ringcentral.com/guide/sms/quick-start)
+-   [Get Started Using RingCentral &raquo;](https://developers.ringcentral.com/guide/sms/quick-start)
 
 ## Additional Resources
 
-* [RingCentral Developer Guide](https://developer.ringcentral.com/api-reference) - a comprehensive set of tutorials to help developers build their first application and to evolve existing applications on the platform. 
+-   [RingCentral Developer Guide](https://developer.ringcentral.com/api-reference) - a comprehensive set of tutorials to help developers build their first application and to evolve existing applications on the platform.
 
-* [RingCentral API Reference](https://developer.ringcentral.com/api-reference) - an interactive reference for the RingCentral API that allows developers to make API calls with no code.
+-   [RingCentral API Reference](https://developer.ringcentral.com/api-reference) - an interactive reference for the RingCentral API that allows developers to make API calls with no code.
 
-You are viewing documentation for upcoming `4.0.0` release. Follow [this link to see 3.x.x documentation](https://github.com/ringcentral/ringcentral-js/tree/v3).  
+You are viewing documentation for upcoming `4.0.0` release. Follow [this link to see 3.x.x documentation](https://github.com/ringcentral/ringcentral-js/tree/v3).
 
 ## Running Demos in this SDK
 
@@ -46,7 +46,7 @@ DEMO_PORT=3000
 REACT_DEMO_PORT=3030
 REDUX_DEMO_PORT=3033
 
-REACT_APP_API_SERVER=https://platform.devtest.ringcentral.com
+REACT_APP_API_SERVER=https://platform.ringcentral.com
 REACT_APP_API_CLIENT_ID=XXX
 ```
 

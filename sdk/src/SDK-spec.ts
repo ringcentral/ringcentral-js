@@ -2,7 +2,7 @@ import {expect, SDK, spy} from './test/test';
 
 describe('RingCentral.SDK', () => {
     it('connects to sandbox', async function theTest() {
-        const server = SDK.server.sandbox;
+        const server = SDK.server.production;
         const sdk = new SDK({
             server,
             clientId: '',

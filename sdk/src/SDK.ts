@@ -45,7 +45,6 @@ export class SDK {
     public static EventEmitter = EventEmitter;
 
     public static server = {
-        sandbox: 'https://platform.devtest.ringcentral.com',
         production: 'https://platform.ringcentral.com',
     };
 
