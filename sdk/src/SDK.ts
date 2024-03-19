@@ -12,6 +12,7 @@ import Platform, {
     SendOptions,
 } from './platform/Platform';
 import {AuthData} from './platform/Auth';
+import {Server} from 'http';
 
 export {
     Cache,
@@ -58,7 +59,10 @@ export class SDK {
 
     public constructor(options: SDKOptions = {}) {
         const {cachePrefix, defaultRequestInit, handleRateLimit} = options;
-
+        if (options?.server === SDK.server.sandbox) {
+            // eslint-disable-next-line no-console
+            console.warn('Sandbox support is deprecated. Please migrate your application to Production Server.');
+        }
         this._externals = new Externals({
             ...defaultExternals,
             ...options,
@@ -165,8 +169,6 @@ export class SDK {
     /* istanbul ignore next */
     public error = (response: Response): Promise<string> => this.client().error(response);
 }
-// eslint-disable-next-line no-console
-console.warn('Sandbox support is deprecated. Please migrate your application to Production Server.');
 export interface SDKOptions extends PlatformOptions, ExternalsOptions {
     cachePrefix?: string;
     defaultRequestInit?: CreateRequestOptions;
