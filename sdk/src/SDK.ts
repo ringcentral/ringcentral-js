@@ -48,7 +48,6 @@ export class SDK {
         sandbox: 'https://platform.devtest.ringcentral.com',
         production: 'https://platform.ringcentral.com',
     };
-
     public static handleLoginRedirect(origin, win) {
         win = win || window;
         const response = win.location.search ? win.location.search : win.location.hash;
@@ -167,6 +166,7 @@ export class SDK {
     public error = (response: Response): Promise<string> => this.client().error(response);
 }
 
+console.warn('Sandbox support is deprecated. Please migrate your application to Production Server.');
 export interface SDKOptions extends PlatformOptions, ExternalsOptions {
     cachePrefix?: string;
     defaultRequestInit?: CreateRequestOptions;

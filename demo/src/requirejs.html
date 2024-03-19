@@ -47,8 +47,7 @@
     require(['ringcentral'], function(sdkNS) {
 
         var SDK = sdkNS;
-        var sdk = new SDK({server: SDK.server.sandbox});
-        console.warn('Sandbox support is deprecated. Please migrate your application to Production Server.');
+        var sdk = new SDK({server: SDK.server.production});
         sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true})
                 .then(function(apiResponse) { return apiResponse.json(); })
                 .then(function(data) {

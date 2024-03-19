@@ -95,10 +95,7 @@
 
         appKeyField.value = platform._clientId;
         appSecretField.value = platform._clientSecret;
-        serverField.value = platform._server || RingCentral.SDK.server.sandbox;
-        if(serverField.value === RingCentral.SDK.server.sandbox){
-            console.warn('Sandbox support is deprecated. Please migrate your application to Production Server.');
-        }
+        serverField.value = platform._server || RingCentral.SDK.server.production;
         
     }
 
