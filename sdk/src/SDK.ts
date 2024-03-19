@@ -165,7 +165,7 @@ export class SDK {
     /* istanbul ignore next */
     public error = (response: Response): Promise<string> => this.client().error(response);
 }
-
+// eslint-disable-next-line no-console
 console.warn('Sandbox support is deprecated. Please migrate your application to Production Server.');
 export interface SDKOptions extends PlatformOptions, ExternalsOptions {
     cachePrefix?: string;
