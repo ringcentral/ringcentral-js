@@ -25,20 +25,20 @@ Follow all instructions from [SDK package](../sdk).
 2. Require the SDK:
 
     ```js
-    import {SDK} from "@ringcentral/sdk";
-    import {Subscriptions} from "@ringcentral/subscriptions-deprecated";
+    import {SDK} from '@ringcentral/sdk';
+    import {Subscriptions} from '@ringcentral/subscriptions-deprecated';
     // or
     const SDK = require('ringcentral').SDK;
     const Subscriptions = require('@ringcentral/subscriptions-deprecated').Subscriptions;
 
     const sdk = new SDK({
-        server: SDK.server.sandbox,
+        server: SDK.server.production,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
-        redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
+        redirectUri: '', // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
     const subscriptions = new Subscriptions({
-       sdk: sdk
+        sdk: sdk,
     });
     ```
 
@@ -53,16 +53,17 @@ pick proper `PubNub` implementation.
 
 Pick the option that works best for you:
 
-- Use CDN **Attention! Versions listed here may be outdated**:
-    - ... all SDK dependencies
-    - https://unpkg.com/@ringcentral/sdk@latest/dist/ringcentral.js
-    - https://unpkg.com/browse/@ringcentral/subscriptions@latest/dist/ringcentral-subscriptions.js
-    - https://unpkg.com/pubnub@latest/dist/web/pubnub.js
+-   Use CDN **Attention! Versions listed here may be outdated**:
 
-- Download everything manually:
-    - ... all SDK dependencies
-    - [Subscriptions SDK](https://github.com/ringcentral/ringcentral-js/releases/download/latest)
-    - [PUBNUB](https://github.com/pubnub/javascript)
+    -   ... all SDK dependencies
+    -   https://unpkg.com/@ringcentral/sdk@latest/dist/ringcentral.js
+    -   https://unpkg.com/browse/@ringcentral/subscriptions@latest/dist/ringcentral-subscriptions.js
+    -   https://unpkg.com/pubnub@latest/dist/web/pubnub.js
+
+-   Download everything manually:
+    -   ... all SDK dependencies
+    -   [Subscriptions SDK](https://github.com/ringcentral/ringcentral-js/releases/download/latest)
+    -   [PUBNUB](https://github.com/pubnub/javascript)
 
 ### Add scripts to HTML page (if you are not using any module loaders)
 
@@ -77,18 +78,16 @@ Add the following to your HTML:
 <script type="text/javascript" src="path-to-scripts/ringcentral.js"></script>
 <script type="text/javascript" src="path-to-scripts/ringcentral-subscriptions-deprecated.js"></script>
 <script type="text/javascript">
-
     var sdk = new RingCentral.SDK({
-        server: RingCentral.SDK.server.sandbox,
+        server: RingCentral.SDK.server.production,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
-        redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
+        redirectUri: '', // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
 
     var subscriptions = new RingCentral.SubscriptionsDeprecated({
-       sdk: sdk
+        sdk: sdk,
     });
-
 </script>
 ```
 
@@ -98,22 +97,22 @@ Add the following to your HTML:
 // Add this to your RequireJS configuration file
 require.config({
     paths: {
-        'pubnub': 'path-to-scripts/pubnub',
-        'ringcentral': 'path-to-scripts/ringcentral',
-        'ringcentral-subscriptions-deprecated': 'path-to-scripts/ringcentral-subscriptions-deprecated'
-    }
+        pubnub: 'path-to-scripts/pubnub',
+        ringcentral: 'path-to-scripts/ringcentral',
+        'ringcentral-subscriptions-deprecated': 'path-to-scripts/ringcentral-subscriptions-deprecated',
+    },
 });
 
 // Then you can use the SDK like any other AMD component
-require(['ringcentral', 'ringcentral-subscriptions-deprecated'], function(sdkNs, subscriptionsNs) {
+require(['ringcentral', 'ringcentral-subscriptions-deprecated'], function (sdkNs, subscriptionsNs) {
     var sdk = new sdkNs.SDK({
-        server: sdkNs.SDK.server.sandbox,
+        server: sdkNs.SDK.server.production,
         appKey: 'yourAppKey',
         appSecret: 'yourAppSecret',
-        redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
+        redirectUri: '', // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
     var subscriptions = new subscriptionsNs.Subscriptions({
-       sdk: sdk
+        sdk: sdk,
     });
 });
 ```
@@ -170,11 +169,11 @@ subscription.reset().off();
 The number of active subscriptions is limited per account (about 20). This means that the application should dispose
 unused subscriptions in the following situations:
 
-- Application should `reset()` subscriptions (on the server they are dead already):
-    - the `Platform` instance emits `logoutSuccess` or `accessViolation` events so the app should `reset()` all subscriptions
-- Application should `remove()` subscriptions or remove no longer needed event filters from them:
-    - the user navigates away from the page or particular view
-    - a subscription becomes unused by the application, based upon the application's business logic
+-   Application should `reset()` subscriptions (on the server they are dead already):
+    -   the `Platform` instance emits `logoutSuccess` or `accessViolation` events so the app should `reset()` all subscriptions
+-   Application should `remove()` subscriptions or remove no longer needed event filters from them:
+    -   the user navigates away from the page or particular view
+    -   a subscription becomes unused by the application, based upon the application's business logic
 
 One of very useful techniques to limit the number of active subscriptions is to store subscription data in cache and
 share this data across Subscription instances in multiple tabs:
