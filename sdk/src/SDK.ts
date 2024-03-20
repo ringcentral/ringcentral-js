@@ -12,7 +12,6 @@ import Platform, {
     SendOptions,
 } from './platform/Platform';
 import {AuthData} from './platform/Auth';
-import {Server} from 'http';
 
 export {
     Cache,
