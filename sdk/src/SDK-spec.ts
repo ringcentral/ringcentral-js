@@ -1,22 +1,6 @@
 import {expect, SDK, spy} from './test/test';
 
 describe('RingCentral.SDK', () => {
-    it('connects to sandbox', async function theTest() {
-        const server = SDK.server.sandbox;
-        const sdk = new SDK({
-            server,
-            clientId: '',
-            clientSecret: '',
-        });
-
-        // sandbox's /restapi/v1.0/status triggers service overloaded very easily, but /restapi/v1.0 works fine
-        const res = await sdk.platform().get('/restapi/v1.0', null, {skipAuthCheck: true});
-
-        await sdk.cache().clean();
-
-        expect(res.status).toEqual(200);
-    });
-
     it('connects to production', async function theTest() {
         const server = SDK.server.production;
         const sdk = new SDK({

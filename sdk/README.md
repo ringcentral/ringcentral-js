@@ -1,18 +1,18 @@
 # Table of contents
 
-- [Installation](#installation)
-- [Getting Started](#getting-started)
-- [API Calls](#api-calls)
-- [Advanced SDK Configuration & Polyfills](#advanced-sdk-configuration--polyfills)
-- [Making telephony calls](#making-telephony-calls)
-- [Call management using JavaScript](#call-management-using-javascript)
-- [SMS](#sms)
-- [MMS](#mms)
-- [Fax](#fax)
-- [Page visibility](#page-visibility)
-- [Tracking network Requests And Responses](#tracking-network-requests-and-responses)
+-   [Installation](#installation)
+-   [Getting Started](#getting-started)
+-   [API Calls](#api-calls)
+-   [Advanced SDK Configuration & Polyfills](#advanced-sdk-configuration--polyfills)
+-   [Making telephony calls](#making-telephony-calls)
+-   [Call management using JavaScript](#call-management-using-javascript)
+-   [SMS](#sms)
+-   [MMS](#mms)
+-   [Fax](#fax)
+-   [Page visibility](#page-visibility)
+-   [Tracking network Requests And Responses](#tracking-network-requests-and-responses)
 
-***
+---
 
 # Installation
 
@@ -41,15 +41,15 @@ SDK can be used in 3 environments:
 2. Require the SDK:
 
     ```js
-    import {SDK} from "@ringcentral/sdk";
+    import {SDK} from '@ringcentral/sdk';
     // op
     const SDK = require('@ringcentral/sdk').SDK;
 
     const rcsdk = new SDK({
-        server: SDK.server.sandbox,
+        server: SDK.server.production,
         clientId: 'yourClientId',
         clientSecret: 'yourClientSecret',
-        redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
+        redirectUri: '', // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
     ```
 
@@ -63,15 +63,16 @@ Follow installation steps for NodeJS. Don't forget to add `target: 'web'` to you
 
 Pick the option that works best for you:
 
-- Use CDN **Attention! Versions listed here may be outdated**:
-    - https://unpkg.com/@ringcentral/sdk@latest/dist/ringcentral.js
-    - https://unpkg.com/whatwg-fetch@latest/dist/fetch.umd.js
-    - https://unpkg.com/es6-promise@latest/dist/es6-promise.auto.js
+-   Use CDN **Attention! Versions listed here may be outdated**:
 
-- Download everything manually:
-    - [SDK](https://github.com/ringcentral/ringcentral-js/releases/download/latest)
-    - [Fetch](https://github.com/github/fetch/releases/download/latest)
-    - [ES6 Promise](https://github.com/jakearchibald/es6-promise/releases/latest)
+    -   https://unpkg.com/@ringcentral/sdk@latest/dist/ringcentral.js
+    -   https://unpkg.com/whatwg-fetch@latest/dist/fetch.umd.js
+    -   https://unpkg.com/es6-promise@latest/dist/es6-promise.auto.js
+
+-   Download everything manually:
+    -   [SDK](https://github.com/ringcentral/ringcentral-js/releases/download/latest)
+    -   [Fetch](https://github.com/github/fetch/releases/download/latest)
+    -   [ES6 Promise](https://github.com/jakearchibald/es6-promise/releases/latest)
 
 ### Add scripts to HTML page (if you are not using any module loaders)
 
@@ -82,16 +83,15 @@ Add the following to your HTML:
 ```html
 <script type="text/javascript" src="path-to-scripts/promise.auto.js"></script>
 <script type="text/javascript" src="path-to-scripts/fetch.umd.js"></script>
-<script type="text/javascript" src="path-to-scripts/ringcentral.js"></script><!-- or ringcentral.min.js -->
+<script type="text/javascript" src="path-to-scripts/ringcentral.js"></script>
+<!-- or ringcentral.min.js -->
 <script type="text/javascript">
-
     var rcsdk = new RingCentral.SDK({
-        server: RingCentral.SDK.server.sandbox,
+        server: RingCentral.SDK.server.production,
         clientId: 'yourClientId',
         clientSecret: 'yourClientSecret',
-        redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
+        redirectUri: '', // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
-
 </script>
 ```
 
@@ -101,17 +101,17 @@ Add the following to your HTML:
 // Add this to your RequireJS configuration file
 require.config({
     paths: {
-        'ringcentral': 'path-to-scripts/ringcentral' // or ringcentral.min
-    }
+        ringcentral: 'path-to-scripts/ringcentral', // or ringcentral.min
+    },
 });
 
 // Then you can use the SDK like any other AMD component
-require(['ringcentral'], function(/** @type RingCentral.sdk */ ns) {
+require(['ringcentral'], function (/** @type RingCentral.sdk */ ns) {
     var rcsdk = new ns.SDK({
-        server: ns.SDK.server.sandbox,
+        server: ns.SDK.server.production,
         clientId: 'yourClientId',
         clientSecret: 'yourClientSecret',
-        redirectUri: '' // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
+        redirectUri: '', // optional, but is required for Implicit Grant and Authorization Code OAuth Flows (see below)
     });
 });
 ```
@@ -119,7 +119,7 @@ require(['ringcentral'], function(/** @type RingCentral.sdk */ ns) {
 Make sure that [polyfills](#advanced-sdk-configuration--polyfills) are added to the page before or together with the SDK.
 Make sure SDK is [configured](#advanced-sdk-configuration--polyfills) to use polyfills.
 
-***
+---
 
 # Getting Started
 
@@ -170,7 +170,7 @@ When enabling PKCE with top frame, you will have to manually save the codeVerifi
 One way of doing this is using the localStorage
 
 ```js
-var loginUrl = rcsdk.loginUrl({ usePKCE: true, implicit: false });
+var loginUrl = rcsdk.loginUrl({usePKCE: true, implicit: false});
 var codeVerifier = rcsdk.platform().codeVerifier;
 localStorage.setItem('codeVerifier', codeVerifier);
 window.location.assign(loginUrl); // or .replace()
@@ -231,23 +231,23 @@ rcsdk
     .login({
         username: '18001234567', // phone number in full format
         extension: '', // leave blank if direct number is used
-        password: 'yourpassword'
+        password: 'yourpassword',
     })
-    .then(function(response) {
-          // your code here
+    .then(function (response) {
+        // your code here
     })
-    .catch(function(e) {
-        alert(e.message  || 'Server cannot authorize user');
+    .catch(function (e) {
+        alert(e.message || 'Server cannot authorize user');
     });
 ```
 
 ### Multi User Login
 
-If you need to have multiple users login in to different instances of the sdk, you can use the `cachePrefix` SDK option.  Specify different `cachePrefix` values for each instance.
+If you need to have multiple users login in to different instances of the sdk, you can use the `cachePrefix` SDK option. Specify different `cachePrefix` values for each instance.
 
 ```js
 const rcsdk1 = new RingCentral.SDK({
-    server: RingCentral.SDK.server.sandbox,
+    server: RingCentral.SDK.server.production,
     clientId: 'yourClientId',
     clientSecret: 'yourClientSecret',
     cachePrefix: 'user1',
@@ -256,11 +256,11 @@ const rcsdk1 = new RingCentral.SDK({
 rcsdk1.login({
     username: '18001234567',
     extension: '101',
-    password: 'password1'
-})
+    password: 'password1',
+});
 
 const rcsdk2 = new RingCentral.SDK({
-    server: RingCentral.SDK.server.sandbox,
+    server: RingCentral.SDK.server.production,
     clientId: 'yourClientId',
     clientSecret: 'yourClientSecret',
     cachePrefix: 'user2',
@@ -269,12 +269,11 @@ const rcsdk2 = new RingCentral.SDK({
 rcsdk1.login({
     username: '18005557777',
     extension: '102',
-    password: 'password2'
-})
-
+    password: 'password2',
+});
 ```
-This prevents login state from being shared between the two instances `rcsdk1` and `rcsdk2`
 
+This prevents login state from being shared between the two instances `rcsdk1` and `rcsdk2`
 
 ## Handling login success
 
@@ -341,20 +340,20 @@ rcsdk.logout().then(...).catch(...);
 
 The platform provides the following events:
 
-- `loginSuccess`
-- `loginError`
-- `logoutSuccess`
-- `logoutError`
-- `refreshSuccess`
-- `refreshError` &mdash; application may listen to this error and show login page
-- `rateLimitError`
+-   `loginSuccess`
+-   `loginError`
+-   `logoutSuccess`
+-   `logoutError`
+-   `refreshSuccess`
+-   `refreshError` &mdash; application may listen to this error and show login page
+-   `rateLimitError`
 
 To listen on platform events, you should call the `on` method of the platform object:
 
 ```js
 var platform = rcsdk.platform();
 
-platform.on(platform.events.refreshError, function(e){
+platform.on(platform.events.refreshError, function (e) {
     // do something, usually open a login page
 });
 ```
@@ -417,14 +416,14 @@ rcsdk.delete('/restapi/v1.0/account/~/extension/~', {...query}).then(...);
 
 ## Available API response methods
 
-- `json()` &mdash; if response type is JSON returns a plain JS object
-- `text()` &mdash; returns text representation
-- `multipart()` &mdash; for `Content-Type: multipart/mixed` responses returns an array of `ApiResponse`
-- `toMultipart()` &mdash; same as `multipart()` but when response is not `Content-Type: multipart/mixed` it will return an array with one item instead of error
-- `ok()` &mdash; `true` for all `2xx` responses, `false` otherwise
-- `error()` &mdash; error string if any
-- `request()` &mdash; low-level `Request` object
-- `response()` &mdash; low-level `Response` object
+-   `json()` &mdash; if response type is JSON returns a plain JS object
+-   `text()` &mdash; returns text representation
+-   `multipart()` &mdash; for `Content-Type: multipart/mixed` responses returns an array of `ApiResponse`
+-   `toMultipart()` &mdash; same as `multipart()` but when response is not `Content-Type: multipart/mixed` it will return an array with one item instead of error
+-   `ok()` &mdash; `true` for all `2xx` responses, `false` otherwise
+-   `error()` &mdash; error string if any
+-   `request()` &mdash; low-level `Request` object
+-   `response()` &mdash; low-level `Response` object
 
 ## Binary downloads
 
@@ -436,21 +435,18 @@ If you need to download a binary file from API (call recording, fax attachment),
 var fs = require('fs');
 
 // read as buffer
-rcsdk.get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
-
-    return res.response().buffer(); // we are accessing Node Fetch's Response
-
-}).then(function(buffer) {
-
-    fs.writeFileSync('./octocat.png', buffer);
-
-});
+rcsdk
+    .get('/restapi/v1.0/account/~/messages/foo/content')
+    .then(function (res) {
+        return res.response().buffer(); // we are accessing Node Fetch's Response
+    })
+    .then(function (buffer) {
+        fs.writeFileSync('./octocat.png', buffer);
+    });
 
 // read as stream
-rcsdk.get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
-
+rcsdk.get('/restapi/v1.0/account/~/messages/foo/content').then(function (res) {
     res.response().body.pipe(fs.createWriteStream('./octocat.png')); // we are accessing Node Fetch's Response
-
 });
 ```
 
@@ -459,17 +455,16 @@ See more here [https://github.com/bitinn/node-fetch#usage](https://github.com/bi
 ### In browser
 
 ```js
-rcsdk.get('/restapi/v1.0/account/~/messages/foo/content').then(function(res) {
-
-    return res.response().blob(); // or arrayBuffer(), we are accessing WhatWG Fetch's Response
-
-}).then(function(blob ){
-
-    var img = document.createElement('img');
-    img.src = URL.createObjectURL(blob);
-    document.getElementById('container').appendChild(img);
-
-});
+rcsdk
+    .get('/restapi/v1.0/account/~/messages/foo/content')
+    .then(function (res) {
+        return res.response().blob(); // or arrayBuffer(), we are accessing WhatWG Fetch's Response
+    })
+    .then(function (blob) {
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(blob);
+        document.getElementById('container').appendChild(img);
+    });
 ```
 
 See more here [https://developer.mozilla.org/en-US/docs/Web/API/Response](https://developer.mozilla.org/en-US/docs/Web/API/Response).
@@ -514,7 +509,7 @@ var rcsdk = new SDK({
     fetch: whatever,
     Headers: whatever,
     Request: whatever,
-    Response: whatever
+    Response: whatever,
 });
 ```
 
@@ -524,7 +519,7 @@ In the NodeJS it might be useful to replace simple built-in storage with somethi
 
 ```js
 var sdk = new SDK({
-    localStorage: whatever
+    localStorage: whatever,
 });
 ```
 
@@ -535,15 +530,15 @@ and provide some unique `cachePrefix` to SDK constructor (otherwise instances wi
 
 ```js
 var rcsdk1 = new SDK({
-    cachePrefix: 'foo-'
+    cachePrefix: 'foo-',
 });
 
 var rcsdk2 = new SDK({
-    cachePrefix: 'bar-'
+    cachePrefix: 'bar-',
 });
 ```
 
-***
+---
 
 # Making telephony calls
 
@@ -567,25 +562,21 @@ var ringout = {}; // this is the status object (lowercase)
  * @param {Error} e
  */
 function handleError(e) {
-
     console.error(e);
     alert(e.message);
-
 }
 
 function create(unsavedRingout) {
-
     rcsdk
         .post('/restapi/v1.0/account/~/extension/~/ringout', unsavedRingout)
-        .then(function(response) { return response.json() })
-        .then(function(ringout) {
-
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (ringout) {
             console.info('First status:', ringout.status.callStatus);
             update();
-
         })
         .catch(handleError);
-
 }
 
 /**
@@ -593,41 +584,32 @@ function create(unsavedRingout) {
  * @param {number} delay - last used delay
  */
 function update() {
-
     clearTimeout(timeout);
 
-    setTimeout(function() {
-
+    setTimeout(function () {
         if (ringout.status && ringout.status.callStatus !== 'InProgress') return;
 
         rcsdk
             .get(ringout.uri)
-            .then(function(response) { return response.json() })
-            .then(function(ringout) {
-
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (ringout) {
                 console.info('Current status:', ringout.status.callStatus);
                 update();
-
             })
             .catch(handleError);
-
     }, 500);
-
 }
 
 /**
  * To stop polling, call this at any time
  */
 function hangUp() {
-
     clearTimeout(timeout);
 
     if (ringout.status && ringout.status.callStatus !== 'InProgress') {
-
-        rcsdk
-            .delete(ringout.uri)
-            .catch(handleError);
-
+        rcsdk.delete(ringout.uri).catch(handleError);
     }
 
     // Clean
@@ -635,9 +617,8 @@ function hangUp() {
         from: {phoneNumber: ''},
         to: {phoneNumber: ''},
         callerId: {phoneNumber: ''}, // optional,
-        playPrompt: true // optional
+        playPrompt: true, // optional
     };
-
 }
 
 /**
@@ -647,11 +628,11 @@ create({
     from: {phoneNumber: '16501111111'},
     to: {phoneNumber: '18882222222'},
     callerId: {phoneNumber: '18882222222'}, // optional,
-    playPrompt: true // optional
+    playPrompt: true, // optional
 });
 ```
 
-***
+---
 
 # Call management using JavaScript
 
@@ -673,11 +654,13 @@ var accountPresence = {};
 
 rcsdk
     .get('/restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true')
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
         _.extend(accountPresence, data);
     })
-    .catch(function(e) {
+    .catch(function (e) {
         alert('Load Presence Error: ' + e.message);
     });
 ```
@@ -685,17 +668,22 @@ rcsdk
 In the meantime, you can also set up Subscriptions (you can use Underscore or Lodash to simplify things):
 
 ```js
-var subscription = rcsdk.createSubscription().addEvents(['/restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true']);
+var subscription = rcsdk
+    .createSubscription()
+    .addEvents(['/restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true']);
 
-subscription.on(subscription.events.notification, function(msg) {
+subscription.on(subscription.events.notification, function (msg) {
     _.extend(accountPresence, msg);
 });
 
-subscription.register().then(function(response) {
-    alert('Success: Subscription is listening');
-}).catch(function(e) {
-    alert('Subscription Error: ' + e.message);
-});
+subscription
+    .register()
+    .then(function (response) {
+        alert('Success: Subscription is listening');
+    })
+    .catch(function (e) {
+        alert('Subscription Error: ' + e.message);
+    });
 
 return subscription;
 ```
@@ -703,12 +691,15 @@ return subscription;
 ## View the list of active calls
 
 ```js
-rcsdk.get('/restapi/v1.0/account/~/extension/~/active-calls', {query: {page: 1, perPage: 10}})
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
+rcsdk
+    .get('/restapi/v1.0/account/~/extension/~/active-calls', {query: {page: 1, perPage: 10}})
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
         activeCalls = data.records;
     })
-    .catch(function(e) {
+    .catch(function (e) {
         alert('Active Calls Error: ' + e.message);
     });
 ```
@@ -716,12 +707,15 @@ rcsdk.get('/restapi/v1.0/account/~/extension/~/active-calls', {query: {page: 1, 
 ## View the list of recent calls
 
 ```js
-rcsdk.get('/restapi/v1.0/account/~/extension/~/call-log', {query: {page: 1, perPage: 10}})
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
+rcsdk
+    .get('/restapi/v1.0/account/~/extension/~/call-log', {query: {page: 1, perPage: 10}})
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
         calls = data.records;
     })
-    .catch(function(e) {
+    .catch(function (e) {
         alert('Recent Calls Error: ' + e.message);
     });
 ```
@@ -734,18 +728,21 @@ By default, the load request returns calls that were made during the last week. 
 In order to send an SMS using the API, simply make a POST request to `/account/~/extension/~/sms`:
 
 ```js
-rcsdk.post('/restapi/v1.0/account/~/extension/~/sms', {
-        from: {phoneNumber:'+12223334444'}, // Your sms-enabled phone number
+rcsdk
+    .post('/restapi/v1.0/account/~/extension/~/sms', {
+        from: {phoneNumber: '+12223334444'}, // Your sms-enabled phone number
         to: [
-            {phoneNumber:'+15556667777'} // Second party's phone number
+            {phoneNumber: '+15556667777'}, // Second party's phone number
         ],
-        text: 'Message content'
+        text: 'Message content',
     })
-    .then(function(response) { return response.json(); })
-    .then(function(json) {
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (json) {
         alert('Success: ' + json.id);
     })
-    .catch(function(e) {
+    .catch(function (e) {
         alert('Error: ' + e.message);
     });
 ```
@@ -762,7 +759,7 @@ Modern browsers have `FormData` class which could be used for sending faxes.
 ```js
 var body = {
         to: [{phoneNumber: '123'}], // see all available options on Developer Portal
-        faxResolution: 'High'
+        faxResolution: 'High',
     },
     formData = new FormData();
 
@@ -773,7 +770,7 @@ formData.append('json', new File([JSON.stringify(body)], 'request.json', {type: 
 var fileField = document.getElementById('input-type-file-field');
 
 // Iterate through all currently selected files
-for (var i = 0, file; file = fileField.files[i]; ++i) {
+for (var i = 0, file; (file = fileField.files[i]); ++i) {
     formData.append('attachment', file); // you can also use file.name instead of 'attachment'
 }
 
@@ -792,7 +789,7 @@ As similar to the fax endpoint, `MMS` understands `multipart/form-data` requests
 var body = {
         from: {phoneNumber: '+12223334444'}, //// Your mms-enabled phone number
         to: [{phoneNumber: '123'}], // see all available options on Developer Portal
-        faxResolution: 'High'
+        faxResolution: 'High',
     },
     formData = new FormData();
 
@@ -803,7 +800,7 @@ formData.append('json', new File([JSON.stringify(body)], 'request.json', {type: 
 var fileField = document.getElementById('input-type-file-field');
 
 // Iterate through all currently selected files
-for (var i = 0, file; file = fileField.files[i]; ++i) {
+for (var i = 0, file; (file = fileField.files[i]); ++i) {
     formData.append('attachment', file); // you can also use file.name instead of 'attachment'
 }
 
@@ -817,27 +814,28 @@ In order to identify the MMS-Enabled phone numbers on an extension, simply make 
 
 ```js
 var mmsEnabledNumbers = [];
-    rcsdk
-        .get('/restapi/v1.0/account/~/extension/~/phone-number', {'perPage': 'max'})
-        .then(function(response) { return response.json(); })
-        .then(function(data) {
-            var phoneNumbers = data.records;
-            for (var i = 0; i < phoneNumbers.length; i++ ) {
-                if (phoneNumbers[i].features.indexOf("MmsSender") != -1 ) {
-                    mmsEnabledNumbers.push(phoneNumbers[i].phoneNumber);
-                }
+rcsdk
+    .get('/restapi/v1.0/account/~/extension/~/phone-number', {perPage: 'max'})
+    .then(function (response) {
+        return response.json();
+    })
+    .then(function (data) {
+        var phoneNumbers = data.records;
+        for (var i = 0; i < phoneNumbers.length; i++) {
+            if (phoneNumbers[i].features.indexOf('MmsSender') != -1) {
+                mmsEnabledNumbers.push(phoneNumbers[i].phoneNumber);
             }
-        })
-        .catch(function(e) {
-            alert('MMS Enabled Phone Number Population Error:\n\n' + e.message);
-        });
+        }
+    })
+    .catch(function (e) {
+        alert('MMS Enabled Phone Number Population Error:\n\n' + e.message);
+    });
 ```
-
 
 Further reading:
 
-- [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
-- [File](https://developer.mozilla.org/en-US/docs/Web/API/File)
+-   [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData)
+-   [File](https://developer.mozilla.org/en-US/docs/Web/API/File)
 
 ## NodeJS
 
@@ -855,7 +853,7 @@ Then you can build your fax, but keep in mind that FormData API in NodeJS is sli
 var FormData = require('form-data'),
     body = {
         to: [{phoneNumber: '123'}], // see all available options on Developer Portal
-        faxResolution: 'High'
+        faxResolution: 'High',
     },
     formData = new FormData();
 
@@ -874,9 +872,9 @@ rcsdk.post('/restapi/v1.0/account/~/extension/~/fax', formData);
 
 Further reading:
 
-- [form-data](https://github.com/form-data/form-data#usage)
+-   [form-data](https://github.com/form-data/form-data#usage)
 
-***
+---
 
 # Page visibility
 
@@ -886,14 +884,14 @@ such as [visibility.js](https://github.com/ai/visibilityjs).
 This allows tracking the visibility of the page/tab/window/frame so that the application can react accordingly.
 Following are some actions that the application may wish to take whenever it becomes visible:
 
-- Check authentication
-- Reload/resync time-sensitive information from the server
-- Send heartbeats to the server
+-   Check authentication
+-   Reload/resync time-sensitive information from the server
+-   Send heartbeats to the server
 
 Another usage is to reduce the number of Call Log or Messages reloads when the application is not visible. The SDK does
 not require that any such optimizations be implemented in the application, but it is considered good practice.
 
-***
+---
 
 # Tracking network Requests And Responses
 
@@ -902,7 +900,7 @@ and registering observers on its various events:
 
 ```js
 var client = rcsdk.client();
-client.on(client.events.beforeRequest, function(apiResponse) {}); // apiResponse does not have response at this point
-client.on(client.events.requestSuccess, function(apiResponse) {});
-client.on(client.events.requestError, function(apiError) {});
+client.on(client.events.beforeRequest, function (apiResponse) {}); // apiResponse does not have response at this point
+client.on(client.events.requestSuccess, function (apiResponse) {});
+client.on(client.events.requestError, function (apiError) {});
 ```
