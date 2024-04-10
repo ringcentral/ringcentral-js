@@ -4,6 +4,9 @@ on:
     branches:
       - master
       - addGitHubPages
+  pull_request:
+    branches:
+      - master
 permissions:
   contents: write
 jobs:
