@@ -1,4 +1,4 @@
-# RingCentral JavaScript SDK
+# Home
 
 [![Build Status](https://github.com/ringcentral/ringcentral-js/workflows/CI%20Pipeline/badge.svg?branch=master)](https://github.com/ringcentral/ringcentral-js/actions)
 [![Coverage Status](https://coveralls.io/repos/github/ringcentral/ringcentral-js/badge.svg?branch=master)](https://coveralls.io/github/ringcentral/ringcentral-js)
