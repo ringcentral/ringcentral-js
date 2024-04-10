@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - addGitHubPages
+      - gitHubPages
   pull_request:
     branches:
       - master
