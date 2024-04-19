@@ -12,7 +12,8 @@
     "publish:release": "lerna publish --tag-version-prefix=\"\" --force-publish=* --no-push --no-git-tag-version",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint --fix",
     "lint:all": "npm run lint './*/src/**/*.ts*'",
-    "lint:staged": "lint-staged"
+    "lint:staged": "lint-staged",
+    "docs": "typedoc --out docs ./sdk/src ./react/src ./redux/src ./subscriptions/src"
   },
   "workspaces": [
     "api-test",
@@ -46,5 +47,8 @@
     "lerna": "^6.6.2",
     "lint-staged": "^12.5.0",
     "typescript": "^4.8.4"
+  },
+  "devDependencies": {
+    "typedoc": "0.25.13"
   }
 }
