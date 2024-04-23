@@ -1,7 +1,4 @@
-import {
-    createHash,
-    randomBytes,
-} from 'crypto';
+import {createHash, randomBytes} from 'crypto';
 import {EventEmitter} from 'events';
 
 import Cache from '../core/Cache';
@@ -157,10 +154,10 @@ export default class Platform extends EventEmitter {
                 initialEndpoint,
                 fetchGet: this.get.bind(this),
             });
-            this._discovery.on(this._discovery.events.initialized, discoveryData => {
+            this._discovery.on(this._discovery.events.initialized, (discoveryData) => {
                 this._authorizeEndpoint = discoveryData.authApi.authorizationUri;
             });
-            this._client.on(this._client.events.requestSuccess, response => {
+            this._client.on(this._client.events.requestSuccess, (response) => {
                 if (response.headers.get('discovery-required')) {
                     this._discovery.refreshExternalData();
                 }
@@ -185,17 +182,32 @@ export default class Platform extends EventEmitter {
         return super.on(event, listener);
     }
 
+    /**
+     * Returns the authentication object.
+     * @returns {Authentication | null} - The authentication object if available, otherwise null.
+     */
     public auth() {
         return this._auth;
     }
 
+    /**
+     * Returns the discovery object.
+     * @returns {Discovery | null} - The discovery object if available, otherwise null.
+     */
     public discovery() {
         return this._discovery;
     }
 
+    /**
+     * Constructs a URL with the given path and options.
+     * @param {string} [path=''] - The path to append to the URL.
+     * @param {CreateUrlOptions} [options={}] - Options for constructing the URL.
+     * @returns {string} - The constructed URL.
+     */
     public createUrl(path = '', options: CreateUrlOptions = {}) {
         let builtUrl = '';
 
+        // Check if the path contains 'http://' or 'https://'
         const hasHttp = checkPathHasHttp(path);
 
         if (options.addServer && !hasHttp) {
@@ -206,19 +218,36 @@ export default class Platform extends EventEmitter {
             }
         }
 
-        if (this._urlPrefix) {builtUrl += this._urlPrefix;}
+        // Append the URL prefix, if available
+        if (this._urlPrefix) {
+            builtUrl += this._urlPrefix;
+        }
 
+        // Append the provided path
         builtUrl += path;
 
-        if (options.addMethod) {builtUrl += `${path.includes('?') ? '&' : '?'}_method=${options.addMethod}`;}
+        // Add method parameter if requested
+        if (options.addMethod) {
+            builtUrl += `${path.includes('?') ? '&' : '?'}_method=${options.addMethod}`;
+        }
 
+        // Return the constructed URL
         return builtUrl;
     }
 
+    /**
+     * @param path The path to append to the URL.
+     * @returns Return sigin Url
+     */
     public async signUrl(path: string) {
         return `${path + (path.includes('?') ? '&' : '?')}access_token=${(await this._auth.data()).access_token}`;
     }
 
+    /**
+     * Generates a login URL with discovery data.
+     * @param {LoginUrlOptions} options - Options for constructing the login URL.
+     * @returns - The constructed login URL.
+     */
     public async loginUrlWithDiscovery(options: LoginUrlOptions = {}) {
         if (this._discovery) {
             try {
@@ -241,6 +270,10 @@ export default class Platform extends EventEmitter {
         return this.loginUrl(options);
     }
 
+    /**
+     * Initializes the discovery process.
+     * @throws {Error} If discovery is not enabled or if an error occurs during initialization.
+     */
     public async initDiscovery() {
         if (!this._discovery) {
             throw new Error('Discovery is not enabled!');
@@ -254,6 +287,22 @@ export default class Platform extends EventEmitter {
         }
     }
 
+    /**
+     * Constructs a login URL with specified options.
+     * @param {Object} options - Options for constructing the login URL.
+     * @param {boolean} [options.implicit] - Whether to use implicit grant flow.
+     * @param {string} [options.state] - State parameter for security.
+     * @param {string} [options.brandId] - ID of the brand.
+     * @param {string} [options.display] - Hint to the authentication system on how to display the authentication page.
+     * @param {string} [options.prompt] - Space-delimited, case-sensitive list of prompts to present the user.
+     * @param {Object} [options.uiOptions] - UI options for the authentication page.
+     * @param {string[]} [options.uiLocales] - Preferred languages for the authentication page.
+     * @param {string} [options.localeId] - ID of the preferred locale for the authentication page.
+     * @param {boolean} [options.usePKCE] - Whether to use PKCE (Proof Key for Code Exchange).
+     * @param {string} [options.responseHint] - Hint about the type of the token returned.
+     * @param {string} [options.redirectUri] - Redirect URI after authentication.
+     * @returns {string} - The constructed login URL.
+     */
     public loginUrl({
         implicit,
         state,
@@ -307,30 +356,33 @@ export default class Platform extends EventEmitter {
     }
 
     /**
-     * @return {string}
+     * Generates a random code verifier for PKCE (Proof Key for Code Exchange) flow.
+     * @return {string} A randomly generated code verifier.
      */
     private _generateCodeVerifier() {
         let codeVerifier: any = randomBytes(32);
-        codeVerifier = codeVerifier
-            .toString('base64')
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=/g, '');
+        codeVerifier = codeVerifier.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
         return codeVerifier;
     }
 
     /**
-     * @param {string} url
-     * @return {Object}
+     * Parses the login redirect URL and extracts the query parameters.
+     * @param {string} url The URL to parse.
+     * @return {Object} An object containing the query parameters.
+     * @throws {Error} If unable to parse the response or if there's an error in the response.
      */
     public parseLoginRedirect(url: string) {
         const response =
             (url.startsWith('#') && getParts(url, '#')) || (url.startsWith('?') && getParts(url, '?')) || null;
 
-        if (!response) {throw new Error('Unable to parse response');}
+        if (!response) {
+            throw new Error('Unable to parse response');
+        }
 
         const queryString = new URLSearchParams(response);
-        if (!queryString) {throw new Error('Unable to parse response');}
+        if (!queryString) {
+            throw new Error('Unable to parse response');
+        }
 
         const error = queryString.get('error_description') || queryString.get('error');
 
@@ -359,9 +411,13 @@ export default class Platform extends EventEmitter {
         // clear check last timeout when user open loginWindow twice to avoid leak
         this._clearLoginWindowCheckTimeout();
         return new Promise((resolve, reject) => {
-            if (typeof window === 'undefined') {throw new Error('This method can be used only in browser');}
+            if (typeof window === 'undefined') {
+                throw new Error('This method can be used only in browser');
+            }
 
-            if (!url) {throw new Error('Missing mandatory URL parameter');}
+            if (!url) {
+                throw new Error('Missing mandatory URL parameter');
+            }
 
             const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : 0;
             const dualScreenTop = window.screenTop !== undefined ? window.screenTop : 0;
@@ -377,30 +433,37 @@ export default class Platform extends EventEmitter {
                 '_blank',
                 target === '_blank'
                     ? `scrollbars=yes, status=yes, width=${width}, height=${height}, left=${left}, top=${top}`
-                    : '',
+                    : ''
             );
 
             if (!win) {
                 throw new Error('Could not open login window. Please allow popups for this site');
             }
 
-            if (win.focus) {win.focus();}
+            if (win.focus) {
+                win.focus();
+            }
             // clear listener when user open loginWindow twice to avoid leak
             if (this._loginWindowEventListener) {
                 window.removeEventListener('message', this._loginWindowEventListener);
             }
-            this._loginWindowEventListener = e => {
+            this._loginWindowEventListener = (e) => {
                 try {
-                    if (e.origin !== origin) {return;}
-                    if (!e.data || !e.data[property]) {return;} // keep waiting
+                    if (e.origin !== origin) {
+                        return;
+                    }
+                    if (!e.data || !e.data[property]) {
+                        return;
+                    } // keep waiting
                     this._clearLoginWindowCheckTimeout();
                     win.close();
                     window.removeEventListener('message', this._loginWindowEventListener);
                     this._loginWindowEventListener = null;
                     const loginOptions = this.parseLoginRedirect(e.data[property]);
 
-                    if (!loginOptions.code && !loginOptions.access_token)
-                        {throw new Error('No authorization code or token');}
+                    if (!loginOptions.code && !loginOptions.access_token) {
+                        throw new Error('No authorization code or token');
+                    }
 
                     resolve(loginOptions);
                 } catch (e1) {
@@ -435,7 +498,8 @@ export default class Platform extends EventEmitter {
     }
 
     /**
-     * @return {Promise<boolean>}
+     * Checks if the user is logged in.
+     * @return {Promise<boolean>} - A promise that resolves to true if the user is logged in, otherwise false.
      */
     public async loggedIn() {
         try {
@@ -450,6 +514,12 @@ export default class Platform extends EventEmitter {
         }
     }
 
+    /**
+     *  Logs in the user with the provided credentials and options.
+     * @param  Options for the login process.
+     * @returns response
+     * @throw Error if an error occurs during login process.
+     */
     public async login({
         username,
         password,
@@ -496,7 +566,7 @@ export default class Platform extends EventEmitter {
                     body.password = password;
                     // eslint-disable-next-line no-console
                     console.warn(
-                        'Username/password authentication is deprecated. Please migrate to the JWT grant type.',
+                        'Username/password authentication is deprecated. Please migrate to the JWT grant type.'
                     );
                 } else if (jwt) {
                     body.grant_type = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
@@ -511,9 +581,15 @@ export default class Platform extends EventEmitter {
                     }
                 }
 
-                if (access_token_ttl) {body.access_token_ttl = access_token_ttl;}
-                if (refresh_token_ttl) {body.refresh_token_ttl = refresh_token_ttl;}
-                if (endpoint_id) {body.endpoint_id = endpoint_id;}
+                if (access_token_ttl) {
+                    body.access_token_ttl = access_token_ttl;
+                }
+                if (refresh_token_ttl) {
+                    body.refresh_token_ttl = refresh_token_ttl;
+                }
+                if (endpoint_id) {
+                    body.endpoint_id = endpoint_id;
+                }
                 response = await this._tokenRequest(tokenEndpoint, body);
 
                 json = await response.clone().json();
@@ -579,9 +655,13 @@ export default class Platform extends EventEmitter {
             const authData = await this.auth().data();
 
             // Perform sanity checks
-            if (!authData.refresh_token) {throw new Error('Refresh token is missing');}
+            if (!authData.refresh_token) {
+                throw new Error('Refresh token is missing');
+            }
             const refreshTokenValid = await this._auth.refreshTokenValid();
-            if (!refreshTokenValid) {throw new Error('Refresh token has expired');}
+            if (!refreshTokenValid) {
+                throw new Error('Refresh token has expired');
+            }
             const body: RefreshTokenBody = {
                 grant_type: 'refresh_token',
                 refresh_token: authData.refresh_token,
@@ -629,6 +709,10 @@ export default class Platform extends EventEmitter {
         }
     }
 
+    /**
+     * Refreshes the authentication token.
+     * @returns A Promise resolving to a Response object.
+     */
     public async refresh(): Promise<Response> {
         if (this._authProxy) {
             throw new Error('Refresh is not supported in Auth Proxy mode');
@@ -649,6 +733,10 @@ export default class Platform extends EventEmitter {
         return this._refreshPromise;
     }
 
+    /**
+     * Logs out the user by revoking the access token.
+     * @returns
+     */
     public async logout(): Promise<Response> {
         if (this._authProxy) {
             throw new Error('Logout is not supported in Auth Proxy mode');
@@ -695,6 +783,12 @@ export default class Platform extends EventEmitter {
         return revokeEndpoint;
     }
 
+    /**
+     * Modifies the given request with necessary headers and authentication, if required.
+     * @param request - The request to inflate.
+     * @param options - The options for inflating the request. Default is an empty object.
+     * @returns A Promise resolving to the modified request.
+     */
     public async inflateRequest(request: Request, options: SendOptions = {}): Promise<Request> {
         options = options || {};
         let userAgent = this._userAgent;
@@ -703,16 +797,26 @@ export default class Platform extends EventEmitter {
         }
         request.headers.set('X-User-Agent', userAgent);
 
-        if (options.skipAuthCheck) {return request;}
+        if (options.skipAuthCheck) {
+            return request;
+        }
 
         await this.ensureLoggedIn();
 
         request.headers.set('Client-Id', this._clientId);
-        if (!this._authProxy) {request.headers.set('Authorization', await this.authHeader());}
+        if (!this._authProxy) {
+            request.headers.set('Authorization', await this.authHeader());
+        }
 
         return request;
     }
 
+    /**
+     * Send request
+     * @param request
+     * @param options
+     * @returns
+     */
     public async sendRequest(request: Request, options: SendOptions = {}): Promise<Response> {
         try {
             request = await this.inflateRequest(request, options);
@@ -721,13 +825,16 @@ export default class Platform extends EventEmitter {
             let {retry, handleRateLimit} = options;
 
             // Guard is for errors that come from polling
-            if (!e.response || retry) {throw e;}
+            if (!e.response || retry) {
+                throw e;
+            }
 
             const {response} = e;
             const {status} = response;
 
-            if ((status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) || this._authProxy)
-                {throw e;}
+            if ((status !== Client._unauthorizedStatus && status !== Client._rateLimitStatus) || this._authProxy) {
+                throw e;
+            }
 
             options.retry = true;
 
@@ -750,7 +857,9 @@ export default class Platform extends EventEmitter {
 
                 this.emit(this.events.rateLimitError, e);
 
-                if (!handleRateLimit) {throw e;}
+                if (!handleRateLimit) {
+                    throw e;
+                }
             }
 
             await delay(retryAfter);
@@ -758,6 +867,10 @@ export default class Platform extends EventEmitter {
         }
     }
 
+    /**
+     * Sends a request with the given options, handling authentication and discovery checks if necessary.
+     * @param options - The options for the request. Default is an empty object.
+     */
     public async send(options: SendOptions = {}) {
         if (!options.skipAuthCheck && !options.skipDiscoveryCheck && this._discovery) {
             if (this._discoveryInitPromise) {
@@ -804,9 +917,17 @@ export default class Platform extends EventEmitter {
         return this.send({method: 'DELETE', url, query, ...options});
     }
 
+    /**
+     * Ensures that the user is logged in by refreshing the authentication token if necessary.
+     * @returns A Promise resolving to a Response object or null.
+     */
     public async ensureLoggedIn(): Promise<Response | null> {
-        if (this._authProxy) {return null;}
-        if (await this._auth.accessTokenValid()) {return null;}
+        if (this._authProxy) {
+            return null;
+        }
+        if (await this._auth.accessTokenValid()) {
+            return null;
+        }
         await this.refresh();
         return null;
     }
@@ -830,6 +951,10 @@ export default class Platform extends EventEmitter {
         });
     }
 
+    /**
+     *
+     * @returns Authorization header
+     */
     public basicAuthHeader(): string {
         const apiKey = this._clientId + (this._clientSecret ? `:${this._clientSecret}` : '');
         return `Basic ${typeof btoa === 'function' ? btoa(apiKey) : Buffer.from(apiKey).toString('base64')}`;
