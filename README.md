@@ -126,6 +126,8 @@ try {
 
 * [RingCentral API Reference](https://developer.ringcentral.com/api-reference) - an interactive reference for the RingCentral API that allows developers to make API calls with no code.
 
+* [Document](https://ringcentral.github.io/ringcentral-js/index.html) - an interactive reference for the SDK code documentation.
+
 You are viewing documentation for upcoming `4.0.0` release. Follow [this link to see 3.x.x documentation](https://github.com/ringcentral/ringcentral-js/tree/v3).  
 
 ## Getting help and support
