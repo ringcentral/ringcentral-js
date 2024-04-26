@@ -219,9 +219,7 @@ export default class Platform extends EventEmitter {
         }
 
         // Append the URL prefix, if available
-        if (this._urlPrefix) {
-            builtUrl += this._urlPrefix;
-        }
+        if (this._urlPrefix) {builtUrl += this._urlPrefix;}
 
         // Append the provided path
         builtUrl += path;
@@ -275,9 +273,7 @@ export default class Platform extends EventEmitter {
      * @throws {Error} If discovery is not enabled or if an error occurs during initialization.
      */
     public async initDiscovery() {
-        if (!this._discovery) {
-            throw new Error('Discovery is not enabled!');
-        }
+        if (!this._discovery) {throw new Error('Discovery is not enabled!');}
         try {
             await this._discovery.init();
             this._discoveryInitPromise = null;
@@ -375,14 +371,10 @@ export default class Platform extends EventEmitter {
         const response =
             (url.startsWith('#') && getParts(url, '#')) || (url.startsWith('?') && getParts(url, '?')) || null;
 
-        if (!response) {
-            throw new Error('Unable to parse response');
-        }
+        if (!response) {throw new Error('Unable to parse response');}
 
         const queryString = new URLSearchParams(response);
-        if (!queryString) {
-            throw new Error('Unable to parse response');
-        }
+        if (!queryString) {throw new Error('Unable to parse response');}
 
         const error = queryString.get('error_description') || queryString.get('error');
 
@@ -411,13 +403,9 @@ export default class Platform extends EventEmitter {
         // clear check last timeout when user open loginWindow twice to avoid leak
         this._clearLoginWindowCheckTimeout();
         return new Promise((resolve, reject) => {
-            if (typeof window === 'undefined') {
-                throw new Error('This method can be used only in browser');
-            }
+            if (typeof window === 'undefined') {throw new Error('This method can be used only in browser');}
 
-            if (!url) {
-                throw new Error('Missing mandatory URL parameter');
-            }
+            if (!url) {throw new Error('Missing mandatory URL parameter');}
 
             const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : 0;
             const dualScreenTop = window.screenTop !== undefined ? window.screenTop : 0;
@@ -587,9 +575,7 @@ export default class Platform extends EventEmitter {
                 if (refresh_token_ttl) {
                     body.refresh_token_ttl = refresh_token_ttl;
                 }
-                if (endpoint_id) {
-                    body.endpoint_id = endpoint_id;
-                }
+                if (endpoint_id) {body.endpoint_id = endpoint_id;}
                 response = await this._tokenRequest(tokenEndpoint, body);
 
                 json = await response.clone().json();
@@ -655,13 +641,9 @@ export default class Platform extends EventEmitter {
             const authData = await this.auth().data();
 
             // Perform sanity checks
-            if (!authData.refresh_token) {
-                throw new Error('Refresh token is missing');
-            }
+            if (!authData.refresh_token) {throw new Error('Refresh token is missing');}
             const refreshTokenValid = await this._auth.refreshTokenValid();
-            if (!refreshTokenValid) {
-                throw new Error('Refresh token has expired');
-            }
+            if (!refreshTokenValid) {throw new Error('Refresh token has expired');}
             const body: RefreshTokenBody = {
                 grant_type: 'refresh_token',
                 refresh_token: authData.refresh_token,
@@ -714,9 +696,7 @@ export default class Platform extends EventEmitter {
      * @returns A Promise resolving to a Response object.
      */
     public async refresh(): Promise<Response> {
-        if (this._authProxy) {
-            throw new Error('Refresh is not supported in Auth Proxy mode');
-        }
+        if (this._authProxy) {throw new Error('Refresh is not supported in Auth Proxy mode');}
         if (!this._refreshPromise) {
             this._refreshPromise = (async () => {
                 try {
@@ -738,9 +718,7 @@ export default class Platform extends EventEmitter {
      * @returns
      */
     public async logout(): Promise<Response> {
-        if (this._authProxy) {
-            throw new Error('Logout is not supported in Auth Proxy mode');
-        }
+        if (this._authProxy) {throw new Error('Logout is not supported in Auth Proxy mode');}
         try {
             this.emit(this.events.beforeLogout);
 
@@ -825,9 +803,7 @@ export default class Platform extends EventEmitter {
             let {retry, handleRateLimit} = options;
 
             // Guard is for errors that come from polling
-            if (!e.response || retry) {
-                throw e;
-            }
+            if (!e.response || retry) {throw e;}
 
             const {response} = e;
             const {status} = response;
@@ -881,9 +857,7 @@ export default class Platform extends EventEmitter {
                 await this._discovery.refreshExternalData();
             }
             const discoveryData = await this._discovery.externalData();
-            if (!discoveryData) {
-                throw new Error('Discovery data is missing');
-            }
+            if (!discoveryData) {throw new Error('Discovery data is missing');}
             this._server = discoveryData.coreApi.baseUri;
             this._rcvServer = discoveryData.rcv.baseApiUri;
             if (discoveryData.tag) {
@@ -922,12 +896,8 @@ export default class Platform extends EventEmitter {
      * @returns A Promise resolving to a Response object or null.
      */
     public async ensureLoggedIn(): Promise<Response | null> {
-        if (this._authProxy) {
-            return null;
-        }
-        if (await this._auth.accessTokenValid()) {
-            return null;
-        }
+        if (this._authProxy) {return null;}
+        if (await this._auth.accessTokenValid()) {return null;}
         await this.refresh();
         return null;
     }

@@ -125,9 +125,7 @@ export default class Client extends EventEmitter {
         init.headers = init.headers || {};
 
         // Sanity checks
-        if (!init.url) {
-            throw new Error('Url is not defined');
-        }
+        if (!init.url) {throw new Error('Url is not defined');}
         if (!init.method) {
             init.method = 'GET';
         }
@@ -214,13 +212,9 @@ export default class Client extends EventEmitter {
 
         try {
             boundary = this.getContentType(response).match(/boundary=([^;]+)/i)[1]; //eslint-disable-line
-        } catch (e) {
-            throw new Error('Cannot find boundary');
-        }
+        } catch (e) {       throw new Error('Cannot find boundary');}
 
-        if (!boundary) {
-            throw new Error('Cannot find boundary');
-        }
+        if (!boundary) {throw new Error('Cannot find boundary');}
 
         const parts = text.toString().split(Client._boundarySeparator + boundary);
 
@@ -231,9 +225,7 @@ export default class Client extends EventEmitter {
             parts.pop();
         }
 
-        if (parts.length < 1) {
-            throw new Error('No parts in body');
-        }
+        if (parts.length < 1) {throw new Error('No parts in body');}
 
         // Step 2. Parse status info
 
@@ -274,9 +266,7 @@ export default class Client extends EventEmitter {
     }
 
     public async error(response: Response, skipOKCheck = false): Promise<string> {
-        if (response.ok && !skipOKCheck) {
-            return null;
-        }
+        if (response.ok && !skipOKCheck) {return null;}
 
         let msg = (response.status ? `${response.status} ` : '') + (response.statusText ? response.statusText : '');
 
