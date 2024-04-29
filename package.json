@@ -1,5 +1,5 @@
 {
-  "name": "@ringcentral/mono",
+  "name": "@ringcentral/smjs",
   "version": "5.0.0",
   "scripts": {
     "clean": "lerna run clean && lerna clean --yes && rm -rf node_modules",
@@ -30,14 +30,14 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ringcentral/ringcentral-js.git"
+    "url": "git+https://github.com/SushilMallRC/ringcentral-js.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ringcentral/ringcentral-js/issues"
+    "url": "https://github.com/SushilMallRC/ringcentral-js/issues"
   },
-  "homepage": "https://github.com/ringcentral/ringcentral-js#readme",
+  "homepage": "https://github.com/SushilMallRC/ringcentral-js#readme",
   "dependencies": {
     "coveralls": "^3.1.1",
     "dotenv-cli": "^1.4.0",
