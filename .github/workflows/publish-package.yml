@@ -23,19 +23,6 @@ jobs:
       - run: npm run build
       - run: npm run test:browser
       - run: npm run test:coverage
-      - run: cat */coverage/lcov.info
-      - name: Coveralls SDK
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          base-path: ./sdk
-          flag-name: sdk
-          parallel: true
-      - name: Coveralls
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
   Release:
     needs: Test
     runs-on: ubuntu-latest # Firefox in it
