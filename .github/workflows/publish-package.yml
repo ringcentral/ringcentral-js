@@ -46,7 +46,7 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
       - run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-      - run: npm run publish:release -- --canary --preid=$BRANCH.$GITHUB_RUN_ID.$GITHUB_RUN_NUMBER --dist-tag=$BRANCH --yes
+      - run: npm i && npm run publish:release -- --canary --preid=$BRANCH.$GITHUB_RUN_ID.$GITHUB_RUN_NUMBER --dist-tag=$BRANCH --yes
         env:
           BRANCH: ${{ steps.extract_branch.outputs.branch }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
