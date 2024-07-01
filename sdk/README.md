@@ -11,6 +11,7 @@
 -   [Fax](#fax)
 -   [Page visibility](#page-visibility)
 -   [Tracking network Requests And Responses](#tracking-network-requests-and-responses)
+-   [Disable Auto Token refreshment](#disable-auto-token-refreshment)
 
 ---
 
@@ -904,3 +905,13 @@ client.on(client.events.beforeRequest, function (apiResponse) {}); // apiRespons
 client.on(client.events.requestSuccess, function (apiResponse) {});
 client.on(client.events.requestError, function (apiError) {});
 ```
+
+# Disable Auto Token refreshment
+
+To disable the automatic token refresh feature, you can include the following code snippet in your application: [Demo](https://github.com/tylerlong/rc-js-sdk-no-auto-refresh-token-demo)
+
+```
+platform.ensureLoggedIn = async () => null;
+```
+This code effectively overrides the default token refresh mechanism, preventing the platform from automatically renewing the authentication token.
+For a detailed explanation and further information, please refer to this article: [Disable Auto Token Refreshment](https://medium.com/@tylerlong/how-to-disable-auto-token-refreshment-for-ringcentral-javascript-sdk-461d7982ed35).

@@ -784,6 +784,13 @@ export default class Platform extends EventEmitter {
         return this.sendRequest(this._client.createRequest(options), options);
     }
 
+    /**
+     * These methods refresh access token automatically if it's expired.
+     * If you want to handle it yourself and disable auto refresh, place below code snippet in your code.
+     * platform.ensureLoggedIn = async () => null;
+     * For more details, please refer to https://medium.com/ringcentral-developers/how-to-disable-auto-token-refreshment-for-ringcentral-javascript-sdk-461d7982ed35
+     * You can also follow demo https://github.com/tylerlong/rc-js-sdk-no-auto-refresh-token-demo 
+     */
     public async get(url, query?, options?: SendOptions): Promise<Response> {
         return this.send({method: 'GET', url, query, ...options});
     }
