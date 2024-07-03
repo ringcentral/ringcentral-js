@@ -2,6 +2,12 @@
 
 This document contains only major functionality changes in certain versions. Minor fixes/updates are omitted.
 
+## 5.0
+
+- Refactor subscriptions package with WebSocket transport
+- Deprecate Pubnub subscriptions, and move to "@ringcentral/subscription-deprecated" package for Pubnub subscriptions
+- The password grant flow has been deprecated.
+
 ## 4.0
 
 - SDK will not add `/restapi/v1.0` to URLs
