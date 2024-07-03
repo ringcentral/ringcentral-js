@@ -836,7 +836,7 @@ describe('RingCentral.platform.Platform', () => {
                 ).toEqual(
                     'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=foo&ui_options=bar&ui_locales=&localeId=&response_hint=baz&response_hint=quux',
                 );
-
+                
                 expect(
                     platform.loginUrl({
                         implicit: false,
@@ -846,6 +846,35 @@ describe('RingCentral.platform.Platform', () => {
                 ).toEqual(
                     'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=foo&ui_locales=&localeId=&response_hint=bar',
                 );
+
+                /**
+                 * Test with loginHin parameter in loginUrl method
+                 */
+                expect(
+                    platform.loginUrl({
+                        implicit: false,
+                        uiOptions: ['foo', 'bar'],
+                        responseHint: ['baz', 'quux'],
+                        loginHint: ['rc@xyz.com','rc1@xyz.com'],
+                    }),
+                ).toEqual(
+                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=foo&ui_options=bar&ui_locales=&localeId=&response_hint=baz&response_hint=quux&login_hint=rc%40xyz.com&login_hint=rc1%40xyz.com',
+                );
+
+                /**
+                 * Test with loginHin parameter in loginUrl method
+                 */
+                expect(
+                    platform.loginUrl({
+                        implicit: false,
+                        uiOptions: 'foo',
+                        responseHint: 'bar',
+                        loginHint: 'rc@xyz.com',
+                    }),
+                ).toEqual(
+                    'http://whatever/restapi/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Ffoo&client_id=whatever&state=&brand_id=&display=&prompt=&ui_options=foo&ui_locales=&localeId=&response_hint=bar&login_hint=rc%40xyz.com',
+                );
+                
             }),
         );
     });
