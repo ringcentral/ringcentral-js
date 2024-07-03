@@ -266,6 +266,7 @@ export default class Platform extends EventEmitter {
         usePKCE,
         responseHint,
         redirectUri,
+        loginHint,
     }: LoginUrlOptions = {}) {
         const query: AuthorizationQuery = {
             response_type: implicit ? 'token' : 'code',
@@ -281,6 +282,9 @@ export default class Platform extends EventEmitter {
         };
         if (responseHint) {
             query.response_hint = responseHint;
+        }
+        if (!!loginHint) {
+            query.login_hint = loginHint;
         }
         if (this._discovery) {
             if (!this._discovery.initialized) {
@@ -932,6 +936,7 @@ export interface LoginUrlOptions {
     usePKCE?: boolean;
     responseHint?: string | string[];
     redirectUri?: string;
+    loginHint?: string | string[];
 }
 
 export enum LoginUrlPrompt {
@@ -977,6 +982,7 @@ export interface AuthorizationQuery {
     code_challenge?: string;
     code_challenge_method?: string;
     discovery?: boolean;
+    login_hint?: string | string[];
 }
 
 export interface TokenRequestHeaders {
