@@ -23,7 +23,8 @@ export default class Cache {
     }
 
     public async setItem(key, data) {
-        this.setItemSync(key, data);
+        await this._externals.localStorage.setItem(this._prefixKey(key), JSON.stringify(data));
+        //this.setItemSync(key, data);
     }
 
     public removeItemSync(key) {
@@ -32,7 +33,8 @@ export default class Cache {
     }
 
     public async removeItem(key) {
-        await this.removeItemSync(key);
+        await this._externals.localStorage.removeItem(this._prefixKey(key));
+        //await this.removeItemSync(key);
     }
 
     public getItemSync(key) {
@@ -42,7 +44,10 @@ export default class Cache {
     }
 
     public async getItem(key) {
-        return this.getItemSync(key);
+        const item = await this._externals.localStorage.getItem(this._prefixKey(key));
+        if (!item) {return null;}
+        return JSON.parse(item);
+       // return this.getItemSync(key);
     }
 
     private async _keys(): Promise<string[]> {
