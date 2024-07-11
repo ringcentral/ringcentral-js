@@ -378,7 +378,7 @@ export default class Platform extends EventEmitter {
 
             const win = window.open(
                 url,
-                'RingCentralLoginWindow',
+                target,
                 target === '_blank'
                     ? `scrollbars=yes, status=yes, width=${width}, height=${height}, left=${left}, top=${top}`
                     : '',
