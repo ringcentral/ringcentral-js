@@ -358,7 +358,7 @@ export default class Platform extends EventEmitter {
         height = 600,
         origin = window.location.origin,
         property = Constants.authResponseProperty,
-        target = '_blank',
+        target = 'RingCentralLoginWindow',
     }: LoginWindowOptions): Promise<LoginOptions> {
         // clear check last timeout when user open loginWindow twice to avoid leak
         this._clearLoginWindowCheckTimeout();
@@ -378,7 +378,7 @@ export default class Platform extends EventEmitter {
 
             const win = window.open(
                 url,
-                '_blank',
+                target,
                 target === '_blank'
                     ? `scrollbars=yes, status=yes, width=${width}, height=${height}, left=${left}, top=${top}`
                     : '',
