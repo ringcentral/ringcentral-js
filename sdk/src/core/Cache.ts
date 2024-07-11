@@ -24,7 +24,6 @@ export default class Cache {
 
     public async setItem(key, data) {
         await this._externals.localStorage.setItem(this._prefixKey(key), JSON.stringify(data));
-        return this; 
         //this.setItemSync(key, data);
     }
 
@@ -35,7 +34,6 @@ export default class Cache {
 
     public async removeItem(key) {
         await this._externals.localStorage.removeItem(this._prefixKey(key));
-        return this;
         //await this.removeItemSync(key);
     }
 
