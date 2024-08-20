@@ -2,7 +2,6 @@
   "name": "@ringcentral/sdk",
   "version": "0.0.0",
   "scripts": {
-    "postinstall": "npx playwright install",
     "clean": "rimraf dist/* lib/* es6/* coverage/* .nyc_output .rpt2_cache",
     "test": "npm run jest",
     "test:coverage": "JEST_ENV=node jest --config jest.config.js --coverage",
