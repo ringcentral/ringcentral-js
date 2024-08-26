@@ -1,4 +1,6 @@
-function createConfig({entry, filename, outputPath, libraryName, externals}) {
+const webpack = require('webpack');
+
+function createConfig({ entry, filename, outputPath, libraryName, externals }) {
     const common = {
         mode: 'production',
         devtool: 'source-map',
@@ -12,6 +14,16 @@ function createConfig({entry, filename, outputPath, libraryName, externals}) {
                 },
             ],
         },
+        plugins: [
+            // Workaround for Buffer is undefined:
+            new webpack.ProvidePlugin({
+                Buffer: ['buffer', 'Buffer'],
+            }),
+            // Workaround for process is undefined:
+            new webpack.ProvidePlugin({
+                process: 'process/browser',
+            }),
+        ],
         resolve: {
             extensions: ['.tsx', '.ts', '.js'],
             fallback: {
