@@ -11,7 +11,7 @@
       "es2015"
     ],
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "noImplicitAny": false,
     "preserveConstEnums": true,
     "pretty": true,
