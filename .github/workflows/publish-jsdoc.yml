@@ -1,35 +1,38 @@
 name: Generate and Deploy JSDocs
 
 on:
-    push:
-        branches:
-            - master
+  push:
+    branches:
+      - master
 permissions:
-    contents: write
+  contents: write
 jobs:
-    Build:
-        runs-on: ubuntu-latest
+  Build:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v2
-              with:
-                  node-version: 16.15.1
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.15.1
 
-            - name: Install dependencies
-              run: npm install
+      - name: Install dependencies
+        run: npm install
 
-            - name: Build Project
-              run: npm run build
+      - name: Install dependencies 2
+        run: yarn install
 
-            - name: Generate JSDocs
-              run: npm run docs
+      - name: Build Project
+        run: npm run build
 
-            - name: Deploy to GitHub Pages
-              uses: peaceiris/actions-gh-pages@v3
-              with:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./docs
+      - name: Generate JSDocs
+        run: npm run docs
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
