@@ -292,7 +292,11 @@ export default class Discovery extends EventEmitter {
         if (oldExternalData) {
             externalEndpoint = oldExternalData.discoveryApi.externalUri;
         } else {
-            const initialData = await this.initialData();
+            let initialData = await this.initialData();
+            if (!initialData) {
+                // If initial data is missing from cache, fetch it again
+                initialData = await this.fetchInitialData();
+            }
             externalEndpoint = initialData.discoveryApi.defaultExternalUri;
         }
         try {
