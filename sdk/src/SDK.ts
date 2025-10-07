@@ -122,8 +122,8 @@ export class SDK {
         this.platform().send({method: 'PATCH', url, query, body, ...options});
 
     /* istanbul ignore next */
-    public delete = async (url, query?, options?: SendOptions): Promise<Response> =>
-        this.platform().send({method: 'DELETE', url, query, ...options});
+    public delete = async (url, body?, query?, options?: SendOptions): Promise<Response> =>
+        this.platform().send({method: 'DELETE', url, query, body, ...options});
 
     /* istanbul ignore next */
     public login = async (options: LoginOptions): Promise<Response> => this.platform().login(options);

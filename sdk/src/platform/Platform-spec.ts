@@ -705,6 +705,57 @@ describe('RingCentral.platform.Platform', () => {
                 expect(request.headers.get('x-user-agent')).toContain('TestAgent');
             }),
         );
+
+        it(
+            'DELETE without body',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+                const client = sdk.client();
+                const path = `/restapi/v1.0/foo/delete-no-body`;
+
+                apiCall('DELETE', path, {ok: true});
+
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
+                });
+
+                const res = await platform.delete(path);
+                const json = await res.json();
+
+                expect(json.ok).toEqual(true);
+                expect(request.method).toEqual('DELETE');
+                expect(request.url).toEqual(`http://whatever${path}`);
+                expect(request.headers.get('content-type')).toContain('application/json');
+                expect(request['originalBody']).toEqual(undefined);
+            }),
+        );
+
+        it(
+            'DELETE with JSON body',
+            asyncTest(async sdk => {
+                const platform = sdk.platform();
+                const client = sdk.client();
+                const path = `/restapi/v1.0/foo/delete-with-body`;
+
+                apiCall('DELETE', path, {ok: true});
+
+                let request;
+                client.on(client.events.requestSuccess, (_, r) => {
+                    request = r;
+                });
+
+                const payload = {reason: 'cleanup', force: true};
+                const res = await platform.delete(path, payload);
+                const json = await res.json();
+
+                expect(json.ok).toEqual(true);
+                expect(request.method).toEqual('DELETE');
+                expect(request.url).toEqual(`http://whatever${path}`);
+                expect(request.headers.get('content-type')).toContain('application/json');
+                expect(request['originalBody']).toEqual(JSON.stringify(payload));
+            }),
+        );
     });
 
     describe('createUrl', () => {
