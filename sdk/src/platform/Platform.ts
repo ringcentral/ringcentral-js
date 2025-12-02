@@ -711,8 +711,6 @@ export default class Platform extends EventEmitter {
 
         await this.ensureLoggedIn();
 
-       
-
         request.headers.set('Client-Id', this._clientId);
         if (!this._authProxy) {request.headers.set('Authorization', await this.authHeader());}
 
