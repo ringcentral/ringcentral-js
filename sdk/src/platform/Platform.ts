@@ -711,6 +711,12 @@ export default class Platform extends EventEmitter {
 
         await this.ensureLoggedIn();
 
+        // Validate token before sending request
+        const authData = await this._auth.data();
+        if (!authData?.access_token || authData?.access_token?.trim() === '') {
+            throw new Error('Access token is empty. Please login before making API requests.');
+        }
+
         request.headers.set('Client-Id', this._clientId);
         if (!this._authProxy) {request.headers.set('Authorization', await this.authHeader());}
 
