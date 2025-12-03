@@ -59,6 +59,9 @@ export default class Auth {
      */
     public async accessTokenValid() {
         const authData = await this.data();
+        if(!authData?.access_token) {
+            return false;
+        }
         return authData.expire_time - this._refreshHandicapMs > Date.now();
     }
 
