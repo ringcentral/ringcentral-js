@@ -7,6 +7,8 @@ This document contains only major functionality changes in certain versions. Min
 - Refactor subscriptions package with WebSocket transport
 - Deprecate Pubnub subscriptions, and move to "@ringcentral/subscription-deprecated" package for Pubnub subscriptions
 - The password grant flow has been deprecated.
+- Refresh token when an empty access token is passed in the request
+- Added body parameter support to the `delete` method
 
 ### ⚠️ Breaking Changes
 
