@@ -7,6 +7,24 @@ This document contains only major functionality changes in certain versions. Min
 - Refactor subscriptions package with WebSocket transport
 - Deprecate Pubnub subscriptions, and move to "@ringcentral/subscription-deprecated" package for Pubnub subscriptions
 - The password grant flow has been deprecated.
+- Refresh token when an empty access token is passed in the request
+- Added body parameter support to the `delete` method
+
+### ⚠️ Breaking Changes
+
+- **`delete` method signature changed**: The `delete` method now supports body params. The signature changed from `delete(url, query)` to `delete(url, body, query)`. If you were passing query parameters as the second argument, you need to update your code:
+
+  Before:
+  ```js
+  rcsdk.delete('/restapi/v1.0/account/~/extension/~', {...query});
+  ```
+
+  After:
+  ```js
+  rcsdk.delete('/restapi/v1.0/account/~/extension/~', null, {...query});
+  // or with body:
+  rcsdk.delete('/restapi/v1.0/account/~/extension/~', {...body}, {...query});
+  ```
 
 ## 4.0
 

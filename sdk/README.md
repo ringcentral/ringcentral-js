@@ -412,7 +412,7 @@ rcsdk.get('/restapi/v1.0/account/~/extension/~', {...query}).then(...);
 rcsdk.post('/restapi/v1.0/account/~/extension/~', {...body}, {...query}).then(...);
 rcsdk.put('/restapi/v1.0/account/~/extension/~', {...body}, {...query}).then(...);
 rcsdk.patch('/restapi/v1.0/account/~/extension/~', {...body}, {...query}).then(...);
-rcsdk.delete('/restapi/v1.0/account/~/extension/~', {...query}).then(...);
+rcsdk.delete('/restapi/v1.0/account/~/extension/~', {...body}, {...query}).then(...);
 ```
 
 ## Available API response methods
