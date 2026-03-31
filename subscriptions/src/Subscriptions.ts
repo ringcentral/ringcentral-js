@@ -2,7 +2,7 @@ import { SDK } from "@ringcentral/sdk";
 import EventEmitter from "events";
 import RingCentral from "@rc-ex/core";
 import RcSdkExtension from "@rc-ex/rcsdk";
-import WebSocketExtension from "@rc-ex/ws";
+import WebSocketExtension, { Events as WsEvents } from "@rc-ex/ws";
 import waitFor from "wait-for-async";
 import WsSubscription from "@rc-ex/ws/subscription";
 
@@ -23,9 +23,55 @@ export class Subscription extends EventEmitter {
     return this;
   }
 
+  private isWsOpen(wsExtension: WebSocketExtension): boolean {
+    return Boolean(wsExtension.ws && wsExtension.ws.readyState === 1);
+  }
+
+  private async waitForWsReady(wsExtension: WebSocketExtension, timeoutMs = 30000): Promise<void> {
+    if (this.isWsOpen(wsExtension)) {
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      let timeoutHandle: ReturnType<typeof setTimeout>;
+
+      const onReady = () => {
+        cleanup();
+        resolve();
+      };
+
+      const onError = (err: Error) => {
+        cleanup();
+        reject(err);
+      };
+
+      const onTimeout = () => {
+        cleanup();
+        reject(new Error(`WebSocket connection timeout after ${timeoutMs}ms`));
+      };
+
+      const cleanup = () => {
+        clearTimeout(timeoutHandle);
+        wsExtension.eventEmitter.off(WsEvents.connectionReady, onReady);
+        wsExtension.eventEmitter.off(WsEvents.autoRecoverError, onError);
+      };
+
+      wsExtension.eventEmitter.once(WsEvents.connectionReady, onReady);
+      wsExtension.eventEmitter.once(WsEvents.autoRecoverError, onError);
+
+      if (this.isWsOpen(wsExtension)) {
+        onReady();
+        return;
+      }
+
+      timeoutHandle = setTimeout(onTimeout, timeoutMs);
+    });
+  }
+
   public async register(): Promise<WsSubscription> {
     await this.subscriptions.init();
     const wsExtension = await this.subscriptions.newWsExtension();
+    await this.waitForWsReady(wsExtension);
     return await wsExtension.subscribe(this.eventFilters, (event) => {
       this.emit(this.events.notification, event);
     });
