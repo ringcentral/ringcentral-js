@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - docFix
 permissions:
   contents: write
 jobs:
