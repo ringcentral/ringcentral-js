@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "sdk/src/**/*",
+    "react/src/**/*",
+    "redux/src/**/*",
+    "subscriptions/src/**/*"
+  ],
+  "exclude": [
+    "react-demo/**/*",
+    "redux-demo/**/*",
+    "demo/**/*",
+    "api-test/**/*",
+    "subscriptions-deprecated/**/*",
+    "node_modules",
+    "docs"
+  ]
+}
