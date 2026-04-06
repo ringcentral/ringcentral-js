@@ -16,6 +16,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: "https://registry.npmjs.org"
+      - name: npm auth debug
+        run: |
+          npm ping --registry=https://registry.npmjs.org
+          npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: yarn install
       - run: DEBUG=eslint:cli-engine npm run lint:all
       - run: npm run build
