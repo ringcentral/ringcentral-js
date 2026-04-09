@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest # Firefox in it
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [22.14.0]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,11 +18,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: "https://registry.npmjs.org"
+      - run: node --version
       - name: Upgrade npm for trusted publishing compatibility
         run: |
           npm i -g npm@^11.5.1
           npm --version
       - run: yarn install
+      - run: node --version
+      - run: npm --version
       - run: DEBUG=eslint:cli-engine npm run lint:all
       - run: npm run build
       - run: npm run test:browser
