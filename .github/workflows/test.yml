@@ -12,10 +12,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: "https://registry.npmjs.org"
+      - name: npm registry connectivity debug
+        run: npm ping --registry=https://registry.npmjs.org
       - run: yarn install
       - run: DEBUG=eslint:cli-engine npm run lint:all
       - run: npm run build
