@@ -62,7 +62,7 @@ jobs:
           unset NODE_AUTH_TOKEN
 
           # Informational only; may fail locally but helps debug in CI.
-          npm whoami --registry=https://registry.npmjs.org || true
+          npm whoami --registry=https://registry.npmjs.org || echo "npm whoami failed (expected in OIDC/no-token dry-run); continuing"
 
           node - <<'NODE'
           const fs = require('fs');
@@ -108,7 +108,7 @@ jobs:
 
           // Dry-run publish each package using npm OIDC trusted publishing.
           for (const t of publishTargets) {
-            run('npm', ['publish', '--dry-run', '--provenance', '--access', 'public'], t.dir);
+            run('npm', ['publish', '--dry-run', '--provenance', '--access', 'public', '--tag', 'dry-run'], t.dir);
           }
           NODE
 
