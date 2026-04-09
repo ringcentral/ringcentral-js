@@ -19,13 +19,16 @@ jobs:
           node-version: ${{ matrix.node-version }}
           registry-url: "https://registry.npmjs.org"
       - run: node --version
+      - name: Enable Yarn (Corepack)
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
       - name: Upgrade npm for trusted publishing compatibility
         run: |
           npm i -g npm@^11.5.1
           npm --version
       - run: yarn install
-      - run: node --version
-      - run: npm --version
       - run: DEBUG=eslint:cli-engine npm run lint:all
       - run: npm run build
       - run: npm run test:browser
@@ -47,16 +50,83 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: "https://registry.npmjs.org"
+      - run: node --version
+      - name: Enable Yarn (Corepack)
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
       - name: Upgrade npm for trusted publishing compatibility
         run: |
           npm i -g npm@^11.5.1
           npm --version
       - run: yarn install
       - run: npm run build
-      - run: git status && git stash
       - run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-      - run: npm run publish:release -- $TAG --yes
+      - name: Publish packages to npm (OIDC)
         if: ${{ env.TAG != '' && !contains(env.TAG, '/') && github.repository == 'ringcentral/ringcentral-js' }}
+        env:
+          # Prevent any repo/org secret from forcing token-based publishing.
+          NODE_AUTH_TOKEN: ""
+          NPM_CONFIG_PROVENANCE: "true"
+        run: |
+          set -euo pipefail
+
+          VERSION="${TAG#v}"
+          export VERSION
+          echo "Publishing version: ${VERSION}"
+
+          unset NODE_AUTH_TOKEN
+
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const { spawnSync } = require('child_process');
+
+          const version = process.env.VERSION;
+          if (!version || version.trim() === '') {
+            console.error('Missing VERSION');
+            process.exit(1);
+          }
+          const publishTag = version.includes('-') ? 'next' : 'latest';
+          console.log(`npm dist-tag: ${publishTag}`);
+
+          const rootPkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const workspaces = rootPkg.workspaces || [];
+
+          function run(cmd, args, cwd) {
+            const res = spawnSync(cmd, args, { cwd, stdio: 'inherit' });
+            if (res.status) process.exit(res.status);
+          }
+
+          const publishTargets = [];
+          for (const ws of workspaces) {
+            const pkgJsonPath = path.join(ws, 'package.json');
+            if (!fs.existsSync(pkgJsonPath)) continue;
+            const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+            if (pkg.private) continue;
+            if (!pkg.name) continue;
+            publishTargets.push({ dir: ws, name: pkg.name });
+          }
+
+          if (publishTargets.length === 0) {
+            console.log('No public workspaces found to publish.');
+            process.exit(0);
+          }
+
+          console.log('Publish targets:');
+          for (const t of publishTargets) console.log(`- ${t.name} (${t.dir})`);
+
+          // Ensure versions are set consistently before publishing.
+          for (const t of publishTargets) {
+            run('npm', ['version', version, '--no-git-tag-version'], t.dir);
+          }
+
+          // Publish each package using npm OIDC trusted publishing.
+          for (const t of publishTargets) {
+            run('npm', ['publish', '--provenance', '--access', 'public', '--tag', publishTag], t.dir);
+          }
+          NODE
       - name: Release
         if: ${{ env.TAG != '' && !contains(env.TAG, '/') && github.repository == 'ringcentral/ringcentral-js' }}
         uses: softprops/action-gh-release@v1
