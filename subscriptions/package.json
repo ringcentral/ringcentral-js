@@ -59,6 +59,13 @@
   "engines": {
     "node": ">=4"
   },
+  "files": [
+    "dist/",
+    "lib/",
+    "es6/",
+    "src/",
+    "dev-notes.md"
+  ],
   "license": "MIT",
   "publishConfig": {
     "access": "public"

@@ -61,6 +61,15 @@
   "engines": {
     "node": ">=4"
   },
+  "files": [
+    "dist/",
+    "lib/",
+    "es6/",
+    "src/",
+    ".nycrc",
+    "jest.config.js",
+    "jest.setup.js"
+  ],
   "license": "MIT",
   "publishConfig": {
     "access": "public"
