@@ -196,11 +196,7 @@ jobs:
           console.log('Dry-run publish targets:');
           for (const t of targets) console.log(`- ${t.name} (${t.dir})`);
 
-          // Set versions consistently (no git tags/commits in CI).
-          for (const t of targets) {
-            run('npm', ['version', version, '--no-git-tag-version'], t.dir);
-          }
-
+          // Versions were already set in the "Pack workspace tarballs" step.
           for (const t of targets) {
             run('npm', ['publish', '--dry-run', '--provenance', '--access', 'public', '--tag', publishTag], t.dir);
           }
