@@ -1,0 +1,208 @@
+name: OIDC Publish Dry Run
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "**"
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to test (ex: 5.0.10 or 5.0.10-rc.1). Used only for dry-run tarball/version checks."
+        required: false
+        default: ""
+        type: string
+      node_version:
+        description: "Node version to use"
+        required: false
+        default: "22.14.0"
+        type: string
+
+permissions:
+  id-token: write # required for npm trusted publishing (OIDC)
+  contents: read
+
+concurrency:
+  group: oidc-publish-dry-run-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ github.event.inputs.node_version || '22.14.0' }}
+          registry-url: "https://registry.npmjs.org"
+
+      - run: node --version
+
+      - name: Enable Yarn (Corepack)
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+          yarn --version
+
+      - name: Upgrade npm for trusted publishing compatibility
+        run: |
+          npm i -g npm@^11.5.1
+          npm --version
+
+      - run: yarn install
+      - run: npm run build
+
+      - name: Pack workspace tarballs (verify contents)
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version || '' }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "${INPUT_VERSION}" ]; then
+            VERSION="${INPUT_VERSION}"
+          else
+            VERSION="0.0.0-dryrun.${GITHUB_SHA:0:7}"
+          fi
+          export VERSION
+          echo "Packing version: ${VERSION}"
+          mkdir -p .artifacts/npm-pack
+
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const { spawnSync } = require('child_process');
+
+          const version = process.env.VERSION;
+          if (!version || version.trim() === '') {
+            console.error('Missing VERSION');
+            process.exit(1);
+          }
+          const outDir = path.join(process.cwd(), '.artifacts', 'npm-pack');
+
+          const rootPkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const workspaces = rootPkg.workspaces || [];
+
+          function run(cmd, args, cwd) {
+            const res = spawnSync(cmd, args, { cwd, stdio: 'inherit' });
+            if (res.status) process.exit(res.status);
+          }
+
+          const targets = [];
+          for (const ws of workspaces) {
+            const pkgJsonPath = path.join(ws, 'package.json');
+            if (!fs.existsSync(pkgJsonPath)) continue;
+            const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+            if (pkg.private) continue;
+            if (!pkg.name) continue;
+            targets.push({ dir: ws, name: pkg.name });
+          }
+
+          if (targets.length === 0) {
+            console.log('No public workspaces found to pack.');
+            process.exit(0);
+          }
+
+          console.log('Pack targets:');
+          for (const t of targets) console.log(`- ${t.name} (${t.dir})`);
+
+          // Set versions consistently (no git tags/commits in CI).
+          for (const t of targets) {
+            run('npm', ['version', version, '--no-git-tag-version'], t.dir);
+          }
+
+          // Create tarballs for inspection.
+          for (const t of targets) {
+            // npm pack prints the filename as its last line.
+            const res = spawnSync('npm', ['pack'], { cwd: t.dir, stdio: ['ignore', 'pipe', 'inherit'] });
+            if (res.status) process.exit(res.status);
+            const filename = String(res.stdout || '').trim().split('\n').pop();
+            if (!filename) {
+              console.error(`npm pack did not output a filename for ${t.name}`);
+              process.exit(1);
+            }
+            const src = path.join(process.cwd(), t.dir, filename);
+            const safeName = t.name.replace('/', '-').replace('@', '');
+            const dest = path.join(outDir, `${safeName}-${version}.tgz`);
+            fs.renameSync(src, dest);
+            console.log(`Packed ${t.name} -> ${path.relative(process.cwd(), dest)}`);
+          }
+          NODE
+
+      - name: Upload packed tarballs
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-pack-tarballs
+          path: .artifacts/npm-pack/*.tgz
+
+      - name: Dry-run publish packages to npm (OIDC)
+        if: ${{ github.repository == 'ringcentral/ringcentral-js' }}
+        env:
+          NODE_AUTH_TOKEN: ""
+          NPM_CONFIG_PROVENANCE: "true"
+          INPUT_VERSION: ${{ github.event.inputs.version || '' }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "${INPUT_VERSION}" ]; then
+            VERSION="${INPUT_VERSION}"
+          else
+            VERSION="0.0.0-dryrun.${GITHUB_SHA:0:7}"
+          fi
+          export VERSION
+          echo "Dry-run publishing version: ${VERSION}"
+
+          unset NODE_AUTH_TOKEN
+
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const { spawnSync } = require('child_process');
+
+          const version = process.env.VERSION;
+          if (!version || version.trim() === '') {
+            console.error('Missing VERSION');
+            process.exit(1);
+          }
+          const publishTag = 'dry-run';
+
+          const rootPkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const workspaces = rootPkg.workspaces || [];
+
+          function run(cmd, args, cwd) {
+            const res = spawnSync(cmd, args, { cwd, stdio: 'inherit' });
+            if (res.status) process.exit(res.status);
+          }
+
+          const targets = [];
+          for (const ws of workspaces) {
+            const pkgJsonPath = path.join(ws, 'package.json');
+            if (!fs.existsSync(pkgJsonPath)) continue;
+            const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+            if (pkg.private) continue;
+            if (!pkg.name) continue;
+            targets.push({ dir: ws, name: pkg.name });
+          }
+
+          if (targets.length === 0) {
+            console.log('No public workspaces found to dry-run publish.');
+            process.exit(0);
+          }
+
+          console.log('Dry-run publish targets:');
+          for (const t of targets) console.log(`- ${t.name} (${t.dir})`);
+
+          // Set versions consistently (no git tags/commits in CI).
+          for (const t of targets) {
+            run('npm', ['version', version, '--no-git-tag-version'], t.dir);
+          }
+
+          for (const t of targets) {
+            run('npm', ['publish', '--dry-run', '--provenance', '--access', 'public', '--tag', publishTag], t.dir);
+          }
+          NODE
+
