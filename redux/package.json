@@ -53,6 +53,11 @@
   "engines": {
     "node": ">=4"
   },
+  "files": [
+    "lib/",
+    "es6/",
+    "src/"
+  ],
   "license": "MIT",
   "publishConfig": {
     "access": "public"
